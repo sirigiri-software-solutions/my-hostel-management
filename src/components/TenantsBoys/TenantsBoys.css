@@ -1,0 +1,461 @@
+.roomlogo-container{
+    background-color: white;
+    /* width: 100px; */
+    box-shadow:0 2px 10px 0px;
+    display: flex;
+    justify-content: center;
+
+    align-items: center;
+    border-radius: 70%;
+    margin-right: 10px;
+    /* margin-bottom: -40px; */
+}
+
+.userDetailsPopupHeading{
+    text-align:center;
+}
+
+.tableRow-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .tableRow-popup {
+    background-color: white;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    width:450px;
+  }
+
+@media screen and (max-width:768px){
+    .tableRow-popup-overlay{
+        top:30px;
+    }
+    .tableRow-popup{
+        width:300px;
+    }
+}
+  
+.tableRowCloseBtnContainer{
+    text-align:center;
+}
+.tableRowCloseBtn{
+    width:100px;
+    height:30px;
+    background-color:#007bff;
+    color:white;
+    border:none;
+    font-size:15px;
+    font-weight:bold;
+}
+  
+
+
+  .tableRowCloseBtn:hover {
+    background-color: red;
+  }
+  .tablePopupProfile{
+    height:150px;
+    width:150px;
+    border-radius:50%;
+    background-size:cover;
+  }
+  .userDetailsPopupInfo{
+    display:flex;
+    justify-content:center;
+    padding-top:10px;
+  }
+  @media screen and (max-width:768px){
+    .userDetailsPopupInfo{
+        flex-direction:column;
+        align-items:center;
+    }
+  }
+  .tableRowpopupProfileContainer{
+    display:flex;
+    align-items:center;
+  }
+  .tableRowPopupInfotext{
+    padding-left:20px;
+  }
+  @media screen and (max-width:768px) {
+    .tableRowPopupInfotext{
+        padding-top:13px;
+    }
+  }
+
+
+  .tenants-userDetails-overlay {
+    display: none ;
+    position: fixed ;
+    top: 0 ;
+    left: 0 ;
+    width: 100% ;
+    height: 100% ;
+    background-color: rgba(0, 0, 0, 0.5) ;
+    z-index: 1000 ;
+  }
+  
+  .tenants-dialog-container {
+    position: absolute ;
+    top: 50% ;
+    left: 50% ;
+    transform: translate(-50%, -50%) ;
+    background-color: #fff ;
+    padding: 20px ;
+    border-radius: 5px ;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3) ;
+    width:600px;
+    height:500px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .tenants-popup-heading{
+    font-family:'Roboto';
+    font-size:28px;
+    font-weight:bold;
+    text-align:center;
+  }
+  .tenants-popup-mainContainer{
+    display:flex;
+    justify-content:center;
+    margin-top:10px;
+  }
+  @media screen and (max-width:768px){
+    .tenants-popup-mainContainer{
+      flex-direction:column;
+      align-items:center;
+    }
+    .tenants-dialog-container{
+      width:400px;
+      height:700px;
+      top:58%;
+    }
+  }
+  .tenants-profile-container{
+    display:flex;
+    align-items:center;
+  }
+  .tenants-popup-profile{
+    border-radius:50%;
+    height:180px;
+    width:180px;
+  }
+  .tenants-popup-detailsContainer{
+    padding-left:20px;
+  }
+  @media screen and (max-width:768px){
+    .tenants-popup-detailsContainer{
+      margin-top:20px;
+    }
+  }
+  .tenants-popup-detailsContainer p {
+    padding:3px;
+    margin:0px;
+    font-size:18px;
+  }
+  .popup-tenants-closeBtn{
+    text-align:center;
+    margin-top:15px;
+  }
+  .NotUploadedText{
+    color:red;
+  }
+  .downloadPdfText{
+    text-decoration:none;
+  }
+
+.Radio {
+  margin-left: 10px;
+}
+
+.bike {
+  margin-left: 3px;
+}
+
+.bikeField {
+  display: flex;
+  flex-direction: column;
+  margin:5px;
+}
+
+.bikedata {
+  height: 30px;
+  width: 50%;
+  border-radius: 5px;
+  /* border-color: lightcyan; */
+  outline: none;
+  margin-left: 10px;
+  /* border-top-color: lightcyan; */
+}
+.bikenumber{
+  margin-left:-8px;
+  margin-top: 5px;
+}
+  
+
+@media (min-width:768px) and (max-width:1005px){
+  .add-button{
+    font-size:13px;
+    padding:5px 10px;
+    width:auto;
+    height:35px;
+    font-weight: bold;
+  }
+}
+
+@media (max-width:1005px){
+  .add-button{
+    font-size:10px;
+    padding:5px 10px;
+    width:auto;
+    height:35px;
+  }
+}
+  
+.management-heading{
+  font-size: 1.2rem;
+}
+
+.confirmation-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.confirmation-card{
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  background-color: #fff;
+  padding: 10px;
+  box-shadow: 0 10px 10px rgba(0,0,0,0.15);
+  border-radius: 10px;
+  margin: 10px;
+}
+
+.confirmation-dialog p {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.confirmation-dialog .buttons {
+  display: flex;
+  justify-content: center;
+}
+
+.confirmation-dialog button {
+  margin: 0 10px;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  background-color: green;
+  color: #fff;
+}
+
+.confirmation-dialog button:hover {
+  background-color: #006400;
+}
+
+.confirmation-dialog button:last-child {
+  background-color: #dc3545;
+}
+
+.confirmation-dialog button:last-child:hover {
+  background-color: #c82333;
+}
+
+@media screen and (max-width:768px){
+  .tenantaddBtn{
+    font-size:12px;
+    padding:0px;
+    width:150px;
+    height:35px;
+  }
+}
+@media screen and (max-width:567px){
+  #tenantsPageaddBtn{
+    width:80px;
+    font-size:12px;
+    padding:0px 2px;
+    font-weight:600;
+    line-height: 1; 
+
+  }
+  #tenantsPageVactedBtns{
+    width:80px;
+    padding:0px 2px;
+    font-size:12px;
+    font-weight:600;
+    text-align:center;
+  }
+}
+#tenantPresentBtn{
+  width:180px;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-label {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.toggle-checkbox {
+  display: none;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 60px; /* Increased to accommodate text */
+  height: 25px;
+  background-color: #ccc;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5px; /* Add padding for text spacing */
+  box-sizing: border-box;
+}
+
+.toggle-switch::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 21px;
+  height: 21px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.toggle-text {
+  font-size:13px;
+  color: #fff;
+  z-index: 1;
+}
+
+.hidden-text {
+  visibility: hidden;
+}
+
+.toggle-checkbox:checked + .toggle-switch {
+  background-color: #FDA339;
+}
+
+.toggle-checkbox:checked + .toggle-switch::before {
+  transform: translateX(35px); /* Adjust for text width */
+}
+#tenantAddButton{
+  width:130px;
+  margin-right:50px;
+}
+#tenantVacateButton{
+  width:100px;
+}
+#presentTenantBtn{
+  width:180px;
+}
+@media screen and (max-width:1650px){
+  #tenantAddButton{
+    width:80px;
+    line-height:16px;
+    text-align:center;
+    padding:5px;
+    margin-right:10px;
+  }
+  #tenantVacateButton{
+    width:80px;
+    padding:5px;
+  }
+
+  
+#presentTenantBtn{
+  width:150px;
+  font-size:14px;
+  padding:px;
+}
+
+}
+@media screen and (max-width:1200px){
+  #tenantAddButton{
+    width:60px;
+    line-height:10px;
+    text-align:center;
+    padding:5px;
+    margin-right:10px;
+    font-size:10px;
+  }
+  #tenantVacateButton{
+    width:60px;
+    padding:5px;
+    font-size:10px;
+  }
+  .toggle-label {
+    font-size:10px;
+    font-weight: bold;
+  }
+  .toggle-container{
+    gap:3px;
+  }
+ 
+}
+@media screen and (max-width:990px){
+  #tenantAddButton{
+    margin-right:0px;
+  }
+
+}
+
+@media screen and (max-width:768px){
+  #tenantAddButton{
+    width:80px;
+    font-size:10px;
+    font-weight:600;
+    margin-right:10px;
+  }
+  #tenantVacateButton{
+    width:60px;
+    font-size:10px;
+      font-weight:600;
+  }
+  #presentTenantBtn{
+    width:120px;
+    font-size:12px;
+    padding:px;
+  }
+ 
+}
+@media  screen and (max-width:768px) {
+
+  #presentTenantBtn{
+
+   float: right;
+   margin-left: 20px;
+  }
+ }

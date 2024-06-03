@@ -1,0 +1,143 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Table.css */
+.table-container {
+  margin-top: 20px;
+  /* overflow: auto; */
+  overflow-y: auto;
+  /* border: 1px solid ; */
+  border-radius:15px 25px 25px 15px;
+  height: 400px;
+}
+.fixed {
+  position: sticky;
+  top: 0;
+  background-color: #fff; /* Change the background color as needed */
+  z-index: 0;
+}
+.bodystar td {
+  padding: 7px;
+}
+.bodystar{
+  overflow:auto;
+}
+.table{
+  width: 100%;
+  border-collapse: collapse ; 
+  margin-bottom:0px !important;
+  
+}
+
+.table thead tr{
+  background-color: orange;
+}
+
+.table thead tr th{
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.35px;
+  color: black;
+  opacity: 1;
+  padding: 10px;
+  vertical-align: top;
+  background-color: #ff8a00;
+}
+
+.table tbody tr td{
+  font-size: 15px;
+  font-weight: normal;
+  letter-spacing: 0.35px;
+  color: black;
+  background-color: hsla(30, 100%, 50%, 0.41);
+  padding: 10px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.tables th, .tables td {
+  padding: 8px;
+}
+
+.table tr{
+  margin-bottom: 90px;
+}
+
+.row-details {
+  padding: 10px;
+}
+
+@media (max-width: 799px){
+  .table-container {
+    height: 600px;
+    padding: 5px;
+    overflow: auto;
+  }
+
+  .table thead{
+    display: none;
+  }
+
+  .table, .table tbody, .table tr, .table td{
+    display: block;
+    width: 100%;
+  }
+  .table tr{
+    margin-bottom: 10px;
+  }
+  .table tbody tr td{
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+    padding: 10px;
+    text-align: center;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .table td:before{
+    content : attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 50%;
+    padding-left: 15px;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: left;
+    font-family:'Roboto';
+  }
+}
+
+.personImage{
+  width:40px;
+  height:40px;
+}
+
+::-webkit-scrollbar {
+  width: 7px; /* Width of the scrollbar */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #ff8a00; /* Color of the thumb (the draggable part of the scrollbar) */
+  border-radius: 5px; /* Border radius of the thumb */
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f0f0f0; /* Color of the track (the area behind the thumb) */
+}
+
+.fixed {
+  position: sticky;
+  top: 0;
+  background-color: #fff; /* Change the background color as needed */
+  z-index: 0;
+}
+.bodystar td {
+  padding: 7px;
+}
+.bodystar{
+  overflow:auto;
+}

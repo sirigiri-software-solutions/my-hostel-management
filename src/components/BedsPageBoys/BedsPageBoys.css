@@ -1,0 +1,25 @@
+.bedPageFilterDropdown{
+    border-radius:7px;
+    margin-right:7px;
+    padding:5px 5px;
+    outline:none;
+    margin-bottom:3px;
+}
+ 
+@media screen and (max-width:768px){
+    .bedPageFilterDropdown{
+        padding:5px 5px;
+        width: 100%;
+        border-radius: 20px;
+        font-size:9px;
+        font-weight:bold;
+    }
+    
+}
+
+.management-heading{
+    font-size: 1.2rem;
+}
+.filterDropDownContainer{
+    width:95%;
+}

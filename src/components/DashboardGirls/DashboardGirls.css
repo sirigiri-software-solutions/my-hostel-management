@@ -1,0 +1,104 @@
+.menu-item{
+    display: flex;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px;
+    min-width: 180px;
+    margin-bottom: 10px;
+    margin-right: 5px;
+}
+
+.menu{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.dashboardGirls{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.image{
+    width: 25px;
+    height: 35px;
+}
+.heading1{
+    font-size: 24px;
+    background-color: rgba(255,141,7, 0.41);
+    width: fit-content;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin-bottom:10px;
+}
+
+
+
+/* .image-container{
+    background-color: rgb(215, 194, 153);
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px 10px 10px 10px;
+    width: 50px;
+} */
+
+.text-container{
+    padding: 10px;
+}
+
+.text-heading{
+    margin: 0px;
+    font-size: 16px;
+}
+
+.text-number{
+    font-weight: bold;
+    margin: 0px;
+    font-size: 20px;
+}
+
+.dashboardGirls{
+    width: 100%;
+}
+
+.custom-modal-body{
+    height: 70vh;
+    overflow: auto;
+}
+.Radio {
+    margin-left: 10px;
+  }
+  
+  .bike {
+    margin-left: 3px;
+  }
+  
+  .bikeField {
+    display: flex;
+    flex-direction: column;
+    margin:5px;
+  }
+  
+  .bikedata {
+    height: 30px;
+    width: 50%;
+    border-radius: 5px;
+    /* border-color: lightcyan; */
+    outline: none;
+    margin-left: 10px;
+    /* border-top-color: lightcyan; */
+  }
+  .bikenumber{
+    margin-left:5px;
+  }
+.flex1{
+    margin-bottom:20px;
+}
+.dashboardgirls{
+    margin-top: -10px;
+}

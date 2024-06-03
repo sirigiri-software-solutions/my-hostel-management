@@ -1,0 +1,33 @@
+@media  screen and (max-width:768px) {
+
+    #presentTenantBtn1{
+
+     float: right;
+
+     width:130px;
+     font-size: 0.8rem;
+     /* margin-right: 200px; */
+
+    }
+    .toggle-label{
+        font-size: 1.3rem;
+
+    }
+
+    .toggle-text{
+        font-size: 1rem;
+
+    }
+    tenantAddButton{
+        width:200px;
+        font-size: 2rem;
+        color:red
+
+    }
+    /* add-button{
+        color:red;
+    }
+    toggle-checkbox{
+        color:red;
+    } */
+   }
