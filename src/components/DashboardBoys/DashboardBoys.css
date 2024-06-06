@@ -1,0 +1,303 @@
+
+.menu-item{
+    display: flex;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px;
+    /* min-width: 220px; */
+    margin-bottom: 10px;
+    width:100%;
+}
+@media screen and (max-width:546px){
+    .menu-item{
+        width:100%;
+    }
+}
+ 
+.menu{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+ 
+.dashboardboys{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap:30px;
+}
+ 
+.image{
+    width: 50px;
+    height: 50px;
+}
+ 
+.heading{
+    font-size: 24px;
+    background-color: rgba(255,141,7, 0.41);
+    width: fit-content;
+    /* display:inline-block; */
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin-bottom: 5px;;
+}
+
+ 
+.text-container{
+    padding: 10px;
+}
+ 
+.text-heading{
+    margin: 0px;
+    font-size: 20px;
+}
+ 
+.text-number{
+    font-weight: bold;
+    margin: 0px;
+    font-size: 25px;
+}
+ 
+.button-container{
+    display: flex ;
+    /* justify-content: space-between ; */
+    flex-direction: row;
+    justify-content:space-between;
+    margin-top: 20px;
+    width:97%;
+ 
+    /* margin-bottom: 20px; */
+}
+@media screen and (max-width:768px){
+    .button-container{
+        flex-wrap: wrap;
+    }
+}
+
+@media screen and (min-width:1600px){
+    .button-container{
+        width:92%;
+    }
+}
+/* #boysButtonContainer{
+    display: flex ;
+    justify-content: space-between ;
+} */
+ 
+@media screen and (max-width: 768px) {
+    .modal-dialog {
+      width: 90vw; /* 90% of the viewport width */
+      max-width: none; /* Remove the maximum width */
+      margin: auto; /* Center the modal horizontally */
+    }
+  }
+.modal-footer {
+  border: none !important; /* Remove border */
+}
+#saveChangeButton{
+    background-color:#ff8a00 ;
+    color:#fff;
+}
+#addButton{
+    background-color:#ff8a00;
+    outline:none;
+    border:none;
+    padding:8px 20px;
+    border-radius:24px;
+    color:#fff;
+}
+.plusIconProperties{
+    width:20px;
+}
+.cardWithBtnsContainer{
+    display:flex;
+    flex-direction:column;
+    width:290px;
+    font-size:21px;
+    font-weight:bold;
+    align-items:flex-start;
+    margin-bottom:10px;
+}
+@media screen and (max-width:1500px){
+    .cardWithBtnsContainer{
+        width:240px;
+    }
+}
+@media screen and (min-width:1500px){
+    .cardWithBtnsContainer{
+        width:270px;
+    }
+}
+@media screen and (max-width:768px){
+    .cardWithBtnsContainer{
+        width:100%;
+    }
+}
+
+#mbladdButton{
+    background-color:#ff8a00;
+    outline:none;
+    border:none;
+    padding:8px 20px;
+    border-radius:24px;
+    color:#fff;
+    width:160px;
+    font-size:15px;
+    margin-left:5px;
+}
+#deskaddButton{
+    background-color:#ff8a00;
+    outline:none;
+    border:none;
+    padding:8px 20px;
+    border-radius:24px;
+    color:#fff;
+}
+/* @media screen and (min-width:646px){
+    #mbladdButton{
+        display:none;
+     
+    }
+} */
+@media screen and (max-width:645px){
+    #deskaddButton{
+        display:none;
+       
+    }
+}
+.tenantsButtonContainer{
+    text-align:center;
+}
+ 
+.modal {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  }
+  
+  .modal-dialog {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Box shadow for depth effect */
+  }
+  
+  .modal-content {
+    background-color: white; /* White background for content */
+    border-radius: 10px; /* Rounded corners */
+  }
+  /* @media screen and (max-width:1440px)
+  {
+    .menu-item{
+        width:20%;
+    }
+  }
+  @media screen and (max-width:768px)
+   {
+     .menu-item{
+        width:70%;
+     }
+    
+     
+    
+  } */
+  
+  
+/* styles.css */
+
+.popupBeds {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-contentBeds {
+    background-color: white;
+    padding: 0px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    max-width: auto; /* Adjust this value according to your design */
+    width: auto;
+    max-height: 80%; /* Adjust this value according to your design */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.popupbeds.open {
+    display: flex;
+}
+
+.close-button{
+    background-color: #ff8a00;
+    padding: 5px 20px;
+    margin-top: 10px;
+    border-radius: 10px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    text-align: center;
+}
+
+.modal-90w {
+    max-height: 200px;
+    margin: 1.75rem auto;
+    text-align: center;
+  }
+  
+.custom-modal-body{
+    height: 70vh;
+    overflow: auto;
+}
+.Radio {
+    margin-left: 10px;
+  }
+  
+  .bike {
+    margin-left: 3px;
+  }
+  
+  .bikeField {
+    display: flex;
+    flex-direction: column;
+    margin:5px;
+  }
+  
+  .bikedata {
+    height: 30px;
+    width: 50%;
+    border-radius: 5px;
+    /* border-color: lightcyan; */
+    outline: none;
+    margin-left: 10px;
+    /* border-top-color: lightcyan; */
+  }
+  .bikenumber{
+    margin-left:5px;
+  }
+  
+
+.custom-modal-body::-webkit-scrollbar {
+    width: 5px; /* Width of the scrollbar */
+}
+  
+.custom-modal-body::-webkit-scrollbar-thumb {
+    background-color: black; /* Color of the thumb (the draggable part of the scrollbar) */
+    border-radius: 5px; /* Border radius of the thumb */
+}
+  
+.custom-modal-body::-webkit-scrollbar-track {
+    background-color: #f0f0f0; /* Color of the track (the area behind the thumb) */
+}
+.flex{
+    margin-bottom: -8px;
+}

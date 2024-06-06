@@ -1,0 +1,67 @@
+.signup-page{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.signup-form{
+    width: 15%;
+    border: 1px solid;
+    padding: 20px;
+}
+
+.signup-form input{
+    width: 96%;
+    margin-bottom: 10px;
+    padding: 7px 0px 7px 7px;
+}
+
+.signup-form textarea{
+    width: 96%;
+    margin-bottom: 10px;
+    padding: 7px 0px 7px 7px;
+}
+
+.signup-form select{
+    width: 96%;
+    margin-bottom: 10px;
+    padding: 7px 0px 7px 7px;
+}
+
+input[type="submit"]{
+    width: 100%;
+    padding: 7px;
+}
+
+.error{
+    font-size: 10px;
+    color: red;
+    margin-bottom: 10px;
+}
+
+.Signup{
+    text-align: center;
+    width: 100%;
+}
+.confirmationContainer{
+    display:flex;
+  }
+.loginText{
+    font-size:17px;
+    font-family:"Roboto";
+}
+  .checkBoxTextContainer{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-right:10px;
+  }
+  .checkBoxText{
+    font-size:17px;
+    font-family:"Roboto";
+    margin-left:5px;
+  }
+.checkbox{
+    margin-top:10px;
+}

@@ -1,0 +1,188 @@
+.bg-container{
+    box-sizing: border-box;
+}
+ 
+.logo{
+    width: 150px;
+}
+@media screen and (max-width:768px){
+    .logo{
+        width:80px;
+    }
+}
+
+.sidebar {
+    @media only screen and (max-width: 768px) {
+        position: -webkit-sticky !important;
+        position: sticky !important;
+        top: 0;
+        z-index: 10;
+
+    }
+}
+.top-section{
+    text-align:center;
+}
+
+.nav-div {
+    display: none;
+
+    @media only screen and (max-width: 768px) {
+        display: block;
+        display:flex;
+        align-items:center;
+    }
+}
+.mbl-dashboard-icon{
+    width:20px;
+    height:20px;
+    margin-right:5px;
+}
+.mb-dashboard-name{
+    font-size:25px;
+    padding-top:11px;
+}
+ 
+.link{
+    display: flex;
+    /* margin-bottom: 20px; */
+    align-items: center;
+    text-decoration: none;
+    padding: 10px 15px;
+    gap: 20px;
+}
+ 
+.link:hover{
+    background-color: hsla(30, 100%, 50%, 0.41);
+    border-radius: 10px;
+}
+ 
+.icon{
+    height:35px;
+    width: 32px;
+}
+ 
+.link-text{
+    font-weight: bold;
+    color: black;
+    font-size:22px;
+}
+ 
+@media screen and (max-width:1060px){
+    .icon{
+        height:15px;
+        width:35px;
+    }
+    .link-text{
+        font-size:15px;
+       
+    }
+}
+@media screen and (max-width:850px){
+    .link-text{
+        font-size:12px;
+    }
+    .icon{
+        height:12px;
+        width:28px;
+       
+    }
+}
+@media screen and (max-width:767px){
+    .link-text{
+        font-size:25px;
+    }
+    .icon{
+        height:18px;    
+        width:30px;
+    }
+}
+
+.popup {
+    position: absolute;
+    position: fixed;
+    top: 10%;  /* Adjust as needed */
+    /* left: 20%; */
+    right: -5%;
+    transform: translateX(-50%);
+    width: 280px; 
+    background: white;
+    padding: 20px;   
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 1000; /* Ensure it's above other content */
+    border: 1px solid #333333;
+    cursor: pointer;
+   
+  }
+
+
+@media screen and (max-width:768px) {
+    .popup {
+        top: 15%;
+        right: 10%;
+        width: 250px; 
+      }
+}
+@media screen and (max-width: 486px ) {
+    .popup {
+        right:-10%;
+       
+    }
+}
+
+@media screen and (max-width:400px) {
+    .popup {
+        top: 15%;  /* Adjust as needed */
+        right: -10%;
+        
+      }
+}
+
+@media screen and (max-width: 375px){
+    .popup{
+       
+        right: -18%;
+    }
+}
+
+.logoutButton{
+    font-size: 30px;
+    font-weight: 800;
+   cursor: pointer;
+   
+}
+.logout-button{
+    background-color:#ff8a00;
+    color:white;
+}
+.logout-button:hover{
+    background-color:red;
+}
+.logout-closeBtn{
+    background-color:#ff8a00;
+    color:white;
+}
+.logout-closeBtn:hover{
+    background-color: #ffa135; 
+}
+@media  screen and (max-width:764px) {
+    .menufontchange{
+        display:flex;
+        flex-direction:row;
+        align-items: center;
+        margin-right: 13px;
+    }
+    .mb-dashboard-name{
+        font-size: 1.2rem;
+    }
+}  
+.dashBoarWelcome{
+    font-size: 18px;
+    font-weight: 700;
+}
+.dashboardHead{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
