@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useData } from '../../ApiData/ContextProvider';
 import { set, ref, remove, onValue, update } from 'firebase/database';
-import { database } from '../../firebase';
+import { database } from '../../firebase/firebase';
 import { toast } from 'react-toastify';
 import './Hostels.css';
 import { Modal, Button } from 'react-bootstrap';
@@ -9,15 +9,15 @@ import { useTranslation } from 'react-i18next';
 
 const Hostels = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, setActiveBoysHostelButtons } = useData();
+  const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, setActiveBoysHostelButtons, userUid } = useData();
   const [isEditing, setIsEditing] = useState(null);
   const [hostels, setHostels] = useState({ boys: [], girls: [] });
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
   const [hostelToDelete, setHostelToDelete] = useState(null);
 
   useEffect(() => {
-    const boysRef = ref(database, 'Hostel/boys');
-    const girlsRef = ref(database, 'Hostel/girls');
+    const boysRef = ref(database, `Hostel/${userUid}/boys`);
+    const girlsRef = ref(database, `Hostel/${userUid}/girls`);
 
     const fetchBoysHostels = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -56,7 +56,7 @@ const Hostels = () => {
   const submitHostelEdit = (e) => {
     e.preventDefault();
     const { id, name, originalName, address, isBoys } = isEditing;
-    const basePath = `Hostel/${isBoys ? 'boys' : 'girls'}`;
+    const basePath = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`;
 
     if (name !== originalName) {
       const updates = {};
@@ -103,7 +103,7 @@ const Hostels = () => {
 
   const confirmDeleteHostel = () => {
     const { isBoys, id } = hostelToDelete;
-    const path = `Hostel/${isBoys ? 'boys' : 'girls'}/${id}`;
+    const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
     remove(ref(database, path))
       .then(() => {
         toast.success("Hostel deleted successfully.", {
@@ -137,9 +137,11 @@ const Hostels = () => {
   const handleEditChange = (field, value) => {
     setIsEditing(prev => ({ ...prev, [field]: value }));
   };
-
   const capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    if (typeof string === 'string' && string.length > 0) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+    return '';
   };
 
   const renderHostelTable = (hostelData, isBoys) => (
@@ -168,7 +170,7 @@ const Hostels = () => {
                 <input
                   type="text"
                   value={isEditing.address}
-                  onChange={(e) => handleEditChange('address',capitalizeFirstLetter( e.target.value))}
+                  onChange={(e) => handleEditChange('address', capitalizeFirstLetter(e.target.value))}
                   className="edit-hostel-input"
                 />
               </td>
@@ -200,9 +202,9 @@ const Hostels = () => {
       <div className="hostels-container">
         <div className="hostel-section">
           <h3 className='hostelPageTableHeading'>{t("hostels.boysHostels")}</h3>
-         
+
           {renderHostelTable(hostels.boys, true)}
-        
+
         </div>
         <div className="hostel-section">
           <h3 className='hostelPageTableHeading'>{t("hostels.girlsHostels")}</h3>
@@ -237,10 +239,10 @@ const Hostels = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={cancelEdit}>
-          {t("hostels.cancel")}
+            {t("hostels.cancel")}
           </Button>
           <Button variant="primary" onClick={submitHostelEdit}>
-          {t("hostels.save")}
+            {t("hostels.save")}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -249,18 +251,18 @@ const Hostels = () => {
           <Modal.Title>{t("hostels.confirmDelete")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        {t("hostels.confirmMsg")}
+          {t("hostels.confirmMsg")}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={cancelDeleteHostel}>
-          {t("hostels.cancel")}
+            {t("hostels.cancel")}
           </Button>
           <Button variant="danger" onClick={confirmDeleteHostel}>
-          {t("hostels.delete")}
+            {t("hostels.delete")}
           </Button>
         </Modal.Footer>
       </Modal>
-   </div>
+    </div>
 
   );
 };

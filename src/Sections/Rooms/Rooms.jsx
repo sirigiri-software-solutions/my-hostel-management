@@ -5,7 +5,7 @@ import RoomsGirls from '../../components/RoomsGirls/RoomsGirls';
 import { useTranslation } from 'react-i18next';
 
 function Rooms() {
-    const { t }=useTranslation();
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState('boys');
 
     const handleTabSelect = (tab) => {

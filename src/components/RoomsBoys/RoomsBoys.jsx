@@ -3,7 +3,9 @@ import RoomsIcon from '../../images/Icons (2).png';
 import SearchIcon from '../../images/Icons (9).png';
 import './RoomsBoys.css';
 import Table from '../../Elements/Table';
-import { database, push, ref } from "../../firebase";
+// import { database, push, ref } from "../../firebase";
+
+import { database, push, ref } from "../../firebase/firebase";
 import { DataContext } from "../../ApiData/ContextProvider"
 import { onValue, remove, update } from 'firebase/database';
 import { toast } from "react-toastify";
@@ -20,7 +22,7 @@ const RoomsBoys = () => {
   }else if(role === "subAdmin"){
     adminRole = "Sub-admin"
   }
-  const { activeBoysHostel } = useData();
+  const { activeBoysHostel , userArea, userUid} = useData();
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
@@ -33,8 +35,6 @@ const RoomsBoys = () => {
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
 
-
-
   useEffect(() => {
     const handleOutsideClick = (event) => {
       console.log("Triggering")
@@ -44,13 +44,11 @@ const RoomsBoys = () => {
     };
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener("keydown", handleOutsideClick)
-
   }, [showModal]);
 
   const handleRoomsIntegerChange = (event) => {
     const { name, value } = event.target;
     // const re = /^[0-9\b]+$/; // Regular expression to allow only numbers
-
     let sanitizedValue = value;
 
     if (name === 'floorNumber' || name === 'roomNumber') {
@@ -104,7 +102,7 @@ const RoomsBoys = () => {
     }
     // -----------------------------------------------
     if (isEditing) {
-      const roomRef = ref(database, `Hostel/boys${activeBoysHostel}/rooms/${currentId}`);
+      const roomRef = ref(database, `Hostel/${userUid}/boys${activeBoysHostel}/rooms/${currentId}`);
       update(roomRef, {
         floorNumber,
         roomNumber,
@@ -135,7 +133,7 @@ const RoomsBoys = () => {
         });
       });
     } else {
-      const roomsRef = ref(database, `Hostel/boys/${activeBoysHostel}/rooms`);
+      const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
       push(roomsRef, {
         floorNumber,
         roomNumber,
@@ -212,7 +210,7 @@ const RoomsBoys = () => {
   };
 
   const confirmDeleteYes = () => {
-    const roomRef = ref(database, `Hostel/boys/${activeBoysHostel}/rooms/${currentId}`);
+    const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
     remove(roomRef).then(() => {
       toast.success("Room deleted successfully.", {
         position: "top-center",
@@ -279,7 +277,7 @@ const RoomsBoys = () => {
   };
 
   useEffect(() => {
-    const roomsRef = ref(database, `Hostel/boys/${activeBoysHostel}/rooms`);
+    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
     onValue(roomsRef, (snapshot) => {
       const data = snapshot.val();
       const loadedRooms = [];

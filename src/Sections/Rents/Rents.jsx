@@ -6,10 +6,10 @@ import { useTranslation } from 'react-i18next';
 
 
 const Rents = () => {
-    const { t }=useTranslation();
-    
+    const { t } = useTranslation();
+
     const [activeTab, setActiveTab] = useState('boys');
-    
+
     const handleTabSelect = (tab) => {
         setActiveTab(tab);
     };
@@ -17,8 +17,8 @@ const Rents = () => {
     return (
         <div className="container">
             <Tabs activeKey={activeTab} onSelect={handleTabSelect} className="mb-3">
-            <Tab eventKey="boys" title={t('dashboard.mens')}>
-                    <RentPageBoys  />
+                <Tab eventKey="boys" title={t('dashboard.mens')}>
+                    <RentPageBoys />
                 </Tab>
                 <Tab eventKey="girls" title={t('dashboard.womens')}>
                     <RentPageGirls />

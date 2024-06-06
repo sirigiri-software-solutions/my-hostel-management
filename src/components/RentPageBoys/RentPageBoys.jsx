@@ -2,7 +2,8 @@ import React, { useContext, useEffect, useRef } from 'react'
 import Table from '../../Elements/Table'
 import RentIcon from '../../images/Icons (6).png'
 import SearchIcon from '../../images/Icons (9).png'
-import { database, push, ref } from "../../firebase";
+// import { database, push, ref } from "../../firebase";
+import { database, push, ref } from "../../firebase/firebase";
 import { useState } from 'react'
 import { DataContext } from '../../ApiData/ContextProvider';
 import { onValue, update } from 'firebase/database';
@@ -17,7 +18,7 @@ import { useData } from '../../ApiData/ContextProvider';
 const RentPageBoys = () => {
   const { t } = useTranslation();
   const { data } = useContext(DataContext);
-  const { activeBoysHostel } = useData();
+  const { activeBoysHostel, userUid } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [tenants, setTenants] = useState([]);
   const [rooms, setRooms] = useState({});
@@ -103,7 +104,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   useEffect(() => {
     // Fetch tenants data once when component mounts
-    const tenantsRef = ref(database, `Hostel/boys/${activeBoysHostel}/tenants`);
+    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
     onValue(tenantsRef, (snapshot) => {
       const data = snapshot.val();
       const loadedTenants = data ? Object.keys(data).map(key => ({
@@ -114,7 +115,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     });
 
     // Fetch room data once when component mounts
-    const roomsRef = ref(database, `Hostel/boys/${activeBoysHostel}/rooms`);
+    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
     onValue(roomsRef, (snapshot) => {
       const data = snapshot.val() || {};
       setRooms(data);
@@ -184,7 +185,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   useEffect(() => {
     // Fetch tenants data once when component mounts
-    const tenantsRef = ref(database, `Hostel/boys/${activeBoysHostel}/tenants`);
+    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
     onValue(tenantsRef, (snapshot) => {
       const tenantsData = snapshot.val();
       const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
@@ -192,7 +193,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       // Initialize an array to hold promises for fetching each tenant's rents
       const rentsPromises = tenantIds.map(tenantId => {
         return new Promise((resolve) => {
-          const rentsRef = ref(database, `Hostel/boys/${activeBoysHostel}/tenants/${tenantId}/rents`);
+          const rentsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantId}/rents`);
           onValue(rentsRef, (rentSnapshot) => {
             const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
               id: key,
@@ -308,7 +309,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
     if (isEditing) {
       // Update the existing rent record
-      const rentRef = ref(database, `Hostel/boys/${activeBoysHostel}/tenants/${selectedTenant}/rents/${editingRentId}`);
+      const rentRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${selectedTenant}/rents/${editingRentId}`);
       await update(rentRef, rentData).then(() => {
         toast.success(t('toastMessages.rentUpdatedSuccess'), {
           position: "top-center",
@@ -339,7 +340,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
     } else {
       // Create a new rent record
-      const rentRef = ref(database, `Hostel/boys/${activeBoysHostel}/tenants/${selectedTenant}/rents`);
+      const rentRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${selectedTenant}/rents`);
       await push(rentRef, rentData).then(() => {
         toast.success(t('toastMessages.rentAddedSuccess'), {
           position: "top-center",
