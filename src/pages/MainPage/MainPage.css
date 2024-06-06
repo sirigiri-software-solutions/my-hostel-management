@@ -98,7 +98,7 @@
     }
 }
 
-.popup {
+.mainPagepPopup {
     position: absolute;
     position: fixed;
     top: 10%;  /* Adjust as needed */
@@ -118,21 +118,21 @@
 
 
 @media screen and (max-width:768px) {
-    .popup {
+    .mainPagepPopup {
         top: 15%;
         right: 10%;
         width: 250px; 
       }
 }
 @media screen and (max-width: 486px ) {
-    .popup {
+    .mainPagepPopup {
         right:-10%;
        
     }
 }
 
 @media screen and (max-width:400px) {
-    .popup {
+    .mainPagepPopup {
         top: 15%;  /* Adjust as needed */
         right: -10%;
         
@@ -140,7 +140,7 @@
 }
 
 @media screen and (max-width: 375px){
-    .popup{
+    .mainPagepPopup{
        
         right: -18%;
     }
@@ -150,11 +150,13 @@
     font-size: 30px;
     font-weight: 800;
    cursor: pointer;
+  
    
 }
 .logout-button{
     background-color:#ff8a00;
     color:white;
+    margin-right:10px;
 }
 .logout-button:hover{
     background-color:red;
@@ -185,4 +187,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+.language-switch{
+    float:right;
+    margin-top: 5px;
+    /* margin-right: 10px; */
+   /* background-color:red; */
 }

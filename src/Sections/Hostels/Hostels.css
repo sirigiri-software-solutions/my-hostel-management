@@ -1,6 +1,6 @@
 .hostelPageHeading{
   margin-top:20px;
-}
+}                                     
 .hostels-container {
     display: flex;
     justify-content: space-between;
@@ -11,7 +11,9 @@
 .hostel-section {
     display:flex;
     flex-direction: column;
-    width:45%;
+    width:65%;
+    align-items: center;
+    
     
   
 }

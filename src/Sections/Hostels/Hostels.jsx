@@ -1,11 +1,71 @@
 import React, { useEffect, useState } from 'react';
 import { useData } from '../../ApiData/ContextProvider';
-import { set, ref, remove, onValue, update } from 'firebase/database';
+import { ref, remove, onValue, update } from 'firebase/database';
 import { database } from '../../firebase';
 import { toast } from 'react-toastify';
 import './Hostels.css';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Tab, Tabs } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+
+const HostelTabContent = ({ hostels, isEditing, startEdit, deleteHostel, handleEditChange, submitHostelEdit, cancelEdit }) => {
+  const { t } = useTranslation();
+
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
+  return (
+    <table className="hostel-table">
+      <thead>
+        <tr>
+          <th>{t("hostels.name")}</th>
+          <th>{t("hostels.address")}</th>
+          <th>{t("hostels.actions")}</th>
+          <th>{t("hostels.deleteData")}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {hostels.map(({ id, name, address }) => (
+          isEditing && isEditing.id === id ? (
+            <tr key={id}>
+              <td>
+                <input
+                  type="text"
+                  value={isEditing.name}
+                  onChange={(e) => handleEditChange('name', capitalizeFirstLetter(e.target.value))}
+                  className="edit-hostel-input"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  value={isEditing.address}
+                  onChange={(e) => handleEditChange('address', capitalizeFirstLetter(e.target.value))}
+                  className="edit-hostel-input"
+                />
+              </td>
+              <td>
+                <button onClick={submitHostelEdit} className="action-btn">Save</button>
+                <button onClick={cancelEdit} className="action-btn">Cancel</button>
+              </td>
+            </tr>
+          ) : (
+            <tr key={id}>
+              <td>{capitalizeFirstLetter(name)}</td>
+              <td>{capitalizeFirstLetter(address)}</td>
+              <td>
+                <button onClick={() => startEdit(id, name, address)} className="action-btn">Edit</button>
+              </td>
+              <td>
+                <button onClick={() => deleteHostel(id)} className="action-btn">Delete</button>
+              </td>
+            </tr>
+          )
+        ))}
+      </tbody>
+    </table>
+  );
+};
 
 const Hostels = () => {
   const { t } = useTranslation();
@@ -14,6 +74,7 @@ const Hostels = () => {
   const [hostels, setHostels] = useState({ boys: [], girls: [] });
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
   const [hostelToDelete, setHostelToDelete] = useState(null);
+  const [activeTab, setActiveTab] = useState('mens');
 
   useEffect(() => {
     const boysRef = ref(database, 'Hostel/boys');
@@ -55,7 +116,8 @@ const Hostels = () => {
 
   const submitHostelEdit = (e) => {
     e.preventDefault();
-    const { id, name, originalName, address, isBoys } = isEditing;
+    const { id, name, originalName, address } = isEditing;
+    const isBoys = activeTab === 'mens';
     const basePath = `Hostel/${isBoys ? 'boys' : 'girls'}`;
 
     if (name !== originalName) {
@@ -96,7 +158,8 @@ const Hostels = () => {
     }
   };
 
-  const deleteHostel = (isBoys, id) => {
+  const deleteHostel = (id) => {
+    const isBoys = activeTab === 'mens';
     setIsDeleteConfirmationOpen(true);
     setHostelToDelete({ isBoys, id });
   };
@@ -130,87 +193,51 @@ const Hostels = () => {
     setIsEditing(null);
   };
 
-  const startEdit = (id, name, address, isBoys) => {
-    setIsEditing({ id, name, originalName: name, address, isBoys });
+  const startEdit = (id, name, address) => {
+    setIsEditing({ id, name, originalName: name, address });
   };
 
   const handleEditChange = (field, value) => {
     setIsEditing(prev => ({ ...prev, [field]: value }));
   };
 
-  const capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  };
-
-  const renderHostelTable = (hostelData, isBoys) => (
-    <table className="hostel-table">
-      <thead>
-        <tr>
-          <th>{t("hostels.name")}</th>
-          <th>{t("hostels.address")}</th>
-          <th>{t("hostels.actions")}</th>
-          <th>{t("hostels.deleteData")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {hostelData.map(({ id, name, address }) => (
-          isEditing && isEditing.id === id ? (
-            <tr key={id}>
-              <td>
-                <input
-                  type="text"
-                  value={isEditing.name}
-                  onChange={(e) => handleEditChange('name', capitalizeFirstLetter(e.target.value))}
-                  className="edit-hostel-input"
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  value={isEditing.address}
-                  onChange={(e) => handleEditChange('address',capitalizeFirstLetter( e.target.value))}
-                  className="edit-hostel-input"
-                />
-              </td>
-              <td>
-                <button onClick={submitHostelEdit} className="action-btn">Save</button>
-                <button onClick={cancelEdit} className="action-btn">Cancel</button>
-              </td>
-            </tr>
-          ) : (
-            <tr key={id}>
-              <td>{capitalizeFirstLetter(name)}</td>
-              <td>{capitalizeFirstLetter(address)}</td>
-              <td>
-                <button onClick={() => startEdit(id, name, address, isBoys)} className="action-btn">Edit</button>
-              </td>
-              <td>
-                <button onClick={() => deleteHostel(isBoys, id)} className="action-btn">Delete</button>
-              </td>
-            </tr>
-          )
-        ))}
-      </tbody>
-    </table>
-  );
-
   return (
     <div>
       <h2 className='hostelPageHeading'>{t("menuItems.hostels")}</h2>
-      <div className="hostels-container">
-        <div className="hostel-section">
-          <h3 className='hostelPageTableHeading'>{t("hostels.boysHostels")}</h3>
-         
-          {renderHostelTable(hostels.boys, true)}
-        
-        </div>
-        <div className="hostel-section">
-          <h3 className='hostelPageTableHeading'>{t("hostels.girlsHostels")}</h3>
-
-          {renderHostelTable(hostels.girls, false)}
-
-        </div>
-      </div>
+      <Tabs activeKey={activeTab} onSelect={(tab) => setActiveTab(tab)} className="mb-3">
+        <Tab eventKey="mens" title={t('dashboard.mens')}>
+          <div className="hostels-container">
+            <div className="hostel-section">
+              <h3 className='hostelPageTableHeading'>{t("hostels.boysHostels")}</h3>
+              <HostelTabContent
+                hostels={hostels.boys}
+                isEditing={isEditing}
+                startEdit={startEdit}
+                deleteHostel={deleteHostel}
+                handleEditChange={handleEditChange}
+                submitHostelEdit={submitHostelEdit}
+                cancelEdit={cancelEdit}
+              />
+            </div>
+          </div>
+        </Tab>
+        <Tab eventKey="womens" title={t('dashboard.womens')}>
+          <div className="hostels-container">
+            <div className="hostel-section">
+              <h3 className='hostelPageTableHeading'>{t("hostels.girlsHostels")}</h3>
+              <HostelTabContent
+                hostels={hostels.girls}
+                isEditing={isEditing}
+                startEdit={startEdit}
+                deleteHostel={deleteHostel}
+                handleEditChange={handleEditChange}
+                submitHostelEdit={submitHostelEdit}
+                cancelEdit={cancelEdit}
+              />
+            </div>
+          </div>
+        </Tab>
+      </Tabs>
       <Modal show={isEditing !== null} onHide={cancelEdit}>
         <Modal.Header closeButton>
           <Modal.Title>{t("hostels.editHostel")}</Modal.Title>
@@ -237,10 +264,10 @@ const Hostels = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={cancelEdit}>
-          {t("hostels.cancel")}
+            {t("hostels.cancel")}
           </Button>
           <Button variant="primary" onClick={submitHostelEdit}>
-          {t("hostels.save")}
+            {t("hostels.save")}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -249,20 +276,21 @@ const Hostels = () => {
           <Modal.Title>{t("hostels.confirmDelete")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        {t("hostels.confirmMsg")}
+          {t("hostels.confirmMsg")}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={cancelDeleteHostel}>
-          {t("hostels.cancel")}
+            {t("hostels.cancel")}
           </Button>
           <Button variant="danger" onClick={confirmDeleteHostel}>
-          {t("hostels.delete")}
+            {t("hostels.delete")}
           </Button>
         </Modal.Footer>
       </Modal>
-   </div>
-
+    </div>
   );
 };
 
 export default Hostels;
+
+

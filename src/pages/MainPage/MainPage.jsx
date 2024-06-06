@@ -26,6 +26,7 @@ import { RiLogoutCircleRLine } from "react-icons/ri";
 import { useTranslation } from 'react-i18next'
 import { useData } from '../../ApiData/ContextProvider';
 import Hostels from '../../Sections/Hostels/Hostels'
+import LanguageSwitch from '../../LanguageSwitch'
 const MainPage = () => {
   const { t } = useTranslation()
   const { activeBoysHostel, activeGirlsHostel } = useData();
@@ -197,6 +198,7 @@ const MainPage = () => {
         <div className='top-section' >
           <img src={logo} alt="logo" className='logo' />
         </div>
+      
         <div className='nav-div' >
         <div className='menufontchange'>
           <img src={Admin} alt="admin" className='mbl-dashboard-icon' />
@@ -205,7 +207,13 @@ const MainPage = () => {
           <div className='logoutButton' onClick={toggleModal}>
             <RiLogoutCircleRLine />
           </div>
+         
         </div>
+       
+        
+       
+
+
         <div style={sidebarItems}>
           {
             menuItems.map((item, index) => (
@@ -263,12 +271,23 @@ const MainPage = () => {
               <h1 className='dashboard-heading'>{name}</h1>
               <div className='logoutButton' onClick={toggleModal}>
                 <RiLogoutCircleRLine />
+                
               </div>
+             
+              
             </div>
+            {/* <div className='language-switch'>
+            <LanguageSwitch/>
+          </div> */}
+            
           </div>
+          <div className='language-switch'>
+            <LanguageSwitch/>
+          </div>
+          
 
           {isModalOpen && (
-            <div id="poplogoutbtn" className="popup">
+            <div id="poplogoutbtn" className="mainPagepPopup">
               <div>
                 <p>Manage your account</p>
               </div>
