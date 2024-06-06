@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { ref, set } from 'firebase/database';
-import { database } from '../../firebase';
+// import { database } from '../../firebase';
+import { database } from '../../firebase/firebase';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LanguageSwitch from '../../LanguageSwitch';
 import { useTranslation } from 'react-i18next';
 import './settings.css';
 import { Modal, Button } from 'react-bootstrap';
+import { useData } from '../../ApiData/ContextProvider';
 
 const Settings = () => {
+  const { userUid } = useData();
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
   const [newBoysHostelAddress, setNewBoysHostelAddress] = useState('');
   const [newGirlsHostelName, setNewGirlsHostelName] = useState('');
@@ -34,7 +37,7 @@ const Settings = () => {
       return;
     }
 
-    const hostelRef = ref(database, `Hostel/${isBoys ? 'boys' : 'girls'}/${name}`);
+    const hostelRef = ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
     const hostelDetails = { name, address };
 
     set(hostelRef, hostelDetails)
@@ -71,12 +74,12 @@ const Settings = () => {
         </div>
         <div className="settingPageHostelSection">
           <div className="add-hostel-form">
-              <h4 className="settingPageSideHeading">{t("settings.boysHostels")}</h4>
-              <button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button>
+            <h4 className="settingPageSideHeading">{t("settings.boysHostels")}</h4>
+            <button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button>
           </div>
           <div className="add-hostel-form">
-              <h4 className="settingPageSideHeading">{t("settings.girlsHostels")}</h4>
-              <button className="addHostelBtn" onClick={() => setIsGirlsModalOpen(true)}>{t("settings.addHostel")}</button>
+            <h4 className="settingPageSideHeading">{t("settings.girlsHostels")}</h4>
+            <button className="addHostelBtn" onClick={() => setIsGirlsModalOpen(true)}>{t("settings.addHostel")}</button>
           </div>
         </div>
       </div>
@@ -110,8 +113,8 @@ const Settings = () => {
               />
             </div>
             <div className='settingsBtn'>
-            <Button variant="primary"style={{marginRight:'10px' }} type="submit">{t("settings.addHostel")}</Button>
-            <Button variant="secondary" onClick={() => setIsBoysModalOpen(false)}>{t("settings.close")}</Button>
+              <Button variant="primary" style={{ marginRight: '10px' }} type="submit">{t("settings.addHostel")}</Button>
+              <Button variant="secondary" onClick={() => setIsBoysModalOpen(false)}>{t("settings.close")}</Button>
             </div>
           </form>
         </Modal.Body>
@@ -145,7 +148,7 @@ const Settings = () => {
                 onChange={(e) => setNewGirlsHostelAddress(e.target.value)}
               />
             </div>
-            <Button variant="primary" type="submit" style={{marginRight:'10px' }}>{t("settings.addHostel")}</Button>
+            <Button variant="primary" type="submit" style={{ marginRight: '10px' }}>{t("settings.addHostel")}</Button>
             <Button variant="secondary" onClick={() => setIsGirlsModalOpen(false)}>{t("settings.close")}</Button>
           </form>
         </Modal.Body>

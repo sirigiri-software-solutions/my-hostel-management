@@ -4,7 +4,8 @@ import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
 import ImageIcon from '../../images/Icons (10).png'
 import { useState, useContext } from 'react'
-import { database, push, ref, storage } from "../../firebase";
+// import { database, push, ref, storage } from "../../firebase";
+import { database, push, ref, storage } from "../../firebase/firebase";
 import './TenantsBoys.css';
 import { DataContext } from '../../ApiData/ContextProvider'
 import { FetchData } from '../../ApiData/FetchData'
@@ -17,7 +18,7 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel } = useData();
+  const { activeBoysHostel, userUid } = useData();
   const role = localStorage.getItem('role');
 
 
@@ -162,7 +163,7 @@ const TenantsBoys = () => {
 
 
   useEffect(() => {
-    const roomsRef = ref(database, `Hostel/boys/${activeBoysHostel}/rooms`);
+    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
     onValue(roomsRef, (snapshot) => {
       const data = snapshot.val();
       const loadedRooms = [];
@@ -202,7 +203,7 @@ const TenantsBoys = () => {
   }
 
   useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/boys/${activeBoysHostel}/tenants`);
+    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
     onValue(tenantsRef, snapshot => {
       const data = snapshot.val() || {};
       const loadedTenants = Object.entries(data).map(([key, value]) => ({
@@ -305,7 +306,7 @@ const TenantsBoys = () => {
     let imageUrlToUpdate = tenantImageUrl;
 
     if (tenantImage) {
-      const imageRef = storageRef(storage, `Hostel/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
       try {
         const snapshot = await uploadBytes(imageRef, tenantImage);
         imageUrlToUpdate = await getDownloadURL(snapshot.ref);
@@ -319,7 +320,7 @@ const TenantsBoys = () => {
 
     let idUrlToUpdate = tenantIdUrl;
     if (tenantId) {
-      const imageRef = storageRef(storage, `Hostel/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
+      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
       try {
         const snapshot = await uploadBytes(imageRef, tenantId);
         idUrlToUpdate = await getDownloadURL(snapshot.ref);
@@ -398,7 +399,7 @@ const TenantsBoys = () => {
     console.log(tenantData, "addressWhileSubmiting1")
 
     if (isEditing) {
-      await update(ref(database, `Hostel/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData).then(() => {
+      await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData).then(() => {
         toast.success(t('toastMessages.tenantUpdated'), {
           position: "top-center",
           autoClose: 2000,
@@ -421,7 +422,7 @@ const TenantsBoys = () => {
         });
       });
     } else {
-      await push(ref(database, `Hostel/boys/${activeBoysHostel}/tenants`), tenantData).then(() => {
+      await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData).then(() => {
         toast.success(t('toastMessages.tenantAddedSuccess'), {
           position: "top-center",
           autoClose: 2000,
@@ -679,8 +680,8 @@ const TenantsBoys = () => {
 
   //=====Vacate tenant ===========
   const handleVacate = async (id) => {
-    const tenantRef = ref(database, `Hostel/boys/${activeBoysHostel}/tenants/${currentId}`);
-    const newTenantRef = ref(database, `Hostel/boys/${activeBoysHostel}/extenants/${currentId}`);
+    const tenantRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`);
+    const newTenantRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants/${currentId}`);
     // Retrieve the data from the original location
     onValue(tenantRef, async (snapshot) => {
       const data = snapshot.val();
@@ -722,7 +723,7 @@ const TenantsBoys = () => {
     // idInputRef.current.value = "";
   };
   const fetchExTenants = () => {
-    const exTenantsRef = ref(database, `Hostel/boys/${activeBoysHostel}/extenants`);
+    const exTenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
     onValue(exTenantsRef, (snapshot) => {
       const data = snapshot.val();
       const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
@@ -742,7 +743,7 @@ const TenantsBoys = () => {
   };
 
   const handleConfirmDelete = async () => {
-    const removeRef = ref(database, `Hostel/boys/${activeBoysHostel}/extenants/${tenantIdToDelete}`);
+    const removeRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants/${tenantIdToDelete}`);
     remove(removeRef)
       .then(() => {
         toast.success('Tenant Deleted', {

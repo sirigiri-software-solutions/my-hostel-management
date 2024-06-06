@@ -3,7 +3,8 @@ import RoomsIcon from '../../images/Icons (2).png';
 import SearchIcon from '../../images/Icons (9).png';
 import './RoomsGirls.css';
 import Table from '../../Elements/Table';
-import { database, push, ref } from "../../firebase";
+// import { database, push, ref } from "../../firebase";
+import { database, push, ref } from "../../firebase/firebase";
 import { DataContext } from '../../ApiData/ContextProvider';
 import { onValue, remove, update } from 'firebase/database';
 import { toast } from "react-toastify";
@@ -20,7 +21,7 @@ const RoomsGirls = () => {
   }else if(role === "subAdmin"){
     adminRole = "Sub-admin"
   }
-  const { activeGirlsHostel } = useData();
+  const { activeGirlsHostel, userUid } = useData();
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
@@ -105,7 +106,7 @@ const handleRoomsIntegerChange = (event) => {
     }
     // ---------------------------------------
     if (isEditing) {
-      const roomRef = ref(database, `Hostel/girls/${activeGirlsHostel}/rooms/${currentId}`);
+      const roomRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`);
       update(roomRef, {
         floorNumber,
         roomNumber,
@@ -136,7 +137,7 @@ const handleRoomsIntegerChange = (event) => {
         });
       });
     } else {
-      const roomsRef = ref(database, `Hostel/girls/${activeGirlsHostel}/rooms`);
+      const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
       push(roomsRef, {
         floorNumber,
         roomNumber,
@@ -205,7 +206,7 @@ const handleRoomsIntegerChange = (event) => {
   };
 
   const confirmDeleteYes = () => {
-    const roomRef = ref(database, `Hostel/girls/${activeGirlsHostel}/rooms/${currentId}`);
+    const roomRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`);
     remove(roomRef).then(() => {
       toast.success("Room deleted successfully.", {
         position: "top-center",
@@ -268,7 +269,7 @@ const handleRoomsIntegerChange = (event) => {
   };
 
   useEffect(() => {
-    const roomsRef = ref(database, `Hostel/girls/${activeGirlsHostel}/rooms`);
+    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
     onValue(roomsRef, (snapshot) => {
       const data = snapshot.val();
       const loadedRooms = [];

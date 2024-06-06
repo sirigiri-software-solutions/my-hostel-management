@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useRef, useEffect } from 'react';
 import { FetchData } from './FetchData';
 import { onValue, ref } from 'firebase/database';
-import { database } from '../firebase';
+import { database } from '../firebase/firebase';
 import isEqual from 'lodash/isEqual';
 
 const DataContext = createContext();
@@ -20,6 +20,19 @@ const DataProvider = ({ children }) => {
   const [activeBoysHostelButtons, setActiveBoysHostelButtons] = useState([]);
   const [activeGirlsHostel, setActiveGirlsHostel] = useState(null);
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
+  const [userarea, setUserArea] = useState();
+  const [userUid, setUserUid] = useState()
+
+  const areaToApiEndpoint = {
+    hyderabad: "https://ameerpet-588ee-default-rtdb.firebaseio.com/register.json",
+    secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
+  };
+
+  useEffect(()=>{
+    const userId = localStorage.getItem('userUid')
+    setUserUid(userId);
+  }, [userUid])
+  console.log("user Id Context", userUid)
 
   useEffect(() => {
     const fetchApiData = async () => {
@@ -35,7 +48,7 @@ const DataProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    const boysRef = ref(database, 'Hostel/boys');
+    const boysRef = ref(database, `Hostel/${userUid}/boys`);
     const unsubscribe = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -47,10 +60,10 @@ const DataProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [userUid]);
 
   useEffect(() => {
-    const girlsRef = ref(database, 'Hostel/girls');
+    const girlsRef = ref(database, `Hostel/${userUid}/girls`);
     const unsubscribe = onValue(girlsRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -62,7 +75,7 @@ const DataProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [userUid]);
 
   useDeepCompareEffect(() => {
     if (activeBoysHostelButtons.length > 0) {
@@ -78,9 +91,10 @@ const DataProvider = ({ children }) => {
 
   console.log("active boys hostel", activeBoysHostel);
   console.log("active buttons", activeBoysHostelButtons);
-
+  console.log("user UID", userUid)
+ 
   return (
-    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons }}>
+    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid }}>
       {children}
     </DataContext.Provider>
   );

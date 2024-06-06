@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import ExpenseIcon from '../../images/Icons (5).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
-import { database, push, ref } from "../../firebase";
+// import { database, push, ref } from "../../firebase";
+import { database, push, ref } from "../../firebase/firebase";
 import "../RoomsBoys/RoomsBoys.css"
 import { onValue } from 'firebase/database';
 import { remove, update, set } from 'firebase/database';
@@ -14,7 +15,7 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const ExpensesGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel } = useData();
+  const { activeGirlsHostel , userUid} = useData();
 
   const  role = localStorage.getItem('role');
   let adminRole = "";
@@ -129,7 +130,7 @@ window.addEventListener('keydown',handleOutsideClick);
     // Only proceed if form is valid
     if (formIsValid) {
       const monthYear = getMonthYearKey(formData.expenseDate);
-      const expensesRef = ref(database, `Hostel/girls/${activeGirlsHostel}/expenses/${monthYear}`);
+      const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}`);
       push(expensesRef, {
         ...formData,
         expenseAmount: parseFloat(formData.expenseAmount),
@@ -182,7 +183,7 @@ window.addEventListener('keydown',handleOutsideClick);
 
   useEffect(() => {
     const formattedMonth = month.slice(0, 3);
-    const expensesRef = ref(database, `Hostel/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
+    const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
     onValue(expensesRef, (snapshot) => {
       const data = snapshot.val();
       const loadedExpenses = [];
@@ -295,7 +296,7 @@ window.addEventListener('keydown',handleOutsideClick);
       };
 
       const monthYear = getMonthYearKey(formData.expenseDate);
-      const expenseRef = ref(database, `Hostel/girls/${activeGirlsHostel}/expenses/${monthYear}/${editingExpense.id}`);
+      const expenseRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}/${editingExpense.id}`);
       set(expenseRef, updatedFormData)
         .then(() => {
           toast.success(t('toastMessages.expensesUpdatedSuccessfully'), {
@@ -336,7 +337,7 @@ window.addEventListener('keydown',handleOutsideClick);
   const handleDelete = () => {
     if (!editingExpense) return;
     const monthYear = getMonthYearKey(formData.expenseDate);
-    const expenseRef = ref(database, `Hostel/girls/${activeGirlsHostel}/expenses/${monthYear}/${editingExpense.id}`);
+    const expenseRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}/${editingExpense.id}`);
     remove(expenseRef).then(() => {
       toast.success(t('toastMessages.expenseDeteledSuccessfully'), {
         position: "top-center",
@@ -419,7 +420,7 @@ useEffect(() => {
 
   const fetchExpenses = async () => {
     const promises = monthNames.map(month => {
-      const monthRef = ref(database, `Hostel/girls/${activeGirlsHostel}/expenses/${year}-${month}`);
+      const monthRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${month}`);
       return new Promise((resolve) => {
         onValue(monthRef, (snapshot) => {
           const expenses = snapshot.val();

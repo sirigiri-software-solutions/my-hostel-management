@@ -6,7 +6,8 @@ import Expenses from '../../images/Icons (5).png'
 import './DashboardGirls.css'
 import SmallCard from '../../Elements/SmallCard'
 import PlusIcon from '../../images/Icons (8).png'
-import { database, push, ref, storage } from "../../firebase";
+// import { database, push, ref, storage } from "../../firebase";
+import { database, push, ref, storage } from "../../firebase/firebase";
 import { onValue, update } from 'firebase/database';
 import { DataContext } from '../../ApiData/ContextProvider';
 import { FetchData } from '../../ApiData/FetchData';
@@ -33,7 +34,7 @@ const DashboardGirls = () => {
    const isUneditable = role === 'admin' || role === 'subAdmin';
 
 
-  const { activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons } = useData();
+  const { activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, userUid } = useData();
   const [modelText, setModelText] = useState('');
   const [formLayout, setFormLayout] = useState('');
   const [floorNumber, setFloorNumber] = useState('');
@@ -121,7 +122,7 @@ const DashboardGirls = () => {
   }
 
   useEffect(()=>{
-    const tenantsRef = ref(database, `Hostel/girls/${activeGirlsHostel}/tenants`);
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
     onValue(tenantsRef, (snapshot) => {
       const data = snapshot.val();
       const loadedTenants = data ? Object.keys(data).map(key => ({
@@ -314,7 +315,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       return; // Prevent form submission if there are errors
     }
 
-    const roomsRef = ref(database, `Hostel/girls/${activeGirlsHostel}/rooms`);
+    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
     push(roomsRef, {
       floorNumber,
       roomNumber,
@@ -358,7 +359,7 @@ Please note that you made your last payment on ${paidDate}.\n`
   };
 
   useEffect(() => {
-    const roomsRef = ref(database, `Hostel/girls/${activeGirlsHostel}/rooms`);
+    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
     onValue(roomsRef, (snapshot) => {
       const data = snapshot.val();
       const loadedRooms = [];
@@ -387,7 +388,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   useEffect(() => {
     const formattedMonth = month.slice(0, 3).toLowerCase();
-    const expensesRef = ref(database, `Hostel/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
+    const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
     onValue(expensesRef, (snapshot) => {
       const data = snapshot.val();
       let total = 0; // Variable to hold the total expenses
@@ -408,7 +409,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
 
   useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/girls/${activeGirlsHostel}/tenants`);
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
     onValue(tenantsRef, snapshot => {
       const data = snapshot.val() || {};
       const loadedTenants = Object.entries(data).map(([key, value]) => ({
@@ -422,7 +423,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   const [girlsRooms, setGirlsRooms] = useState([]);
   useEffect(() => {
-    const roomsRef = ref(database, `Hostel/girls/${activeGirlsHostel}/rooms`);
+    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
     onValue(roomsRef, (snapshot) => {
       const data = snapshot.val();
       const loadedRooms = [];
@@ -513,7 +514,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     let imageUrlToUpdate = tenantImageUrl;
 
     if (tenantImage) {
-      const imageRef = storageRef(storage, `Hostel/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
       try {
         const snapshot = await uploadBytes(imageRef, tenantImage);
         imageUrlToUpdate = await getDownloadURL(snapshot.ref);
@@ -525,7 +526,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
     let idUrlToUpdate = tenantIdUrl;
     if (tenantId) {
-      const imageRef = storageRef(storage, `Hostel/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
+      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
       try {
         const snapshot = await uploadBytes(imageRef, tenantId);
         idUrlToUpdate = await getDownloadURL(snapshot.ref);
@@ -555,7 +556,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     console.log(tenantData,"dashtenant");
 
     if (isEditing) {
-      await update(ref(database, `Hostel/girls/${activeGirlsHostel}/tenants/${currentTenantId}`), tenantData).then(() => {
+      await update(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${currentTenantId}`), tenantData).then(() => {
         toast.success(t('toastMessages.tenantUpdated'), {
           position: "top-center",
           autoClose: 2000,
@@ -577,7 +578,7 @@ Please note that you made your last payment on ${paidDate}.\n`
         });
       });
     } else {
-      await push(ref(database, `Hostel/girls/${activeGirlsHostel}/tenants`), tenantData).then(() => {
+      await push(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`), tenantData).then(() => {
         toast.success(t('toastMessages.tenantAddedSuccess'), {
           position: "top-center",
           autoClose: 2000,
@@ -684,7 +685,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   useEffect(() => {
     // Fetch tenants data once when component mounts
-    const tenantsRef = ref(database, `Hostel/girls/${activeGirlsHostel}/tenants`);
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
     onValue(tenantsRef, (snapshot) => {
       const tenantsData = snapshot.val();
       const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
@@ -692,7 +693,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       // Initialize an array to hold promises for fetching each tenant's rents
       const rentsPromises = tenantIds.map(tenantId => {
         return new Promise((resolve) => {
-          const rentsRef = ref(database, `Hostel/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
+          const rentsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
           onValue(rentsRef, (rentSnapshot) => {
             const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
               id: key,
@@ -767,7 +768,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
     if (isEditing) {
       // Update the existing rent record
-      const rentRef = ref(database, `Hostel/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents/${editingRentId}`);
+      const rentRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents/${editingRentId}`);
       await update(rentRef, rentData).then(() => {
         toast.success(t('toastMessages.rentUpdatedSuccess'), {
           position: "top-center",
@@ -796,7 +797,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       });
     } else {
       // Create a new rent record
-      const rentRef = ref(database, `Hostel/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents`);
+      const rentRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents`);
       await push(rentRef, rentData).then(() => {
         toast.success(t('toastMessages.rentAddedSuccess'), {
           position: "top-center",
@@ -966,7 +967,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     // Only proceed if form is valid
     if (formIsValid) {
       const monthYear = getMonthYearKey(formData.expenseDate);
-      const expensesRef = ref(database, `Hostel/girls/${activeGirlsHostel}/expenses/${monthYear}`);
+      const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}`);
       push(expensesRef, {
         ...formData,
         expenseAmount: parseFloat(formData.expenseAmount),
