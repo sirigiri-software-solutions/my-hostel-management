@@ -4,13 +4,16 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useData } from "../../ApiData/ContextProvider";
 import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
+  const { areaToApiEndpoint } = useData();
   let navigate=useNavigate();
   const [data, setData] = useState({
     firstname: "",
     lastname: "",
+    area: "",
     email: "",
     phone: "",
     password: "",
@@ -18,9 +21,11 @@ const SignUp = () => {
     securityQuestion: "",
     securityAnswer: "",
   });
+
   const [errors, setErrors] = useState({
     firstname: "",
     lastname: "",
+    area: "",
     email: "",
     phone: "",
     password: "",
@@ -33,19 +38,9 @@ const SignUp = () => {
 
   const handleCheckboxChange = (event) => {
     setSelectedRole(event.target.value);
-    console.log(event.target.value);
   };
 
-  const {
-    firstname,
-    lastname,
-    email,
-    phone,
-    password,
-    confirmpassword,
-    securityQuestion,
-    securityAnswer,
-  } = data;
+  const { firstname, lastname, area, email, phone, password, confirmpassword,securityQuestion,securityAnswer } = data;
 
   const changeHandler = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -69,6 +64,11 @@ const SignUp = () => {
 
     if (lastname.trim() === "") {
       newErrors.lastname = "Please enter your last name";
+      formValid = false;
+    }
+
+    if (area.trim() === "") {
+      newErrors.area = "Please enter your area name";
       formValid = false;
     }
 
@@ -123,6 +123,7 @@ const SignUp = () => {
     const formData = {
       firstname,
       lastname,
+      area,
       email,
       phone,
       password,
@@ -132,13 +133,14 @@ const SignUp = () => {
       role: selectedRole,
     };
     console.log(formData,'signupdata');
+   
+
+    const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
+    console.log(areaToApiEndpoint[area.toLowerCase()]);
+
     // Proceed with form submission if all fields are filled
     axios
-      .post(
-        "https://kiranreddy-58a8c-default-rtdb.firebaseio.com/register.json",
-        formData
-      )
-      // .post('https://signuppage-2f4c8-default-rtdb.firebaseio.com/register.json', formData)
+      .post(apiEndpoint, formData)
       .then(() => {
         toast.success("Your details Submitted Successfully.", {
           position: "bottom-right",
@@ -153,6 +155,7 @@ const SignUp = () => {
         setData({
           firstname: "",
           lastname: "",
+          area: "",
           email: "",
           phone: "",
           password: "",
@@ -219,6 +222,20 @@ const SignUp = () => {
             />
             {errors.lastname && <div className="text-danger">{errors.lastname}</div>}
           </div>
+          <div className="form-group col-md-6">
+            {/* <label htmlFor="lastname">Lastname:</label> */}
+            <input
+              type="text"
+              name="area"
+              value={area}
+              onChange={changeHandler}
+              placeholder="Enter Your Area"
+              onFocus={() => clearErrorOnFocus("area")}
+              className="form-control rounded-pill"
+            />
+            {errors.area && <div className="text-danger">{errors.area}</div>}
+          </div>
+          
           <div className="form-group col-md-6">
             {/* <label htmlFor="email">Email:</label> */}
             <input

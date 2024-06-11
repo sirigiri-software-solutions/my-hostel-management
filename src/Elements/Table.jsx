@@ -30,7 +30,7 @@ const Table = ({columns, rows,onClickTentantRow}) => {
 
 
   return (
-    <div className='table-container'>
+    <div  className='table-container1'>
         <table className="table text-center">
           <thead>
             <tr className="fixed">
@@ -44,7 +44,7 @@ const Table = ({columns, rows,onClickTentantRow}) => {
               rows.map((item, index) => <tr>
                {item.s_no && <td data-label={t('mobileTable.serialNumber')} style={{padding:"7px"}} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.s_no}</td>}
 {item.image && <td data-label={t('mobileTable.image')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}><img className='personImage' src={item.image} alt='img'/></td>}
-{item.name && <td data-label={t('mobileTable.name')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.name}</td>}
+{item.name && <td className='hosteltable' data-label={t('mobileTable.name')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.name}</td>}
 {item.id && <td data-label={t('mobileTable.id')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.id}</td>}
 {item.mobile_no && <td data-label={t('mobileTable.mobileNumber')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.mobile_no}</td>}
 {item.room_bed_no && <td data-label={t('mobileTable.roomBedNumber')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.room_bed_no}</td>}
@@ -66,6 +66,7 @@ const Table = ({columns, rows,onClickTentantRow}) => {
 {item.last_fee && <td data-label={t('mobileTable.lastFee')}>{item.last_fee}</td>}
 {item.created_on && <td data-label={t('mobileTable.createdOn')}>{item.created_on}</td>}
 {item.expense_name && <td data-label={t('mobileTable.expenseName')}>{item.expense_name}</td>}
+{item.address && <td className='hosteltable' data-label={t('mobileTable.address')}>{item.address}</td>}
 {item.expense_amount && <td data-label={t('mobileTable.expenseAmount')}>{item.expense_amount}</td>}
 {item.created_by && <td data-label={t('mobileTable.createdBy')}>{getTranslationCreatedBy(item.created_by)}</td>}
 {item.last_updated_by && <td data-label={t('mobileTable.lastUpdatedDate')}>{item.last_updated_by}</td>}
@@ -73,8 +74,8 @@ const Table = ({columns, rows,onClickTentantRow}) => {
 {item.status && <td data-label={t('mobileTable.status')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{getTranslationStatus(item.status)}</td>}
 {item.edit_room && <td data-label={t('mobileTable.edit')}>{item.edit_room}</td>}
 {item.actions && <td data-label={t('mobileTable.actions')}>{item.actions}</td>}
-{item.edit && <td data-label={t('mobileTable.edit')}><Button icon={item.edit.icon} variant={item.edit.variant} text={item.edit.text}/></td>}
-{item.delete && <td data-label={t('mobileTable.delete')}><Button icon={item.edit.icon} variant={item.edit.variant} text={item.delete.text}/></td>}
+{item.edit && <td className='hosteltable' data-label={t('mobileTable.edit')}>{item.edit}</td>}
+{item.delete && <td className='hosteltable' data-label={t('mobileTable.delete')}>{item.delete}</td>}
               </tr>)
             }
           </tbody>

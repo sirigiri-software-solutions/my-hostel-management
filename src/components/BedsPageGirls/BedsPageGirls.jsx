@@ -2,7 +2,8 @@ import React, {useEffect, useState} from 'react'
 import bedIcon from '../../images/Icons (3).png'
 import Table from '../../Elements/Table'
 import SearchIcon from '../../images/Icons (9).png'
-import {database, ref, push} from '../../firebase'
+// import {database, ref, push} from '../../firebase/'
+import { database, push, ref } from '../../firebase/firebase'
 import { onValue } from 'firebase/database'
 import "../BedsPageBoys/BedsPageBoys.css"
 import { useData } from '../../ApiData/ContextProvider';
@@ -10,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 const BedsPageGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel } = useData();
+  const { activeGirlsHostel, userUid } = useData();
   const [girlsRooms, setGirlsRooms]= useState([])
   const [bedsData, setBedsData] = useState([]);
   const [tenants, setTenants] = useState([]);
@@ -22,7 +23,7 @@ const BedsPageGirls = () => {
   const [floorNumbersToShow,setFloorNumbersToShow] = useState([]);
 
   useEffect(() => {
-    const roomsRef = ref(database, `Hostel/girls/${activeGirlsHostel}/rooms`);
+    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
     onValue(roomsRef, (snapshot) => {
       const data = snapshot.val();
       const loadedRooms = [];
@@ -37,7 +38,7 @@ const BedsPageGirls = () => {
   }, [activeGirlsHostel]);
   // Fetch tenants data
   useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/girls/${activeGirlsHostel}/tenants`);
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
     onValue(tenantsRef, (snapshot) => {
       const data = snapshot.val();
       const loadedTenants = [];

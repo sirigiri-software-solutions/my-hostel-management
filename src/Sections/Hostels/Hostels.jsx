@@ -1,75 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useData } from '../../ApiData/ContextProvider';
-import { ref, remove, onValue, update } from 'firebase/database';
-import { database } from '../../firebase';
+import { set, ref, remove, onValue, update } from 'firebase/database';
+import { database } from '../../firebase/firebase';
 import { toast } from 'react-toastify';
 import './Hostels.css';
 import { Modal, Button, Tab, Tabs } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-
-const HostelTabContent = ({ hostels, isEditing, startEdit, deleteHostel, handleEditChange, submitHostelEdit, cancelEdit }) => {
-  const { t } = useTranslation();
-
-  const capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  };
-
-  return (
-    <table className="hostel-table">
-      <thead>
-        <tr>
-          <th>{t("hostels.name")}</th>
-          <th>{t("hostels.address")}</th>
-          <th>{t("hostels.actions")}</th>
-          <th>{t("hostels.deleteData")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {hostels.map(({ id, name, address }) => (
-          isEditing && isEditing.id === id ? (
-            <tr key={id}>
-              <td>
-                <input
-                  type="text"
-                  value={isEditing.name}
-                  onChange={(e) => handleEditChange('name', capitalizeFirstLetter(e.target.value))}
-                  className="edit-hostel-input"
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  value={isEditing.address}
-                  onChange={(e) => handleEditChange('address', capitalizeFirstLetter(e.target.value))}
-                  className="edit-hostel-input"
-                />
-              </td>
-              <td>
-                <button onClick={submitHostelEdit} className="action-btn">Save</button>
-                <button onClick={cancelEdit} className="action-btn">Cancel</button>
-              </td>
-            </tr>
-          ) : (
-            <tr key={id}>
-              <td>{capitalizeFirstLetter(name)}</td>
-              <td>{capitalizeFirstLetter(address)}</td>
-              <td>
-                <button onClick={() => startEdit(id, name, address)} className="action-btn">Edit</button>
-              </td>
-              <td>
-                <button onClick={() => deleteHostel(id)} className="action-btn">Delete</button>
-              </td>
-            </tr>
-          )
-        ))}
-      </tbody>
-    </table>
-  );
-};
+import RoomsIcon from '../../images/Icons (2).png';
+import Table from '../../Elements/Table';
 
 const Hostels = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, setActiveBoysHostelButtons } = useData();
+  const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, setActiveBoysHostelButtons, userUid } = useData();
   const [isEditing, setIsEditing] = useState(null);
   const [hostels, setHostels] = useState({ boys: [], girls: [] });
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
@@ -77,8 +19,8 @@ const Hostels = () => {
   const [activeTab, setActiveTab] = useState('mens');
 
   useEffect(() => {
-    const boysRef = ref(database, 'Hostel/boys');
-    const girlsRef = ref(database, 'Hostel/girls');
+    const boysRef = ref(database, `Hostel/${userUid}/boys`);
+    const girlsRef = ref(database, `Hostel/${userUid}/girls`);
 
     const fetchBoysHostels = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -116,9 +58,8 @@ const Hostels = () => {
 
   const submitHostelEdit = (e) => {
     e.preventDefault();
-    const { id, name, originalName, address } = isEditing;
-    const isBoys = activeTab === 'mens';
-    const basePath = `Hostel/${isBoys ? 'boys' : 'girls'}`;
+    const { id, name, originalName, address, isBoys } = isEditing;
+    const basePath = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`;
 
     if (name !== originalName) {
       const updates = {};
@@ -166,7 +107,7 @@ const Hostels = () => {
 
   const confirmDeleteHostel = () => {
     const { isBoys, id } = hostelToDelete;
-    const path = `Hostel/${isBoys ? 'boys' : 'girls'}/${id}`;
+    const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
     remove(ref(database, path))
       .then(() => {
         toast.success("Hostel deleted successfully.", {
@@ -193,49 +134,76 @@ const Hostels = () => {
     setIsEditing(null);
   };
 
-  const startEdit = (id, name, address) => {
-    setIsEditing({ id, name, originalName: name, address });
+  const startEdit = (id, name, address, isBoys) => {
+    setIsEditing({ id, name, originalName: name, address, isBoys });
   };
 
   const handleEditChange = (field, value) => {
     setIsEditing(prev => ({ ...prev, [field]: value }));
   };
 
+  const getHostelColumns = () => [
+    t("hostels.name"),
+    t("hostels.address"),
+    t("hostels.actions"),
+    t("hostels.deleteData")
+  ];
+
+  const getHostelRows = (hostels, isBoys) => hostels.map(hostel => ({
+    name: hostel.name,
+    address: hostel.address,
+    edit: <button 
+    style={{ backgroundColor: '#ff8a00', padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
+      
+      onClick={ () => startEdit(hostel.id, hostel.name, hostel.address, isBoys)}
+    >Edit</button>,
+    
+    delete: <button
+    style={{backgroundColor:"#ff8a00",padding:'4px',borderRadius:'5px',color:'white',border:'none',}}
+      onClick={ () => deleteHostel(hostel.id)}
+    >Delete</button>
+  }));
+
   return (
-    <div>
-      <h2 className='hostelPageHeading'>{t("menuItems.hostels")}</h2>
-      <Tabs activeKey={activeTab} onSelect={(tab) => setActiveTab(tab)} className="mb-3">
+    <div className='container'>
+      <Tabs activeKey={activeTab} onSelect={(tab) => setActiveTab(tab)} className=" mb-3 tabs-nav">
         <Tab eventKey="mens" title={t('dashboard.mens')}>
-          <div className="hostels-container">
-            <div className="hostel-section">
-              <h3 className='hostelPageTableHeading'>{t("hostels.boysHostels")}</h3>
-              <HostelTabContent
-                hostels={hostels.boys}
-                isEditing={isEditing}
-                startEdit={startEdit}
-                deleteHostel={deleteHostel}
-                handleEditChange={handleEditChange}
-                submitHostelEdit={submitHostelEdit}
-                cancelEdit={cancelEdit}
-              />
-            </div>
+          {/* <div className="hostels-container"> */}
+            {/* <div className="hostel-section"> */}
+            <div className=" row d-flex flex-wrap align-items-center justify-content-between">
+            <div className="col-12  col-md-4 d-flex  align-items-center mr-5 mb-2">
+          <div className='roomlogo-container'>
+            <img src={RoomsIcon} alt="RoomsIcon"   className='roomlogo' />
           </div>
+          <text  className='management-heading2'>{t('roomsPage.HostelsManagement')}</text>
+        </div>
+        </div>
+        <div>
+              <Table
+                columns={getHostelColumns()}
+                rows={getHostelRows(hostels.boys, true)}
+                onClickTentantRow={(row) => console.log(row)}
+              />
+              </div>
+            
+          
         </Tab>
         <Tab eventKey="womens" title={t('dashboard.womens')}>
-          <div className="hostels-container">
-            <div className="hostel-section">
-              <h3 className='hostelPageTableHeading'>{t("hostels.girlsHostels")}</h3>
-              <HostelTabContent
-                hostels={hostels.girls}
-                isEditing={isEditing}
-                startEdit={startEdit}
-                deleteHostel={deleteHostel}
-                handleEditChange={handleEditChange}
-                submitHostelEdit={submitHostelEdit}
-                cancelEdit={cancelEdit}
-              />
-            </div>
+        <div className=" row d-flex flex-wrap align-items-center justify-content-between">
+            <div className="col-12  col-md-4 d-flex  align-items-center mr-5 mb-2">
+          <div className='roomlogo-container'>
+            <img src={RoomsIcon} alt="RoomsIcon"   className='roomlogo' />
           </div>
+          <text  className='management-heading2'>{t('roomsPage.HostelsManagement')}</text>
+        </div>
+        </div>
+        <div>
+              <Table
+                columns={getHostelColumns()}
+                rows={getHostelRows(hostels.girls, false)}
+                onClickTentantRow={(row) => console.log(row)}
+              />
+              </div>
         </Tab>
       </Tabs>
       <Modal show={isEditing !== null} onHide={cancelEdit}>
@@ -275,9 +243,7 @@ const Hostels = () => {
         <Modal.Header closeButton>
           <Modal.Title>{t("hostels.confirmDelete")}</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          {t("hostels.confirmMsg")}
-        </Modal.Body>
+        <Modal.Body>{t("hostels.deleteMessage")}</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={cancelDeleteHostel}>
             {t("hostels.cancel")}
@@ -292,5 +258,3 @@ const Hostels = () => {
 };
 
 export default Hostels;
-
-

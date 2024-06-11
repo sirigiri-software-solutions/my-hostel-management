@@ -163,8 +163,6 @@ const MainPage = () => {
   const [hamburgerMenu, setHamburgerMenu] = useState(false)
   const [hamburgerMenuItems, setHamburgerMenuItems] = useState(false)
 
-
-
   const handleHamburgerMenu = () => {
     setHamburgerMenuItems(!hamburgerMenuItems)
   }
@@ -186,7 +184,11 @@ const MainPage = () => {
   const logout = () => {
     // Clear any stored data related to user session
     localStorage.removeItem('username');
+    localStorage.removeItem('userarea');
+    localStorage.removeItem('role');
+    localStorage.removeItem('userUid');
     localStorage.removeItem('rememberedUsername');
+    localStorage.removeItem('rememberedUserarea');
     localStorage.removeItem('rememberedPassword');
     // Redirect to login page
     navigate('/');

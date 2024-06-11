@@ -96,6 +96,7 @@
         "Last Updated Date": "Last Updated Date",
         "Edit": "Edit",
         "RoomsManagement":"Rooms Management",
+        "HostelsManagement":"Hostels Management",
         "floorNumber": "Floor Number",
   "roomNumber": "Room Number",
   "numberOfBeds": "Number of Beds",
@@ -320,7 +321,8 @@
             "status": "Status",
             "edit": "Edit",
             "actions": "Actions",
-            "delete": "Delete"
+            "delete": "Delete",
+            "address":"address"
         
         
     },

@@ -41,6 +41,8 @@ justify-content: flex-end;
 display: flex;
 justify-content: center;
 align-items: center;
+position:relative;
+top:60px;
 /* border: 1px solid; */
 }
 
@@ -68,7 +70,7 @@ margin: 20px;
 }
 
 .input-form input[type="email"],
-.input-form input[type="password"] {
+.input-form input[type="password"],.input-form input[type="area"] {
 width: 100%;
 padding: 10px;
 margin-bottom: 10px;
@@ -106,7 +108,17 @@ color: #FF8a00;
 .invalid-feedback{
   margin-bottom: 5px;
 }
+#admin{
+  margin-right: 15px;
+  width:10px;
+  height: 18px;
+}
+#subadmin{
+  margin-right: 15px;
+  width:10px;
+  height: 18px;
 
+}
 
 @media screen and (max-width:768px){
   .main-div{
@@ -360,14 +372,18 @@ color: #FF8a00;
 
 
   .right-div{
+    
     position: relative;
     top:130px;
+    right:15px;
+    /* background-color: red; */
+
   }
 
   
   .image-right-container{
     position:absolute;
-    top:350px;
+    top:500px;
   }
   .form-container{
      width:100%;
@@ -383,8 +399,9 @@ color: #FF8a00;
     font-size: 12px;
   }
   .input-form{
-    position: fixed;
-    top:260px;
+    width:100px;
+    position: relative;
+    top:-130px;
   }
   /* .form-container{
     width:300px;
@@ -394,16 +411,42 @@ color: #FF8a00;
 @media screen and (max-width:500px) {
    .signupMobileDownImgContainer{
     position:absolute;
-    top:800px;
+    top:870px;
+   }
+   #forgotform{
+    width: 600px;
+        position: relative;
+        top: 200px;
+        left: 50px;
+   }
+   #signupformedit{
+    position:relative;
+    top:-150px;
+    left:50px;
+
+   }
+   .logo-container{
+    position: absolute;
+    top: 60px;
+    left: 45px
+   }
+   #newpassform{
+    /* width:100px; */
+    /* height: -60px; */
+    position:relative;
+    left:40px;
+    
    }
 }
 
 
-.form-container {
+.loginform-container {
   width: 100%;
   max-width: 400px; /* Adjust max-width as needed */
   margin: 0 auto; /* Center the form horizontally */
   padding: 20px;
+  position: relative;
+  top:120px;
 }
 
 .input-form {
@@ -640,9 +683,13 @@ color: #FF8a00;
   width:500px;
   position: relative;
   z-index:1;
+
 }
 /* modal.css */
-
+/* .loginFormMainContainer{
+  position: relative;
+  top:300;
+} */
 .custom-modal-overlay {
   position: fixed;
   top: 0;
@@ -774,6 +821,7 @@ color: #FF8a00;
   flex-direction: column;
 }
 
+
 .form-group {
   margin-bottom: 20px;
 }
@@ -816,9 +864,9 @@ button {
     max-width: 300px;
   }
 }
-#securtybtn{
+/* #securtybtn{
   
-}
+} */
 #newPassword{
   margin-top:20px;
   height:60px;
@@ -829,6 +877,7 @@ button {
 }
 #footerbtn{
   margin-top: 20px;
+  margin-right:28px;
 }
 .background{
   background-color:white;
@@ -891,9 +940,10 @@ input[type="submit"]:hover {
 
 .confirmationContainer {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  /* flex-wrap: wrap;
+  justify-content: space-between; */
 }
+
 
 .checkBoxTextContainer {
   display: flex;
@@ -951,4 +1001,5 @@ margin-left: 40%;
 #signuphead{margin-left: 30%;
 }
 }
+
 

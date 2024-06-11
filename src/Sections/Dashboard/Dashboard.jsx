@@ -9,7 +9,7 @@ import DashboardGirls from '../../components/DashboardGirls/DashboardGirls'
 import { useData } from '../../ApiData/ContextProvider';
 
 const Dashboard = () => {
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const { activeBoysHostel } = useData();
   const [activeTab, setActiveTab] = useState('boys');
   const name = localStorage.getItem("username");
