@@ -5,13 +5,14 @@ import RentPageGirls from '../../components/RentPageGirls/RentPageGirls';
 import { useTranslation } from 'react-i18next';
 
 
-const Rents = () => {
+const Rents = ({ onTabSelect,activeTab }) => {
     const { t } = useTranslation();
 
-    const [activeTab, setActiveTab] = useState('boys');
+    // const [activeTab, setActiveTab] = useState('boys');
 
     const handleTabSelect = (tab) => {
-        setActiveTab(tab);
+        // setActiveTab(tab);
+        onTabSelect(tab)
     };
 
     return (
