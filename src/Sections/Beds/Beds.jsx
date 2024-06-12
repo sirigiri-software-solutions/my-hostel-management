@@ -5,14 +5,15 @@ import BedsPageBoys from '../../components/BedsPageBoys/BedsPageBoys';
 import BedsPageGirls from '../../components/BedsPageGirls/BedsPageGirls';
 import { useTranslation } from 'react-i18next';
 
-const Beds = () => {
+const Beds = ({ onTabSelect,activeTab }) => {
     const { t } = useTranslation();
-    const [activeTab, setActiveTab] = useState('boys');
+    // const [activeTab, setActiveTab] = useState('boys');
     const [key, setKey] = useState('boys');
 
     const handleTabSelect = (tab) => {
-        setActiveTab(tab);
+        // setActiveTab(tab);
         setKey(tab);
+        onTabSelect(tab);
     };
 
     return (

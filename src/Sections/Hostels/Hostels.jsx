@@ -9,14 +9,14 @@ import { useTranslation } from 'react-i18next';
 import RoomsIcon from '../../images/Icons (2).png';
 import Table from '../../Elements/Table';
 
-const Hostels = () => {
+const Hostels = ({ onTabSelect,activeTab }) => {
   const { t } = useTranslation();
   const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, setActiveBoysHostelButtons, userUid } = useData();
   const [isEditing, setIsEditing] = useState(null);
   const [hostels, setHostels] = useState({ boys: [], girls: [] });
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
   const [hostelToDelete, setHostelToDelete] = useState(null);
-  const [activeTab, setActiveTab] = useState('mens');
+  // const [activeTab, setActiveTab] = useState('mens');
 
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
@@ -30,6 +30,7 @@ const Hostels = () => {
           name: data[key].name,
           address: data[key].address,
         }));
+        console.log(formattedData,"EntireBoysHostelData")
         setHostels(prev => ({ ...prev, boys: formattedData }));
       } else {
         setHostels(prev => ({ ...prev, boys: [] }));
@@ -54,7 +55,7 @@ const Hostels = () => {
       fetchBoysHostels();
       fetchGirlsHostels();
     };
-  }, []);
+  }, [hostels]);
 
   const submitHostelEdit = (e) => {
     e.preventDefault();
@@ -164,10 +165,16 @@ const Hostels = () => {
     >Delete</button>
   }));
 
+  const handleTabSelect = (tab) => {
+    // setActiveTab(tab);
+    onTabSelect(tab);
+};
+
+
   return (
     <div className='container'>
-      <Tabs activeKey={activeTab} onSelect={(tab) => setActiveTab(tab)} className=" mb-3 tabs-nav">
-        <Tab eventKey="mens" title={t('dashboard.mens')}>
+      <Tabs activeKey={activeTab} onSelect={handleTabSelect} className=" mb-3 tabs-nav">
+        <Tab eventKey="boys" title={t('dashboard.mens')}>
           {/* <div className="hostels-container"> */}
             {/* <div className="hostel-section"> */}
             <div className=" row d-flex flex-wrap align-items-center justify-content-between">
@@ -188,7 +195,7 @@ const Hostels = () => {
             
           
         </Tab>
-        <Tab eventKey="womens" title={t('dashboard.womens')}>
+        <Tab eventKey="girls" title={t('dashboard.womens')}>
         <div className=" row d-flex flex-wrap align-items-center justify-content-between">
             <div className="col-12  col-md-4 d-flex  align-items-center mr-5 mb-2">
           <div className='roomlogo-container'>

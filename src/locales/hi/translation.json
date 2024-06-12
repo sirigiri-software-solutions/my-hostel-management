@@ -95,7 +95,8 @@
       "Last Updated Date": "अंतिम अपडेट की तारीख",
       "Edit": "संपादित करें",
       "RoomsManagement": "कक्ष प्रबंधन",
-      "HostelsManagement":"హాస్టల్స్ నిర్వహణ",
+     
+      "HostelsManagement":"होस्टल प्रबंधन",
       "floorNumber": "मंजिल संख्या",
   "roomNumber": "कमरा संख्या",
   "numberOfBeds": "बिस्तरों की संख्या",
@@ -319,7 +320,8 @@
         "status": "स्थिति",
         "edit": "संपादित करें",
         "actions": "क्रियाएँ",
-        "delete": "हटाएं"
+        "delete": "हटाएं",
+        "address":"पता"
     },
     "createdBy": {
       "Admin": "प्रशासक",
