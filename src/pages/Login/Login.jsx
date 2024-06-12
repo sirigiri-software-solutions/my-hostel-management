@@ -164,8 +164,6 @@ const Login = () => {
       // setLogin(false);
     }
 
-
-
     if (rememberMe) {
       localStorage.setItem('rememberedUsername', loginData.email);
       localStorage.setItem('rememberedPassword', loginData.password);
@@ -444,12 +442,13 @@ const Login = () => {
       role: selectedRole,
     };
     console.log(formData, 'signupdata');
-    // Proceed with form submission if all fields are filled
+
+    const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
+    console.log(areaToApiEndpoint[area.toLowerCase()]);
+
+   
     axios
-      .post(
-        "https://kiranreddy-58a8c-default-rtdb.firebaseio.com/register.json",
-        formData
-      )
+      .post(apiEndpoint,formData)
       .then(() => {
         toast.success("Your details Submitted Successfully.", {
           position: "bottom-right",
