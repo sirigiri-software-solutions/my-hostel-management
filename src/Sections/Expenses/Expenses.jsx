@@ -6,11 +6,12 @@ import ExpensesBoys from '../../components/ExpensesBoys/ExpensesBoys';
 import ExpensesGirls from '../../components/ExpensesGirls/ExpensesGirls';
 import { useTranslation } from 'react-i18next';
 
-function Expenses() {
+const  Expenses=({ onTabSelect,activeTab })=> {
     const { t } = useTranslation();
-    const [activeTab, setActiveTab] = useState('boys');
+    // const [activeTab, setActiveTab] = useState('boys');
     const handleTabSelect = (tab) => {
-        setActiveTab(tab);
+        // setActiveTab(tab);
+        onTabSelect(tab);
     };
     return (
         <div className="container">

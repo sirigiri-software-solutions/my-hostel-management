@@ -8,14 +8,17 @@ import { useTranslation } from 'react-i18next';
 import DashboardGirls from '../../components/DashboardGirls/DashboardGirls'
 import { useData } from '../../ApiData/ContextProvider';
 
-const Dashboard = () => {
+const Dashboard = ({ onTabSelect,activeTab }) => {
   const { t } = useTranslation()
   const { activeBoysHostel } = useData();
-  const [activeTab, setActiveTab] = useState('boys');
+  // const [activeTab, setActiveTab] = useState('boys');
   const name = localStorage.getItem("username");
 
+
+
   const handleTabSelect = (tab) => {
-    setActiveTab(tab);
+    // setActiveTab(tab);
+    onTabSelect(tab);
   };
 
   return (
