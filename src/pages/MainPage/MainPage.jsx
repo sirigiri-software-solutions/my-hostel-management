@@ -8,6 +8,7 @@ import ExpensesImage from '../../images/Icons (5).png'
 import RentImage from '../../images/Icons (6).png'
 import SettingsImage from '../../images/Icons (7).png'
 import logo from "../../images/image.png"
+// import logo from "../../images/HMLogo2.png"
 import './MainPage.css'
 import '../../Sections/Dashboard/Dashboard.css'
 import Dashboard from '../../Sections/Dashboard/Dashboard'
@@ -38,6 +39,21 @@ const MainPage = () => {
     console.log(data && data);
   }
   console.log("end");
+
+
+  const [activeTab, setActiveTab] = useState('boys');
+
+  const handleTabSelect = (tab) => {
+    setActiveTab(tab);
+  };
+
+
+  useEffect(()=>{
+    setActiveTab("boys")
+  },[])
+
+
+
 
   const menuItems = [
     {
@@ -96,12 +112,13 @@ const MainPage = () => {
     setIsModalOpen(!isModalOpen);
   };
 
-  const Components = [<Dashboard />, <Rooms />, <Beds />, <Rents />, <Tenants />, <Expenses />, <Hostels/>, <Settings />]
+  const Components = [<Dashboard activeTab={activeTab} onTabSelect={handleTabSelect} />, <Rooms activeTab={activeTab} onTabSelect={handleTabSelect} />, <Beds activeTab={activeTab} onTabSelect={handleTabSelect} />, <Rents activeTab={activeTab} onTabSelect={handleTabSelect} />, <Tenants activeTab={activeTab} onTabSelect={handleTabSelect} />, <Expenses activeTab={activeTab} onTabSelect={handleTabSelect} />, <Hostels activeTab={activeTab} onTabSelect={handleTabSelect} />, <Settings />]
 
   const [flag, setFlag] = useState(1);
 
   const handlesideBar = (value) => {
     setFlag(value);
+    setActiveTab("boys")
   }
 
   useEffect(() => {
@@ -170,7 +187,8 @@ const MainPage = () => {
 
   const handleSidebarItemClick = (itemId, close) => {
     handlesideBar(itemId);
-    close(); // Close the popup modal
+    close();
+    setActiveTab('boys');
   }
 
   // const [isModalOpen, setIsModalOpen] = useState(false);
@@ -194,26 +212,39 @@ const MainPage = () => {
     navigate('/');
   };
 
+
+  const renderWelcomeext = index =>{
+    if (index === Components.length) {
+      return null;
+    }
+    return(
+      <>
+      {activeTab === 'boys' && <text>{t('dashboard.welcomeTo')}&nbsp;{activeBoysHostel}&nbsp;{t('dashboard.boysHostel')}</text>}
+      {activeTab !== 'boys' && <text>{t('dashboard.welcomeTo')}&nbsp;{activeGirlsHostel}&nbsp;{t('dashboard.girlsHostel')}</text>}
+      </>
+    )
+  }
+
   return (
     <div className='bg-container' style={mainBackgroundContainerStyle}>
       <div className='sidebar' style={sidebarStyle}>
         <div className='top-section' >
           <img src={logo} alt="logo" className='logo' />
         </div>
-      
+
         <div className='nav-div' >
-        <div className='menufontchange'>
-          <img src={Admin} alt="admin" className='mbl-dashboard-icon' />
-          <h1 className='mb-dashboard-name'>{name}</h1>
+          <div className='menufontchange'>
+            <img src={Admin} alt="admin" className='mbl-dashboard-icon' />
+            <h1 className='mb-dashboard-name'>{name}</h1>
           </div>
           <div className='logoutButton' onClick={toggleModal}>
             <RiLogoutCircleRLine />
           </div>
-         
+
         </div>
-       
-        
-       
+
+
+
 
 
         <div style={sidebarItems}>
@@ -266,27 +297,32 @@ const MainPage = () => {
         <div >
           <div className='dashboardHead'>
             <div className='dashBoarWelcome'>
-              <text>{t('dashboard.welcomeTo')} {activeBoysHostel} {t('dashboard.boysHostel')}  , {activeGirlsHostel} {t('dashboard.girlsHostel')} </text>
+                {renderWelcomeext(flag)}
+
+
+             
+              {/* <text>
+                {t('dashboard.welcomeTo')}&nbsp;
+                {activeTab === 'boys' ? activeBoysHostel : activeGirlsHostel}&nbsp;
+                {activeTab === 'boys' ? t('dashboard.boysHostel') : t('dashboard.girlsHostel')}
+              </text> */}
+              
             </div>
             <div className='top-div'>
               <img src={Admin} alt="admin" className='dashboard-icon' />
               <h1 className='dashboard-heading'>{name}</h1>
               <div className='logoutButton' onClick={toggleModal}>
                 <RiLogoutCircleRLine />
-                
+
               </div>
-             
-              
+
+
             </div>
-            {/* <div className='language-switch'>
-            <LanguageSwitch/>
-          </div> */}
-            
+
+
           </div>
-          <div className='language-switch'>
-            <LanguageSwitch/>
-          </div>
-          
+
+
 
           {isModalOpen && (
             <div id="poplogoutbtn" className="mainPagepPopup">

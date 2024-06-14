@@ -95,7 +95,8 @@
     "Last Updated Date": "చివరి నవీకరణ తేదీ",
     "Edit": "సవరించు",
     "RoomsManagement": "గదుల నిర్వహణ",
-    "HostelsManagement":"होस्टल प्रबंधन",
+    
+    "HostelsManagement":"హాస్టల్స్ నిర్వహణ",
     "addRooms": "గదులు చేర్చండి",
     "createRooms": "గదులు సృష్టించండి",
     "floorNumber": "అంతస్తు సంఖ్య",
@@ -315,7 +316,8 @@
     "status": "స్థితి",
     "edit": "సవరించు",
     "actions": "చర్యలు",
-    "delete": "తొలగించు"
+    "delete": "తొలగించు",
+    "address":"చిరునామా"
 },
 "createdBy": {
   "Admin": "అడ్మిన్",

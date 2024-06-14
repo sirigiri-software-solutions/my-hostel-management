@@ -4,14 +4,15 @@ import TenantsBoys from '../../components/TenantsBoys/TenantsBoys';
 import TenantsGirls from '../../components/TenantsGirls/TenantsGirls';
 import { useTranslation } from 'react-i18next';
 
-function Tenants() {
+const  Tenants = ({ onTabSelect,activeTab }) => {
     const { t } = useTranslation();
-    const [activeTab, setActiveTab] = useState('boys');
+    // const [activeTab, setActiveTab] = useState('boys');
     const [key, setKey] = useState('boys');
 
     const handleTabSelect = (tab) => {
-        setActiveTab(tab);
+        // setActiveTab(tab);
         setKey(tab);
+        onTabSelect(tab);
     };
 
     return (

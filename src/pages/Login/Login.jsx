@@ -19,7 +19,7 @@ const Login = () => {
   const initialState = { Id: "", email: "", area: "", password: "" };
   const [loginData, setLoginData] = useState(initialState);
   const [data, setData] = useState([]);
-  const[flag,setFlag] = useState(false)
+  const [flag, setFlag] = useState(false)
   const [loginErrors, setLoginErrors] = useState({});
   const [rememberMe, setRememberMe] = useState(false);
   const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false);
@@ -206,10 +206,25 @@ const Login = () => {
   const validateForm = () => {
     // let isValid=true;
     let errors = {};
-    if (loginData.email === "") errors.email = "Enter email to login";
-    if (loginData.password === "") errors.password = "Enter password to login";
-    if (loginData.area === "") errors.area = "Enter area  to login";
     
+    if (loginData.email === "") {
+      errors.email = "Enter email to login";
+      setLoginErrors(errors);
+      return false;
+    }
+  
+    if (loginData.area === "") {
+      errors.area = "Enter area to login";
+      setLoginErrors(errors);
+      return false;
+    }
+  
+    if (loginData.password === "") {
+      errors.password = "Enter password to login";
+      setLoginErrors(errors);
+      return false;
+    }
+  
     setLoginErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -446,11 +461,11 @@ const Login = () => {
     }
   }
 
-  
+
 
   const handleSwitch = () => {
     setLogin(false);
-    setIsForget(!isForget);
+    setIsForget(true);
     // setLogin(false);
     // if(isForget==true){
     // navigate('/');
@@ -459,23 +474,19 @@ const Login = () => {
     // setForgotPasswordModalOpen(isForget);
     // setNewPasswordModalOpen(!isForget);
   };
-  const handleClose=()=>{
-  // navigate('/');
-  setLogin(true);
+  const handleClose = () => {
+    // navigate('/');
+    setLogin(true);
   }
-  const forgotSubmit=()=>{
-    setIsForget(false);
-     setNewPasswordModalOpen(true);
-      
-  }
-  const newPasswordClose=(e)=>{
+  
+  const newPasswordClose = (e) => {
     setNewPasswordModalOpen(false);
     setLogin(true);
   }
-  const handleSignUp=(e)=>{
+  const handleSignUp = (e) => {
     setIsForget(false);
     setSignUp(true);
-    
+
   }
 
 
@@ -484,7 +495,7 @@ const Login = () => {
     firstname: "",
     lastname: "",
     email: "",
-    area:"",
+    area: "",
     phone: "",
     password: "",
     confirmpassword: "",
@@ -495,7 +506,7 @@ const Login = () => {
     firstname: "",
     lastname: "",
     email: "",
-    area:"",
+    area: "",
     // loginarea:"",
     phone: "",
     password: "",
@@ -536,67 +547,47 @@ const Login = () => {
 
   const clearErrorOnFocus = (fieldName) => {
     setSignupErrors({ ...signupErrors, [fieldName]: "" });
+    setLoginErrors({...loginErrors,[fieldName]:""})
   };
 
   const submitHandler = (e) => {
     e.preventDefault();
-   
-    let formValid = true;
-    const newErrors = { ...signupErrors };
 
-    // Check for empty fields
+    let formValid = true;
+    const newErrors = {};
+
+    // Sequential validation
     if (firstname.trim() === "") {
       newErrors.firstname = "required";
       formValid = false;
-    }
-
-    // if (lastname.trim() === "") {
-    //   newErrors.lastname = "Please enter your last name";
-    //   formValid = false;
-    // }
-
-    if (email.trim() === "") {
-      newErrors.email = "required";
-      formValid = false;
-    }
-
-    if (phone.trim() === "") {
-      newErrors.phone = "required";
-      formValid = false;
-    }
-    if (area.trim() === "") {
+    } else if (area.trim() === "") {
       newErrors.area = "required";
       formValid = false;
-    }
-
-    if (password.trim() === "") {
+    }else if (email.trim() === "") {
+      newErrors.email = "required";
+      formValid = false;
+    } else if (phone.trim() === "") {
+      newErrors.phone = "required";
+      formValid = false;
+    }  else if (password.trim() === "") {
       newErrors.password = "required";
       formValid = false;
     } else if (!isPasswordValid(password)) {
-      newErrors.password =
-        "required 1char,1symbol,1number";
+      newErrors.password = "require length 8, 1char,1symbol,1number";
       formValid = false;
-    }
-
-    if (confirmpassword.trim() === "") {
+    } else if (confirmpassword.trim() === "") {
       newErrors.confirmpassword = "required";
       formValid = false;
     } else if (password !== confirmpassword) {
       newErrors.confirmpassword = "Passwords do not match";
       formValid = false;
-    }
-
-    if (securityQuestion.trim() === "") {
+    } else if (securityQuestion.trim() === "") {
       newErrors.securityQuestion = "required";
       formValid = false;
-    }
-
-    if (securityAnswer.trim() === "") {
+    } else if (securityAnswer.trim() === "") {
       newErrors.securityAnswer = "required";
       formValid = false;
-    }
-
-    if (!selectedRole) {
+    } else if (!selectedRole) {
       newErrors.role = "Please select a role";
       formValid = false;
     }
@@ -701,140 +692,121 @@ const Login = () => {
   }
 
 
-  // const  area = localStorage.getItem('userarea');
-  // const  name = localStorage.getItem('username');
-  // setUserArea(area)
-  // console.log("local-area", area);
-  // console.log("local-name", name);
+
 
   return (
     <>
       <div className="main-div">
-        <div className="left-div">
-          <div className="image-container">
             <img src={ImageOne} alt="imageone" className="up-image" />
-          </div>
-          <div className="logo-container">
+          
+        <div className="loginPage-left-mainContainer">
+          <div className="left-logo-mainContainer">
             <img src={Logo} alt="logo" className="img" />
-            <p className="p"><b>A Home away from home, where strangers become friends and every day is an adventure.</b></p>
+            <p className="login-mainPageText"><b>A Home away from home, where strangers become friends and every day is an adventure.</b></p>
           </div>
         </div>
-        {!signup ? (
-          login ? (
-            <div className="right-div">
-              <div className="right-div-content">
-                <div className="loginform-container">
-                  <form onSubmit={checkData} className="input-form">
-                    <h1 className="login-heading">LOGIN</h1>
-                    <div className="mbl-inputField">
-                      <input
-                        type="area"
-                        className={`form-control ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
-                        placeholder="Enter Area"
-                        onChange={handleData}
-                        value={loginData.area}
-                        onFocus={() => clearErrorOnFocus("loginarea")}
-                        name="area"
-                        id="area"
-                      />
-                      {loginErrors.area && <div className="invalid-feedback">{loginErrors.area}</div>}
-                    </div>
-
-
-                    <div className="mbl-inputField">
-                      <input
-                        type="email"
-                        className={`form-control ${loginErrors?.email && "is-invalid"} ${loginData.email.trim() === "" && "empty-field"}`}
-                        placeholder="Username or Email"
-                        onChange={handleData}
-                        value={loginData.email}
-                        onFocus={() => clearErrorOnFocus("email")}
-                        name="email"
-                        id="mail"
-                      />
-                      {loginErrors.email && <div className="invalid-feedback">{loginErrors.email}</div>}
-                    </div>
-                    <div>
-                      <input
-                        type="password"
-                        className={`form-control ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
-                        placeholder="Password"
-                        onChange={handleData}
-                        value={loginData.password}
-                        onFocus={() => clearErrorOnFocus("password")}
-                        name="password"
-                        id="pass"
-                      />
-                      {loginErrors.password && <div className="invalid-feedback">{loginErrors.password}</div>}
-                    </div>
-                    <div>
-                      <button type="submit" className="login-button">Login</button>
-                    </div>
-                    <div className='loginfooter'>
-                      <div className="signupdiv">
-                        <p>Don't have an account?</p>
-                        <Link to="" onClick={(e) => handleSignUp()}>
-                          <b>Sign Up</b>
-                        </Link>
-                      </div>
-                      <div className="forgotbtndiv">
-                        <Link to=""  onClick={handleSwitch}>Forgot password</Link>
-                      </div>
-                    </div>
-                  </form>
+        <div className="loginPage-right-mainContainer">
+          <div className="checkpage">
+             {!signup ? (login ? (
+              <form onSubmit={checkData} className="input-form">
+              <h1 className="login-heading">LOGIN</h1>
+              <div className="mbl-inputField">
+                <input
+                  type="email"
+                  className={`form-control ${loginErrors?.email && "is-invalid"} ${loginData.email.trim() === "" && "empty-field"}`}
+                  placeholder="Username or Email"
+                  onChange={handleData}
+                  value={loginData.email}
+                  onFocus={() => clearErrorOnFocus("email")}
+                  name="email"
+                  id="mail"
+                />
+                {loginErrors.email && <p className="form-error-msg">{loginErrors.email}</p>}
+              </div>
+              <div className="mbl-inputField">
+                <input
+                  type="area"
+                  className={`form-control ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
+                  placeholder="Enter Area"
+                  onChange={handleData}
+                  value={loginData.area}
+                  onFocus={() => clearErrorOnFocus("area")}
+                  name="area"
+                  id="area"
+                />
+                {loginErrors.area && <p className="form-error-msg">{loginErrors.area}</p>}
+              </div>
+              <div>
+                <input
+                  type="password"
+                  className={`form-control ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
+                  placeholder="Password"
+                  onChange={handleData}
+                  value={loginData.password}
+                  onFocus={() => clearErrorOnFocus("password")}
+                  name="password"
+                  id="pass"
+                />
+                {loginErrors.password && <p className="form-error-msg">{loginErrors.password}</p>}
+              </div>
+              <div>
+                <button type="submit" className="login-button">Login</button>
+              </div>
+              <div className='loginfooter'>
+                <div className="signupdiv">
+                  <p>Don't have an account?</p>
+                  <span className="forgotText" onClick={(e) => handleSignUp()}>
+                    Sign Up
+                  </span>
                 </div>
-                <div className="image-right-container">
-                  <img src={ImageTwo} alt="imagetwo" className="down-image" />
+                <div className="forgotbtndiv">
+                  <span className="forgotText" onClick={handleSwitch}>Forgot password</span>
                 </div>
               </div>
-            </div>
-          ) : (
+            </form>):
             isForget ? (
-              <div className="right-div">
-                <div className="popup-div-content">
-                  <div id="forgotform" className="form-container">
-                    <form onSubmit={handleForgotPasswordSubmit} className="input-form">
-                      <h1 className="login-heading">Forgot Password</h1>
-                      <div className="mbl-inputField">
-                        <select
-                          name="securityQuestion"
-                          className="form-control rounded-pill"
-                          value={forgotPasswordData.securityQuestion}
-                          onChange={handleForgotPasswordData}
-                          required
-                        >
-                          <option value="">Select a security question</option>
-                          <option value="question1">What was the name of your first pet?</option>
-                          <option value="question2">What is your mother's maiden name?</option>
-                          <option value="question3">What is your favorite color?</option>
-                          <option value="question4">What is the name of the city you were born in?</option>
-                          <option value="question5">What was the make of your first car?</option>
-                        </select>
-                      </div>
-                      <div className="mbl-inputField">
-                        <input
-                          type="text"
-                          className="form-control rounded-pill"
-                          placeholder="Enter your security answer"
-                          name="securityAnswer"
-                          value={forgotPasswordData.securityAnswer}
-                          onChange={handleForgotPasswordData}
-                          required
-                        />
-                      </div>
-                      <div className="mbl-inputField">
-                        <input
-                          type="email"
-                          className="form-control"
-                          placeholder="Enter your email"
-                          name="email"
-                          value={forgotPasswordData.email}
-                          onChange={handleForgotPasswordData}
-                          required
-                        />
-                      </div>
-                      <div className="mbl-inputField">
-                        <input
+            <form onSubmit={handleForgotPasswordSubmit} className="input-form">
+              <h1 className="login-heading pb-2">Forgot Password</h1>
+              <div className="form-group">
+                <select
+                  name="securityQuestion"
+                  className="form-control rounded-pill"
+                  value={forgotPasswordData.securityQuestion}
+                  onChange={handleForgotPasswordData}
+                  required
+                >
+                  <option value="">Select a security question</option>
+                  <option value="question1">What was the name of your first pet?</option>
+                  <option value="question2">What is your mother's maiden name?</option>
+                  <option value="question3">What is your favorite color?</option>
+                  <option value="question4">What is the name of the city you were born in?</option>
+                  <option value="question5">What was the make of your first car?</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <input
+                  type="text"
+                  className="form-control rounded-pill"
+                  placeholder="Enter your security answer"
+                  name="securityAnswer"
+                  value={forgotPasswordData.securityAnswer}
+                  onChange={handleForgotPasswordData}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <input
+                  type="email"
+                  className="form-control"
+                  placeholder="Enter your email"
+                  name="email"
+                  value={forgotPasswordData.email}
+                  onChange={handleForgotPasswordData}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                  <input
                           type="text"
                           className="form-control rounded-pill"
                           placeholder="Enter your area"
@@ -844,71 +816,54 @@ const Login = () => {
                           required
                         />
                       </div>
-                      <div id="securtybtn" className="d-flex justify-content-between">
-                        <button id="forgotsbt" type="submit" className="btn btn-primary" >Submit</button>
-                        <button id="closesbt" type="close" className="btn btn-secondary" onClick={handleClose}>Close</button>
-                      </div>
-                    </form>
-                  </div>
-                  <div className="image-right-container">
-                    <img src={ImageTwo} alt="imagetwo" className="down-image" />
-                  </div>
-                </div>
+              <div id="securtybtn" className="d-flex justify-content-between">
+              <button id="closesbt" type="close" className="btn btn-secondary" onClick={handleClose}>Close</button>
+                <button id="forgotsbt" type="submit" className="btn btn-primary" >Submit</button>
+
               </div>
-            ) : (
+
+             
+            </form>) : (
               newPasswordModalOpen && (
-                <div className="right-div">
-                  <div className="right-div-content">
-                    <div id="newpassform" className="form-container">
-                      <form onSubmit={handleNewPasswordSubmit}>
-                      <h1 className="login-heading">New Password</h1>
-                        <div className="form-group">
-                          <input
-                            type="password"
-                            className="form-control rounded-pill custom-form-control"
-                            id="newPassword"
-                            placeholder="Enter your new password"
-                            name="newPassword"
-                            value={newPasswordData.newPassword}
-                            onChange={handleNewPasswordData}
-                            required
-                          />
-                        </div>
-                        <div className="form-group">
-                          <input
-                            type="password"
-                            className="form-control rounded-pill custom-form-control"
-                            id="confirmPassword"
-                            placeholder="Confirm your new password"
-                            name="confirmPassword"
-                            value={newPasswordData.confirmPassword}
-                            onChange={handleNewPasswordData}
-                            required
-                          />
-                        </div>
-                        <div id='footerbtn' className="custom-modal-footer">
-                          <button type="submit" className="btn btn-primary">Submit</button>
-                          <button type="button" className="btn btn-secondary" onClick={(e) => newPasswordClose()}>Close</button>
-                        </div>
-                      </form>
-                    </div>
-                    <div className="image-right-container">
-                      <img src={ImageTwo} alt="imagetwo" className="down-image" />
-                    </div>
+                <form onSubmit={handleNewPasswordSubmit}>
+                <h1 className="login-heading mt-3 mb-3 text-center">New Password</h1>
+                  <div className="form-group">
+                    <input
+                      type="password"
+                      className="form-control rounded-pill custom-form-control"
+                      id="newPassword"
+                      placeholder="Enter your new password"
+                      name="newPassword"
+                      value={newPasswordData.newPassword}
+                      onChange={handleNewPasswordData}
+                      required
+                    />
                   </div>
-                </div>
+                  <div className="form-group">
+                    <input
+                      type="password"
+                      className="form-control rounded-pill custom-form-control"
+                      id="confirmPassword"
+                      placeholder="Confirm your new password"
+                      name="confirmPassword"
+                      value={newPasswordData.confirmPassword}
+                      onChange={handleNewPasswordData}
+                      required
+                    />
+                  </div>
+                  <div id='footerbtn' className="d-flex justify-content-between">
+                  <button type="button" className="btn btn-secondary" onClick={(e) => newPasswordClose()}>Close</button>
+                    <button type="submit" className="btn btn-primary">Submit</button>
+
+                  </div>
+                </form>
               )
             )
-          )
-        ) : (
-          <div className="right-div signupMainContainer">
-          <div className="right-div-content">
-            <div className="form-container">
-
-            <form id='signupformedit' className="signupFormZindex row" autoComplete="off" onSubmit={submitHandler}>
-            <h1 className="login-heading">SignUp</h1>
-          <div className="form-group col-md-6">
           
+          ): (
+            <form className="row p-2"  onSubmit={submitHandler}>
+            <h2 className="text-center login-heading p-2">SignUp</h2>
+          <div className="form-group col-md-6">
             <input 
               type="text"
               name="firstname"
@@ -916,9 +871,9 @@ const Login = () => {
               onChange={changeHandler}
               placeholder="Enter Your FirstName"
               onFocus={() => clearErrorOnFocus("firstname")}
-              className="form-control rounded-pill"
+              className="rounded-pill"
             />
-            {signupErrors.firstname && <div id="errortextchange" className="text-danger">{signupErrors.firstname}</div>}
+            {signupErrors.firstname && <div className="form-error-msg">{signupErrors.firstname}</div>}
           </div>
           {/* <div className="form-group col-md-6">
             
@@ -934,7 +889,6 @@ const Login = () => {
             {signupErrors.lastname && <div className="text-danger">{signupErrors.lastname}</div>}
           </div> */}
           <div className="form-group col-md-6">
-            {/* <label htmlFor="email">Email:</label> */}
             <input
               type="area"
               name="area"
@@ -942,12 +896,11 @@ const Login = () => {
               onChange={changeHandler}
               placeholder="Enter Your area"
               onFocus={() => clearErrorOnFocus("area")}
-              className="form-control rounded-pill"
+              className="rounded-pill"
             />
-            {signupErrors.area && <div className="text-danger">{signupErrors.area}</div>}
+            {signupErrors.area && <div className="form-error-msg">{signupErrors.area}</div>}
           </div>
           <div className="form-group col-md-6">
-            {/* <label htmlFor="email">Email:</label> */}
             <input
               type="email"
               name="email"
@@ -955,12 +908,11 @@ const Login = () => {
               onChange={changeHandler}
               placeholder="Enter Your Email"
               onFocus={() => clearErrorOnFocus("email")}
-              className="form-control rounded-pill"
+              className="rounded-pill"
             />
-            {signupErrors.email && <div className="text-danger">{signupErrors.email}</div>}
+            {signupErrors.email && <div className="form-error-msg">{signupErrors.email}</div>}
           </div>
           <div className="form-group col-md-6">
-            {/* <label htmlFor="mobile">Mobile:</label> */}
             <input
               type="tel"
               name="phone"
@@ -968,9 +920,9 @@ const Login = () => {
               onChange={changeHandler}
               placeholder="Mobile number"
               onFocus={() => clearErrorOnFocus("phone")}
-              className="form-control rounded-pill"
+              className="rounded-pill"
             />
-            {signupErrors.phone && <div className="text-danger">{signupErrors.phone}</div>}
+            {signupErrors.phone && <div className="form-error-msg">{signupErrors.phone}</div>}
           </div>
           <div className="form-group col-md-6">
             {/* <label htmlFor="password">Password:</label> */}
@@ -983,7 +935,7 @@ const Login = () => {
               onFocus={() => clearErrorOnFocus("password")}
               className="form-control rounded-pill"
             />
-            {signupErrors.password && <div className="text-danger">{signupErrors.password}</div>}
+            {signupErrors.password && <div className="form-error-msg">{signupErrors.password}</div>}
           </div>
           <div className="form-group col-md-6">
             {/* <label htmlFor="confirmPassword">Confirm Password:</label> */}
@@ -997,7 +949,7 @@ const Login = () => {
               className="form-control rounded-pill"
             />
             {signupErrors.confirmpassword && (
-              <div className="text-danger">{signupErrors.confirmpassword}</div>
+              <div className="form-error-msg">{signupErrors.confirmpassword}</div>
             )}
           </div>
           <div className="form-group col-md-6">
@@ -1016,7 +968,7 @@ const Login = () => {
               <option value="question4">What is the name of the city you were born in?</option>
               <option value="question5">What was the make of your first car?</option>
             </select>
-            {signupErrors.securityQuestion && <div id='errortextchange' className="text-danger">{signupErrors.securityQuestion}</div>}
+            {signupErrors.securityQuestion && <div className="form-error-msg">{signupErrors.securityQuestion}</div>}
           </div>
           <div className="form-group col-md-6">
             {/* <label htmlFor="securityAnswer">Security Answer:</label> */}
@@ -1029,7 +981,7 @@ const Login = () => {
               onFocus={() => clearErrorOnFocus("securityAnswer")}
               className="form-control rounded-pill"
             />
-            {signupErrors.securityAnswer && <div className="text-danger">{signupErrors.securityAnswer}</div>}
+            {signupErrors.securityAnswer && <div className="form-error-msg">{signupErrors.securityAnswer}</div>}
           </div>
           <div className="form-group col-md-12">
             {/* <label className="loginText">Register As:</label> */}
@@ -1072,25 +1024,23 @@ const Login = () => {
             <input type="submit" id='submit' className="btn btn-primary rounded-pill" value="Sign up" />
           </div>
           <p className="text-center">
-          Already have an account?<span onClick={()=>setSignUp(false)}>Login</span>
+          Already have an account?<span className="forgotText" onClick={()=>setSignUp(false)}>Login</span>
         </p>
 
         </form>
-       
-       
-            </div>
-            
-            <div className="image-right-container signupMobileDownImgContainer">
-              <img src={ImageTwo} alt="imagetwo" className="down-image" />
-            </div>
+          )}
+           
+           
+
+
           </div>
         </div>
-         
-        )}
+
+        <img src={ImageTwo} alt="imagetwo" className="down-image" />
       </div>
     </>
   );
-  
+
 };
 
 export default Login;
