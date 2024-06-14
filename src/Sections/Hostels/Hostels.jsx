@@ -153,15 +153,15 @@ const Hostels = ({ onTabSelect,activeTab }) => {
   const getHostelRows = (hostels, isBoys) => hostels.map(hostel => ({
     name: hostel.name,
     address: hostel.address,
-    edit: <button 
-    style={{ backgroundColor: '#ff8a00', padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
-      
-      onClick={ () => startEdit(hostel.id, hostel.name, hostel.address, isBoys)}
+    edit: <button
+      style={{ backgroundColor: '#ff8a00', padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
+
+      onClick={() => startEdit(hostel.id, hostel.name, hostel.address, isBoys)}
     >Edit</button>,
-    
+
     delete: <button
-    style={{backgroundColor:"#ff8a00",padding:'4px',borderRadius:'5px',color:'white',border:'none',}}
-      onClick={ () => deleteHostel(hostel.id)}
+      style={{ backgroundColor: "#ff8a00", padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
+      onClick={() => deleteHostel(hostel.id)}
     >Delete</button>
   }));
 
@@ -176,41 +176,41 @@ const Hostels = ({ onTabSelect,activeTab }) => {
       <Tabs activeKey={activeTab} onSelect={handleTabSelect} className=" mb-3 tabs-nav">
         <Tab eventKey="boys" title={t('dashboard.mens')}>
           {/* <div className="hostels-container"> */}
-            {/* <div className="hostel-section"> */}
-            <div className=" row d-flex flex-wrap align-items-center justify-content-between">
+          {/* <div className="hostel-section"> */}
+          <div className=" row d-flex flex-wrap align-items-center justify-content-between">
             <div className="col-12  col-md-4 d-flex  align-items-center mr-5 mb-2">
-          <div className='roomlogo-container'>
-            <img src={RoomsIcon} alt="RoomsIcon"   className='roomlogo' />
-          </div>
-          <text  className='management-heading2'>{t('roomsPage.HostelsManagement')}</text>
-        </div>
-        </div>
-        <div>
-              <Table
-                columns={getHostelColumns()}
-                rows={getHostelRows(hostels.boys, true)}
-                onClickTentantRow={(row) => console.log(row)}
-              />
+              <div className='roomlogo-container'>
+                <img src={RoomsIcon} alt="RoomsIcon" className='roomlogo' />
               </div>
-            
-          
+              <text className='management-heading2'>{t('roomsPage.HostelsManagement')}</text>
+            </div>
+          </div>
+          <div>
+            <Table
+              columns={getHostelColumns()}
+              rows={getHostelRows(hostels.boys, true)}
+              onClickTentantRow={(row) => console.log(row)}
+            />
+          </div>
+
+
         </Tab>
         <Tab eventKey="girls" title={t('dashboard.womens')}>
         <div className=" row d-flex flex-wrap align-items-center justify-content-between">
             <div className="col-12  col-md-4 d-flex  align-items-center mr-5 mb-2">
-          <div className='roomlogo-container'>
-            <img src={RoomsIcon} alt="RoomsIcon"   className='roomlogo' />
-          </div>
-          <text  className='management-heading2'>{t('roomsPage.HostelsManagement')}</text>
-        </div>
-        </div>
-        <div>
-              <Table
-                columns={getHostelColumns()}
-                rows={getHostelRows(hostels.girls, false)}
-                onClickTentantRow={(row) => console.log(row)}
-              />
+              <div className='roomlogo-container'>
+                <img src={RoomsIcon} alt="RoomsIcon" className='roomlogo' />
               </div>
+              <text className='management-heading2'>{t('roomsPage.HostelsManagement')}</text>
+            </div>
+          </div>
+          <div>
+            <Table
+              columns={getHostelColumns()}
+              rows={getHostelRows(hostels.girls, false)}
+              onClickTentantRow={(row) => console.log(row)}
+            />
+          </div>
         </Tab>
       </Tabs>
       <Modal show={isEditing !== null} onHide={cancelEdit}>

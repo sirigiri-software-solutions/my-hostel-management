@@ -27,8 +27,11 @@ const Login = () => {
   const [forgotPasswordData, setForgotPasswordData] = useState({
     securityQuestion: '',
     securityAnswer: '',
-    email: ''
+    email: '',
+    area:''
+
   });
+
   const [newPasswordData, setNewPasswordData] = useState({
     newPassword: '',
     confirmPassword: ''
@@ -36,8 +39,9 @@ const Login = () => {
 
   const [isForget, setIsForget] = useState(false);
   const [login, setLogin] = useState(true);
-  const [signup, setSignUp] = useState(false);
-
+  const [signup,setSignUp]=useState(false);
+  const [myapiEndpoint,setApiEnPoint]=useState(null);
+  
 
   useEffect(() => {
     const rememberedUsername = localStorage.getItem('rememberedUsername');
@@ -48,10 +52,26 @@ const Login = () => {
       setRememberMe(true);
     }
   }, [])
+  console.log()
+  
 
   const handleRememberme = (e) => {
     setRememberMe(!rememberMe);
   }
+
+  // const [formData, setFormData] = useState({
+  //   firstname: '',
+  //   lastname: '',
+  //   email: '',
+  //   area: '',
+  //   phone: '',
+  //   password: '',
+  //   confirmpassword: '',
+  //   securityQuestion: '',
+  //   securityAnswer: '',
+  //   role: ''
+  // });
+
 
   // useEffect(() => {
   //   axios
@@ -81,13 +101,15 @@ const Login = () => {
   //     });
   // }, [signup]);
   // console.log(data,'registerdata');
+  // console.log(loginData,"loginData");
+  // const [forgotapiEndpoint,setforgotapiEndpoint]=useState([]);
 
   useEffect(() => {
     if (loginData.area && areaToApiEndpoint[loginData.area]) {
       axios.get(areaToApiEndpoint[loginData.area])
         .then((response) => {
           // let data = Object.values(response.data);
-          let data = Object.entries(response.data).map(([uid, user]) => ({ uid, ...user }));
+          const data = Object.entries(response.data).map(([uid, user]) => ({ uid, ...user }));
           setData(data);
           console.log("area==>", data)
           console.log(data, "data response from firebase");
@@ -95,8 +117,10 @@ const Login = () => {
     }
     setUserArea(loginData.area)
   }, [loginData.area, areaToApiEndpoint]);
+//  const forgotapiEndpoint=[...data];
 
-  console.log("area--login", loginData.area)
+
+//   console.log("area--login",forgotapiEndpoint);
 
   const handleData = (event) => {
     setLoginData({
@@ -104,6 +128,7 @@ const Login = () => {
       [event.target.name]: event.target.value,
     });
   };
+  console.log(loginData,"loginData3");
 
   const checkData = (event) => {
     event.preventDefault();
@@ -112,7 +137,7 @@ const Login = () => {
         (item) => item.email === loginData.email
       );
       const singleLoginuser = data.find((item) => item.email === loginData.email);
-      // console.log(singleLoginuser);
+      console.log(singleLoginuser,"singleloginuserdetails");
       if (itemExist > -1) {
         if (
           data[itemExist].email === loginData.email &&
@@ -179,6 +204,7 @@ const Login = () => {
   };
 
   const validateForm = () => {
+    // let isValid=true;
     let errors = {};
     
     if (loginData.email === "") {
@@ -213,32 +239,116 @@ const Login = () => {
     });
   };
 
-  const handleForgotPasswordSubmit = (event) => {
+  const [uniqueforgotUserId,setUniqueForgotUserId]=useState(null);
+  console.log( uniqueforgotUserId,"forgotunique");
+  
+
+  const handleForgotPasswordSubmit = async (event) => {
     event.preventDefault();
-    const user = data.find(item =>
-      item.securityQuestion === forgotPasswordData.securityQuestion &&
-      item.securityAnswer === forgotPasswordData.securityAnswer &&
-      item.email === forgotPasswordData.email
-    );
-    if (user) {
-      toast.success("select a new password.", {
+
+    const { email, securityQuestion, securityAnswer, area } = forgotPasswordData;
+
+    // Validate all fields are filled
+    if (!email || !securityQuestion || !securityAnswer || !area) {
+      toast.error("Please fill in all fields.", {
         position: "bottom-right",
         autoClose: 2000,
         theme: "light",
-
       });
-      // setForgotPasswordModalOpen(false);
-      setIsForget(false);
-      setNewPasswordModalOpen(true);
+      return;
+    }
 
-    } else {
-      toast.error("Details do not match. Please try again.", {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address.", {
+        position: "bottom-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+      return;
+    }
+
+    // Ensure areaToApiEndpoint is defined and has entries
+    if (!areaToApiEndpoint || Object.keys(areaToApiEndpoint).length === 0) {
+      console.error("areaToApiEndpoint is not defined or is empty");
+      toast.error("Configuration error. Please contact support.", {
+        position: "bottom-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+      return;
+    }
+    console.log(areaToApiEndpoint, "forgotdata");
+
+    const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
+    setApiEnPoint(apiEndpoint);
+    console.log(apiEndpoint);
+
+    try {
+      const response = await axios.get(apiEndpoint);
+      const data = response.data;
+      console.log(data, "dataforgotdetails1");
+
+      // Find user based on provided details
+      const forgotUniqueUserId = Object.entries(data).find(([key, value]) => {
+        return (
+          value.securityQuestion === securityQuestion &&
+          value.securityAnswer === securityAnswer &&
+          value.area === area &&
+          value.email === email
+        );
+      });
+
+      if (forgotUniqueUserId) {
+        const uniqueuserid = forgotUniqueUserId[0];
+        setUniqueForgotUserId(uniqueuserid);
+        // uniquecode=uniqueforgotUserId
+
+
+        toast.success("Select a new password.", {
+          position: "bottom-right",
+          autoClose: 2000,
+          theme: "light",
+        });
+        console.log(uniqueforgotUserId,"uniquecode");
+
+        setIsForget(false);
+        setNewPasswordModalOpen(true);
+        // setForgotPasswordData("");
+        setForgotPasswordData({
+          securityQuestion:'',
+          securityAnswer:'',
+          email:'',
+          area:''
+        }
+
+        )
+
+      } else {
+        toast.error("Details do not match. Please try again.", {
+          position: "bottom-right",
+          autoClose: 2000,
+          theme: "light",
+        });
+      }
+
+    } catch (error) {
+      console.error("Error during forgot password process:", error);
+      toast.error("An error occurred during the forgot password process.", {
         position: "bottom-right",
         autoClose: 2000,
         theme: "light",
       });
     }
   };
+  console.log(uniqueforgotUserId,"uniquecode1");//unique code console;
+
+// useEffect(()=>{
+//   console.log(setUniqueForgotUserId(uniqueuserid))
+
+// },[uniqueuserid]);
+
 
   const handleNewPasswordData = (event) => {
     setNewPasswordData({
@@ -247,49 +357,109 @@ const Login = () => {
     });
   };
 
-  const handleNewPasswordSubmit = (event) => {
+  const [responseData, setResponseData] = useState([]); 
+  
+  const handleNewPasswordSubmit = async (event) => {
     event.preventDefault();
-    if (newPasswordData.newPassword === newPasswordData.confirmPassword) {
-      const updatedData = data.map(item =>
-        item.email === forgotPasswordData.email ? { ...item, password: newPasswordData.newPassword, confirmPassword: newPasswordData.confirmPassword } : item
-
-      );
-      console.log(newPasswordData, "newpassworddata");
-      console.log(updatedData, "updatedata");
-
-      setData(updatedData);
-      toast.success("Password updated successfully.", {
-        position: "bottom-right",
-        autoClose: 2000,
-        theme: "light",
-        // navigate('/');
-      }
-
-
-      );
-      setLogin(true);
-      navigate('/');
-      setNewPasswordModalOpen(false);
-      // navigate('/');
-      setForgotPasswordData({
-        // firstname: '',
-        // lastname: '',
-        securityQuestion: '',
-        securityAnswer: '',
-        email: ''
-      });
-      setNewPasswordData({
-        newPassword: '',
-        confirmPassword: ''
-      });
-    } else {
+    if (newPasswordData.newPassword !== newPasswordData.confirmPassword) {
       toast.error("Passwords do not match. Please try again.", {
         position: "bottom-right",
         autoClose: 2000,
-        theme: "light",
+        theme: "light"
       });
+      return;
     }
-  };
+
+    if (!uniqueforgotUserId) {
+      toast.error("User ID not found. Please try again.", {
+        position: "bottom-right",
+        autoClose: 2000,
+        theme: "light"
+      });
+      return;
+    }
+
+    try {
+      axios.get(myapiEndpoint)
+  .then(response => {
+    const userData = response.data[uniqueforgotUserId]; // Extract the user data using userId
+    if (userData) {
+      // Update the password locally
+      userData.password = newPasswordData.newPassword;
+
+      // PUT the entire updated data back to the same URL
+      axios.put(myapiEndpoint, response.data)
+        .then(response => {
+          console.log("Password updated successfully!");
+          console.log(response,"passwordChanged")
+          toast.success("Your details Submitted Successfully.", {
+            position: "bottom-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+          setNewPasswordModalOpen(false);
+          setLogin(true);
+          console.log(response.data,"putresponsedata");
+          // newPasswordData.newPassword="";
+
+          setNewPasswordData({
+            newPassword: '',
+            confirmPassword: ''
+          });
+
+        })
+        .catch(error => {
+          console.error("Error updating password:", error);
+        });
+    } else {
+      console.log("User not found!");
+    }
+  })
+  .catch(error => {
+    console.error("Error fetching user data:", error);
+  });
+      
+   
+
+      // if (response.status === 200) {
+      //   toast.success("Password updated successfully.", {
+      //     position: "bottom-right",
+      //     autoClose: 2000,
+      //     theme: "light"
+      //   });
+      //   setLogin(true);
+      //   navigate('/');
+      //   setNewPasswordModalOpen(false);
+      //   setForgotPasswordData({
+      //     securityQuestion: '',
+      //     securityAnswer: '',
+      //     email: ''
+      //   });
+      //   setNewPasswordData({
+      //     newPassword: '',
+      //     confirmPassword: ''
+      //   });
+      // } else {
+      //   toast.error("Failed to update password. Please try again.", {
+      //     position: "bottom-right",
+      //     autoClose: 2000,
+      //     theme: "light"
+      //   });
+      // }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.", {
+        position: "bottom-right",
+        autoClose: 2000,
+        theme: "light"
+      });
+      console.error('Error updating password:', error);
+    }
+  }
 
 
 
@@ -308,11 +478,7 @@ const Login = () => {
     // navigate('/');
     setLogin(true);
   }
-  const forgotSubmit = () => {
-    setIsForget(false);
-    setNewPasswordModalOpen(true);
-
-  }
+  
   const newPasswordClose = (e) => {
     setNewPasswordModalOpen(false);
     setLogin(true);
@@ -351,6 +517,10 @@ const Login = () => {
 
   const [selectedRole, setSelectedRole] = useState(null);
 
+  
+
+
+
   const handleCheckboxChange = (event) => {
     setSelectedRole(event.target.value);
     console.log(event.target.value);
@@ -367,9 +537,11 @@ const Login = () => {
     securityQuestion,
     securityAnswer,
   } = signupData;
+  // console.log(signupData,"mysignupdata");
 
   const changeHandler = (e) => {
     setSignupData({ ...signupData, [e.target.name]: e.target.value });
+    console.log(signupData,"mysignupdata");
     setSignupErrors({ ...signupErrors, [e.target.name]: "" }); // Reset error when input changes
   };
 
@@ -433,43 +605,65 @@ const Login = () => {
       area,
       phone,
       password,
-      confirmpassword,
+     
       securityQuestion,
       securityAnswer,
       role: selectedRole,
     };
-    console.log(formData, 'signupdata');
+
+    // const [responseData, setResponseData] = useState([]); 
+
+
+
+    console.log(formData, 'signupdata1');
     // Proceed with form submission if all fields are filled
-    axios
-      .post(
-        "https://kiranreddy-58a8c-default-rtdb.firebaseio.com/register.json",
-        formData
-      )
-      .then(() => {
-        toast.success("Your details Submitted Successfully.", {
-          position: "bottom-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        setSignUp(false);
-        setSignupData({
-          firstname: "",
-          lastname: "",
-          email: "",
-          phone: "",
-          area: "",
-          password: "",
-          confirmpassword: "",
-          securityQuestion: "",
-          securityAnswer: "",
-        }); // Clear input fields after successful submission
-        navigate("/");
-      })
+    const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
+    console.log(areaToApiEndpoint[area.toLowerCase()]);
+
+    // Proceed with form submission if all fields are filled
+    axios.post(apiEndpoint, formData)
+    .then(response => {
+      setData(response.data);
+      setResponseData(prevData => [...prevData, data]); // Append new response data to the array
+      console.log(response, 'responseData'); // Log the response data
+      if(response.status === 200){
+       const responseData= axios.get(apiEndpoint)
+       setResponseData(response.data);
+       console.log(responseData,"apiendpointgetdata");
+        // .then(response=>{
+        //   console.log(response,"apiendpointdata")
+        // })
+        // .catch((error)=>{
+        //   console.log(error,"apiendpointdata")
+        // })
+      }
+      console.log(responseData,"apiendpointgetdata");
+      toast.success("Your details Submitted Successfully.", {
+        position: "bottom-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+
+      // Reset form and state after successful submission
+      setSignUp(false);
+      // setFormData({
+      //   firstname: "",
+      //   lastname: "",
+      //   email: "",
+      //   area: "",
+      //   phone: "",
+      //   password: "",
+      //   confirmpassword: "",
+      //   securityQuestion: "",
+      //   securityAnswer: "",
+      //   role: ""
+      // });
+    })
       .catch((error) => {
         console.error("Error submitting data:", error);
         toast.error(
@@ -486,8 +680,9 @@ const Login = () => {
           }
         );
       });
-};
 
+
+  };
 
   const isPasswordValid = (password) => {
     // Password must be at least 8 characters long and contain at least 1 character, 1 symbol, and 1 number
@@ -610,11 +805,24 @@ const Login = () => {
                   required
                 />
               </div>
+              <div className="form-group">
+                  <input
+                          type="text"
+                          className="form-control rounded-pill"
+                          placeholder="Enter your area"
+                          name="area"
+                          value={forgotPasswordData.area}
+                          onChange={handleForgotPasswordData}
+                          required
+                        />
+                      </div>
               <div id="securtybtn" className="d-flex justify-content-between">
               <button id="closesbt" type="close" className="btn btn-secondary" onClick={handleClose}>Close</button>
-                <button id="forgotsbt" type="submit" className="btn btn-primary" onClick={forgotSubmit}>Submit</button>
+                <button id="forgotsbt" type="submit" className="btn btn-primary" >Submit</button>
 
               </div>
+
+             
             </form>) : (
               newPasswordModalOpen && (
                 <form onSubmit={handleNewPasswordSubmit}>
