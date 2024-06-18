@@ -15,6 +15,9 @@ import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useTranslation } from 'react-i18next'
 import { useData } from '../../ApiData/ContextProvider';
+import { Camera, CameraResultType } from '@capacitor/camera';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCamera } from '@fortawesome/free-solid-svg-icons';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
@@ -69,7 +72,69 @@ const TenantsBoys = () => {
   const [bikeRcImage,setBikeRcImage]=useState('');
   const [bikeRcImageField,setBikeRcImageField]=useState('');
   
-  
+  // for camera icon
+  const [isMobile, setIsMobile] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState(null);
+  const [idUrl,setIdUrl]=useState(null);
+  useEffect(() => {
+    // Check if the user agent is a mobile device
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    setIsMobile(/iPhone|iPod|iPad|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent));
+}, []);
+
+  const takePicture = async () => {
+
+    if (!isMobile) {
+      console.error("Camera access is not supported on your device.");
+      return;
+  }
+    try {
+      const photo = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Uri
+      });
+      const response = await fetch(photo.webPath);
+      const blob = await response.blob();
+      const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
+      const snapshot = await uploadBytes(imageRef, blob);
+      const url = await getDownloadURL(snapshot.ref);
+      
+      setPhotoUrl(url); // Display in UI
+      setTenantImageUrl(url); // Use in form submission
+      // setPhotoUrl(photo.webPath);
+    } catch (error) {
+      console.error("Error accessing the camera", error);
+      toast.error(t('toastMessages.Image not Uploaded'));
+    }
+  };
+
+  const takeidPicture = async () => {
+
+    if (!isMobile) {
+      console.error("Camera access is not supported on your device.");
+      return;
+  }
+    try {
+      const photo = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Uri
+      });
+      const response = await fetch(photo.webPath);
+      const blob = await response.blob();
+      const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
+      const snapshot = await uploadBytes(imageRef, blob);
+      const url = await getDownloadURL(snapshot.ref);
+      
+      setIdUrl(url); // Display in UI
+      setTenantIdUrl(url); // Use in form submission
+      // setPhotoUrl(photo.webPath);
+    } catch (error) {
+      console.error("Error accessing the camera", error);
+      toast.error(t('toastMessages.Id not Uploaded'));
+    }
+  };
 
 
   const handleImageChange = (e) => {
@@ -979,6 +1044,17 @@ const TenantsBoys = () => {
                       </div>
                     )}
                     <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} required />
+                    {isMobile && (
+                    <div>
+                    <p>{t('tenantsPage.or')}</p>
+                    <div style={{display:'flex',flexDirection:'row'}}>
+                    <p>{t('tenantsPage.takePhoto')}</p>
+                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
+                    {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
+                    </div>
+                    </div>
+                    )}
+
                     {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
                   </div>
                   <div className="col-md-6">
@@ -993,6 +1069,17 @@ const TenantsBoys = () => {
                     {/* Show input for uploading ID only if not editing or tenantIdUrl doesn't exist */}
 
                     <input ref={tenantProofIdRef} id="tenantUploadId" className="form-control" type="file" onChange={handleTenantIdChange} />
+                    {isMobile && (
+                    <div>
+                    <p>{t('tenantsPage.or')}</p>
+                    <div style={{display:'flex',flexDirection:'row'}}>
+                    <p>{t('tenantsPage.takePhoto')}</p>
+                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeidPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
+                    {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
+                    </div>
+                    </div>
+                    )}
+
 
                   </div>
                   <div className='col-md-12'>
