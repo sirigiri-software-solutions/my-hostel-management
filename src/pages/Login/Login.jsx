@@ -5,7 +5,8 @@ import { useNavigate, Link } from "react-router-dom";
 // import Modal from 'react-modal';
 import ImageOne from "../../images/Vector 1 (1).png";
 import ImageTwo from "../../images/Vector 3 (2).png";
-import Logo from "../../images/image.png";
+// import Logo from "../../images/image.png";
+import Logo from "../../images/HMLogo3.png"
 import './Login.css';
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -53,40 +54,11 @@ const Login = () => {
     setRememberMe(!rememberMe);
   }
 
-  // useEffect(() => {
-  //   axios
-  //        .get("https://kiranreddy-58a8c-default-rtdb.firebaseio.com/register.json")
-  //     .then((response) => {
-  //       let data = Object.values(response.data);
-  //       setData(data);
-  //       console.log(data, "data response from firebase");
-  //     });
-  // }, []);
-
-  //----------------------------
-  // useEffect(() => {
-  //   const rememberedUsername = localStorage.getItem('rememberedUsername');
-  //   const rememberedPassword = localStorage.getItem('rememberedPassword');
-  //   if (rememberedUsername && rememberedPassword) {
-  //     setLoginData({ email: rememberedUsername, password: rememberedPassword });
-  //     setRememberMe(true);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   axios.get("https://kiranreddy-58a8c-default-rtdb.firebaseio.com/register.json")
-  //     .then((response) => {
-  //       let data = Object.values(response.data);
-  //       setData(data);
-  //     });
-  // }, [signup]);
-  // console.log(data,'registerdata');
 
   useEffect(() => {
     if (loginData.area && areaToApiEndpoint[loginData.area]) {
       axios.get(areaToApiEndpoint[loginData.area])
         .then((response) => {
-          // let data = Object.values(response.data);
           let data = Object.entries(response.data).map(([uid, user]) => ({ uid, ...user }));
           setData(data);
           console.log("area==>", data)
@@ -112,7 +84,6 @@ const Login = () => {
         (item) => item.email === loginData.email
       );
       const singleLoginuser = data.find((item) => item.email === loginData.email);
-      // console.log(singleLoginuser);
       if (itemExist > -1) {
         if (
           data[itemExist].email === loginData.email &&
@@ -133,14 +104,12 @@ const Login = () => {
 
           navigate("/mainPage");
 
-          localStorage.setItem("username", singleLoginuser.firstname)
+             localStorage.setItem("username", singleLoginuser.firstname)
           localStorage.setItem("role", singleLoginuser.role)
           localStorage.setItem("userarea", singleLoginuser.area)
-          localStorage.setItem("userUid", singleLoginuser.uid); // Store UID
-          // setUserUid(singleLoginuser.uid); // Update state with UID 
-
-          window.location.reload(); // Reload the page
-          // console.log(flag, "flag");
+          localStorage.setItem("userUid", singleLoginuser.uid);
+          window.location.reload(); 
+         
 
         } else {
           toast.error("Password Wrong, please enter correct password.", {
@@ -514,11 +483,11 @@ const Login = () => {
           <div className="checkpage">
              {!signup ? (login ? (
               <form onSubmit={checkData} className="input-form">
-              <h1 className="login-heading">LOGIN</h1>
+              <h1 className="login-heading mb-3">Login</h1>
               <div className="mbl-inputField">
                 <input
                   type="email"
-                  className={`form-control ${loginErrors?.email && "is-invalid"} ${loginData.email.trim() === "" && "empty-field"}`}
+                  className={`form-control custom-input ${loginErrors?.email && "is-invalid"} ${loginData.email.trim() === "" && "empty-field"}`}
                   placeholder="Username or Email"
                   onChange={handleData}
                   value={loginData.email}
@@ -531,7 +500,7 @@ const Login = () => {
               <div className="mbl-inputField">
                 <input
                   type="area"
-                  className={`form-control ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
+                  className={`form-control custom-input ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
                   placeholder="Enter Area"
                   onChange={handleData}
                   value={loginData.area}
@@ -544,7 +513,7 @@ const Login = () => {
               <div>
                 <input
                   type="password"
-                  className={`form-control ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
+                  className={`form-control custom-input ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
                   placeholder="Password"
                   onChange={handleData}
                   value={loginData.password}
@@ -643,7 +612,7 @@ const Login = () => {
                       required
                     />
                   </div>
-                  <div id='footerbtn' className="d-flex justify-content-between">
+                  <div id='footerbtn' className="d-flex justify-content-between mb-3">
                   <button type="button" className="btn btn-secondary" onClick={(e) => newPasswordClose()}>Close</button>
                     <button type="submit" className="btn btn-primary">Submit</button>
 
