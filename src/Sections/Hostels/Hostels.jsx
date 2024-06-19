@@ -55,7 +55,7 @@ const Hostels = ({ onTabSelect,activeTab }) => {
       fetchBoysHostels();
       fetchGirlsHostels();
     };
-  }, [hostels]);
+  }, [ userUid, database]);
 
   const submitHostelEdit = (e) => {
     e.preventDefault();
