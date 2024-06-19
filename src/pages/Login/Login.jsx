@@ -5,7 +5,8 @@ import { useNavigate, Link } from "react-router-dom";
 // import Modal from 'react-modal';
 import ImageOne from "../../images/Vector 1 (1).png";
 import ImageTwo from "../../images/Vector 3 (2).png";
-import Logo from "../../images/image.png";
+// import Logo from "../../images/image.png";
+import Logo from "../../images/HMLogo3.png"
 import './Login.css';
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -59,50 +60,6 @@ const Login = () => {
     setRememberMe(!rememberMe);
   }
 
-  // const [formData, setFormData] = useState({
-  //   firstname: '',
-  //   lastname: '',
-  //   email: '',
-  //   area: '',
-  //   phone: '',
-  //   password: '',
-  //   confirmpassword: '',
-  //   securityQuestion: '',
-  //   securityAnswer: '',
-  //   role: ''
-  // });
-
-
-  // useEffect(() => {
-  //   axios
-  //        .get("https://kiranreddy-58a8c-default-rtdb.firebaseio.com/register.json")
-  //     .then((response) => {
-  //       let data = Object.values(response.data);
-  //       setData(data);
-  //       console.log(data, "data response from firebase");
-  //     });
-  // }, []);
-
-  //----------------------------
-  // useEffect(() => {
-  //   const rememberedUsername = localStorage.getItem('rememberedUsername');
-  //   const rememberedPassword = localStorage.getItem('rememberedPassword');
-  //   if (rememberedUsername && rememberedPassword) {
-  //     setLoginData({ email: rememberedUsername, password: rememberedPassword });
-  //     setRememberMe(true);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   axios.get("https://kiranreddy-58a8c-default-rtdb.firebaseio.com/register.json")
-  //     .then((response) => {
-  //       let data = Object.values(response.data);
-  //       setData(data);
-  //     });
-  // }, [signup]);
-  // console.log(data,'registerdata');
-  // console.log(loginData,"loginData");
-  // const [forgotapiEndpoint,setforgotapiEndpoint]=useState([]);
 
   useEffect(() => {
     if (loginData.area && areaToApiEndpoint[loginData.area]) {
@@ -155,18 +112,18 @@ const Login = () => {
             theme: "light",
           })
           setLoginData(initialState);
-
+ 
           navigate("/mainPage");
-
+ 
           localStorage.setItem("username", singleLoginuser.firstname)
           localStorage.setItem("role", singleLoginuser.role)
           localStorage.setItem("userarea", singleLoginuser.area)
           localStorage.setItem("userUid", singleLoginuser.uid); // Store UID
-          // setUserUid(singleLoginuser.uid); // Update state with UID 
-
+          // setUserUid(singleLoginuser.uid); // Update state with UID
+ 
           window.location.reload(); // Reload the page
           // console.log(flag, "flag");
-
+ 
         } else {
           toast.error("Password Wrong, please enter correct password.", {
             position: "bottom-right",
@@ -188,9 +145,9 @@ const Login = () => {
       }
       // setLogin(false);
     }
-
-
-
+ 
+ 
+ 
     if (rememberMe) {
       localStorage.setItem('rememberedUsername', loginData.email);
       localStorage.setItem('rememberedPassword', loginData.password);
@@ -200,7 +157,7 @@ const Login = () => {
       localStorage.removeItem('rememberedPassword');
       localStorage.removeItem('rememberedArea');
     }
-
+ 
   };
 
   const validateForm = () => {
@@ -552,10 +509,10 @@ const Login = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-
+ 
     let formValid = true;
     const newErrors = {};
-
+ 
     // Sequential validation
     if (firstname.trim() === "") {
       newErrors.firstname = "required";
@@ -591,12 +548,12 @@ const Login = () => {
       newErrors.role = "Please select a role";
       formValid = false;
     }
-
+ 
     if (!formValid) {
       setSignupErrors(newErrors);
       return; // Don't proceed with submission if form is invalid
     }
-
+ 
     // Create a data object for submission without errors
     const formData = {
       firstname,
@@ -610,16 +567,16 @@ const Login = () => {
       securityAnswer,
       role: selectedRole,
     };
-
-    // const [responseData, setResponseData] = useState([]); 
-
-
-
+ 
+    // const [responseData, setResponseData] = useState([]);
+ 
+ 
+ 
     console.log(formData, 'signupdata1');
     // Proceed with form submission if all fields are filled
     const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
     console.log(areaToApiEndpoint[area.toLowerCase()]);
-
+ 
     // Proceed with form submission if all fields are filled
     axios.post(apiEndpoint, formData)
     .then(response => {
@@ -648,7 +605,7 @@ const Login = () => {
         progress: undefined,
         theme: "light",
       });
-
+ 
       // Reset form and state after successful submission
       setSignUp(false);
       // setFormData({
@@ -680,8 +637,8 @@ const Login = () => {
           }
         );
       });
-
-
+ 
+ 
   };
 
   const isPasswordValid = (password) => {
@@ -709,11 +666,11 @@ const Login = () => {
           <div className="checkpage">
              {!signup ? (login ? (
               <form onSubmit={checkData} className="input-form">
-              <h1 className="login-heading">LOGIN</h1>
+              <h1 className="login-heading mb-3">Login</h1>
               <div className="mbl-inputField">
                 <input
                   type="email"
-                  className={`form-control ${loginErrors?.email && "is-invalid"} ${loginData.email.trim() === "" && "empty-field"}`}
+                  className={`form-control custom-input ${loginErrors?.email && "is-invalid"} ${loginData.email.trim() === "" && "empty-field"}`}
                   placeholder="Username or Email"
                   onChange={handleData}
                   value={loginData.email}
@@ -726,7 +683,7 @@ const Login = () => {
               <div className="mbl-inputField">
                 <input
                   type="area"
-                  className={`form-control ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
+                  className={`form-control custom-input ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
                   placeholder="Enter Area"
                   onChange={handleData}
                   value={loginData.area}
@@ -739,7 +696,7 @@ const Login = () => {
               <div>
                 <input
                   type="password"
-                  className={`form-control ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
+                  className={`form-control custom-input ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
                   placeholder="Password"
                   onChange={handleData}
                   value={loginData.password}
@@ -851,7 +808,7 @@ const Login = () => {
                       required
                     />
                   </div>
-                  <div id='footerbtn' className="d-flex justify-content-between">
+                  <div id='footerbtn' className="d-flex justify-content-between mb-3">
                   <button type="button" className="btn btn-secondary" onClick={(e) => newPasswordClose()}>Close</button>
                     <button type="submit" className="btn btn-primary">Submit</button>
 
