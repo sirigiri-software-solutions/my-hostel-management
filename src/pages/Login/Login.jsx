@@ -12,6 +12,7 @@ import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { DataContext } from "../../ApiData/ContextProvider";
 
+
 export const loginContext = createContext();
 
 const Login = () => {
@@ -111,7 +112,9 @@ const Login = () => {
             progress: undefined,
             theme: "light",
           })
-          setLoginData(initialState);
+          setLoginData({
+            Id: "", email: "", area: "", password: ""
+          });
  
           navigate("/mainPage");
  
@@ -719,6 +722,7 @@ const Login = () => {
                 <div className="forgotbtndiv">
                   <span className="forgotText" onClick={handleSwitch}>Forgot password</span>
                 </div>
+               
               </div>
             </form>):
             isForget ? (

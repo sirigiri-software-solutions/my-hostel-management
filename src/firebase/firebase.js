@@ -25,11 +25,10 @@
 
 // src/firebase-config.js
 
-
+// working firebase config for different locations
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, push } from "firebase/database";
 import { getStorage } from "firebase/storage";
-import { useEffect, useState } from "react";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAOHosh74ErvJ-NyySUluijsTv2ZvdC4SU",
@@ -78,4 +77,6 @@ const { database, storage } = initializeFirebase();
 
 console.log("finaldatabase", database)
 
-export { database, storage, push, ref };
+export { initializeFirebase,database, storage, push, ref };
+
+
