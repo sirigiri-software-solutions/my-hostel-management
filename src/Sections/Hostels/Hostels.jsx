@@ -9,14 +9,13 @@ import { useTranslation } from 'react-i18next';
 import RoomsIcon from '../../images/Icons (2).png';
 import Table from '../../Elements/Table';
 
-const Hostels = ({ onTabSelect,activeTab }) => {
+const Hostels = ({ onTabSelect, activeTab }) => {
   const { t } = useTranslation();
   const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, setActiveBoysHostelButtons, userUid } = useData();
   const [isEditing, setIsEditing] = useState(null);
   const [hostels, setHostels] = useState({ boys: [], girls: [] });
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
   const [hostelToDelete, setHostelToDelete] = useState(null);
-  // const [activeTab, setActiveTab] = useState('mens');
 
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
@@ -30,7 +29,6 @@ const Hostels = ({ onTabSelect,activeTab }) => {
           name: data[key].name,
           address: data[key].address,
         }));
-        console.log(formattedData,"EntireBoysHostelData")
         setHostels(prev => ({ ...prev, boys: formattedData }));
       } else {
         setHostels(prev => ({ ...prev, boys: [] }));
@@ -101,7 +99,7 @@ const Hostels = ({ onTabSelect,activeTab }) => {
   };
 
   const deleteHostel = (id) => {
-    const isBoys = activeTab === 'mens';
+    const isBoys = activeTab === 'boys';
     setIsDeleteConfirmationOpen(true);
     setHostelToDelete({ isBoys, id });
   };
@@ -166,17 +164,13 @@ const Hostels = ({ onTabSelect,activeTab }) => {
   }));
 
   const handleTabSelect = (tab) => {
-    // setActiveTab(tab);
     onTabSelect(tab);
-};
-
+  };
 
   return (
     <div className='container'>
       <Tabs activeKey={activeTab} onSelect={handleTabSelect} className=" mb-3 tabs-nav">
         <Tab eventKey="boys" title={t('dashboard.mens')}>
-          {/* <div className="hostels-container"> */}
-          {/* <div className="hostel-section"> */}
           <div className=" row d-flex flex-wrap align-items-center justify-content-between">
             <div className="col-12  col-md-4 d-flex  align-items-center mr-5 mb-2">
               <div className='roomlogo-container'>
@@ -192,11 +186,9 @@ const Hostels = ({ onTabSelect,activeTab }) => {
               onClickTentantRow={(row) => console.log(row)}
             />
           </div>
-
-
         </Tab>
         <Tab eventKey="girls" title={t('dashboard.womens')}>
-        <div className=" row d-flex flex-wrap align-items-center justify-content-between">
+          <div className=" row d-flex flex-wrap align-items-center justify-content-between">
             <div className="col-12  col-md-4 d-flex  align-items-center mr-5 mb-2">
               <div className='roomlogo-container'>
                 <img src={RoomsIcon} alt="RoomsIcon" className='roomlogo' />
@@ -250,7 +242,7 @@ const Hostels = ({ onTabSelect,activeTab }) => {
         <Modal.Header closeButton>
           <Modal.Title>{t("hostels.confirmDelete")}</Modal.Title>
         </Modal.Header>
-        <Modal.Body>{t("hostels.deleteMessage")}</Modal.Body>
+        <Modal.Body>{t("hostels.confirmMsg")}</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={cancelDeleteHostel}>
             {t("hostels.cancel")}
@@ -265,3 +257,4 @@ const Hostels = ({ onTabSelect,activeTab }) => {
 };
 
 export default Hostels;
+
