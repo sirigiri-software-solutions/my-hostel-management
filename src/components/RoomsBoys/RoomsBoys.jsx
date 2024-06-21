@@ -14,15 +14,17 @@ import { useData } from '../../ApiData/ContextProvider';
 import { useTranslation } from 'react-i18next';
 
 const RoomsBoys = () => {
-  const { t }=useTranslation();
-  const  role = localStorage.getItem('role');
+
+  const { t } = useTranslation();
+  const role = localStorage.getItem('role');
   let adminRole = "";
-  if(role === "admin"){
+  if (role === "admin") {
     adminRole = "Admin";
-  }else if(role === "subAdmin"){
+  } else if (role === "subAdmin") {
     adminRole = "Sub-admin"
   }
-  const { activeBoysHostel , userArea, userUid} = useData();
+
+  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons } = useData();
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
@@ -255,12 +257,23 @@ const RoomsBoys = () => {
   };
 
   const handleAddNew = () => {
-    // Reset any previous data
-    resetForm();
-    // Set modal for a new entry
-    setIsEditing(false);
-    // Open the modal
-    setShowModal(true);
+    if (activeBoysHostelButtons.length == 0) {
+      toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
+      resetForm();
+      setIsEditing(false);
+      setShowModal(true);
+    }
+
+
   };
 
   const closePopupModal = () => {
@@ -311,10 +324,10 @@ const RoomsBoys = () => {
     t('roomsPage.Floor'),
     t('roomsPage.No.of Beds'),
     t('roomsPage.Bed Rent'),
-    t('roomsPage.Created By'),
+    // t('roomsPage.Created By'),
     t('roomsPage.Last Updated Date'),
     t('roomsPage.Edit')
-    
+
   ]
 
 
@@ -374,106 +387,106 @@ const RoomsBoys = () => {
     const { name } = e.target;
     setErrors((prevErrors) => ({
       ...prevErrors,
-      [name]: '',  
+      [name]: '',
     }));
   };
 
   return (
     <div className='h-100'>
       <>
-      <div className="row d-flex flex-wrap align-items-center justify-content-between">
-        <div className="col-12 col-md-4 d-flex  align-items-center mr-5 mb-2">
-          <div className='roomlogo-container'>
-            <img src={RoomsIcon} alt="RoomsIcon" className='roomlogo' />
-          </div>
-          <h1 className='management-heading'>{t('roomsPage.RoomsManagement')}</h1>
-        </div>
-        <div className="col-6 col-md-4  search-wrapper">
-          <input type="text" placeholder={t('common.search')} className='search-input' onChange={handleChange} value={searchTerm} />
-          <img src={SearchIcon} alt="search-icon" className='search-icon' />
-        </div>
-        <div className="col-6 col-md-4 d-flex justify-content-end">
-          <button id="roomPageAddBtn" type="button" className="add-button" onClick={handleAddNew}>
-          {t('dashboard.addRooms')}
-            </button>
-        </div>
-      </div>
-      <div>
-        <Table columns={columns} rows={filteredRows} />
-      </div>
-      <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalRoomsBoys" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal}>
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="exampleModalLabel">{t('roomsPage.CreateRoom')}</h1>
-              <button onClick={closePopupModal} className="btn-close" aria-label="Close"></button>
+        <div className="row d-flex flex-wrap align-items-center justify-content-between">
+          <div className="col-12 col-md-4 d-flex  align-items-center mr-5 mb-2">
+            <div className='roomlogo-container'>
+              <img src={RoomsIcon} alt="RoomsIcon" className='roomlogo' />
             </div>
-            <div className="modal-body">
-              <div className="container-fluid">
-                <form className="row g-3" onSubmit={handleSubmit}>
-                  <div className="col-md-6">
-                    <label htmlFor="inputNumber" className="form-label">{t('roomsPage.floorNumber')}</label>
-                    <input type="text" className="form-control" id="inputNumber" name="floorNumber" value={floorNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
-                    {/* {formErrors.number && <div className="text-danger">{formErrors.number}</div>} */}
-                    {errors.floorNumber && <div style={{ color: 'red' }}>{errors.floorNumber}</div>}
-                  </div>
-                  <div className="col-md-6">
-                    <label htmlFor="inputRent" className="form-label">{t('roomsPage.roomNumber')}</label>
-                    <input type="text" className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
-                    {/* {formErrors.rent && <div className="text-danger">{formErrors.rent}</div>} */}
-                    {errors.roomNumber && <div style={{ color: 'red' }}>{errors.roomNumber}</div>}
-                  </div>
-                  <div className="col-md-6">
-                    <label htmlFor="inputRooms" className="form-label">{t('roomsPage.numberOfBeds')}</label>
-                    <input type="text" className="form-control" id="inputRooms" name="numberOfBeds" value={numberOfBeds} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
-                    {/* {formErrors.rooms && <div className="text-danger">{formErrors.rooms}</div>} */}
-                    {errors.numberOfBeds && <div style={{ color: 'red' }}>{errors.numberOfBeds}</div>}
-                  </div>
-                  <div className="col-md-6">
-                    <label htmlFor="inputStatus" className="form-label">{t('roomsPage.bedRent')}</label>
-                    <input type="text" className="form-control" id="inputStatus" name="bedRent" value={bedRent} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
-                    {/* {formErrors.status && <div className="text-danger">{formErrors.status}</div>} */}
-                    {errors.bedRent && <div style={{ color: 'red' }}>{errors.bedRent}</div>}
-                  </div>
-                  <div className="col-md-6">
-                    <label htmlFor="inputRole" className="form-label">{t('roomsPage.createdBy')}</label>
+            <h1 className='management-heading'>{t('roomsPage.RoomsManagement')}</h1>
+          </div>
+          <div className="col-6 col-md-4  search-wrapper">
+            <input type="text" placeholder={t('common.search')} className='search-input' onChange={handleChange} value={searchTerm} />
+            <img src={SearchIcon} alt="search-icon" className='search-icon' />
+          </div>
+          <div className="col-6 col-md-4 d-flex justify-content-end">
+            <button id="roomPageAddBtn" type="button" className="add-button" onClick={handleAddNew}>
+              {t('dashboard.addRooms')}
+            </button>
+          </div>
+        </div>
+        <div>
+          <Table columns={columns} rows={filteredRows} />
+        </div>
+        <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalRoomsBoys" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5" id="exampleModalLabel">{t('roomsPage.CreateRoom')}</h1>
+                <button onClick={closePopupModal} className="btn-close" aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <div className="container-fluid">
+                  <form className="row g-3" onSubmit={handleSubmit}>
+                    <div className="col-md-6">
+                      <label htmlFor="inputNumber" className="form-label">{t('roomsPage.floorNumber')}</label>
+                      <input type="text" className="form-control" id="inputNumber" name="floorNumber" value={floorNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+                      {/* {formErrors.number && <div className="text-danger">{formErrors.number}</div>} */}
+                      {errors.floorNumber && <div style={{ color: 'red' }}>{errors.floorNumber}</div>}
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="inputRent" className="form-label">{t('roomsPage.roomNumber')}</label>
+                      <input type="text" className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+                      {/* {formErrors.rent && <div className="text-danger">{formErrors.rent}</div>} */}
+                      {errors.roomNumber && <div style={{ color: 'red' }}>{errors.roomNumber}</div>}
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="inputRooms" className="form-label">{t('roomsPage.numberOfBeds')}</label>
+                      <input type="text" className="form-control" id="inputRooms" name="numberOfBeds" value={numberOfBeds} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+                      {/* {formErrors.rooms && <div className="text-danger">{formErrors.rooms}</div>} */}
+                      {errors.numberOfBeds && <div style={{ color: 'red' }}>{errors.numberOfBeds}</div>}
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="inputStatus" className="form-label">{t('roomsPage.bedRent')}</label>
+                      <input type="text" className="form-control" id="inputStatus" name="bedRent" value={bedRent} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+                      {/* {formErrors.status && <div className="text-danger">{formErrors.status}</div>} */}
+                      {errors.bedRent && <div style={{ color: 'red' }}>{errors.bedRent}</div>}
+                    </div>
+                    {/* <div className="col-md-6"> */}
+                    {/* <label htmlFor="inputRole" className="form-label">{t('roomsPage.createdBy')}</label> */}
                     {/* <select disabled={isUneditable} className="form-select" id="inputRole" name="role" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}>
 
                       <option value="Admin">{t('dashboard.admin')}</option>
                       <option value="Sub-admin">{t('dashboard.subAdmin')}</option>
                     </select> */}
-                    <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}/>
+                    {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}/> */}
                     {/* {formErrors.role && <div className="text-danger">{formErrors.role}</div>} */}
-                  </div>
-                  <div className="col-12 text-center">
-                    {isEditing ? (
-                      <div className="roomsEditBtnsContainer">
-                      <button type="button"  className="btn btn-warning roomUpdateBtn" onClick={handleSubmit}>{t('roomsPage.Update Room')}</button>
-                      {role === "admin" ? <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button> : null}
-                      </div>
-                    ) : (
-                      <button type="submit" className="btn btn-warning" >{t('roomsPage.CreateRoom')}</button>
-                    )}
-                    {/* <button type="submit" className="btn btn-warning">Create Room</button> */}
-                  </div>
-                </form>
+                    {/* </div> */}
+                    <div className="col-12 text-center">
+                      {isEditing ? (
+                        <div className="roomsEditBtnsContainer">
+                          <button type="button" className="btn btn-warning roomUpdateBtn" onClick={handleSubmit}>{t('roomsPage.Update Room')}</button>
+                          {role === "admin" ? <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button> : null}
+                        </div>
+                      ) : (
+                        <button type="submit" className="btn btn-warning" >{t('roomsPage.CreateRoom')}</button>
+                      )}
+                      {/* <button type="submit" className="btn btn-warning">Create Room</button> */}
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      {showConfirmationPopUp && (
-         <div className="confirmation-dialog">
-         <div className='confirmation-card'>
-         <p style={{paddingBottom:'0px',marginBottom:'7px'}}>{t('roomsPage.Are you sure you want to delete the room with number')} <span style={{color:'red'}}>{roomNumber}</span> ?</p>
-         <p style={{fontSize:'15px',color:'red',textAlign:'center',paddingTop:'0px'}}>{t('roomsPage.Once you delete the room it will not be restored')}</p>
-         <div className="buttons">
-           <button onClick={confirmDeleteYes} >{t('roomsPage.Yes')}</button>
-           <button onClick={confirmDeleteNo} >{t('roomsPage.No')}</button>
-         </div>
-         </div>
-       </div>
-      )}
+        {showConfirmationPopUp && (
+          <div className="confirmation-dialog">
+            <div className='confirmation-card'>
+              <p style={{ paddingBottom: '0px', marginBottom: '7px' }}>{t('roomsPage.Are you sure you want to delete the room with number')} <span style={{ color: 'red' }}>{roomNumber}</span> ?</p>
+              <p style={{ fontSize: '15px', color: 'red', textAlign: 'center', paddingTop: '0px' }}>{t('roomsPage.Once you delete the room it will not be restored')}</p>
+              <div className="buttons">
+                <button onClick={confirmDeleteYes} >{t('roomsPage.Yes')}</button>
+                <button onClick={confirmDeleteNo} >{t('roomsPage.No')}</button>
+              </div>
+            </div>
+          </div>
+        )}
       </>
     </div>
   )

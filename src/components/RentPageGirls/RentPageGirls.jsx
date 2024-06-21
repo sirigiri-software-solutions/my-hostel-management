@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 const RentPageGirls = () => {
   const { t } = useTranslation();
   const { data } = useContext(DataContext);
-  const { activeGirlsHostel, userUid } = useData();
+  const { activeGirlsHostel, userUid , activeGirlsHostelButtons} = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [tenants, setTenants] = useState([]);
   const [rooms, setRooms] = useState({});
@@ -382,12 +382,21 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   //===> For Clear Form for Add Rents
   const handleAddNew = () => {
-    // Reset any previous data
+    if (activeGirlsHostelButtons.length == 0) {
+      toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
     resetForm();
-    // Set modal for a new entry
     setIsEditing(false);
-    // Open the modal
     setShowModal(true);
+    }
   };
   const resetForm = () => {
     setSelectedTenant('');
