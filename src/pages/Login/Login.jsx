@@ -964,9 +964,9 @@ const Login = () => {
                   />
                   {signupErrors.securityAnswer && <div className="form-error-msg">{signupErrors.securityAnswer}</div>}
                 </div>
-                <div className="form-group col-md-12">
+                {/* <div className="form-group col-md-12"> */}
                   {/* <label className="loginText">Register As:</label> */}
-                  <div className="confirmationContainer ">
+                  {/* <div className="confirmationContainer ">
                     <div className="form-check form-check-inline d-flex">
                       <input
                         name="role"
@@ -997,9 +997,9 @@ const Login = () => {
                         Subadmin
                       </label>
                     </div>
-                  </div>
+                  </div> */}
                   {/* {signupErrors.role && <div className="text-danger">{signupErrors.role}</div>} */}
-                </div>
+                {/* </div> */}
                 <div className="form-group col-md-12">
                   {/* <input type="submit" className="btn btn-primary rounded-pill" value="Sign up" /> */}
                   <input type="submit" id='submit' className="btn btn-primary rounded-pill" value="Sign up" />

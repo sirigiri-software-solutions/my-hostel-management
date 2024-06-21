@@ -322,7 +322,7 @@ const SignUp = () => {
             {errors.securityAnswer && <div className="text-danger">{errors.securityAnswer}</div>}
           </div>
           <div className="form-group col-md-12">
-            {/* <label className="loginText">Register As:</label> */}
+     
             <div className="confirmationContainer">
               <div className="form-check form-check-inline">
                 <input

@@ -23,7 +23,7 @@ const ExpensesBoys = () => {
   }
 
   const isUneditable = role === 'admin' || role === 'subAdmin';
-  const { activeBoysHostel,userUid } = useData();
+  const { activeBoysHostel,userUid, activeBoysHostelButtons } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [initialRows, setInitialRows] = useState([]);
   const [expenses, setExpenses] = useState([]);
@@ -197,7 +197,7 @@ const ExpensesBoys = () => {
     t('expensesPage.sNo'),
     t('expensesPage.expenseName'),
     t('expensesPage.expenseAmount'),
-    t('expensesPage.createdBy'),
+    // t('expensesPage.createdBy'),
     t('expensesPage.date'),
     t('expensesPage.actions')
   ];
@@ -376,6 +376,17 @@ const ExpensesBoys = () => {
 
 
   const handleAddNew = () => {
+    if (activeBoysHostelButtons.length == 0) {
+      toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
     setShowModal(true);
     setFormData({
       expenseName: '',
@@ -389,6 +400,7 @@ const ExpensesBoys = () => {
       expenseDate: ''
     });
     setEditingExpense(null);
+  }
   };
 
 
