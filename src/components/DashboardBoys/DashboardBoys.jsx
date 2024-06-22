@@ -94,10 +94,6 @@ const DashboardBoys = () => {
   const [bikeImageField, setBikeImageField] = useState('');
   const [bikeRcImage, setBikeRcImage] = useState('');
   const [bikeRcImageField, setBikeRcImageField] = useState('');
-
-  console.log(database, "ddd database ")
-
-
   const handleImageChange = (e) => {
     const file = e.target.files[0];
 
@@ -719,8 +715,6 @@ const DashboardBoys = () => {
 
   };
 
-
-
   const [bedNumber, setBedNumber] = useState('');
   const [totalFee, setTotalFee] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
@@ -1018,9 +1012,22 @@ const DashboardBoys = () => {
   const Buttons = ['Add Rooms', 'Add Tenants', 'Add Rent', 'Add Expenses'];
 
   const handleClick = (text) => {
-    setModelText(text);
-    setFormLayout(text);
-    setShowModal(true);
+    if (activeBoysHostelButtons.length == 0) {
+      toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
+      setModelText(text);
+      setFormLayout(text);
+      setShowModal(true);
+    }
+
   };
 
   const handleCloseModal = () => {
@@ -1198,14 +1205,14 @@ const DashboardBoys = () => {
               <input type="text" className="form-control" id="inputStatus" name="bedRent" value={bedRent} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
               {errors.bedRent && <div style={{ color: 'red' }}>{errors.bedRent}</div>}
             </div>
-            <div className="col-md-6">
-              <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label>
+            {/* <div className="col-md-6"> */}
+              {/* <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label> */}
               {/* <select className="form-select" id="inputRole" name="role" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}>
                 <option value="admin">{t('dashboard.admin')}</option>
                 <option value="sub-admin">{t('dashboard.subAdmin')}</option>
               </select> */}
-              <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} />
-            </div>
+              {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} /> */}
+            {/* </div> */}
             <div className="col-12 text-center">
               <button type="submit" className="btn btn-warning" onClick={handleBoysRoomsSubmit}>{t('dashboard.createRoom')}</button>
             </div>
@@ -1627,14 +1634,14 @@ const DashboardBoys = () => {
               <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onChange={handleInputChange} onFocus={handleExpensesFocus} />
               {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
             </div>
-            <div className="col-md-6">
-              <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label>
+            {/* <div className="col-md-6"> */}
+              {/* <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label> */}
               {/* <select className="form-select" id="inputRole" name="createdBy" value={formData.createdBy} onChange={handleInputChange}>
                 <option value="admin">{t('dashboard.admin')}</option>
                 <option value="sub-admin">{t('dashboard.subAdmin')}</option>
               </select> */}
-              <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} />
-            </div>
+              {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} /> */}
+            {/* </div> */}
             <div className="col-md-6">
               <label htmlFor="inputDate" className="form-label">{t('dashboard.expenseDate')}</label>
               <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
@@ -1856,6 +1863,7 @@ const DashboardBoys = () => {
           </Modal>
         </div>
       }
+
 
     </div>
 

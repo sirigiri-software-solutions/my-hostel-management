@@ -21,7 +21,7 @@ import { faCamera } from '@fortawesome/free-solid-svg-icons';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid } = useData();
+  const { activeBoysHostel, userUid , activeBoysHostelButtons} = useData();
   const role = localStorage.getItem('role');
 
 
@@ -548,16 +548,25 @@ const TenantsBoys = () => {
 
 
   const handleAddNew = () => {
-    // Reset any previous data
+    if (activeBoysHostelButtons.length == 0) {
+      toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
+
     resetForm();
-    // Set modal for a new entry
     setIsEditing(false);
-    // Open the modal
     setShowModal(true);
     setUserDetailsTenantsPopup(false);
     setTenantIdUrl('')
     setHasBike(false);
-
+    }
   };
 
   const resetForm = () => {

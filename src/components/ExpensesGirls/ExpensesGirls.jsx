@@ -10,12 +10,11 @@ import { remove, update, set } from 'firebase/database';
 import { toast } from "react-toastify";
 import './ExpensesGirls.css';
 import { useTranslation } from 'react-i18next';
-
 import { useData } from '../../ApiData/ContextProvider';
 
 const ExpensesGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel , userUid} = useData();
+  const { activeGirlsHostel , userUid, activeGirlsHostelButtons} = useData();
 
   const  role = localStorage.getItem('role');
   let adminRole = "";
@@ -204,7 +203,7 @@ window.addEventListener('keydown',handleOutsideClick);
     t('expensesPage.sNo'),
     t('expensesPage.expenseName'),
     t('expensesPage.expenseAmount'),
-    t('expensesPage.createdBy'),
+    // t('expensesPage.createdBy'),
     t('expensesPage.date'),
     t('expensesPage.actions')
   ];
@@ -385,6 +384,17 @@ window.addEventListener('keydown',handleOutsideClick);
   });
 
   const handleAddNew = () => {
+    if (activeGirlsHostelButtons.length == 0) {
+      toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
     setShowModal(true);
     setFormData({
       expenseName: '',
@@ -398,6 +408,7 @@ window.addEventListener('keydown',handleOutsideClick);
       expenseDate: ''
     });
     setEditingExpense(null);
+  }
   };
 
 

@@ -18,7 +18,7 @@ import { useData } from '../../ApiData/ContextProvider';
 const RentPageBoys = () => {
   const { t } = useTranslation();
   const { data } = useContext(DataContext);
-  const { activeBoysHostel, userUid } = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [tenants, setTenants] = useState([]);
   const [rooms, setRooms] = useState({});
@@ -377,12 +377,24 @@ Please note that you made your last payment on ${paidDate}.\n`
   };
   //===> For Clear Form for Add Rents
   const handleAddNew = () => {
+    if (activeBoysHostelButtons.length == 0) {
+      toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
     // Reset any previous data
     resetForm();
     // Set modal for a new entry
     setIsEditing(false);
     // Open the modal
     setShowModal(true);
+    }
   };
 
   const resetForm = () => {

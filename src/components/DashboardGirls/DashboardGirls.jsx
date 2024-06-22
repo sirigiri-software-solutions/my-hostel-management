@@ -26,15 +26,15 @@ import { faCamera } from '@fortawesome/free-solid-svg-icons';
 const DashboardGirls = () => {
   const { t } = useTranslation();
 
-   // created by admin or subAdmin 
-   const  role = localStorage.getItem('role');
-   let adminRole = "";
-   if(role === "admin"){
-     adminRole = "Admin";
-   }else if(role === "subAdmin"){
-     adminRole = "Sub-admin"
-   }
-   const isUneditable = role === 'admin' || role === 'subAdmin';
+  // created by admin or subAdmin 
+  const role = localStorage.getItem('role');
+  let adminRole = "";
+  if (role === "admin") {
+    adminRole = "Admin";
+  } else if (role === "subAdmin") {
+    adminRole = "Sub-admin"
+  }
+  const isUneditable = role === 'admin' || role === 'subAdmin';
 
 
   const { activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, userUid } = useData();
@@ -86,7 +86,7 @@ const DashboardGirls = () => {
   const [selectedTenant, setSelectedTenant] = useState('');
   const [notify, setNotify] = useState(false);
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
-  const [totalTenantsData,setTotalTenantData] = useState({});
+  const [totalTenantsData, setTotalTenantData] = useState({});
   const [permnentAddress, setPermnentAddress] = useState("");
   const [bikeImage, setBikeImage] = useState(null);
   const [bikeImageField, setBikeImageField] = useState('');
@@ -124,7 +124,7 @@ const DashboardGirls = () => {
 
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
     onValue(tenantsRef, (snapshot) => {
       const data = snapshot.val();
@@ -134,25 +134,25 @@ const DashboardGirls = () => {
       })) : [];
       setTotalTenantData(loadedTenants)
     })
-   
-    
-  },[selectedTenant])
+
+
+  }, [selectedTenant])
 
   const sendMessage = (tenant, rentRecord) => {
 
-    console.log(tenant,"sendMessages")
-    console.log(tenant,"sendMessages")
+    console.log(tenant, "sendMessages")
+    console.log(tenant, "sendMessages")
 
 
     const totalFee = rentRecord.totalFee;
     const tenantName = tenant.name;
-  const amount = rentRecord.due;
-  const dateOfJoin = tenant.dateOfJoin;
-  const dueDate = rentRecord.dueDate;
-  const paidAmount = rentRecord.paidAmount;
-  const paidDate = rentRecord.paidDate;
+    const amount = rentRecord.due;
+    const dateOfJoin = tenant.dateOfJoin;
+    const dueDate = rentRecord.dueDate;
+    const paidAmount = rentRecord.paidAmount;
+    const paidDate = rentRecord.paidDate;
 
-  const message = `Hi ${tenantName},\n
+    const message = `Hi ${tenantName},\n
 Hope you are doing fine.\n
 Your total fee is ${totalFee}.\n
 You have paid ${paidAmount} so far.\n
@@ -180,7 +180,7 @@ Please note that you made your last payment on ${paidDate}.\n`
   const handleNotifyCheckbox = (rentData) => {
     // Toggle the state of the notify checkbox
 
-    console.log(notify,notifyUserInfo,"addedToNotify")
+    console.log(notify, notifyUserInfo, "addedToNotify")
     if (notify && notifyUserInfo) {
       // const { tenant, rentRecord } = notifyUserInfo;
       // console.log(tenant, "InNotify")
@@ -315,13 +315,13 @@ Please note that you made your last payment on ${paidDate}.\n`
   };
   useEffect(() => {
     const handleOutsideClick = (event) => {
-        if (showModal && (event.target.id === "exampleModalRoomsGirls" || event.key === "Escape")) {
-            setShowModal(false);
-            setHasBike(false);
-            setBikeNumber('NA');
-            handleCloseModal();
-        }
-       
+      if (showModal && (event.target.id === "exampleModalRoomsGirls" || event.key === "Escape")) {
+        setShowModal(false);
+        setHasBike(false);
+        setBikeNumber('NA');
+        handleCloseModal();
+      }
+
     };
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener('keydown', handleOutsideClick)
@@ -371,12 +371,12 @@ Please note that you made your last payment on ${paidDate}.\n`
     const newErrors = {};
     // Validation checks
     if (!floorNumber.trim()) newErrors.floorNumber = t('errors.floorNumberRequired');
-    if (!roomNumber.trim()) newErrors.roomNumber =  t('errors.roomNumberRequired');
+    if (!roomNumber.trim()) newErrors.roomNumber = t('errors.roomNumberRequired');
     else if (rooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
-      newErrors.roomNumber = t('errors.roomNumberExists') ;
+      newErrors.roomNumber = t('errors.roomNumberExists');
     }
-    if (!numberOfBeds) newErrors.numberOfBeds = t('errors.numberOfBedsRequired') ;
-    if (!bedRent) newErrors.bedRent =t('errors.bedRentRequired');
+    if (!numberOfBeds) newErrors.numberOfBeds = t('errors.numberOfBedsRequired');
+    if (!bedRent) newErrors.bedRent = t('errors.bedRentRequired');
 
     // Check if there are any errors
     if (Object.keys(newErrors).length > 0) {
@@ -622,7 +622,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
       // tenantIdUrl,
     };
-    console.log(tenantData,"dashtenant");
+    console.log(tenantData, "dashtenant");
 
     if (isEditing) {
       await update(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${currentTenantId}`), tenantData).then(() => {
@@ -680,7 +680,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   //handle add rent==============================================
 
- 
+
   const [bedNumber, setBedNumber] = useState('');
   const [totalFee, setTotalFee] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
@@ -964,7 +964,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     {
       image: Beds,
       heading: t('dashboard.totalBeds'),
-      number: `${totalBeds}/${totalBeds-tenants.length}`,
+      number: `${totalBeds}/${totalBeds - tenants.length}`,
       btntext: t('dashboard.addRent'),
     },
     {
@@ -974,13 +974,26 @@ Please note that you made your last payment on ${paidDate}.\n`
       btntext: t('dashboard.addExpenses'),
     },
   ];
-  
+
   const Buttons = ['Add Rooms', 'Add Tenants', 'Add Rent', 'Add Expenses'];
 
   const handleClick = (text) => {
-    setModelText(text);
-    setFormLayout(text);
-    setShowModal(true);
+    if (activeGirlsHostelButtons.length == 0) {
+      toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
+      setModelText(text);
+      setFormLayout(text);
+      setShowModal(true);
+    }
+
   };
 
   const handleCloseModal = () => {
@@ -1013,13 +1026,13 @@ Please note that you made your last payment on ${paidDate}.\n`
 
 
     if (!formData.expenseAmount.match(/^\d+(\.\d{1,2})?$/)) {
-      errors.expenseAmount =t('errors.expenseAmountValidNumber');
+      errors.expenseAmount = t('errors.expenseAmountValidNumber');
       formIsValid = false;
     }
 
 
     if (!formData.expenseName) {
-      errors.expenseName =  t('errors.expenseNameRequired');
+      errors.expenseName = t('errors.expenseNameRequired');
       formIsValid = false;
     }
 
@@ -1029,7 +1042,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     }
 
     if (!formData.expenseDate) {
-      errors.expenseDate =t('errors.expenseDateRequired');
+      errors.expenseDate = t('errors.expenseDateRequired');
       formIsValid = false;
     }
 
@@ -1101,19 +1114,19 @@ Please note that you made your last payment on ${paidDate}.\n`
   const onClickCheckbox = () => {
     setNotify(!notify)
     const singleTenant = totalTenantsData.filter(tenant =>
-      tenant.id === selectedTenant 
+      tenant.id === selectedTenant
     );
     const singleTenantData = singleTenant[0];
-    console.log(singleTenantData,"addedToNotify")
+    console.log(singleTenantData, "addedToNotify")
     setNotifyUserInfo(singleTenantData)
-    
+
   }
 
   const handleFocus = (e) => {
     const { name } = e.target;
     setErrors((prevErrors) => ({
       ...prevErrors,
-      [name]: '',  
+      [name]: '',
     }));
   };
 
@@ -1132,8 +1145,8 @@ Please note that you made your last payment on ${paidDate}.\n`
       [fieldName]: ''
     }));
   };
-  
- 
+
+
   const renderFormLayout = () => {
     switch (formLayout) {
       case t('dashboard.addRooms'):
@@ -1160,15 +1173,15 @@ Please note that you made your last payment on ${paidDate}.\n`
               <input type="text" className="form-control" id="inputStatus" name="bedRent" value={bedRent} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
               {errors.bedRent && <div style={{ color: 'red' }}>{errors.bedRent}</div>}
             </div>
-            <div className="col-md-6">
-              <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label>
+            {/* <div className="col-md-6"> */}
+              {/* <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label> */}
               {/* <select className="form-select" id="inputRole" name="role" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}>
 
                 <option value="admin">{t('dashboard.admin')}</option>
                 <option value="sub-admin">{t('dashboard.subAdmin')}</option>
               </select> */}
-              <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} />
-            </div>
+              {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} /> */}
+            {/* </div> */}
             <div className="col-12 text-center">
               <button type="submit" className="btn btn-warning" onClick={handleGirlsRoomsSubmit}>{t('dashboard.createRoom')}</button>
             </div>
@@ -1263,11 +1276,11 @@ Please note that you made your last payment on ${paidDate}.\n`
                         id="notifyCheckbox"
                         className="form-check-input"
                         type="checkbox"
-                      checked={notify}
-                      onChange={onClickCheckbox} // Toggle the state on change
+                        checked={notify}
+                        onChange={onClickCheckbox} // Toggle the state on change
                       />
                       <label className="form-check-label" htmlFor="notifyCheckbox">
-                      {t('dashboard.notify')}
+                        {t('dashboard.notify')}
                       </label>
                       <FaWhatsapp style={{ backgroundColor: 'green', color: 'white', marginLeft: '7px', marginBottom: '4px' }} />
                     </div>
@@ -1356,16 +1369,16 @@ Please note that you made your last payment on ${paidDate}.\n`
                         id="notifyCheckbox"
                         className="form-check-input"
                         type="checkbox"
-                      checked={notify}
-                      onChange={onClickCheckbox} // Toggle the state on change
+                        checked={notify}
+                        onChange={onClickCheckbox} // Toggle the state on change
                       />
                       <label className="form-check-label" htmlFor="notifyCheckbox">
-                      {t('dashboard.notify')}
+                        {t('dashboard.notify')}
                       </label>
                       <FaWhatsapp style={{ backgroundColor: 'green', color: 'white', marginLeft: '7px', marginBottom: '4px' }} />
                     </div>
                   </div>
-                  
+
                   <div class="col-12 text-center mt-2">
                     <button type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
                   </div>
@@ -1374,90 +1387,91 @@ Please note that you made your last payment on ${paidDate}.\n`
             }
           </div>
         )
-        case t('dashboard.addTenants'):
-          return (
-            <form class="row lg-10" onSubmit={handleTenantSubmit}>
-              <div class="col-md-6">
-                <label htmlFor='roomNo' class="form-label">{t('dashboard.roomNo')}</label>
-                <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedBed" onFocus={handleTenantFocus}>
-                  <option value="">{t('dashboard.selectRoom')}</option>
-                  {girlsRooms.map((room) => (
-                    <option key={room.roomNumber} value={room.roomNumber}>
-                      {room.roomNumber}
-                    </option>
-                  ))}
-                </select>
-                {tenatErrors.selectedRoom && <p style={{ color: 'red' }}>{tenatErrors.selectedRoom}</p>}
-              </div>
-   
-              <div class="col-md-6">
-                <label htmlFor='bedNo' class="form-label">
+      case t('dashboard.addTenants'):
+        return (
+          <form class="row lg-10" onSubmit={handleTenantSubmit}>
+            <div class="col-md-6">
+              <label htmlFor='roomNo' class="form-label">{t('dashboard.roomNo')}</label>
+              <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedBed" onFocus={handleTenantFocus}>
+                <option value="">{t('dashboard.selectRoom')}</option>
+                {girlsRooms.map((room) => (
+                  <option key={room.roomNumber} value={room.roomNumber}>
+                    {room.roomNumber}
+                  </option>
+                ))}
+              </select>
+              {tenatErrors.selectedRoom && <p style={{ color: 'red' }}>{tenatErrors.selectedRoom}</p>}
+            </div>
+
+            <div class="col-md-6">
+              <label htmlFor='bedNo' class="form-label">
                 {t('dashboard.bedNo')}
-                </label>
-                <select id="bedNo" class="form-select" value={selectedBed} onChange={(e) => setSelectedBed(e.target.value)} name="selectedBed" onFocus={handleTenantFocus}>
-                  <option value="">{t('dashboard.selectBed')}</option>
-                  {bedOptions.map(bedNumber => (
-                    <option key={bedNumber} value={bedNumber}>
-                      {bedNumber}
-                    </option>
-                  ))}
-                </select>
-   
-                {tenatErrors.selectedBed && <p style={{ color: 'red' }}>{tenatErrors.selectedBed}</p>}
-              </div>
-              <div class="col-md-6">
-                <label htmlFor='dataofJoin' class="form-label">
+              </label>
+              <select id="bedNo" class="form-select" value={selectedBed} onChange={(e) => setSelectedBed(e.target.value)} name="selectedBed" onFocus={handleTenantFocus}>
+                <option value="">{t('dashboard.selectBed')}</option>
+                {bedOptions.map(bedNumber => (
+                  <option key={bedNumber} value={bedNumber}>
+                    {bedNumber}
+                  </option>
+                ))}
+              </select>
+
+              {tenatErrors.selectedBed && <p style={{ color: 'red' }}>{tenatErrors.selectedBed}</p>}
+            </div>
+            <div class="col-md-6">
+              <label htmlFor='dataofJoin' class="form-label">
                 {t('dashboard.dateOfJoin')}
-                </label>
-                <input id="dataofJoin" class="form-control" type="date" value={dateOfJoin} onChange={(e) => setDateOfJoin(e.target.value)} name="dateOfJoin" onFocus={handleTenantFocus} />
-   
-                {tenatErrors.dateOfJoin && <p style={{ color: 'red' }}>{tenatErrors.dateOfJoin}</p>}
-              </div>
-              <div class="col-md-6">
-                <label htmlFor='tenantName' class="form-label">
+              </label>
+              <input id="dataofJoin" class="form-control" type="date" value={dateOfJoin} onChange={(e) => setDateOfJoin(e.target.value)} name="dateOfJoin" onFocus={handleTenantFocus} />
+
+              {tenatErrors.dateOfJoin && <p style={{ color: 'red' }}>{tenatErrors.dateOfJoin}</p>}
+            </div>
+            <div class="col-md-6">
+              <label htmlFor='tenantName' class="form-label">
                 {t('dashboard.name')}
-                </label>
-                <input id="tenantName" class="form-control" type="text" value={name} onChange={(e) => setName(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} name="name" onFocus={handleTenantFocus} />
-   
-                {tenatErrors.name && <p style={{ color: 'red' }}>{tenatErrors.name}</p>}
-              </div>
-              <div class="col-md-6">
-                <label htmlFor='tenantMobileNo' class="form-label">
+              </label>
+              <input id="tenantName" class="form-control" type="text" value={name} onChange={(e) => setName(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} name="name" onFocus={handleTenantFocus} />
+
+              {tenatErrors.name && <p style={{ color: 'red' }}>{tenatErrors.name}</p>}
+            </div>
+            <div class="col-md-6">
+              <label htmlFor='tenantMobileNo' class="form-label">
                 {t('dashboard.mobileNo')}
-                </label>
-                <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} name="mobileNo" onFocus={handleTenantFocus} />
-   
-                {tenatErrors.mobileNo && <p style={{ color: 'red' }}>{tenatErrors.mobileNo}</p>}
-              </div>
-              <div class="col-md-6">
-                <label htmlFor='tenantIdNum' class="form-label">
+              </label>
+              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} name="mobileNo" onFocus={handleTenantFocus} />
+
+              {tenatErrors.mobileNo && <p style={{ color: 'red' }}>{tenatErrors.mobileNo}</p>}
+            </div>
+            <div class="col-md-6">
+              <label htmlFor='tenantIdNum' class="form-label">
                 {t('dashboard.idNumber')}
-                </label>
-                <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)}  name="idNumber" onFocus={handleTenantFocus} />
-   
-                {tenatErrors.idNumber && <p style={{ color: 'red' }}>{tenatErrors.idNumber}</p>}
-              </div>
-              <div class="col-md-6">
-                <label htmlFor='tenantEmergency' class="form-label">
+              </label>
+              <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} name="idNumber" onFocus={handleTenantFocus} />
+
+              {tenatErrors.idNumber && <p style={{ color: 'red' }}>{tenatErrors.idNumber}</p>}
+            </div>
+            <div class="col-md-6">
+              <label htmlFor='tenantEmergency' class="form-label">
                 {t('dashboard.emergencyContact')}
-                </label>
-                <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)}  name="emergencyContact" onFocus={handleTenantFocus} />
-   
-                {tenatErrors.emergencyContact && <p style={{ color: 'red' }}>{tenatErrors.emergencyContact}</p>}
-              </div>
-              <div class="col-md-6">
-                <label htmlFor='tenantStatus' class="form-label">
+              </label>
+              <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} name="emergencyContact" onFocus={handleTenantFocus} />
+
+              {tenatErrors.emergencyContact && <p style={{ color: 'red' }}>{tenatErrors.emergencyContact}</p>}
+            </div>
+            <div class="col-md-6">
+              <label htmlFor='tenantStatus' class="form-label">
                 {t('dashboard.status')}
-                </label>
-                <select id="tenantStatus" class="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <option value="occupied">{t('dashboard.occupied')}</option>
-                  <option value="unoccupied">{t('dashboard.unoccupied')}</option>
-                </select>
-   
-              </div>
-              <div class="col-md-6">
-                <label htmlFor='tenantUpload' class="form-label">
+              </label>
+              <select id="tenantStatus" class="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
+                <option value="occupied">{t('dashboard.occupied')}</option>
+                <option value="unoccupied">{t('dashboard.unoccupied')}</option>
+              </select>
+
+            </div>
+            <div class="col-md-6">
+              <label htmlFor='tenantUpload' class="form-label">
                 {t('dashboard.uploadImage')}
+<<<<<<< HEAD
                 </label>
                 {isEditing && tenantImageUrl && (
                   <div>
@@ -1514,72 +1528,108 @@ Please note that you made your last payment on ${paidDate}.\n`
    
               <div className="col-12 col-sm-12 col-md-12" style={{ marginTop: '20px' }}>
                 <label className='col-sm-12 col-md-4' htmlFor="bikeCheck">{t('dashboard.doYouHaveBike')}</label>
+=======
+              </label>
+              {isEditing && tenantImageUrl && (
+                <div>
+                  <img src={tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
+                  <p>{t('dashboard.currentImage')}</p>
+                </div>
+              )}
+              <input id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} ref={imageInputRef} required />
+              {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
+            </div>
+            <div class="col-md-6">
+              <label htmlFor='tenantUploadId' class="form-label">
+                {t('dashboard.uploadId')}:
+              </label>
+              {isEditing && tenantIdUrl && (
+                <object
+                  data={tenantIdUrl}
+                  type="application/pdf"
+                  width="50%"
+                  height="200px"
+                >
+                  <a href={tenantIdUrl}>{t('dashboard.downloadPdf')}</a>
+                </object>
+              )}
+              <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef} multiple />
+
+            </div>
+            <div className='col-md-12'>
+              <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
+              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' />
+            </div>
+
+            <div className="col-12 col-sm-12 col-md-12" style={{ marginTop: '20px' }}>
+              <label className='col-sm-12 col-md-4' htmlFor="bikeCheck">{t('dashboard.doYouHaveBike')}</label>
+              <input
+                type="radio"
+                className="Radio"
+                id="bikeCheck"
+                name="bike"
+                value="yes"
+                onClick={handleCheckboxChange}
+                checked={hasBike}
+              />
+              <label htmlFor='bikeCheck' className='bike'>{t('dashboard.yes')}</label>
+              <input
+                type="radio"
+                id="bikeCheck1"
+                name="bike"
+                value="no"
+                onClick={handleCheckboxChange}
+                checked={!hasBike}
+                style={{ marginLeft: '30px' }}
+              />
+              <label htmlFor='bikeCheck1' className='bike'>{t('dashboard.no')}</label>
+            </div>
+
+            {hasBike && (
+              <div className='bikeField' style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
+                <label class="bikenumber" htmlFor="bikeNumber" >{t('dashboard.bikeNumber')}</label>
+>>>>>>> 551e7bfc2a6c822588fcce2271ddf7bbf7c7e02b
                 <input
-                  type="radio"
-                  className="Radio"
-                  id="bikeCheck"
-                  name="bike"
-                  value="yes"
-                  onClick={handleCheckboxChange}
-                  checked={hasBike}
+                  type="text"
+                  id="bikeNumber"
+
+                  className='form-control'
+                  placeholder="Enter number plate ID"
+                  value={bikeNumber}
+                  onChange={(event) => setBikeNumber(event.target.value)}
+                  style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px', marginLeft: '8px' }}
                 />
-                <label htmlFor='bikeCheck' className='bike'>{t('dashboard.yes')}</label>
-                <input
-                  type="radio"
-                  id="bikeCheck1"
-                  name="bike"
-                  value="no"
-                  onClick={handleCheckboxChange}
-                  checked={!hasBike}
-                  style={{ marginLeft: '30px' }}
-                />
-                <label htmlFor='bikeCheck1' className='bike'>{t('dashboard.no')}</label>
               </div>
-   
-             {hasBike && (
-                      <div className='bikeField' style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
-                        <label class="bikenumber" htmlFor="bikeNumber" >{t('dashboard.bikeNumber')}</label>
-                        <input
-                          type="text"
-                          id="bikeNumber"
-  
-                          className='form-control'
-                          placeholder="Enter number plate ID"
-                          value={bikeNumber}
-                          onChange={(event) => setBikeNumber(event.target.value)}
-                          style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px', marginLeft: '8px' }}
-                        />
-                      </div>
-                    )
-                  }
-   
-   
-   
-              {/* ===== */}
-              {hasBike && (
-    <>
-      <div className="col-md-6">
-        <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-        <input type="file" className="form-control" onChange={handleImageChange} />
-      </div>
-      <div className="col-md-6">
-        <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-        <input type="file" className="form-control" onChange={handleRcChange} />
-      </div>
-    </>
-  )}
-  
-   
-              {/* =============== */}
-              <div className='col-12 text-center mt-3'>
-                {isEditing ? (
-                  <button type="button" className="btn btn-warning" onClick={handleTenantSubmit}>{t('dashboard.updateTenant')}</button>
-                ) : (
-                  <button className='btn btn-warning' type="submit">{t('dashboard.addTenants')}</button>
-                )}
-              </div>
-            </form>
-          )
+            )
+            }
+
+
+
+            {/* ===== */}
+            {hasBike && (
+              <>
+                <div className="col-md-6">
+                  <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
+                  <input type="file" className="form-control" onChange={handleImageChange} />
+                </div>
+                <div className="col-md-6">
+                  <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
+                  <input type="file" className="form-control" onChange={handleRcChange} />
+                </div>
+              </>
+            )}
+
+
+            {/* =============== */}
+            <div className='col-12 text-center mt-3'>
+              {isEditing ? (
+                <button type="button" className="btn btn-warning" onClick={handleTenantSubmit}>{t('dashboard.updateTenant')}</button>
+              ) : (
+                <button className='btn btn-warning' type="submit">{t('dashboard.addTenants')}</button>
+              )}
+            </div>
+          </form>
+        )
       case t('dashboard.addExpenses'):
         return (
           <form className="row lg-10" onSubmit={expensesHandleSubmit}>
@@ -1593,14 +1643,14 @@ Please note that you made your last payment on ${paidDate}.\n`
               <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onChange={handleInputChange} onFocus={handleExpensesFocus} />
               {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
             </div>
-            <div className="col-md-6">
-              <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label>
+            {/* <div className="col-md-6"> */}
+              {/* <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label> */}
               {/* <select className="form-select" id="inputRole" name="createdBy" value={formData.createdBy} onChange={handleInputChange}>
                 <option value="admin">{t('dashboard.admin')}</option>
                 <option value="sub-admin">{t('dashboard.subAdmin')}</option>
               </select> */}
-              <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} />
-            </div>
+              {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} /> */}
+            {/* </div> */}
             <div className="col-md-6">
               <label htmlFor="inputDate" className="form-label">{t('dashboard.expenseDate')}</label>
               <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
@@ -1625,8 +1675,8 @@ Please note that you made your last payment on ${paidDate}.\n`
   const [bedsData, setBedsData] = useState([]);
   const handleCardClick = (item) => {
     if (item.heading === t('dashboard.totalBeds')) {
-        // Logic to open the popup for "Total Beds" card
-        setPopupOpen(true);
+      // Logic to open the popup for "Total Beds" card
+      setPopupOpen(true);
     }
     if (item.heading === 'Total Expenses') {
       setExpensePopupOpen(true);
@@ -1647,7 +1697,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       if (popupOpen && event.target.id === "example") {
         setPopupOpen(false)
         setHasBike(false);
-            setBikeNumber('NA');
+        setBikeNumber('NA');
       }
     };
     window.addEventListener('click', handleOutsideClick)
@@ -1703,11 +1753,11 @@ Please note that you made your last payment on ${paidDate}.\n`
     expense: expense.expenseName,
     amount: expense.expenseAmount,
   }));
-console.log("hostels names", activeGirlsHostelButtons)
+  console.log("hostels names", activeGirlsHostelButtons)
 
   return (
     <div className="dashboardgirls">
-        <h1 className="heading1">{t('dashboard.womens')}</h1>
+      <h1 className="heading1">{t('dashboard.womens')}</h1>
       <br />
       {activeGirlsHostelButtons.length > 0 ? (
         <div className={"flex1"}>

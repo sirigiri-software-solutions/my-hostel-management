@@ -29,7 +29,7 @@ const Login = () => {
     securityQuestion: '',
     securityAnswer: '',
     email: '',
-    area:''
+    area: ''
 
   });
 
@@ -40,9 +40,11 @@ const Login = () => {
 
   const [isForget, setIsForget] = useState(false);
   const [login, setLogin] = useState(true);
-  const [signup,setSignUp]=useState(false);
-  const [myapiEndpoint,setApiEnPoint]=useState(null);
-  
+  const [signup, setSignUp] = useState(false);
+  const [myapiEndpoint, setApiEnPoint] = useState(null);
+
+  const areaOptions = ["hyderabad", "secunderabad"];
+
 
   useEffect(() => {
     const rememberedUsername = localStorage.getItem('rememberedUsername');
@@ -54,7 +56,7 @@ const Login = () => {
     }
   }, [])
   console.log()
-  
+
 
   const handleRememberme = (e) => {
     setRememberMe(!rememberMe);
@@ -74,10 +76,10 @@ const Login = () => {
     }
     setUserArea(loginData.area)
   }, [loginData.area, areaToApiEndpoint]);
-//  const forgotapiEndpoint=[...data];
+  //  const forgotapiEndpoint=[...data];
 
 
-//   console.log("area--login",forgotapiEndpoint);
+  //   console.log("area--login",forgotapiEndpoint);
 
   const handleData = (event) => {
     setLoginData({
@@ -85,7 +87,7 @@ const Login = () => {
       [event.target.name]: event.target.value,
     });
   };
-  console.log(loginData,"loginData3");
+  console.log(loginData, "loginData3");
 
   const checkData = (event) => {
     event.preventDefault();
@@ -94,7 +96,7 @@ const Login = () => {
         (item) => item.email === loginData.email
       );
       const singleLoginuser = data.find((item) => item.email === loginData.email);
-      console.log(singleLoginuser,"singleloginuserdetails");
+      console.log(singleLoginuser, "singleloginuserdetails");
       if (itemExist > -1) {
         if (
           data[itemExist].email === loginData.email &&
@@ -112,18 +114,18 @@ const Login = () => {
             theme: "light",
           })
           setLoginData(initialState);
- 
+
           navigate("/mainPage");
- 
+
           localStorage.setItem("username", singleLoginuser.firstname)
           localStorage.setItem("role", singleLoginuser.role)
           localStorage.setItem("userarea", singleLoginuser.area)
           localStorage.setItem("userUid", singleLoginuser.uid); // Store UID
           // setUserUid(singleLoginuser.uid); // Update state with UID
- 
+
           window.location.reload(); // Reload the page
           // console.log(flag, "flag");
- 
+
         } else {
           toast.error("Password Wrong, please enter correct password.", {
             position: "bottom-right",
@@ -145,9 +147,9 @@ const Login = () => {
       }
       // setLogin(false);
     }
- 
- 
- 
+
+
+
     if (rememberMe) {
       localStorage.setItem('rememberedUsername', loginData.email);
       localStorage.setItem('rememberedPassword', loginData.password);
@@ -157,31 +159,31 @@ const Login = () => {
       localStorage.removeItem('rememberedPassword');
       localStorage.removeItem('rememberedArea');
     }
- 
+
   };
 
   const validateForm = () => {
     // let isValid=true;
     let errors = {};
-    
+
     if (loginData.email === "") {
       errors.email = "Enter email to login";
       setLoginErrors(errors);
       return false;
     }
-  
+
     if (loginData.area === "") {
       errors.area = "Enter area to login";
       setLoginErrors(errors);
       return false;
     }
-  
+
     if (loginData.password === "") {
       errors.password = "Enter password to login";
       setLoginErrors(errors);
       return false;
     }
-  
+
     setLoginErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -196,9 +198,9 @@ const Login = () => {
     });
   };
 
-  const [uniqueforgotUserId,setUniqueForgotUserId]=useState(null);
-  console.log( uniqueforgotUserId,"forgotunique");
-  
+  const [uniqueforgotUserId, setUniqueForgotUserId] = useState(null);
+  console.log(uniqueforgotUserId, "forgotunique");
+
 
   const handleForgotPasswordSubmit = async (event) => {
     event.preventDefault();
@@ -268,16 +270,16 @@ const Login = () => {
           autoClose: 2000,
           theme: "light",
         });
-        console.log(uniqueforgotUserId,"uniquecode");
+        console.log(uniqueforgotUserId, "uniquecode");
 
         setIsForget(false);
         setNewPasswordModalOpen(true);
         // setForgotPasswordData("");
         setForgotPasswordData({
-          securityQuestion:'',
-          securityAnswer:'',
-          email:'',
-          area:''
+          securityQuestion: '',
+          securityAnswer: '',
+          email: '',
+          area: ''
         }
 
         )
@@ -299,12 +301,12 @@ const Login = () => {
       });
     }
   };
-  console.log(uniqueforgotUserId,"uniquecode1");//unique code console;
+  console.log(uniqueforgotUserId, "uniquecode1");//unique code console;
 
-// useEffect(()=>{
-//   console.log(setUniqueForgotUserId(uniqueuserid))
+  // useEffect(()=>{
+  //   console.log(setUniqueForgotUserId(uniqueuserid))
 
-// },[uniqueuserid]);
+  // },[uniqueuserid]);
 
 
   const handleNewPasswordData = (event) => {
@@ -314,8 +316,8 @@ const Login = () => {
     });
   };
 
-  const [responseData, setResponseData] = useState([]); 
-  
+  const [responseData, setResponseData] = useState([]);
+
   const handleNewPasswordSubmit = async (event) => {
     event.preventDefault();
     if (newPasswordData.newPassword !== newPasswordData.confirmPassword) {
@@ -338,50 +340,50 @@ const Login = () => {
 
     try {
       axios.get(myapiEndpoint)
-  .then(response => {
-    const userData = response.data[uniqueforgotUserId]; // Extract the user data using userId
-    if (userData) {
-      // Update the password locally
-      userData.password = newPasswordData.newPassword;
-
-      // PUT the entire updated data back to the same URL
-      axios.put(myapiEndpoint, response.data)
         .then(response => {
-          console.log("Password updated successfully!");
-          console.log(response,"passwordChanged")
-          toast.success("Your details Submitted Successfully.", {
-            position: "bottom-right",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-          setNewPasswordModalOpen(false);
-          setLogin(true);
-          console.log(response.data,"putresponsedata");
-          // newPasswordData.newPassword="";
+          const userData = response.data[uniqueforgotUserId]; // Extract the user data using userId
+          if (userData) {
+            // Update the password locally
+            userData.password = newPasswordData.newPassword;
 
-          setNewPasswordData({
-            newPassword: '',
-            confirmPassword: ''
-          });
+            // PUT the entire updated data back to the same URL
+            axios.put(myapiEndpoint, response.data)
+              .then(response => {
+                console.log("Password updated successfully!");
+                console.log(response, "passwordChanged")
+                toast.success("Your details Submitted Successfully.", {
+                  position: "bottom-right",
+                  autoClose: 2000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "light",
+                });
+                setNewPasswordModalOpen(false);
+                setLogin(true);
+                console.log(response.data, "putresponsedata");
+                // newPasswordData.newPassword="";
 
+                setNewPasswordData({
+                  newPassword: '',
+                  confirmPassword: ''
+                });
+
+              })
+              .catch(error => {
+                console.error("Error updating password:", error);
+              });
+          } else {
+            console.log("User not found!");
+          }
         })
         .catch(error => {
-          console.error("Error updating password:", error);
+          console.error("Error fetching user data:", error);
         });
-    } else {
-      console.log("User not found!");
-    }
-  })
-  .catch(error => {
-    console.error("Error fetching user data:", error);
-  });
-      
-   
+
+
 
       // if (response.status === 200) {
       //   toast.success("Password updated successfully.", {
@@ -435,7 +437,7 @@ const Login = () => {
     // navigate('/');
     setLogin(true);
   }
-  
+
   const newPasswordClose = (e) => {
     setNewPasswordModalOpen(false);
     setLogin(true);
@@ -450,7 +452,6 @@ const Login = () => {
   // let navigate = useNavigate();
   const [signupData, setSignupData] = useState({
     firstname: "",
-    lastname: "",
     email: "",
     area: "",
     phone: "",
@@ -461,7 +462,6 @@ const Login = () => {
   });
   const [signupErrors, setSignupErrors] = useState({
     firstname: "",
-    lastname: "",
     email: "",
     area: "",
     // loginarea:"",
@@ -474,7 +474,7 @@ const Login = () => {
 
   const [selectedRole, setSelectedRole] = useState(null);
 
-  
+
 
 
 
@@ -485,7 +485,6 @@ const Login = () => {
 
   const {
     firstname,
-    lastname,
     email,
     area,
     phone,
@@ -498,21 +497,21 @@ const Login = () => {
 
   const changeHandler = (e) => {
     setSignupData({ ...signupData, [e.target.name]: e.target.value });
-    console.log(signupData,"mysignupdata");
+    console.log(signupData, "mysignupdata");
     setSignupErrors({ ...signupErrors, [e.target.name]: "" }); // Reset error when input changes
   };
 
   const clearErrorOnFocus = (fieldName) => {
     setSignupErrors({ ...signupErrors, [fieldName]: "" });
-    setLoginErrors({...loginErrors,[fieldName]:""})
+    setLoginErrors({ ...loginErrors, [fieldName]: "" })
   };
 
   const submitHandler = (e) => {
     e.preventDefault();
- 
+
     let formValid = true;
     const newErrors = {};
- 
+
     // Sequential validation
     if (firstname.trim() === "") {
       newErrors.firstname = "required";
@@ -520,13 +519,13 @@ const Login = () => {
     } else if (area.trim() === "") {
       newErrors.area = "required";
       formValid = false;
-    }else if (email.trim() === "") {
+    } else if (email.trim() === "") {
       newErrors.email = "required";
       formValid = false;
     } else if (phone.trim() === "") {
       newErrors.phone = "required";
       formValid = false;
-    }  else if (password.trim() === "") {
+    } else if (password.trim() === "") {
       newErrors.password = "required";
       formValid = false;
     } else if (!isPasswordValid(password)) {
@@ -548,79 +547,77 @@ const Login = () => {
       newErrors.role = "Please select a role";
       formValid = false;
     }
- 
+
     if (!formValid) {
       setSignupErrors(newErrors);
       return; // Don't proceed with submission if form is invalid
     }
- 
+
     // Create a data object for submission without errors
     const formData = {
       firstname,
-      lastname,
       email,
       area,
       phone,
       password,
-     
+
       securityQuestion,
       securityAnswer,
       role: selectedRole,
     };
- 
+
     // const [responseData, setResponseData] = useState([]);
- 
- 
- 
+
+
+
     console.log(formData, 'signupdata1');
     // Proceed with form submission if all fields are filled
     const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
     console.log(areaToApiEndpoint[area.toLowerCase()]);
- 
+
     // Proceed with form submission if all fields are filled
     axios.post(apiEndpoint, formData)
-    .then(response => {
-      setData(response.data);
-      setResponseData(prevData => [...prevData, data]); // Append new response data to the array
-      console.log(response, 'responseData'); // Log the response data
-      if(response.status === 200){
-       const responseData= axios.get(apiEndpoint)
-       setResponseData(response.data);
-       console.log(responseData,"apiendpointgetdata");
-        // .then(response=>{
-        //   console.log(response,"apiendpointdata")
-        // })
-        // .catch((error)=>{
-        //   console.log(error,"apiendpointdata")
-        // })
-      }
-      console.log(responseData,"apiendpointgetdata");
-      toast.success("Your details Submitted Successfully.", {
-        position: "bottom-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
- 
-      // Reset form and state after successful submission
-      setSignUp(false);
-      // setFormData({
-      //   firstname: "",
-      //   lastname: "",
-      //   email: "",
-      //   area: "",
-      //   phone: "",
-      //   password: "",
-      //   confirmpassword: "",
-      //   securityQuestion: "",
-      //   securityAnswer: "",
-      //   role: ""
-      // });
-    })
+      .then(response => {
+        setData(response.data);
+        setResponseData(prevData => [...prevData, data]); // Append new response data to the array
+        console.log(response, 'responseData'); // Log the response data
+        if (response.status === 200) {
+          const responseData = axios.get(apiEndpoint)
+          setResponseData(response.data);
+          console.log(responseData, "apiendpointgetdata");
+          // .then(response=>{
+          //   console.log(response,"apiendpointdata")
+          // })
+          // .catch((error)=>{
+          //   console.log(error,"apiendpointdata")
+          // })
+        }
+        console.log(responseData, "apiendpointgetdata");
+        toast.success("Your details Submitted Successfully.", {
+          position: "bottom-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+
+        // Reset form and state after successful submission
+        setSignUp(false);
+        // setFormData({
+        //   firstname: "",
+        //   email: "",
+        //   area: "",
+        //   phone: "",
+        //   password: "",
+        //   confirmpassword: "",
+        //   securityQuestion: "",
+        //   securityAnswer: "",
+        //   role: ""
+        // });
+      })
       .catch((error) => {
         console.error("Error submitting data:", error);
         toast.error(
@@ -637,8 +634,8 @@ const Login = () => {
           }
         );
       });
- 
- 
+
+
   };
 
   const isPasswordValid = (password) => {
@@ -654,8 +651,8 @@ const Login = () => {
   return (
     <>
       <div className="main-div">
-            <img src={ImageOne} alt="imageone" className="up-image" />
-          
+        <img src={ImageOne} alt="imageone" className="up-image" />
+
         <div className="loginPage-left-mainContainer">
           <div className="left-logo-mainContainer">
             <img src={Logo} alt="logo" className="img" />
@@ -664,330 +661,357 @@ const Login = () => {
         </div>
         <div className="loginPage-right-mainContainer">
           <div className="checkpage">
-             {!signup ? (login ? (
+            {!signup ? (login ? (
               <form onSubmit={checkData} className="input-form">
-              <h1 className="login-heading mb-3">Login</h1>
-              <div className="mbl-inputField">
-                <input
-                  type="email"
-                  className={`form-control custom-input ${loginErrors?.email && "is-invalid"} ${loginData.email.trim() === "" && "empty-field"}`}
-                  placeholder="Username or Email"
-                  onChange={handleData}
-                  value={loginData.email}
-                  onFocus={() => clearErrorOnFocus("email")}
-                  name="email"
-                  id="mail"
-                />
-                {loginErrors.email && <p className="form-error-msg">{loginErrors.email}</p>}
-              </div>
-              <div className="mbl-inputField">
-                <input
-                  type="area"
-                  className={`form-control custom-input ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
-                  placeholder="Enter Area"
-                  onChange={handleData}
-                  value={loginData.area}
-                  onFocus={() => clearErrorOnFocus("area")}
-                  name="area"
-                  id="area"
-                />
-                {loginErrors.area && <p className="form-error-msg">{loginErrors.area}</p>}
-              </div>
-              <div>
-                <input
-                  type="password"
-                  className={`form-control custom-input ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
-                  placeholder="Password"
-                  onChange={handleData}
-                  value={loginData.password}
-                  onFocus={() => clearErrorOnFocus("password")}
-                  name="password"
-                  id="pass"
-                />
-                {loginErrors.password && <p className="form-error-msg">{loginErrors.password}</p>}
-              </div>
-              <div>
-                <button type="submit" className="login-button">Login</button>
-              </div>
-              <div className='loginfooter'>
-                <div className="signupdiv">
-                  <p>Don't have an account?</p>
-                  <span className="forgotText" onClick={(e) => handleSignUp()}>
-                    Sign Up
-                  </span>
-                </div>
-                <div className="forgotbtndiv">
-                  <span className="forgotText" onClick={handleSwitch}>Forgot password</span>
-                </div>
-              </div>
-            </form>):
-            isForget ? (
-            <form onSubmit={handleForgotPasswordSubmit} className="input-form">
-              <h1 className="login-heading pb-2">Forgot Password</h1>
-              <div className="form-group">
-                <select
-                  name="securityQuestion"
-                  className="form-control rounded-pill"
-                  value={forgotPasswordData.securityQuestion}
-                  onChange={handleForgotPasswordData}
-                  required
-                >
-                  <option value="">Select a security question</option>
-                  <option value="question1">What was the name of your first pet?</option>
-                  <option value="question2">What is your mother's maiden name?</option>
-                  <option value="question3">What is your favorite color?</option>
-                  <option value="question4">What is the name of the city you were born in?</option>
-                  <option value="question5">What was the make of your first car?</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <input
-                  type="text"
-                  className="form-control rounded-pill"
-                  placeholder="Enter your security answer"
-                  name="securityAnswer"
-                  value={forgotPasswordData.securityAnswer}
-                  onChange={handleForgotPasswordData}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <input
-                  type="email"
-                  className="form-control"
-                  placeholder="Enter your email"
-                  name="email"
-                  value={forgotPasswordData.email}
-                  onChange={handleForgotPasswordData}
-                  required
-                />
-              </div>
-              <div className="form-group">
+                <h1 className="login-heading mb-3">Login</h1>
+                <div className="mbl-inputField">
                   <input
-                          type="text"
-                          className="form-control rounded-pill"
-                          placeholder="Enter your area"
-                          name="area"
-                          value={forgotPasswordData.area}
-                          onChange={handleForgotPasswordData}
-                          required
-                        />
-                      </div>
-              <div id="securtybtn" className="d-flex justify-content-between">
-              <button id="closesbt" type="close" className="btn btn-secondary" onClick={handleClose}>Close</button>
-                <button id="forgotsbt" type="submit" className="btn btn-primary" >Submit</button>
-
-              </div>
-
-             
-            </form>) : (
-              newPasswordModalOpen && (
-                <form onSubmit={handleNewPasswordSubmit}>
-                <h1 className="login-heading mt-3 mb-3 text-center">New Password</h1>
+                    type="email"
+                    className={`form-control custom-input ${loginErrors?.email && "is-invalid"} ${loginData.email.trim() === "" && "empty-field"}`}
+                    placeholder="Username or Email"
+                    onChange={handleData}
+                    value={loginData.email}
+                    onFocus={() => clearErrorOnFocus("email")}
+                    name="email"
+                    id="mail"
+                  />
+                  {loginErrors.email && <p className="form-error-msg">{loginErrors.email}</p>}
+                </div>
+                {/* <div className="mbl-inputField">
+                  <input
+                    type="area"
+                    className={`form-control custom-input ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
+                    placeholder="Enter Area"
+                    onChange={handleData}
+                    value={loginData.area}
+                    onFocus={() => clearErrorOnFocus("area")}
+                    name="area"
+                    id="area"
+                  />
+                  {loginErrors.area && <p className="form-error-msg">{loginErrors.area}</p>}
+                </div> */}
+                <div className="mbl-inputField">
+                  <select
+                    className={`form-control custom-input ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
+                    onChange={handleData}
+                    value={loginData.area}
+                    onFocus={() => clearErrorOnFocus("area")}
+                    name="area"
+                    id="area"
+                  >
+                    <option value="" disabled>Select Your Area</option>
+                    {areaOptions.map((area, index) => (
+                      <option key={index} value={area}>
+                        {area}
+                      </option>
+                    ))}
+                  </select>
+                  {loginErrors.area && <p className="form-error-msg">{loginErrors.area}</p>}
+                </div>
+                <div>
+                  <input
+                    type="password"
+                    className={`form-control custom-input ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
+                    placeholder="Password"
+                    onChange={handleData}
+                    value={loginData.password}
+                    onFocus={() => clearErrorOnFocus("password")}
+                    name="password"
+                    id="pass"
+                  />
+                  {loginErrors.password && <p className="form-error-msg">{loginErrors.password}</p>}
+                </div>
+                <div>
+                  <button type="submit" className="login-button">Login</button>
+                </div>
+                <div className='loginfooter'>
+                  <div className="signupdiv">
+                    <p>Don't have an account?</p>
+                    <span className="forgotText" onClick={(e) => handleSignUp()}>
+                      Sign Up
+                    </span>
+                  </div>
+                  <div className="forgotbtndiv">
+                    <span className="forgotText" onClick={handleSwitch}>Forgot password</span>
+                  </div>
+                </div>
+              </form>) :
+              isForget ? (
+                <form onSubmit={handleForgotPasswordSubmit} className="input-form">
+                  <h1 className="login-heading pb-2">Forgot Password</h1>
+                  <div className="form-group">
+                    <select
+                      name="securityQuestion"
+                      className="form-control rounded-pill"
+                      value={forgotPasswordData.securityQuestion}
+                      onChange={handleForgotPasswordData}
+                      required
+                    >
+                      <option value="">Select a security question</option>
+                      <option value="question1">What was the name of your first pet?</option>
+                      <option value="question2">What is your mother's maiden name?</option>
+                      <option value="question3">What is your favorite color?</option>
+                      <option value="question4">What is the name of the city you were born in?</option>
+                      <option value="question5">What was the make of your first car?</option>
+                    </select>
+                  </div>
                   <div className="form-group">
                     <input
-                      type="password"
-                      className="form-control rounded-pill custom-form-control"
-                      id="newPassword"
-                      placeholder="Enter your new password"
-                      name="newPassword"
-                      value={newPasswordData.newPassword}
-                      onChange={handleNewPasswordData}
+                      type="text"
+                      className="form-control rounded-pill"
+                      placeholder="Enter your security answer"
+                      name="securityAnswer"
+                      value={forgotPasswordData.securityAnswer}
+                      onChange={handleForgotPasswordData}
                       required
                     />
                   </div>
                   <div className="form-group">
                     <input
-                      type="password"
-                      className="form-control rounded-pill custom-form-control"
-                      id="confirmPassword"
-                      placeholder="Confirm your new password"
-                      name="confirmPassword"
-                      value={newPasswordData.confirmPassword}
-                      onChange={handleNewPasswordData}
+                      type="email"
+                      className="form-control"
+                      placeholder="Enter your email"
+                      name="email"
+                      value={forgotPasswordData.email}
+                      onChange={handleForgotPasswordData}
                       required
                     />
                   </div>
-                  <div id='footerbtn' className="d-flex justify-content-between mb-3">
-                  <button type="button" className="btn btn-secondary" onClick={(e) => newPasswordClose()}>Close</button>
-                    <button type="submit" className="btn btn-primary">Submit</button>
+                  {/* <div className="form-group">
+                    <input
+                      type="text"
+                      className="form-control rounded-pill"
+                      placeholder="Enter your area"
+                      name="area"
+                      value={forgotPasswordData.area}
+                      onChange={handleForgotPasswordData}
+                      required
+                    />
+                  </div> */}
+                  <div className="form-group">
+                    <select
+                      className="form-control rounded-pill"
+                      name="area"
+                      value={forgotPasswordData.area}
+                      onChange={handleForgotPasswordData}
+                      required
+                    >
+                      <option value="" disabled>Select Your Area</option>
+                      {areaOptions.map((area, index) => (
+                        <option key={index} value={area}>
+                          {area}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div id="securtybtn" className="d-flex justify-content-between">
+                    <button id="closesbt" type="close" className="btn btn-secondary" onClick={handleClose}>Close</button>
+                    <button id="forgotsbt" type="submit" className="btn btn-primary" >Submit</button>
 
                   </div>
-                </form>
+
+
+                </form>) : (
+                newPasswordModalOpen && (
+                  <form onSubmit={handleNewPasswordSubmit}>
+                    <h1 className="login-heading mt-3 mb-3 text-center">New Password</h1>
+                    <div className="form-group">
+                      <input
+                        type="password"
+                        className="form-control rounded-pill custom-form-control"
+                        id="newPassword"
+                        placeholder="Enter your new password"
+                        name="newPassword"
+                        value={newPasswordData.newPassword}
+                        onChange={handleNewPasswordData}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <input
+                        type="password"
+                        className="form-control rounded-pill custom-form-control"
+                        id="confirmPassword"
+                        placeholder="Confirm your new password"
+                        name="confirmPassword"
+                        value={newPasswordData.confirmPassword}
+                        onChange={handleNewPasswordData}
+                        required
+                      />
+                    </div>
+                    <div id='footerbtn' className="d-flex justify-content-between mb-3">
+                      <button type="button" className="btn btn-secondary" onClick={(e) => newPasswordClose()}>Close</button>
+                      <button type="submit" className="btn btn-primary">Submit</button>
+
+                    </div>
+                  </form>
+                )
               )
-            )
-          
-          ): (
-            <form className="row p-2"  onSubmit={submitHandler}>
-            <h2 className="text-center login-heading p-2">SignUp</h2>
-          <div className="form-group col-md-6">
-            <input 
-              type="text"
-              name="firstname"
-              value={firstname}
-              onChange={changeHandler}
-              placeholder="Enter Your FirstName"
-              onFocus={() => clearErrorOnFocus("firstname")}
-              className="rounded-pill"
-            />
-            {signupErrors.firstname && <div className="form-error-msg">{signupErrors.firstname}</div>}
-          </div>
-          {/* <div className="form-group col-md-6">
-            
-            <input
-              type="text"
-              name="lastname"
-              value={lastname}
-              onChange={changeHandler}
-              placeholder="Enter Your LastName"
-              onFocus={() => clearErrorOnFocus("lastname")}
-              className="form-control rounded-pill"
-            />
-            {signupErrors.lastname && <div className="text-danger">{signupErrors.lastname}</div>}
-          </div> */}
-          <div className="form-group col-md-6">
-            <input
-              type="area"
-              name="area"
-              value={area}
-              onChange={changeHandler}
-              placeholder="Enter Your area"
-              onFocus={() => clearErrorOnFocus("area")}
-              className="rounded-pill"
-            />
-            {signupErrors.area && <div className="form-error-msg">{signupErrors.area}</div>}
-          </div>
-          <div className="form-group col-md-6">
-            <input
-              type="email"
-              name="email"
-              value={email}
-              onChange={changeHandler}
-              placeholder="Enter Your Email"
-              onFocus={() => clearErrorOnFocus("email")}
-              className="rounded-pill"
-            />
-            {signupErrors.email && <div className="form-error-msg">{signupErrors.email}</div>}
-          </div>
-          <div className="form-group col-md-6">
-            <input
-              type="tel"
-              name="phone"
-              value={phone}
-              onChange={changeHandler}
-              placeholder="Mobile number"
-              onFocus={() => clearErrorOnFocus("phone")}
-              className="rounded-pill"
-            />
-            {signupErrors.phone && <div className="form-error-msg">{signupErrors.phone}</div>}
-          </div>
-          <div className="form-group col-md-6">
-            {/* <label htmlFor="password">Password:</label> */}
-            <input
-              type="password"
-              name="password"
-              value={password}
-              onChange={changeHandler}
-              placeholder="Enter Your Password"
-              onFocus={() => clearErrorOnFocus("password")}
-              className="form-control rounded-pill"
-            />
-            {signupErrors.password && <div className="form-error-msg">{signupErrors.password}</div>}
-          </div>
-          <div className="form-group col-md-6">
-            {/* <label htmlFor="confirmPassword">Confirm Password:</label> */}
-            <input
-              type="password"
-              name="confirmpassword"
-              value={confirmpassword}
-              onChange={changeHandler}
-              placeholder="Confirm Your Password"
-              onFocus={() => clearErrorOnFocus("confirmpassword")}
-              className="form-control rounded-pill"
-            />
-            {signupErrors.confirmpassword && (
-              <div className="form-error-msg">{signupErrors.confirmpassword}</div>
-            )}
-          </div>
-          <div className="form-group col-md-6">
-            {/* <label htmlFor="securityQuestion">Security Question:</label> */}
-            <select
-              name="securityQuestion"
-              value={securityQuestion}
-              onChange={changeHandler}
-              onFocus={() => clearErrorOnFocus("securityQuestion")}
-              className="form-control rounded-pill"
-            >
-              <option value="">Select a security question</option>
-              <option value="question1">What was the name of your first pet?</option>
-              <option value="question2">What is your mother's maiden name?</option>
-              <option value="question3">What is your favorite color?</option>
-              <option value="question4">What is the name of the city you were born in?</option>
-              <option value="question5">What was the make of your first car?</option>
-            </select>
-            {signupErrors.securityQuestion && <div className="form-error-msg">{signupErrors.securityQuestion}</div>}
-          </div>
-          <div className="form-group col-md-6">
-            {/* <label htmlFor="securityAnswer">Security Answer:</label> */}
-            <input
-              type="text"
-              name="securityAnswer"
-              value={securityAnswer}
-              onChange={changeHandler}
-              placeholder="Enter your security answer"
-              onFocus={() => clearErrorOnFocus("securityAnswer")}
-              className="form-control rounded-pill"
-            />
-            {signupErrors.securityAnswer && <div className="form-error-msg">{signupErrors.securityAnswer}</div>}
-          </div>
-          <div className="form-group col-md-12">
-            {/* <label className="loginText">Register As:</label> */}
-            <div className="confirmationContainer ">
-              <div  className="form-check form-check-inline d-flex">
-                <input
-                  name="role"
-                  type="checkbox"
-                  id="admin"
-                  value="admin"
-                  checked={selectedRole === "admin"}
-                  onChange={handleCheckboxChange}
-                  className="form-check-input "
-                  onFocus={() => clearErrorOnFocus("role")}
-                />
-                <label className="form-check-label" htmlFor="admin">
-                  Admin
-                </label>
-              </div>
-              <div  className="form-check form-check-inline d-flex ">
-                <input
-                  name="role"
-                  type="checkbox"
-                  id="subadmin"
-                  value="subAdmin"
-                  checked={selectedRole === "subAdmin"}
-                  onChange={handleCheckboxChange}
-                  className="form-check-input"
-                  onFocus={() => clearErrorOnFocus("role")}
-                />
-                <label className="form-check-label" htmlFor="subAdmin">
-                  Subadmin
-                </label>
-              </div>
-            </div>
-            {/* {signupErrors.role && <div className="text-danger">{signupErrors.role}</div>} */}
-          </div>
-          <div className="form-group col-md-12">
-            {/* <input type="submit" className="btn btn-primary rounded-pill" value="Sign up" /> */}
-            <input type="submit" id='submit' className="btn btn-primary rounded-pill" value="Sign up" />
-          </div>
-          <p className="text-center">
-          Already have an account?<span className="forgotText" onClick={()=>setSignUp(false)}>Login</span>
-        </p>
 
-        </form>
-          )}
-           
-           
+            ) : (
+              <form className="row p-2" onSubmit={submitHandler}>
+                <h2 className="text-center login-heading p-2">SignUp</h2>
+                <div className="form-group col-md-6">
+                  <input
+                    type="text"
+                    name="name"
+                    value={firstname}
+                    onChange={changeHandler}
+                    placeholder="Enter Your Name"
+                    onFocus={() => clearErrorOnFocus("firstname")}
+                    className="rounded-pill"
+                  />
+                  {signupErrors.firstname && <div className="form-error-msg">{signupErrors.firstname}</div>}
+                </div>
+
+                <div className="form-group col-md-6">
+                  <select
+                    name="area"
+                    value={signupData.area}
+                    onChange={changeHandler}
+                    onFocus={() => clearErrorOnFocus("area")}
+                    className="rounded-pill"
+                  >
+                    <option value="" disabled>Select Your Area</option>
+                    {areaOptions.map((area, index) => (
+                      <option key={index} value={area}>
+                        {area}
+                      </option>
+                    ))}
+                  </select>
+                  {signupErrors.area && <div className="form-error-msg">{signupErrors.area}</div>}
+                </div>
+                <div className="form-group col-md-6">
+                  <input
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={changeHandler}
+                    placeholder="Enter Your Email"
+                    onFocus={() => clearErrorOnFocus("email")}
+                    className="rounded-pill"
+                  />
+                  {signupErrors.email && <div className="form-error-msg">{signupErrors.email}</div>}
+                </div>
+                <div className="form-group col-md-6">
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={phone}
+                    onChange={changeHandler}
+                    placeholder="Mobile number"
+                    onFocus={() => clearErrorOnFocus("phone")}
+                    className="rounded-pill"
+                  />
+                  {signupErrors.phone && <div className="form-error-msg">{signupErrors.phone}</div>}
+                </div>
+                <div className="form-group col-md-6">
+                  {/* <label htmlFor="password">Password:</label> */}
+                  <input
+                    type="password"
+                    name="password"
+                    value={password}
+                    onChange={changeHandler}
+                    placeholder="Enter Your Password"
+                    onFocus={() => clearErrorOnFocus("password")}
+                    className="form-control rounded-pill"
+                  />
+                  {signupErrors.password && <div className="form-error-msg">{signupErrors.password}</div>}
+                </div>
+                <div className="form-group col-md-6">
+                  {/* <label htmlFor="confirmPassword">Confirm Password:</label> */}
+                  <input
+                    type="password"
+                    name="confirmpassword"
+                    value={confirmpassword}
+                    onChange={changeHandler}
+                    placeholder="Confirm Your Password"
+                    onFocus={() => clearErrorOnFocus("confirmpassword")}
+                    className="form-control rounded-pill"
+                  />
+                  {signupErrors.confirmpassword && (
+                    <div className="form-error-msg">{signupErrors.confirmpassword}</div>
+                  )}
+                </div>
+                <div className="form-group col-md-6">
+                  {/* <label htmlFor="securityQuestion">Security Question:</label> */}
+                  <select
+                    name="securityQuestion"
+                    value={securityQuestion}
+                    onChange={changeHandler}
+                    onFocus={() => clearErrorOnFocus("securityQuestion")}
+                    className="form-control rounded-pill"
+                  >
+                    <option value="">Select a security question</option>
+                    <option value="question1">What was the name of your first pet?</option>
+                    <option value="question2">What is your mother's maiden name?</option>
+                    <option value="question3">What is your favorite color?</option>
+                    <option value="question4">What is the name of the city you were born in?</option>
+                    <option value="question5">What was the make of your first car?</option>
+                  </select>
+                  {signupErrors.securityQuestion && <div className="form-error-msg">{signupErrors.securityQuestion}</div>}
+                </div>
+                <div className="form-group col-md-6">
+                  {/* <label htmlFor="securityAnswer">Security Answer:</label> */}
+                  <input
+                    type="text"
+                    name="securityAnswer"
+                    value={securityAnswer}
+                    onChange={changeHandler}
+                    placeholder="Enter your security answer"
+                    onFocus={() => clearErrorOnFocus("securityAnswer")}
+                    className="form-control rounded-pill"
+                  />
+                  {signupErrors.securityAnswer && <div className="form-error-msg">{signupErrors.securityAnswer}</div>}
+                </div>
+                {/* <div className="form-group col-md-12"> */}
+                  {/* <label className="loginText">Register As:</label> */}
+                  {/* <div className="confirmationContainer ">
+                    <div className="form-check form-check-inline d-flex">
+                      <input
+                        name="role"
+                        type="checkbox"
+                        id="admin"
+                        value="admin"
+                        checked={selectedRole === "admin"}
+                        onChange={handleCheckboxChange}
+                        className="form-check-input "
+                        onFocus={() => clearErrorOnFocus("role")}
+                      />
+                      <label className="form-check-label" htmlFor="admin">
+                        Admin
+                      </label>
+                    </div>
+                    <div className="form-check form-check-inline d-flex ">
+                      <input
+                        name="role"
+                        type="checkbox"
+                        id="subadmin"
+                        value="subAdmin"
+                        checked={selectedRole === "subAdmin"}
+                        onChange={handleCheckboxChange}
+                        className="form-check-input"
+                        onFocus={() => clearErrorOnFocus("role")}
+                      />
+                      <label className="form-check-label" htmlFor="subAdmin">
+                        Subadmin
+                      </label>
+                    </div>
+                  </div> */}
+                  {/* {signupErrors.role && <div className="text-danger">{signupErrors.role}</div>} */}
+                {/* </div> */}
+                <div className="form-group col-md-12">
+                  {/* <input type="submit" className="btn btn-primary rounded-pill" value="Sign up" /> */}
+                  <input type="submit" id='submit' className="btn btn-primary rounded-pill" value="Sign up" />
+                </div>
+                <p className="text-center">
+                  Already have an account?<span className="forgotText" onClick={() => setSignUp(false)}>Login</span>
+                </p>
+
+              </form>
+            )}
+
+
 
 
           </div>

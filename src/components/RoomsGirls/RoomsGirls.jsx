@@ -21,7 +21,7 @@ const RoomsGirls = () => {
   }else if(role === "subAdmin"){
     adminRole = "Sub-admin"
   }
-  const { activeGirlsHostel, userUid } = useData();
+  const { activeGirlsHostel, userUid , activeGirlsHostelButtons} = useData();
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
@@ -40,8 +40,7 @@ const RoomsGirls = () => {
       console.log("Triggering")
         if (showModal && (event.target.id === "exampleModalGirls" || event.key === "Escape")) {
             setShowModal(false);
-        }
-       
+        } 
     };
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener("keydown", handleOutsideClick)
@@ -251,12 +250,21 @@ const handleRoomsIntegerChange = (event) => {
   };
 
   const handleAddNew = () => {
-    // Reset form and errors
+    if (activeGirlsHostelButtons.length == 0) {
+      toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
     resetForm();
-    // Set modal for a new entry
     setIsEditing(false);
-    // Open the modal
     setShowModal(true);
+    }
   };
 
   const resetForm = () => {
@@ -289,7 +297,7 @@ const handleRoomsIntegerChange = (event) => {
     t('roomsPage.Floor'),
     t('roomsPage.No.of Beds'),
     t('roomsPage.Bed Rent'),
-    t('roomsPage.Created By'),
+    // t('roomsPage.Created By'),
     t('roomsPage.Last Updated Date'),
     t('roomsPage.Edit')
   ];
@@ -412,14 +420,14 @@ function capitalizeFirstLetter(string) {
                     {/* {formErrors.status && <div className="text-danger">{formErrors.status}</div>} */}
                     {errors.bedRent && <div style={{ color: 'red' }}>{errors.bedRent}</div>}
                   </div>
-                  <div className="col-md-6">
-                    <label htmlFor="inputRole" className="form-label">{t('roomsPage.createdBy')}</label>
+                  {/* <div className="col-md-6"> */}
+                    {/* <label htmlFor="inputRole" className="form-label">{t('roomsPage.createdBy')}</label> */}
                     {/* <select className="form-select" id="inputRole" name="role" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}>
                       <option value="admin">{t('dashboard.admin')}</option>
                       <option value="sub-admin">{t('dashboard.subAdmin')}</option>
                     </select> */}
-                    <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}/>
-                  </div>
+                    {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}/> */}
+                  {/* </div> */}
                   <div className="col-12 text-center">
                     {isEditing ? (
                       <>
