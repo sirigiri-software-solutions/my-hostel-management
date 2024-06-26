@@ -44,8 +44,9 @@ const Table = ({ columns, rows, onClickTentantRow }) => {
             rows.map((item, index) => <tr>
               {item.s_no && <td data-label={t('mobileTable.serialNumber')} style={{ padding: "7px" }} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.s_no}</td>}
               {item.image && <td data-label={t('mobileTable.image')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}><img className='personImage' src={item.image} alt='img' /></td>}
-              {item.name && <td className='hosteltable' data-label={t('mobileTable.name')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.name}</td>}
+              {/* {item.name && <td className='hosteltable' data-label={t('mobileTable.name')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.name}</td>} */}
               {item.id && <td data-label={t('mobileTable.id')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.id}</td>}
+              {item.name && <td className='hosteltable' data-label={t('mobileTable.name')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.name}</td>}
               {item.mobile_no && <td data-label={t('mobileTable.mobileNumber')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.mobile_no}</td>}
               {item.room_bed_no && <td data-label={t('mobileTable.roomBedNumber')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.room_bed_no}</td>}
               {item.bed_number && <td data-label={t('mobileTable.bedNumber')}>{item.bed_number}</td>}
@@ -57,7 +58,7 @@ const Table = ({ columns, rows, onClickTentantRow }) => {
               {item.noofBeds && <td data-label={t('mobileTable.numberOfBeds')}>{item.noofBeds}</td>}
               {item.bedRent && <td data-label={t('mobileTable.bedRent')}>{item.bedRent}</td>}
               {item.month_year && <td data-label={t('mobileTable.monthYear')}>{item.month_year}</td>}
-              {item.rent && <td data-label={t('mobileTable.rent')}>{item.rent}</td>}
+              {/* {item.rent && <td data-label={t('mobileTable.rent')}>{item.rent}</td>} */}
               {item.paid && <td data-label={t('mobileTable.paid')}>{item.paid}</td>}
               {item.due && <td data-label={t('mobileTable.due')}>{item.due}</td>}
               {item.joining_date && <td data-label={t('mobileTable.joiningDate')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.joining_date}</td>}
@@ -76,6 +77,9 @@ const Table = ({ columns, rows, onClickTentantRow }) => {
               {item.actions && <td data-label={t('mobileTable.actions')}>{item.actions}</td>}
               {item.edit && <td className='hosteltable' data-label={t('mobileTable.edit')}>{item.edit}</td>}
               {item.delete && <td className='hosteltable' data-label={t('mobileTable.delete')}>{item.delete}</td>}
+              {item.rent && <td className='allhosteldata' data-label={t('mobileTable.rent')}>{item.rent}</td>}
+              {/* {item.address && <td className='allhosteldata' data-label={t('mobileTable.address')}>{item.address}</td>} */}
+              {/* {item.rent && <td className='allhosteldata' data-label={t('mobileTable.rent')}>{item.rent}</td>} */}
             </tr>)
           }
         </tbody>

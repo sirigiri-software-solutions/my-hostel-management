@@ -31,7 +31,7 @@ import { getDatabase, ref, push } from "firebase/database";
 import { getStorage } from "firebase/storage";
 import { useEffect, useState } from "react";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyAOHosh74ErvJ-NyySUluijsTv2ZvdC4SU",
   authDomain: "ameerpet-588ee.firebaseapp.com",
   databaseURL: "https://ameerpet-588ee-default-rtdb.firebaseio.com",
@@ -41,7 +41,7 @@ const firebaseConfig = {
   appId: "1:497595268016:web:930213c3e11b95d2087475"
 };
 
-const firebaseConfig1 = {
+export const firebaseConfig1 = {
   apiKey: "AIzaSyBjWBFrZrUCSXGrnGv1xFp_B8J-PWENcQk",
   authDomain: "sr-nagar.firebaseapp.com",
   databaseURL: "https://sr-nagar-default-rtdb.firebaseio.com",

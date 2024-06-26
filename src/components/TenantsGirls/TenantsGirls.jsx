@@ -795,12 +795,12 @@ const TenantsGirls = () => {
               </label>
             </div>) : null}
             <div className='d-flex justify-content-center align-items-center'>
-              <div className={showExTenants ? "col-1 bedPageFilterDropdown" : "col-5 bedPageFilterDropdown"}>
-                {showExTenants ? '' : <button id="tenantAddButton" type="button" class="add-button" onClick={() => { handleAddNew(); }} >
-                  {t('dashboard.addTenants')}
-                </button>}
-
-              </div>
+            <div className={showExTenants ? "col-1 bedPageFilterDropdown" : "col-5 bedPageFilterDropdown"}>
+              {showExTenants ? '' : <button id="tenantAddButton" type="button" class="add-button" onClick={() => { handleAddNew(); }} >
+               {t('dashboard.addTenants')}
+              </button>}
+              
+            </div>
               <div className={showExTenants ? "col-8 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
               {showExTenants ? <button type="button" id="presentTenantBtn1" class="add-button text-center" onClick={showExTenantsData} >
               {t('tenantsPage.presentTenants')}

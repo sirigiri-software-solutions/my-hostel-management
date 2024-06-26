@@ -307,6 +307,28 @@ const Login = () => {
   //   console.log(setUniqueForgotUserId(uniqueuserid))
 
   // },[uniqueuserid]);
+  function onClickLogin(e){
+    setSignUp(false);
+    setSignupData({
+      firstname: "",
+    email: "",
+    area: "",
+    phone: "",
+    password: "",
+    confirmpassword: "",
+    securityQuestion: "",
+    securityAnswer: "",
+
+    });
+    setLoginData({
+      id:"",
+      email:"",
+      area:"",
+      password:"",
+    })
+
+  }
+
 
 
   const handleNewPasswordData = (event) => {
@@ -419,6 +441,15 @@ const Login = () => {
       console.error('Error updating password:', error);
     }
   }
+  // if(isForget)
+  //   {
+  //     setLoginData({
+  //       id:"",
+  //       email:"",
+  //       area:"",
+  //       password:"",
+  //     })
+  //   }
 
 
 
@@ -435,6 +466,20 @@ const Login = () => {
   };
   const handleClose = () => {
     // navigate('/');
+    setForgotPasswordData({
+      securityQuestion: '',
+      securityAnswer: '',
+      email: '',
+      area: ''
+    }
+
+    )
+    setLoginData({
+      id:"",
+      email:"",
+      area:"",
+      password:"",
+    })
     setLogin(true);
   }
 
@@ -443,6 +488,18 @@ const Login = () => {
     setLogin(true);
   }
   const handleSignUp = (e) => {
+    setSignupData({
+      firstname: "",
+    email: "",
+    area: "",
+    phone: "",
+    password: "",
+    confirmpassword: "",
+    securityQuestion: "",
+    securityAnswer: "",
+      
+    })
+
     setIsForget(false);
     setSignUp(true);
 
@@ -606,6 +663,18 @@ const Login = () => {
 
         // Reset form and state after successful submission
         setSignUp(false);
+        setSignupData({
+          firstname: "",
+          email: "",
+          area: "",
+          phone: "",
+          password: "",
+          confirmpassword: "",
+          securityQuestion: "",
+          securityAnswer: "",
+
+
+        })
         // setFormData({
         //   firstname: "",
         //   email: "",
@@ -690,16 +759,16 @@ const Login = () => {
                   />
                   {loginErrors.area && <p className="form-error-msg">{loginErrors.area}</p>}
                 </div> */}
-                <div className="mbl-inputField">
+                <div className="mbl-inputField ">
                   <select
-                    className={`form-control custom-input ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
+                    className={`form-control custom-input rounded-pill selectarea ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
                     onChange={handleData}
                     value={loginData.area}
                     onFocus={() => clearErrorOnFocus("area")}
                     name="area"
                     id="area"
                   >
-                    <option value="" disabled>Select Your Area</option>
+                    <option id= "selectarea" value="" disabled>Select Your Area</option>
                     {areaOptions.map((area, index) => (
                       <option key={index} value={area}>
                         {area}
@@ -741,6 +810,7 @@ const Login = () => {
                   <h1 className="login-heading pb-2">Forgot Password</h1>
                   <div className="form-group">
                     <select
+            
                       name="securityQuestion"
                       className="form-control rounded-pill"
                       value={forgotPasswordData.securityQuestion}
@@ -854,7 +924,7 @@ const Login = () => {
                 <div className="form-group col-md-6">
                   <input
                     type="text"
-                    name="name"
+                    name="firstname"
                     value={firstname}
                     onChange={changeHandler}
                     placeholder="Enter Your Name"
@@ -867,7 +937,7 @@ const Login = () => {
                 <div className="form-group col-md-6">
                   <select
                     name="area"
-                    value={signupData.area}
+                    value={area}
                     onChange={changeHandler}
                     onFocus={() => clearErrorOnFocus("area")}
                     className="rounded-pill"
@@ -940,7 +1010,7 @@ const Login = () => {
                     value={securityQuestion}
                     onChange={changeHandler}
                     onFocus={() => clearErrorOnFocus("securityQuestion")}
-                    className="form-control rounded-pill"
+                    className=" rounded-pill"
                   >
                     <option value="">Select a security question</option>
                     <option value="question1">What was the name of your first pet?</option>
@@ -1005,7 +1075,7 @@ const Login = () => {
                   <input type="submit" id='submit' className="btn btn-primary rounded-pill" value="Sign up" />
                 </div>
                 <p className="text-center">
-                  Already have an account?<span className="forgotText" onClick={() => setSignUp(false)}>Login</span>
+                  Already have an account?<span className="forgotText" onClick={(e) =>onClickLogin(e)} >Login</span>
                 </p>
 
               </form>

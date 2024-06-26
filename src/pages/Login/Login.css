@@ -120,6 +120,20 @@
   border: 1px solid #ccc;
   border-radius: 25px;
 }
+.selectarea{
+  /* width: 100%;
+  padding: 10px; */
+  margin-bottom: 10px;
+  /* border: 1px solid #ccc;
+  border-radius: 25px;
+  color:#FF8a00; */
+
+}
+.form-group select{
+  width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+}
 
 .input-form input[type="checkbox"] {
   margin-right: 5px;

@@ -9,6 +9,10 @@ import { useTranslation } from 'react-i18next';
 import './settings.css';
 import { Modal, Button } from 'react-bootstrap';
 import { useData } from '../../ApiData/ContextProvider';
+import {  useEffect } from 'react';
+import {  get, onValue } from 'firebase/database';
+// import { database } from '../../firebase/firebase';
+
 
 const Settings = () => {
   const { userUid } = useData();
@@ -19,6 +23,45 @@ const Settings = () => {
   const { t } = useTranslation();
   const [isBoysModalOpen, setIsBoysModalOpen] = useState(false);
   const [isGirlsModalOpen, setIsGirlsModalOpen] = useState(false);
+  const [boysHostels, setBoysHostels] = useState([]);
+const [girlsHostels, setGirlsHostels] = useState([]);
+
+useEffect(() => {
+  if (userUid) {
+    // Fetch boys hostels
+    const boysHostelsRef = ref(database, `Hostel/${userUid}/boys`);
+    console.log(boysHostelsRef,"myhostels");
+
+    onValue(boysHostelsRef, (snapshot) => {
+      const hostels = [];
+      snapshot.forEach((childSnapshot) => {
+        hostels.push({
+          id: childSnapshot.key,
+          ...childSnapshot.val()
+        });
+      });
+      setBoysHostels(hostels);
+    });
+
+    // Fetch girls hostels
+    const girlsHostelsRef = ref(database, `Hostel/${userUid}/girls`);
+    onValue(girlsHostelsRef, (snapshot) => {
+      const hostels = [];
+      snapshot.forEach((childSnapshot) => {
+        hostels.push({
+          id: childSnapshot.key,
+          ...childSnapshot.val()
+        });
+      });
+      setGirlsHostels(hostels);
+    });
+  }
+}, [userUid]);
+console.log('Boys Hostels:', boysHostels);
+console.log('Girls Hostels:', girlsHostels);
+
+
+
 
   const capitalizeFirstLetter = (string) => {
     return string.replace(/\b\w/g, char => char.toUpperCase());

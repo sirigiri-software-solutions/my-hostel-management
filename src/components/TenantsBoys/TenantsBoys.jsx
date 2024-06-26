@@ -6,7 +6,8 @@ import ImageIcon from '../../images/Icons (10).png'
 import { useState, useContext } from 'react'
 // import { database, push, ref, storage } from "../../firebase";
 import { database, push, ref, storage } from "../../firebase/firebase";
-import './TenantsBoys.css';
+import '../TenantsGirls/TenantsGirls.css';
+import './TenantsBoys.css'
 import { DataContext } from '../../ApiData/ContextProvider'
 import { FetchData } from '../../ApiData/FetchData'
 import { onValue, remove, set, update } from 'firebase/database'
