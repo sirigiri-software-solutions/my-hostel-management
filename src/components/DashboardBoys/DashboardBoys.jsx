@@ -1070,21 +1070,21 @@ const DashboardBoys = () => {
     }
   };
 
-  useEffect(() => {
-    if (selectedTenant) {
-      const tenant = tenants.find(t => t.id === selectedTenant);
-      if (tenant) {
-        // Set the date of join
-        setDateOfJoin(tenant.dateOfJoin || '');
+  // useEffect(() => {
+  //   if (selectedTenant) {
+  //     const tenant = tenants.find(t => t.id === selectedTenant);
+  //     if (tenant) {
+  //       // Set the date of join
+  //       setDateOfJoin(tenant.dateOfJoin || '');
 
-        // Calculate the due date (one day less than adding one month)
-        const currentDate = new Date(tenant.dateOfJoin); // Get the join date
-        const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1)); // Add one month and subtract one day
-        const formattedDueDate = dueDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
-        setDueDate(formattedDueDate);
-      }
-    }
-  }, [selectedTenant, tenants]);
+  //       // Calculate the due date (one day less than adding one month)
+  //       const currentDate = new Date(tenant.dateOfJoin); // Get the join date
+  //       const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1)); // Add one month and subtract one day
+  //       const formattedDueDate = dueDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+  //       setDueDate(formattedDueDate);
+  //     }
+  //   }
+  // }, [selectedTenant, tenants]);
 
   const handleFocus = (e) => {
     const { name } = e.target;
@@ -1164,18 +1164,11 @@ const DashboardBoys = () => {
               <div className='monthlyAddForm'>
                 <form class="row lg-10" onSubmit={handleRentSubmit}>
                   <div class='col-12 mb-3'>
-                    <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
+                    <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} name="selectedTenant" onFocus={handleFocus}>
                       <option value="">{t('dashboard.selectTenant')} *</option>
-                      {/* {availableTenants.map(tenant => (
+                      {availableTenants.map(tenant => (
                           <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
-                        ))} */}
-                      {isEditing ? (
-                        <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
-                      ) : (
-                        availableTenants.map(tenant => (
-                          <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
-                        ))
-                      )}
+                        ))}
                     </select>
                     {errors.selectedTenant && <div style={{ color: 'red' }}>{errors.selectedTenant}</div>}
                   </div>

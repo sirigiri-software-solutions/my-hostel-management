@@ -118,7 +118,7 @@ const Login = () => {
           navigate("/mainPage");
 
           localStorage.setItem("username", singleLoginuser.firstname)
-          localStorage.setItem("role", singleLoginuser.role)
+          // localStorage.setItem("role", singleLoginuser.role)
           localStorage.setItem("userarea", singleLoginuser.area)
           localStorage.setItem("userUid", singleLoginuser.uid); // Store UID
           // setUserUid(singleLoginuser.uid); // Update state with UID
@@ -472,16 +472,16 @@ const Login = () => {
     securityAnswer: "",
   });
 
-  const [selectedRole, setSelectedRole] = useState(null);
+  // const [selectedRole, setSelectedRole] = useState(null);
 
 
 
 
 
-  const handleCheckboxChange = (event) => {
-    setSelectedRole(event.target.value);
-    console.log(event.target.value);
-  };
+  // const handleCheckboxChange = (event) => {
+  //   setSelectedRole(event.target.value);
+  //   console.log(event.target.value);
+  // };
 
   const {
     firstname,
@@ -543,10 +543,11 @@ const Login = () => {
     } else if (securityAnswer.trim() === "") {
       newErrors.securityAnswer = "required";
       formValid = false;
-    } else if (!selectedRole) {
-      newErrors.role = "Please select a role";
-      formValid = false;
-    }
+    } 
+    // else if (!selectedRole) {
+    //   newErrors.role = "Please select a role";
+    //   formValid = false;
+    // }
 
     if (!formValid) {
       setSignupErrors(newErrors);
@@ -563,7 +564,7 @@ const Login = () => {
 
       securityQuestion,
       securityAnswer,
-      role: selectedRole,
+      // role: selectedRole,
     };
 
     // const [responseData, setResponseData] = useState([]);
@@ -644,9 +645,6 @@ const Login = () => {
       password
     );
   }
-
-
-
 
   return (
     <>
@@ -854,7 +852,7 @@ const Login = () => {
                 <div className="form-group col-md-6">
                   <input
                     type="text"
-                    name="name"
+                    name="firstname"
                     value={firstname}
                     onChange={changeHandler}
                     placeholder="Enter Your Name"
@@ -1007,13 +1005,8 @@ const Login = () => {
                 <p className="text-center">
                   Already have an account?<span className="forgotText" onClick={() => setSignUp(false)}>Login</span>
                 </p>
-
               </form>
             )}
-
-
-
-
           </div>
         </div>
 
