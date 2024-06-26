@@ -24,6 +24,7 @@ const Hostels = ({ onTabSelect, activeTab }) => {
     const fetchBoysHostels = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
+        console.log(data,"hostelsdata2");
         const formattedData = Object.keys(data).map(key => ({
           id: key,
           name: data[key].name,
