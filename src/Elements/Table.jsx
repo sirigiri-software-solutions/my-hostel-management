@@ -45,8 +45,8 @@ const Table = ({ columns, rows, onClickTentantRow }) => {
               {item.s_no && <td data-label={t('mobileTable.serialNumber')} style={{ padding: "7px" }} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.s_no}</td>}
               {item.image && <td data-label={t('mobileTable.image')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}><img className='personImage' src={item.image} alt='img' /></td>}
               {/* {item.name && <td className='hosteltable' data-label={t('mobileTable.name')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.name}</td>} */}
-              {item.id && <td data-label={t('mobileTable.id')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.id}</td>}
               {item.name && <td className='hosteltable' data-label={t('mobileTable.name')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.name}</td>}
+              {item.id && <td data-label={t('mobileTable.id')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.id}</td>}
               {item.mobile_no && <td data-label={t('mobileTable.mobileNumber')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.mobile_no}</td>}
               {item.room_bed_no && <td data-label={t('mobileTable.roomBedNumber')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.room_bed_no}</td>}
               {item.bed_number && <td data-label={t('mobileTable.bedNumber')}>{item.bed_number}</td>}
