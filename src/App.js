@@ -7,7 +7,7 @@ import SignUp from './pages/SignUp/SignUp';
 import { ToastContainer } from 'react-toastify';
 import { DataProvider } from './ApiData/ContextProvider';
 import ProtectedRoute from './ProtectedRoute';
-import AllHostels from './Sections/Hostels/HostelsData';
+// import AllHostels from './Sections/Hostels/HostelsData';
 
 const App = () => {
   return (
@@ -15,7 +15,7 @@ const App = () => {
       <DataProvider> 
       <ToastContainer />
       <Routes>
-        <Route path='/allhostels'index  element={<AllHostels/>}/>
+        {/* <Route path='/allhostels'index  element={<AllHostels/>}/> */}
         <Route index element={<Login />} />
         <Route path="/mainPage" element={
           <ProtectedRoute>

@@ -9,8 +9,8 @@ import { useTranslation } from 'react-i18next';
 import './settings.css';
 import { Modal, Button } from 'react-bootstrap';
 import { useData } from '../../ApiData/ContextProvider';
-import {  useEffect } from 'react';
-import {  get, onValue } from 'firebase/database';
+import { useEffect } from 'react';
+import { get, onValue } from 'firebase/database';
 // import { database } from '../../firebase/firebase';
 
 
@@ -24,56 +24,83 @@ const Settings = () => {
   const [isBoysModalOpen, setIsBoysModalOpen] = useState(false);
   const [isGirlsModalOpen, setIsGirlsModalOpen] = useState(false);
   const [boysHostels, setBoysHostels] = useState([]);
-const [girlsHostels, setGirlsHostels] = useState([]);
+  const [girlsHostels, setGirlsHostels] = useState([]);
+  const [boysHostelImage, setBoysHostelImage] = useState('');
+  const [girlsHostelImage, setGirlsHostelImage] = useState('');
 
-useEffect(() => {
-  if (userUid) {
-    // Fetch boys hostels
-    const boysHostelsRef = ref(database, `Hostel/${userUid}/boys`);
-    console.log(boysHostelsRef,"myhostels");
+  useEffect(() => {
+    if (userUid) {
+      // Fetch boys hostels
+      const boysHostelsRef = ref(database, `Hostel/${userUid}/boys`);
+      console.log(boysHostelsRef, "myhostels");
 
-    onValue(boysHostelsRef, (snapshot) => {
-      const hostels = [];
-      snapshot.forEach((childSnapshot) => {
-        hostels.push({
-          id: childSnapshot.key,
-          ...childSnapshot.val()
+      onValue(boysHostelsRef, (snapshot) => {
+        const hostels = [];
+        snapshot.forEach((childSnapshot) => {
+          hostels.push({
+            id: childSnapshot.key,
+            ...childSnapshot.val()
+          });
         });
+        setBoysHostels(hostels);
       });
-      setBoysHostels(hostels);
-    });
 
-    // Fetch girls hostels
-    const girlsHostelsRef = ref(database, `Hostel/${userUid}/girls`);
-    onValue(girlsHostelsRef, (snapshot) => {
-      const hostels = [];
-      snapshot.forEach((childSnapshot) => {
-        hostels.push({
-          id: childSnapshot.key,
-          ...childSnapshot.val()
+      // Fetch girls hostels
+      const girlsHostelsRef = ref(database, `Hostel/${userUid}/girls`);
+      onValue(girlsHostelsRef, (snapshot) => {
+        const hostels = [];
+        snapshot.forEach((childSnapshot) => {
+          hostels.push({
+            id: childSnapshot.key,
+            ...childSnapshot.val()
+          });
         });
+        setGirlsHostels(hostels);
       });
-      setGirlsHostels(hostels);
-    });
-  }
-}, [userUid]);
-console.log('Boys Hostels:', boysHostels);
-console.log('Girls Hostels:', girlsHostels);
-
-
-
+    }
+  }, [userUid]);
 
   const capitalizeFirstLetter = (string) => {
     return string.replace(/\b\w/g, char => char.toUpperCase());
   };
 
+  
+  const handleHostelChange = (e, isBoys) => {
+    const file = e.target.files[0];
+    if (!file) {
+      toast.error("Please select a file.", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+      return;
+    }
+  
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      if (isBoys) {
+        setBoysHostelImage(dataUrl);
+      } else {
+        setGirlsHostelImage(dataUrl);
+      }
+    };
+    reader.onerror = () => {
+      toast.error("Failed to read file.", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+  
+
   const addNewHostel = (e, isBoys) => {
     e.preventDefault();
     const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
     const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
-
-    if (name.trim() === '' || address.trim() === '') {
-      toast.error("Hostel name and address cannot be empty.", {
+    const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
+    if (name.trim() === '' || address.trim() === '' || hostelImage.trim()==='') {
+      toast.error("Hostel name, address and image cannot be empty.", {
         position: "top-center",
         autoClose: 3000,
       });
@@ -81,7 +108,7 @@ console.log('Girls Hostels:', girlsHostels);
     }
 
     const hostelRef = ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
-    const hostelDetails = { name, address };
+    const hostelDetails = { name, address , hostelImage};
 
     set(hostelRef, hostelDetails)
       .then(() => {
@@ -91,10 +118,12 @@ console.log('Girls Hostels:', girlsHostels);
         });
         if (isBoys) {
           setNewBoysHostelName('');
+          setBoysHostelImage('');
           setNewBoysHostelAddress('');
           setIsBoysModalOpen(false);
         } else {
           setNewGirlsHostelName('');
+          setGirlsHostelImage('');
           setNewGirlsHostelAddress('');
           setIsGirlsModalOpen(false);
         }
@@ -106,6 +135,8 @@ console.log('Girls Hostels:', girlsHostels);
         });
       });
   };
+
+
 
   return (
     <div className="settings">
@@ -155,6 +186,10 @@ console.log('Girls Hostels:', girlsHostels);
                 onChange={(e) => setNewBoysHostelAddress(e.target.value)}
               />
             </div>
+            <div className="col-md-6">
+              <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
+              <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, true)} />
+            </div>
             <div className='settingsBtn'>
               <Button variant="primary" style={{ marginRight: '10px' }} type="submit">{t("settings.addHostel")}</Button>
               <Button variant="secondary" onClick={() => setIsBoysModalOpen(false)}>{t("settings.close")}</Button>
@@ -190,6 +225,10 @@ console.log('Girls Hostels:', girlsHostels);
                 value={newGirlsHostelAddress}
                 onChange={(e) => setNewGirlsHostelAddress(e.target.value)}
               />
+            </div>
+            <div className="col-md-6">
+              <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
+              <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, false)} />
             </div>
             <Button variant="primary" type="submit" style={{ marginRight: '10px' }}>{t("settings.addHostel")}</Button>
             <Button variant="secondary" onClick={() => setIsGirlsModalOpen(false)}>{t("settings.close")}</Button>
