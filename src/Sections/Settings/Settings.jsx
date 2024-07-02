@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ref, set } from 'firebase/database';
+import { ref, set, push } from 'firebase/database';
 // import { database } from '../../firebase';
 import { database } from '../../firebase/firebase';
 import { toast } from 'react-toastify';
@@ -63,7 +63,6 @@ const Settings = () => {
   const capitalizeFirstLetter = (string) => {
     return string.replace(/\b\w/g, char => char.toUpperCase());
   };
-
   
   const handleHostelChange = (e, isBoys) => {
     const file = e.target.files[0];
@@ -93,24 +92,73 @@ const Settings = () => {
     reader.readAsDataURL(file);
   };
   
+  // const addNewHostel = (e, isBoys) => {
+  //   e.preventDefault();
+  //   const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
+  //   const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
+  //   const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
+  //   if (name.trim() === '' || address.trim() === '' || hostelImage.trim()==='') {
+  //     toast.error("Hostel name, address and image cannot be empty.", { 
+  //       position: "top-center",
+  //       autoClose: 3000,
+  //     });
+  //     return;
+  //   }
+
+  //   const hostelRef = ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+  //   const hostelDetails = { name, address , hostelImage};
+
+  //   set(hostelRef, hostelDetails)
+  //     .then(() => {
+  //       toast.success(`New ${isBoys ? 'boys' : 'girls'} hostel '${name}' added successfully.`, {
+  //         position: "top-center",
+  //         autoClose: 3000,
+  //       });
+  //       if (isBoys) {
+  //         setNewBoysHostelName('');
+  //         setBoysHostelImage('');
+  //         setNewBoysHostelAddress('');
+  //         setIsBoysModalOpen(false);
+  //       } else {
+  //         setNewGirlsHostelName('');
+  //         setGirlsHostelImage('');
+  //         setNewGirlsHostelAddress('');
+  //         setIsGirlsModalOpen(false);
+  //       }
+  //     })
+  //     .catch(error => {
+  //       toast.error("Failed to add new hostel: " + error.message, {
+  //         position: "top-center",
+  //         autoClose: 3000,
+  //       });
+  //     });
+  // };
+
 
   const addNewHostel = (e, isBoys) => {
     e.preventDefault();
     const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
     const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
     const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
-    if (name.trim() === '' || address.trim() === '' || hostelImage.trim()==='') {
+  
+    if (name.trim() === '' || address.trim() === '' || hostelImage.trim() === '') {
       toast.error("Hostel name, address and image cannot be empty.", {
         position: "top-center",
         autoClose: 3000,
       });
       return;
     }
-
-    const hostelRef = ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
-    const hostelDetails = { name, address , hostelImage};
-
-    set(hostelRef, hostelDetails)
+  
+    // Create a new reference with a unique ID
+    const newHostelRef = push(ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`));
+    const hostelDetails = {
+      id: newHostelRef.key, // Store the unique key if needed
+      name,
+      address,
+      hostelImage
+    };
+  
+    set(newHostelRef, hostelDetails)
       .then(() => {
         toast.success(`New ${isBoys ? 'boys' : 'girls'} hostel '${name}' added successfully.`, {
           position: "top-center",
@@ -135,9 +183,7 @@ const Settings = () => {
         });
       });
   };
-
-
-
+  
   return (
     <div className="settings">
       <h1 className='settingsPageHeading'>{t('menuItems.settings')}</h1>
@@ -187,7 +233,7 @@ const Settings = () => {
               />
             </div>
             <div className="col-md-6">
-              <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
+              <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
               <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, true)} />
             </div>
             <div className='settingsBtn'>
@@ -227,7 +273,7 @@ const Settings = () => {
               />
             </div>
             <div className="col-md-6">
-              <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
+              <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
               <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, false)} />
             </div>
             <Button variant="primary" type="submit" style={{ marginRight: '10px' }}>{t("settings.addHostel")}</Button>

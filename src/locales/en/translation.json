@@ -364,7 +364,7 @@
         "hostelAddress":"Hostel Address",
         "close":"Close",
         "enterhostelName":"Enter new Hostel name",
-        "enterhostelAddress":"Enter Hostel address"
-
+        "enterhostelAddress":"Enter Hostel address",
+        "hostelImage":"Hostel Image"
     }
   }

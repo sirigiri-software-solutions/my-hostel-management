@@ -1647,18 +1647,25 @@ Please note that you made your last payment on ${paidDate}.\n`
       <h1 className="heading1">{t('dashboard.womens')}</h1>
       <br />
       {activeGirlsHostelButtons.length > 0 ? (
-        <div className={"flex1"}>
+        <div className={"flex"}>
           {activeGirlsHostelButtons.map((button, index) => (
-            <button className={`btn m-2 ${activeGirlsHostel === `${button}` ? 'active-button' : 'inactive-button'}`} onClick={() => setActiveGirlsHostel(button)} key={index} style={{
-              backgroundColor: activeGirlsHostel === button ? '#FF8A00' : '#fac38c', // Example colors
-              color: activeGirlsHostel === button ? 'white' : '#333333' // Set text color (optional)
-            }}
-            >{button}</button>
+            <button
+              className={`btn m-1 ${activeGirlsHostel === button.id ? 'active-button' : 'inactive-button'}`}
+               onClick={() => setActiveGirlsHostel(button.id)} // Assuming you want to track active hostel by id
+              key={button.id} 
+              style={{
+                backgroundColor: activeGirlsHostel === button.id ? '#FF8A00' : '#fac38c', 
+                color: activeGirlsHostel === button.id ? 'white' : '#333333' 
+              }}
+            >
+              {button.name} 
+            </button>
           ))}
         </div>
       ) : (
         <p>No active hostels found.</p>
       )}
+
 
       <div className="menu">
         {menu.map((item, index) => (
