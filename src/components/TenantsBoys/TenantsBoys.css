@@ -442,7 +442,9 @@
   #tenantVacateButton{
     width:60px;
     font-size:10px;
-      font-weight:600;
+    font-weight:600;
+    padding:0px;
+    line-height: 11px;
   }
   #presentTenantBtn{
     width:120px;

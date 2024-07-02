@@ -18,7 +18,7 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid } = useData();
+  const { activeBoysHostel, userUid , activeBoysHostelButtons} = useData();
   const role = localStorage.getItem('role');
 
 
@@ -483,16 +483,25 @@ const TenantsBoys = () => {
 
 
   const handleAddNew = () => {
-    // Reset any previous data
+    if (activeBoysHostelButtons.length == 0) {
+      toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
+
     resetForm();
-    // Set modal for a new entry
     setIsEditing(false);
-    // Open the modal
     setShowModal(true);
     setUserDetailsTenantsPopup(false);
     setTenantIdUrl('')
     setHasBike(false);
-
+    }
   };
 
   const resetForm = () => {
@@ -592,7 +601,7 @@ const TenantsBoys = () => {
   const filteredRows = rows.filter((row) => {
     // Check if any value in the row matches the search query
     const hasSearchQueryMatch = Object.values(row).some((value) =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     );
   
     // Apply additional filtering based on the selected status
@@ -838,7 +847,7 @@ const TenantsBoys = () => {
           <input type="text" placeholder={t('common.search')} className='search-input' value={searchQuery} onChange={handleSearchChange} />
           <img src={SearchIcon} alt="search-icon" className='search-icon' />
         </div>
-        <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end '>
+        <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end justify-cotent-end'>
           <div className='d-flex align-items-center text-center'>
           {showBikeFilter?( <div className="toggle-container">
                 <label className="toggle-label" htmlFor="status-toggleGirl">{t('tenantsPage.bike')}</label>
@@ -861,7 +870,7 @@ const TenantsBoys = () => {
               </button>}
               
             </div>
-            <div className={showExTenants ? "col-4 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
+            <div className={showExTenants ? "col-8 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
               {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
               {t('tenantsPage.presentTenants')}
               </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >

@@ -19,7 +19,7 @@ import './TenantsGirls.css';
 const TenantsGirls = () => {
   const { t } = useTranslation();
 
-  const { activeGirlsHostel , userUid} = useData();
+  const { activeGirlsHostel , userUid, activeGirlsHostelButtons} = useData();
   const role = localStorage.getItem('role');
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -389,15 +389,25 @@ const TenantsGirls = () => {
   };
 
   const handleAddNew = () => {
-    // Reset any previous data
+    if (activeGirlsHostelButtons.length == 0) {
+      toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
+
     resetForm();
-    // Set modal for a new entry
     setIsEditing(false);
-    // Open the modal
     setShowModal(true);
     setUserDetailsTenantsPopup(false);
     setTenantIdUrl('')
     setHasBike(false);
+    }
   };
 
   // const handleDelete = async (id) => {
@@ -531,7 +541,7 @@ const TenantsGirls = () => {
   const filteredRows = rows.filter((row) => {
     // Check if any value in the row matches the search query
     const hasSearchQueryMatch = Object.values(row).some((value) =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     );
   
     // Apply additional filtering based on the selected status
@@ -792,7 +802,7 @@ const TenantsGirls = () => {
 
               </div>
               <div className={showExTenants ? "col-8 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
-              {showExTenants ? <button type="button" id="presentTenantBtn1" class="add-button text-center" onClick={showExTenantsData} >
+              {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
               {t('tenantsPage.presentTenants')}
               </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
               {t('tenantsPage.vacated')}
