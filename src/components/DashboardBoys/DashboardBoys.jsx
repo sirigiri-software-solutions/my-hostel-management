@@ -515,7 +515,7 @@ const DashboardBoys = () => {
     if (isBedOccupied) {
       tempErrors.selectedBed = t('errors.bedAlreadyOccupied');
     }
-    if (!tenantImage ) {
+    if (!tenantImage) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
     setTenantErrors(tempErrors);
@@ -544,7 +544,7 @@ const DashboardBoys = () => {
       reader.readAsDataURL(file);
     }
   };
-  
+
   const handleTenantIdChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -1155,12 +1155,12 @@ const DashboardBoys = () => {
               {errors.bedRent && <div style={{ color: 'red' }}>{errors.bedRent}</div>}
             </div>
             {/* <div className="col-md-6"> */}
-              {/* <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label> */}
-              {/* <select className="form-select" id="inputRole" name="role" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}>
+            {/* <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label> */}
+            {/* <select className="form-select" id="inputRole" name="role" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}>
                 <option value="admin">{t('dashboard.admin')}</option>
                 <option value="sub-admin">{t('dashboard.subAdmin')}</option>
               </select> */}
-              {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} /> */}
+            {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} /> */}
             {/* </div> */}
             <div className="col-12 text-center">
               <button type="submit" className="btn btn-warning" onClick={handleBoysRoomsSubmit}>{t('dashboard.createRoom')}</button>
@@ -1185,8 +1185,8 @@ const DashboardBoys = () => {
                     <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} name="selectedTenant" onFocus={handleFocus}>
                       <option value="">{t('dashboard.selectTenant')} *</option>
                       {availableTenants.map(tenant => (
-                          <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
-                        ))}
+                        <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
+                      ))}
                     </select>
                     {errors.selectedTenant && <div style={{ color: 'red' }}>{errors.selectedTenant}</div>}
                   </div>
@@ -1555,12 +1555,12 @@ const DashboardBoys = () => {
               {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
             </div>
             {/* <div className="col-md-6"> */}
-              {/* <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label> */}
-              {/* <select className="form-select" id="inputRole" name="createdBy" value={formData.createdBy} onChange={handleInputChange}>
+            {/* <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label> */}
+            {/* <select className="form-select" id="inputRole" name="createdBy" value={formData.createdBy} onChange={handleInputChange}>
                 <option value="admin">{t('dashboard.admin')}</option>
                 <option value="sub-admin">{t('dashboard.subAdmin')}</option>
               </select> */}
-              {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} /> */}
+            {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} /> */}
             {/* </div> */}
             <div className="col-md-6">
               <label htmlFor="inputDate" className="form-label">{t('dashboard.expenseDate')}</label>
@@ -1674,16 +1674,23 @@ const DashboardBoys = () => {
       {activeBoysHostelButtons.length > 0 ? (
         <div className={"flex"}>
           {activeBoysHostelButtons.map((button, index) => (
-            <button className={`btn m-1 ${activeBoysHostel === `${button}` ? 'active-button' : 'inactive-button'}`} onClick={() => setActiveBoysHostel(button)} key={index} style={{
-              backgroundColor: activeBoysHostel === button ? '#FF8A00' : '#fac38c', // Example colors
-              color: activeBoysHostel === button ? 'white' : '#333333' // Set text color (optional)
-            }}
-            >{button}</button>
+            <button
+              className={`btn m-1 ${activeBoysHostel === button.id ? 'active-button' : 'inactive-button'}`}
+               onClick={() => setActiveBoysHostel(button.id)} // Assuming you want to track active hostel by id
+              key={button.id} // It's better to use unique ID than index for key if possible
+              style={{
+                backgroundColor: activeBoysHostel === button.id ? '#FF8A00' : '#fac38c', // Example colors
+                color: activeBoysHostel === button.id ? 'white' : '#333333' // Set text color (optional)
+              }}
+            >
+              {button.name} 
+            </button>
           ))}
         </div>
       ) : (
         <p>No active hostels found.</p>
       )}
+
       <div className="menu">
         {menu.map((item, index) => (
           <div className='cardWithBtnsContainer'>
