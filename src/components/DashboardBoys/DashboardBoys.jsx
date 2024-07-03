@@ -35,7 +35,7 @@ const DashboardBoys = () => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
 
 
-  const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, userArea, userUid } = useData();
+  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userArea, userUid } = useData();
   const [modelText, setModelText] = useState('');
   const [formLayout, setFormLayout] = useState('');
   const [floorNumber, setFloorNumber] = useState('');
@@ -50,7 +50,6 @@ const DashboardBoys = () => {
   const [showModal, setShowModal] = useState(false);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [currentMonthExpenses, setCurrentMonthExpenses] = useState([])
-
   //===============================
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
@@ -813,7 +812,7 @@ const DashboardBoys = () => {
       dateOfJoin,
       paidDate,
       dueDate,
-      status: parseFloat(due) <= 0 ? t('rentPage.paid') : t('rentPage.unpaid'),
+      status: parseFloat(due) <= 0 ? 'Paid' : 'Unpaid',
     };
 
     if (isEditing) {
@@ -1676,7 +1675,7 @@ const DashboardBoys = () => {
           {activeBoysHostelButtons.map((button, index) => (
             <button
               className={`btn m-1 ${activeBoysHostel === button.id ? 'active-button' : 'inactive-button'}`}
-               onClick={() => setActiveBoysHostel(button.id)} // Assuming you want to track active hostel by id
+               onClick={() =>{ setActiveBoysHostel(button.id); setActiveBoysHostelName(button.name)}} // Assuming you want to track active hostel by id
               key={button.id} // It's better to use unique ID than index for key if possible
               style={{
                 backgroundColor: activeBoysHostel === button.id ? '#FF8A00' : '#fac38c', // Example colors

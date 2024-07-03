@@ -17,8 +17,10 @@ function useDeepCompareEffect(callback, dependencies) {
 const DataProvider = ({ children }) => {
   const [data, setData] = useState(null);
   const [activeBoysHostel, setActiveBoysHostel] = useState(null);
+  const [activeBoysHostelName, setActiveBoysHostelName] = useState(null);
   const [activeBoysHostelButtons, setActiveBoysHostelButtons] = useState([]);
   const [activeGirlsHostel, setActiveGirlsHostel] = useState(null);
+  const [activeGirlsHostelName, setActiveGirlsHostelName] = useState(null);
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
   const [userarea, setUserArea] = useState();
   const [userUid, setUserUid] = useState()
@@ -116,12 +118,14 @@ console.log(activeBoysHostelButtons, "activeBoysHostelButtons")
   useDeepCompareEffect(() => {
     if (activeBoysHostelButtons.length > 0) {
       setActiveBoysHostel(activeBoysHostelButtons[0].id);
+      setActiveBoysHostelName(activeBoysHostelButtons[0].name)
     }
   }, [activeBoysHostelButtons]);
-
+console.log(activeBoysHostelName, "ActiveBoysHostelName")
   useDeepCompareEffect(() => {
     if (activeGirlsHostelButtons.length > 0) {
       setActiveGirlsHostel(activeGirlsHostelButtons[0].id);
+      setActiveGirlsHostelName(activeGirlsHostelButtons[0].name)
     }
   }, [activeGirlsHostelButtons]);
 
@@ -130,7 +134,7 @@ console.log(activeBoysHostelButtons, "activeBoysHostelButtons")
   console.log("user UID", userUid)
  
   return (
-    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid }}>
+    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid }}>
       {children}
     </DataContext.Provider>
   );
