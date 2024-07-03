@@ -787,7 +787,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       dateOfJoin,
       paidDate,
       dueDate,
-      status: parseFloat(due) <= 0 ? t('rentPage.paid') : t('rentPage.unpaid'),
+      status: parseFloat(due) <= 0 ? 'Paid' : 'Unpaid',
     };
 
     if (isEditing) {
@@ -1647,7 +1647,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       <h1 className="heading1">{t('dashboard.womens')}</h1>
       <br />
       {activeGirlsHostelButtons.length > 0 ? (
-        <div className={"flex"}>
+        <div className={"flex1"}>
           {activeGirlsHostelButtons.map((button, index) => (
             <button
               className={`btn m-1 ${activeGirlsHostel === button.id ? 'active-button' : 'inactive-button'}`}

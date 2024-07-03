@@ -449,7 +449,7 @@ Please note that you made your last payment on ${paidDate}.\n`
   // console.log(rentsRows,'rent')
   // const count = 0;
 
-
+  console.log(rentsRows, "rentsRows")
   const rows = rentsRows.map((rent, index) => {
     const currentDate = new Date();
     const dueDate = new Date(rent.dueDate);
@@ -461,7 +461,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       person_name: rent.name,
       person_mobile: rent.mobileNo,
       bed_no: rent.bedNumber,
-      rent: "Rs. " + rent.totalFee,
+      bedRent: rent.totalFee,
       paid: rent.paid,
       due: rent.due,
       joining_date: rent.dateOfJoin,
@@ -590,7 +590,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           </div>
 
           <div className="col-6 col-md-4 d-flex justify-content-end">
-            <div className="form-group">             
+            <div className="form-group">
               <select
                 id="dueDateFilter"
                 className="form-control"

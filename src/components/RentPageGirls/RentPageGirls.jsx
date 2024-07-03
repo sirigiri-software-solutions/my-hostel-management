@@ -457,7 +457,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       person_name: rent.name,
       person_mobile: rent.mobileNo,
       bed_no: rent.bedNumber,
-      rent: "Rs. " + rent.totalFee,
+      bedRent: rent.totalFee,
       paid: rent.paid,
       due: rent.due,
       joining_date: rent.dateOfJoin,
