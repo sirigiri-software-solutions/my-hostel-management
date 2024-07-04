@@ -42,9 +42,9 @@ const TenantsGirls = () => {
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
-  const [tenantImageUrl, setTenantImageUrl] = useState('');
+  // const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantId, setTenantId] = useState(null);
-  const [tenantIdUrl, setTenantIdUrl] = useState('');
+  // const [tenantIdUrl, setTenantIdUrl] = useState('');
   // const imageInputRef = useRef(null);
   // const idInputRef = useRef(null);
   const [girlsRoomsData, setGirlsRoomsData] = useState([]);
@@ -149,11 +149,8 @@ const TenantsGirls = () => {
     reader.onload = () => {
       // Once the file is loaded, set the image in state
       setBikeImage(reader.result);
-
     };
     // console.log(file,"file created");
-
-
     reader.readAsDataURL(file);
     console.log(file, "file created");
   };
@@ -169,9 +166,6 @@ const TenantsGirls = () => {
     console.log(file1, "file1 created");
 
   }
-
-
-
 
   const handleCheckboxChange = (e) => {
     setHasBike(e.target.value == 'yes');
@@ -190,25 +184,20 @@ const TenantsGirls = () => {
       console.log("Triggering")
       if (showModal && (event.target.id === "exampleModalTenantsGirls" || event.key === "Escape")) {
         setShowModal(false);
-        setTenantIdUrl('')
+        setTenantId('')
       }
-
-
-
     };
 
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener('keydown', handleOutsideClick)
   }, [showModal]);
 
-
-
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       const popup = document.getElementById('userDetailsTenantPopupIdGirl');
       if (popup && (!popup.contains(event.target) || event.key === "Escape")) {
         setUserDetailsTenantsPopup(false);
+        tenantPopupClose()
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -293,7 +282,7 @@ const TenantsGirls = () => {
     if (isBedOccupied) {
       tempErrors.selectedBed = t('errors.bedAlreadyOccupied');
     }
-    if (!tenantImage && !tenantImageUrl) {
+    if (!tenantImage ) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
 
@@ -301,19 +290,44 @@ const TenantsGirls = () => {
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
+  // const handleTenantImageChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     setTenantImage(e.target.files[0]);
+  //   }
+  // };
   const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // Once the file is loaded, set the image in state as a base64 URL
+        setTenantImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
+  console.log("tenant image", tenantImage)
+
   const handleTenantIdChange = (e) => {
-    if (e.target.files[0]) {
-      const file = e.target.files[0]
-      console.log(file, "filename");
-      setFileName(file.name)
-      setTenantId(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // Once the file is loaded, set the image in state as a base64 URL
+        setTenantId(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
+  console.log("tenant id", tenantId)
+  // const handleTenantIdChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     const file = e.target.files[0]
+  //     console.log(file, "filename");
+  //     setFileName(file.name)
+  //     setTenantId(e.target.files[0]);
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -328,28 +342,28 @@ const TenantsGirls = () => {
       if (!validate()) return;
     }
 
-    let imageUrlToUpdate = tenantImageUrl;
+    // let imageUrlToUpdate = tenantImageUrl;
 
-    if (tenantImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, tenantImage);
-        imageUrlToUpdate = await getDownloadURL(snapshot.ref);
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-      }
-    }
+    // if (tenantImage) {
+    //   const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+    //   try {
+    //     const snapshot = await uploadBytes(imageRef, tenantImage);
+    //     imageUrlToUpdate = await getDownloadURL(snapshot.ref);
+    //   } catch (error) {
+    //     console.error("Error uploading tenant image:", error);
+    //   }
+    // }
 
-    let idUrlToUpdate = tenantIdUrl;
-    if (tenantId) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, tenantId);
-        idUrlToUpdate = await getDownloadURL(snapshot.ref);
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-      }
-    }
+    // let idUrlToUpdate = tenantIdUrl;
+    // if (tenantId) {
+    //   const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
+    //   try {
+    //     const snapshot = await uploadBytes(imageRef, tenantId);
+    //     idUrlToUpdate = await getDownloadURL(snapshot.ref);
+    //   } catch (error) {
+    //     console.error("Error uploading tenant image:", error);
+    //   }
+    // }
 
 
 
@@ -362,8 +376,8 @@ const TenantsGirls = () => {
       idNumber,
       emergencyContact,
       status,
-      tenantImageUrl: imageUrlToUpdate,
-      tenantIdUrl: idUrlToUpdate,
+      tenantImage,
+      tenantId,
       bikeNumber,
       // fileName: fileName,
       permnentAddress,
@@ -438,8 +452,9 @@ const TenantsGirls = () => {
     setIsEditing(true);
     setCurrentId(tenant.id);
     // setTenantImage(tenant.tenantImageUrl);
-    setTenantImageUrl(tenant.tenantImageUrl || ''); // Set the current image URL
-    setTenantIdUrl(tenant.tenantIdUrl || '');
+    setTenantImage(tenant.tenantImage)
+    // setTenantIdUrl(tenant.tenantIdUrl || '');
+    setTenantId(tenant.tenantId || '');
     setFileName(tenant.fileName || '');
     console.log(tenant, "tenantDetails")
     setHasBike(false);
@@ -472,7 +487,6 @@ const TenantsGirls = () => {
     setIsEditing(false);
     setShowModal(true);
     setUserDetailsTenantsPopup(false);
-    setTenantIdUrl('')
     setHasBike(false);
     }
   };
@@ -495,8 +509,8 @@ const TenantsGirls = () => {
     setErrors({});
     setTenantImage(null);
     setTenantId(null);
-    setTenantImageUrl('');
-    setTenantIdUrl('');
+    setTenantImage('')
+    setTenantId('')
     setBikeNumber('NA');
 
     tenantImageInputRef.current.value = null;
@@ -577,7 +591,7 @@ const TenantsGirls = () => {
 
   const rows = tenants.map((tenant, index) => ({
     s_no: index + 1,
-    image: tenant.tenantImageUrl,
+    image: tenant.tenantImage,
     name: capitalizeFirstLetter(tenant.name), // Assuming 'name' property exists in the fetched data
     id: tenant.idNumber, // Assuming 'id' property exists in the fetched data
     mobile_no: tenant.mobileNo, // Assuming 'mobile_no' property exists in the fetched data
@@ -627,7 +641,8 @@ const TenantsGirls = () => {
 
   const handleClosePopUp = () => {
     setShowModal(false);
-    setTenantIdUrl('')
+    // setTenantIdUrl('')
+    setTenantId('')
     setHasBike(false);
     setBikeNumber("");
     setFileName('');
@@ -658,8 +673,8 @@ const TenantsGirls = () => {
       console.log("Tenant with due date not found or due date is missing");
     }
 
-    if (singleUserDueDate && singleUserDueDate.tenantIdUrl) {
-      setSingleTenantProofId(singleUserDueDate.tenantIdUrl)
+    if (singleUserDueDate && singleUserDueDate.tenantId) {
+      setSingleTenantProofId(singleUserDueDate.tenantId)
     }
 
     if (singleUserDueDate && singleUserDueDate.permnentAddress) {
@@ -791,7 +806,7 @@ const TenantsGirls = () => {
 
   const exTenantRows = exTenants.map((tenant, index) => ({
     s_no: index + 1, // Assuming `id` is a unique identifier for each tenant
-    image: tenant.tenantImageUrl,
+    image: tenant.tenantImage,
     name: capitalizeFirstLetter(tenant.name),
     id: tenant.idNumber,
     mobile_no: tenant.mobileNo,
@@ -862,12 +877,12 @@ const TenantsGirls = () => {
               </label>
             </div>) : null}
             <div className='d-flex justify-content-center align-items-center'>
-              <div className={showExTenants ? "col-1 bedPageFilterDropdown" : "col-5 bedPageFilterDropdown"}>
-                {showExTenants ? '' : <button id="tenantAddButton" type="button" class="add-button" onClick={() => { handleAddNew(); }} >
-                  {t('dashboard.addTenants')}
-                </button>}
-
-              </div>
+            <div className={showExTenants ? "col-1 bedPageFilterDropdown" : "col-5 bedPageFilterDropdown"}>
+              {showExTenants ? '' : <button id="tenantAddButton" type="button" class="add-button" onClick={() => { handleAddNew(); }} >
+               {t('dashboard.addTenants')}
+              </button>}
+              
+            </div>
               <div className={showExTenants ? "col-8 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
               {showExTenants ? <button type="button" id="presentTenantBtn1" class="add-button text-center" onClick={showExTenantsData} >
               {t('tenantsPage.presentTenants')}
@@ -983,9 +998,9 @@ const TenantsGirls = () => {
                     <label htmlFor='tenantUpload' class="form-label">
                       {t('dashboard.uploadImage')}
                     </label>
-                    {isEditing && tenantImageUrl && (
+                    {isEditing && tenantImage && (
                       <div>
-                        <img src={tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
+                        <img src={tenantImage} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
@@ -1007,7 +1022,7 @@ const TenantsGirls = () => {
                     <label htmlFor='tenantUploadId' class="form-label">
                       {t('dashboard.uploadId')}:
                     </label>
-                    {isEditing && tenantIdUrl && (
+                    {isEditing && tenantId && (
                       <div>
                         <p>{fileName}</p>
                       </div>

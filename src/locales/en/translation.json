@@ -170,7 +170,7 @@
         "bike": "Bike",
         "yes": "Yes",
         "no": "No",
-        "presentTenants": "Present-Tenants",
+        "presentTenants": "Present- Tenants",
         "vacated": "Vacated",
         "updateTenant": "Update Tenant",
         "vacateTenant": "Vacate Tenant",
@@ -349,7 +349,7 @@
        "cancel":"Cancel",
        "save":"Save",
        "confirmDelete":"Confirm Delete",
-       "confirmMsg":"Are you sure you want to delete this hostel?",
+       "confirmMsg":"If you are Delete this Hostel, all the Data related to rooms, beds, tenants, rents and expenses will be deleted and you can't access it again.  Are you sure you want to delete this hostel? ",
        "delete":"Delete"
 
     },
@@ -364,7 +364,7 @@
         "hostelAddress":"Hostel Address",
         "close":"Close",
         "enterhostelName":"Enter new Hostel name",
-        "enterhostelAddress":"Enter Hostel address"
-
+        "enterhostelAddress":"Enter Hostel address",
+        "hostelImage":"Hostel Image"
     }
   }

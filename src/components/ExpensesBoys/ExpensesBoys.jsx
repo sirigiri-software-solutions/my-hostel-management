@@ -543,14 +543,14 @@ const ExpensesBoys = () => {
                       <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onChange={handleInputChange} onFocus={handleExpensesFocus}  />
                       {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
                     </div>
-                    <div className="col-md-6">
-                      <label htmlFor="inputRole" className="form-label">{t('expensesPage.createdBy')} :</label>
+                    {/* <div className="col-md-6"> */}
+                      {/* <label htmlFor="inputRole" className="form-label">{t('expensesPage.createdBy')} :</label> */}
                       {/* <select className="form-select" id="inputRole" name="createdBy" value={formData.createdBy} onChange={handleInputChange}>
                         <option value="admin">{t('expensesPage.admin')} </option>
                         <option value="sub-admin">{t('expensesPage.subAdmin')} </option>
                       </select> */}
-                       <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={formData.createdBy}  />
-                    </div>
+                       {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={formData.createdBy}  /> */}
+                    {/* </div>b  */}
                     <div className="col-md-6">
                       <label htmlFor="inputDate" className="form-label">{t('expensesPage.expenseDate')} : </label>
                       <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus}  />
@@ -564,7 +564,7 @@ const ExpensesBoys = () => {
                       {editingExpense && (
                         <>
                           <button type="button" className="btn btn-success" style={{ marginRight: '10px' }} onClick={handleUpdate}>{t('expensesPage.updateExpense')}</button>
-                        {role === "admin" ? <button type="button" className="btn btn-danger" onClick={handleDelete}>{t('expensesPage.deleteExpense')}</button> : null }
+                         <button type="button" className="btn btn-danger" onClick={handleDelete}>{t('expensesPage.deleteExpense')}</button> 
                         </>
                       )}
                     </div>
