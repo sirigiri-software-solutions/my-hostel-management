@@ -1471,64 +1471,6 @@ Please note that you made your last payment on ${paidDate}.\n`
             <div class="col-md-6">
               <label htmlFor='tenantUpload' class="form-label">
                 {t('dashboard.uploadImage')}
-<<<<<<< HEAD
-                </label>
-                {isEditing && tenantImageUrl && (
-                  <div>
-                    <img src={tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
-                    <p>{t('dashboard.currentImage')}</p>
-                  </div>
-                )}
-                <input id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} ref={imageInputRef} required />
-                {isMobile && (
-                  <div>
-                  <p>{t('tenantsPage.or')}</p>
-                  <div style={{display:'flex',flexDirection:'row'}}>
-                  <p>{t('tenantsPage.takePhoto')}</p>
-                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeIdPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
-                  {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
-                  </div>
-                  </div>
-                    )}
-
-
-                {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
-              </div>
-              <div class="col-md-6">
-                <label htmlFor='tenantUploadId' class="form-label">
-                {t('dashboard.uploadId')}:
-                </label>
-                {isEditing && tenantIdUrl && (
-                  <object
-                    data={tenantIdUrl}
-                    type="application/pdf"
-                    width="50%"
-                    height="200px"
-                  >
-                    <a href={tenantIdUrl}>{t('dashboard.downloadPdf')}</a>
-                  </object>
-                )}
-                <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef} multiple />
-                {isMobile && (
-                  <div>
-                  <p>{t('tenantsPage.or')}</p>
-                  <div style={{display:'flex',flexDirection:'row'}}>
-                  <p>{t('tenantsPage.takePhoto')}</p>
-                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeIdPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
-                  {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
-                  </div>
-                  </div>
-                    )}
-                    
-              </div>
-              <div className='col-md-12'>
-                      <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
-                      <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' />
-                    </div>
-   
-              <div className="col-12 col-sm-12 col-md-12" style={{ marginTop: '20px' }}>
-                <label className='col-sm-12 col-md-4' htmlFor="bikeCheck">{t('dashboard.doYouHaveBike')}</label>
-=======
               </label>
               {isEditing && tenantImageUrl && (
                 <div>
@@ -1537,6 +1479,18 @@ Please note that you made your last payment on ${paidDate}.\n`
                 </div>
               )}
               <input id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} ref={imageInputRef} required />
+              {isMobile && (
+                  <div>
+                  <p>{t('tenantsPage.or')}</p>
+                  <div style={{display:'flex',flexDirection:'row'}}>
+                  <p>{t('tenantsPage.takePhoto')}</p>
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeIdPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
+                  {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
+                  </div>
+                  </div>
+                    )}
+
+
               {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
             </div>
             <div class="col-md-6">
@@ -1554,6 +1508,16 @@ Please note that you made your last payment on ${paidDate}.\n`
                 </object>
               )}
               <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef} multiple />
+              {isMobile && (
+                  <div>
+                  <p>{t('tenantsPage.or')}</p>
+                  <div style={{display:'flex',flexDirection:'row'}}>
+                  <p>{t('tenantsPage.takePhoto')}</p>
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeIdPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
+                  {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
+                  </div>
+                  </div>
+                    )}
 
             </div>
             <div className='col-md-12'>
@@ -1588,7 +1552,6 @@ Please note that you made your last payment on ${paidDate}.\n`
             {hasBike && (
               <div className='bikeField' style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
                 <label class="bikenumber" htmlFor="bikeNumber" >{t('dashboard.bikeNumber')}</label>
->>>>>>> 551e7bfc2a6c822588fcce2271ddf7bbf7c7e02b
                 <input
                   type="text"
                   id="bikeNumber"
