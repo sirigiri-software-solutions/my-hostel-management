@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 const RentPageGirls = () => {
   const { t } = useTranslation();
   const { data } = useContext(DataContext);
-  const { activeGirlsHostel, userUid , activeGirlsHostelButtons} = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [tenants, setTenants] = useState([]);
   const [rooms, setRooms] = useState({});
@@ -41,22 +41,22 @@ const RentPageGirls = () => {
   const [notify, setNotify] = useState(false);
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [showForm, setShowForm] = useState(true);
- 
-   
+  const [filterOption, setFilterOption] = useState('all');
+
 
   // Function to send WhatsApp message
   const sendMessage = (tenant, rentRecord) => {
     console.log(rentRecord, "RentRecordUpdating")
     const totalFee = rentRecord.totalFee;
     const tenantName = tenant.name;
-  const amount = rentRecord.due;
-  const dateOfJoin = tenant.dateOfJoin;
-  const dueDate = rentRecord.dueDate;
-  const paidAmount = rentRecord.paidAmount;
-  const paidDate = rentRecord.paidDate;
+    const amount = rentRecord.due;
+    const dateOfJoin = tenant.dateOfJoin;
+    const dueDate = rentRecord.dueDate;
+    const paidAmount = rentRecord.paidAmount;
+    const paidDate = rentRecord.paidDate;
 
 
-  const message = `Hi ${tenantName},\n
+    const message = `Hi ${tenantName},\n
 Hope you are doing fine.\n
 Your total fee is ${totalFee}.\n
 You have paid ${paidAmount} so far.\n
@@ -94,18 +94,18 @@ Please note that you made your last payment on ${paidDate}.\n`
   useEffect(() => {
     const handleOutsideClick = (event) => {
       console.log("Triggering")
-        if (showModal && (event.target.id === "exampleModalRentsGirls" || event.key === "Escape")) {
-            setShowModal(false);
-        }
-       
+      if (showModal && (event.target.id === "exampleModalRentsGirls" || event.key === "Escape")) {
+        setShowModal(false);
+      }
+
     };
     window.addEventListener('click', handleOutsideClick);
-    window.addEventListener('keydown',handleOutsideClick)
-    
-}, [showModal]);
+    window.addEventListener('keydown', handleOutsideClick)
 
-   
-  
+  }, [showModal]);
+
+
+
 
 
   useEffect(() => {
@@ -279,7 +279,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       if (tenant) {
         // Set the date of join
         setDateOfJoin(tenant.dateOfJoin || '');
-  
+
         // Calculate the due date (one day less than adding one month)
         const currentDate = new Date(tenant.dateOfJoin); // Get the join date
         const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1)); // Add one month and subtract one day
@@ -288,7 +288,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       }
     }
   }, [selectedTenant, tenants]);
-  
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -329,7 +329,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           handleNotifyCheckbox(rentData);
         } // Reset editing state
       }).catch(error => {
-        toast.error(t('toastMessages.errorAddingRent')+ error.message, {
+        toast.error(t('toastMessages.errorAddingRent') + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -369,15 +369,8 @@ Please note that you made your last payment on ${paidDate}.\n`
         });
       });
     }
-
-
     resetForm();
     setShowModal(false);
-
-
-
-
-
   };
 
   //===> For Clear Form for Add Rents
@@ -393,9 +386,9 @@ Please note that you made your last payment on ${paidDate}.\n`
         progress: undefined,
       })
     } else {
-    resetForm();
-    setIsEditing(false);
-    setShowModal(true);
+      resetForm();
+      setIsEditing(false);
+      setShowModal(true);
     }
   };
   const resetForm = () => {
@@ -412,7 +405,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     setErrors({});
   };
 
- 
+
 
 
   const handleSearch = (e) => {
@@ -453,34 +446,76 @@ Please note that you made your last payment on ${paidDate}.\n`
     rentId: rent.id,
   })))
 
-  const rows = rentsRows.map((rent, index) => ({
-    s_no: index + 1,
-    room_no: rent.roomNumber,
-    person_name: rent.name,
-    person_mobile: rent.mobileNo,
-    bed_no: rent.bedNumber,
-    rent: "Rs. " + rent.totalFee,
-    paid: rent.paid,
-    due: rent.due,
-    joining_date: rent.dateOfJoin,
-    due_date: rent.dueDate,
-    last_fee: rent.paidDate,
-    status: rent.status === 'Unpaid' ? 'Unpaid' : 'Paid',
-    actions: <button
-    style={{ backgroundColor: '#ff8a00', padding:'4px', borderRadius: '5px', color: 'white', border: 'none', }}
-    onClick={() => loadRentForEditing(rent.tenantId, rent.rentId)}
+  const rows = rentsRows.map((rent, index) => {
+    const currentDate = new Date();
+    const dueDate = new Date(rent.dueDate);
+    const isPastDue = currentDate > dueDate;
 
-  >
-    Update
-  </button>,
-  }));
-
-
-  const filteredRows = rows.filter(row => {
-    return Object.values(row).some(value =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return {
+      s_no: index + 1,
+      room_no: rent.roomNumber,
+      person_name: rent.name,
+      person_mobile: rent.mobileNo,
+      bed_no: rent.bedNumber,
+      rent: "Rs. " + rent.totalFee,
+      paid: rent.paid,
+      due: rent.due,
+      joining_date: rent.dateOfJoin,
+      due_date: rent.dueDate,
+      last_fee: rent.paidDate,
+      status: rent.status === 'Unpaid' ? 'Unpaid' : 'Paid',
+      actions: (
+        <button
+          style={{
+            backgroundColor: isPastDue ? 'red' : '#ff8a00',
+            padding: '4px',
+            borderRadius: '5px',
+            color: 'white',
+            border: 'none',
+          }}
+          onClick={() => {
+            loadRentForEditing(rent.tenantId, rent.rentId);
+            setShowForm(true);
+          }}
+        >
+          Update
+        </button>
+      ),
+    };
   });
+
+
+
+  // const filteredRows = rows.filter(row => {
+  //   return Object.values(row).some(value =>
+  //     value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+  //   );
+  // });
+  const filteredRows = rows.filter(row => {
+    const currentDate = new Date();
+    const dueDate = new Date(row.due_date);
+
+    const isPastDueDate = currentDate > dueDate;
+    const isTodayDueDate = currentDate.toDateString() === dueDate.toDateString();
+    const matchesSearchQuery = Object.values(row).some(value => {
+      if (value) {
+        return value.toString().toLowerCase().includes(searchQuery.toLowerCase());
+      }
+      return false;
+    });
+
+    const filterCondition = filterOption === 'all' ||
+      (filterOption === 'today' && isTodayDueDate) ||
+      (filterOption === 'overdue' && isPastDueDate);
+
+    return matchesSearchQuery && filterCondition;
+  });
+
+
+  const handleSelectChange = (event) => {
+    setFilterOption(event.target.value);
+  };
+
 
   const handleClosePopUp = () => {
     setShowModal(false);
@@ -489,13 +524,13 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   const onClickCheckbox = () => {
     setNotify(!notify)
-    
-    if(selectedTenant){
-    const tenant = tenantsWithRents.find(t => t.id === selectedTenant);
-    console.log(tenant,"unique")
-    console.log(selectedTenant,"unique")
-    const rentRecord = tenant.rents
-    setNotifyUserInfo({ tenant, rentRecord });
+
+    if (selectedTenant) {
+      const tenant = tenantsWithRents.find(t => t.id === selectedTenant);
+      console.log(tenant, "unique")
+      console.log(selectedTenant, "unique")
+      const rentRecord = tenant.rents
+      setNotifyUserInfo({ tenant, rentRecord });
     }
   }
 
@@ -503,11 +538,11 @@ Please note that you made your last payment on ${paidDate}.\n`
     const { name } = e.target;
     setErrors((prevErrors) => ({
       ...prevErrors,
-      [name]: '',  
+      [name]: '',
     }));
   };
 
-   
+
 
   return (
     <div className='h-100'>
@@ -521,13 +556,25 @@ Please note that you made your last payment on ${paidDate}.\n`
             <h1 className='management-heading'>{t('rentsPage.rentsManagement')}</h1>
           </div>
           <div className="col-6 col-md-4 search-wrapper">
-            <input type="text" placeholder={t('common.search')}  className='search-input' value={searchQuery}
+            <input type="text" placeholder={t('common.search')} className='search-input' value={searchQuery}
               onChange={handleSearch} />
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
           <div className="col-6 col-md-4 d-flex justify-content-end">
-            <button id="roomGirlsPageBtn" type="button" class="add-button" onClick={()=>{handleAddNew(); setShowForm(true)}} >
-            {t('rentsPage.addRent')}
+            <div className="form-group">
+              <select
+                id="dueDateFilter"
+                className="form-control"
+                value={filterOption}
+                onChange={handleSelectChange}
+              >
+                <option value="all">All</option>
+                <option value="today">Today</option>
+                <option value="overdue">Due Over</option>
+              </select>
+            </div>
+            <button id="roomGirlsPageBtn" type="button" class="add-button" onClick={() => { handleAddNew(); setShowForm(true) }} >
+              {t('rentsPage.addRent')}
             </button>
           </div>
         </div>
@@ -546,15 +593,15 @@ Please note that you made your last payment on ${paidDate}.\n`
               <div class="modal-body">
                 <div className="container-fluid">
                   {isEditing ? null :
-                  <div className='monthlyDailyButtons'>
-                    <div className={showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(true)}>
-                      <text>{t('dashboard.monthly')}</text>
+                    <div className='monthlyDailyButtons'>
+                      <div className={showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(true)}>
+                        <text>{t('dashboard.monthly')}</text>
+                      </div>
+                      <div className={!showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(false)}>
+                        <text>{t('dashboard.daily')}</text>
+                      </div>
                     </div>
-                    <div className={!showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(false)}>
-                      <text>{t('dashboard.daily')}</text>
-                    </div>
-                  </div>
-}
+                  }
                   {showForm ?
                     <div className='monthlyAddForm'>
                       <form class="row lg-10" onSubmit={handleSubmit}>
@@ -572,8 +619,6 @@ Please note that you made your last payment on ${paidDate}.\n`
                                 <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
                               ))
                             )}
-
-
                           </select>
                           {errors.selectedTenant && <div style={{ color: 'red' }}>{errors.selectedTenant}</div>}
                         </div>
@@ -612,7 +657,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                             value={paidDate}
                             onChange={e => setPaidDate(e.target.value)}
                             name="paidDate"
-                          onFocus={handleFocus}
+                            onFocus={handleFocus}
                           />
                           {errors.paidDate && <div style={{ color: 'red' }}>{errors.paidDate}</div>}
                         </div>
@@ -625,7 +670,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                             value={dueDate}
                             onChange={e => setDueDate(e.target.value)}
                             name="dueDate"
-                              onFocus={handleFocus}
+                            onFocus={handleFocus}
                           />
                           {errors.dueDate && <div style={{ color: 'red' }}>{errors.dueDate}</div>}
                         </div>
@@ -637,10 +682,10 @@ Please note that you made your last payment on ${paidDate}.\n`
                               type="checkbox"
                               checked={notify}
                               onChange={onClickCheckbox} // Toggle the state on change
-                              
+
                             />
                             <label className="form-check-label" htmlFor="notifyCheckbox">
-                            {t('dashboard.notify')}
+                              {t('dashboard.notify')}
                             </label>
                             <FaWhatsapp style={{ backgroundColor: 'green', color: 'white', marginLeft: '7px', marginBottom: '4px' }} />
                           </div>
@@ -681,11 +726,11 @@ Please note that you made your last payment on ${paidDate}.\n`
                         </div>
                         <div class="col-md-6 mb-3">
                           <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}:</label>
-                          <input id="TotalFee" class="form-control" type="number" value={totalFee}  onChange={e => setTotalFee(e.target.value)} />
+                          <input id="TotalFee" class="form-control" type="number" value={totalFee} onChange={e => setTotalFee(e.target.value)} />
                         </div>
                         <div class="col-md-6 mb-3">
                           <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                          <input id="PaidAmount" class="form-control" type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)}  name="paidAmount" onFocus={handleFocus} />
+                          <input id="PaidAmount" class="form-control" type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} name="paidAmount" onFocus={handleFocus} />
                           {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
                         </div>
                         <div class="col-md-6 mb-3">
@@ -706,7 +751,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                             value={paidDate}
                             onChange={e => setPaidDate(e.target.value)}
                             name="paidDate"
-                        onFocus={handleFocus}
+                            onFocus={handleFocus}
                           />
                           {errors.paidDate && <div style={{ color: 'red' }}>{errors.paidDate}</div>}
                         </div>
@@ -733,7 +778,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                               onChange={onClickCheckbox} // Toggle the state on change
                             />
                             <label className="form-check-label" htmlFor="notifyCheckbox">
-                            {t('dashboard.notify')}
+                              {t('dashboard.notify')}
                             </label>
                             <FaWhatsapp style={{ backgroundColor: 'green', color: 'white', marginLeft: '7px', marginBottom: '4px' }} />
                           </div>
@@ -743,7 +788,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                         </div>
                       </form>
                     </div>
-                    }
+                  }
                 </div>
               </div>
 

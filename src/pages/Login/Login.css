@@ -90,6 +90,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction:column;
   width: 400px;
   /* border:1px solid black; */
   height:500px;
@@ -120,6 +121,20 @@
   border: 1px solid #ccc;
   border-radius: 25px;
 }
+.selectarea{
+  /* width: 100%;
+  padding: 10px; */
+  margin-bottom: 10px;
+  /* border: 1px solid #ccc;
+  border-radius: 25px;
+  color:#FF8a00; */
+
+}
+.form-group select{
+  width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+}
 
 .input-form input[type="checkbox"] {
   margin-right: 5px;
@@ -138,11 +153,39 @@
   outline: none;
   cursor: pointer;
   border-radius: 20px;
+  font-weight: 600;
+}
+.signupButton{
+  width:95%;
+  padding: 10px;
+  border:1px solid #FF8a00;
+  background-color:transparent;
+  color: black;
+  outline: none;
+  cursor: pointer;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.spanText{
+  font-size:18px;
+  margin-top:-20px;
+  margin-bottom:5px;
 }
 
 .login-heading {
   color: #FF8a00;
 }
+.forgot-heading{
+  color: #FF8a00;
+  font-size:35px;
+}
+.forgotbtndiv{
+  text-align:right;
+  margin-top:-10px;
+  margin-bottom:5px;
+}
+
 
 .loginfooter {
   display: flex;
@@ -158,6 +201,7 @@
 .forgotText {
   color: blue;
   cursor: pointer;
+  font-weight:600;
 }
 
 .forgotText:hover {
@@ -193,4 +237,10 @@
 .custom-input {
   height:40px; 
   padding: 5px 10px; 
+}
+.error-message {
+  color: red;
+}
+.signupdiv{
+  margin-top:-20px;
 }

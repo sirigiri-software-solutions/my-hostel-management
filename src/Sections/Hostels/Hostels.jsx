@@ -24,10 +24,12 @@ const Hostels = ({ onTabSelect, activeTab }) => {
     const fetchBoysHostels = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
+        console.log(data, "hostelsdata2");
         const formattedData = Object.keys(data).map(key => ({
           id: key,
           name: data[key].name,
           address: data[key].address,
+          hostelImage: data[key].hostelImage,
         }));
         setHostels(prev => ({ ...prev, boys: formattedData }));
       } else {
@@ -42,6 +44,7 @@ const Hostels = ({ onTabSelect, activeTab }) => {
           id: key,
           name: data[key].name,
           address: data[key].address,
+          hostelImage: data[key].hostelImage,
         }));
         setHostels(prev => ({ ...prev, girls: formattedData }));
       } else {
@@ -53,7 +56,7 @@ const Hostels = ({ onTabSelect, activeTab }) => {
       fetchBoysHostels();
       fetchGirlsHostels();
     };
-  },[database,userUid]);
+  }, [userUid, database]);
 
   const submitHostelEdit = (e) => {
     e.preventDefault();
@@ -142,27 +145,33 @@ const Hostels = ({ onTabSelect, activeTab }) => {
   };
 
   const getHostelColumns = () => [
+    'image',
     t("hostels.name"),
     t("hostels.address"),
     t("hostels.actions"),
     t("hostels.deleteData")
   ];
+console.log(hostels, "hhhh")
 
-  const getHostelRows = (hostels, isBoys) => hostels.map(hostel => ({
-    name: hostel.name,
-    address: hostel.address,
-    edit: <button
-      style={{ backgroundColor: '#ff8a00', padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
+  const getHostelRows = (hostels, isBoys) => hostels.map(hostel => {
+    // Log the hostel image URL to the console
+    console.log("Hostel Image URL:", hostel.hostelImage);
 
-      onClick={() => startEdit(hostel.id, hostel.name, hostel.address, isBoys)}
-    >Edit</button>,
-
-    delete: <button
-      style={{ backgroundColor: "#ff8a00", padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
-      onClick={() => deleteHostel(hostel.id)}
-    >Delete</button>
-  }));
-
+    return {
+      image: hostel.hostelImage,
+      name: hostel.name,
+      address: hostel.address,
+      edit: <button
+        style={{ backgroundColor: '#ff8a00', padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
+        onClick={() => startEdit(hostel.id, hostel.name, hostel.address, isBoys)}
+      >Edit</button>,
+      delete: <button
+        style={{ backgroundColor: "#ff8a00", padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
+        onClick={() => deleteHostel(hostel.id)}
+      >Delete</button>
+    };
+  });
+  
   const handleTabSelect = (tab) => {
     onTabSelect(tab);
   };

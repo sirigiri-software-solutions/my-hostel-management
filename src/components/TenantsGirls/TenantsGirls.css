@@ -4,7 +4,7 @@
 
      float: right;
 
-     width:130px;
+     width:150px;
      font-size: 0.8rem;
      /* margin-right: 200px; */
 
@@ -12,6 +12,10 @@
     .toggle-label{
         font-size: 1.3rem;
 
+    }
+    #presentTenantBtn1 {
+        font-weight: 100;
+        /* width: 500px; */
     }
 
     .toggle-text{

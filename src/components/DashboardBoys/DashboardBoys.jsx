@@ -66,9 +66,9 @@ const DashboardBoys = () => {
   const [currentTenantId, setCurrentTenantId] = useState('');
   const [tenatErrors, setTenantErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
-  const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
+  // const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
   const [tenantId, setTenantId] = useState(null);
-  const [tenantIdUrl, setTenantIdUrl] = useState('');
+  // const [tenantIdUrl, setTenantIdUrl] = useState('');
   const imageInputRef = useRef(null);
   const idInputRef = useRef(null);
   const [showForm, setShowForm] = useState(true);
@@ -93,17 +93,12 @@ const DashboardBoys = () => {
   const [bikeRcImageField, setBikeRcImageField] = useState('');
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-
     const reader = new FileReader();
-
     reader.onload = () => {
       // Once the file is loaded, set the image in state
       setBikeImage(reader.result);
-
     };
     // console.log(file,"file created");
-
-
     reader.readAsDataURL(file);
     console.log(file, "file2 created");
   };
@@ -520,21 +515,45 @@ const DashboardBoys = () => {
     if (isBedOccupied) {
       tempErrors.selectedBed = t('errors.bedAlreadyOccupied');
     }
-    if (!tenantImage && !tenantImageUrl) {
+    if (!tenantImage ) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
     setTenantErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
+  // const handleTenantImageChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     setTenantImage(e.target.files[0]);
+  //   }
+  // };
+  // const handleTenantIdChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     setTenantId(e.target.files[0]);
+  //   }
+  // };
+
   const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // Once the file is loaded, set the image in state as a base64 URL
+        setTenantImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
+  
   const handleTenantIdChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantId(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // Once the file is loaded, set the image in state as a base64 URL
+        setTenantId(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -547,27 +566,27 @@ const DashboardBoys = () => {
       return
     };
 
-    let imageUrlToUpdate = tenantImageUrl;
-    if (tenantImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, tenantImage);
-        imageUrlToUpdate = await getDownloadURL(snapshot.ref);
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-      }
-    }
+    // let imageUrlToUpdate = tenantImageUrl;
+    // if (tenantImage) {
+    //   const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+    //   try {
+    //     const snapshot = await uploadBytes(imageRef, tenantImage);
+    //     imageUrlToUpdate = await getDownloadURL(snapshot.ref);
+    //   } catch (error) {
+    //     console.error("Error uploading tenant image:", error);
+    //   }
+    // }
 
-    let idUrlToUpdate = tenantIdUrl;
-    if (tenantId) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, tenantId);
-        idUrlToUpdate = await getDownloadURL(snapshot.ref);
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-      }
-    }
+    // let idUrlToUpdate = tenantIdUrl;
+    // if (tenantId) {
+    //   const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
+    //   try {
+    //     const snapshot = await uploadBytes(imageRef, tenantId);
+    //     idUrlToUpdate = await getDownloadURL(snapshot.ref);
+    //   } catch (error) {
+    //     console.error("Error uploading tenant image:", error);
+    //   }
+    // }
 
     const tenantData = {
       roomNo: selectedRoom,
@@ -578,13 +597,12 @@ const DashboardBoys = () => {
       idNumber,
       emergencyContact,
       status,
-      tenantImageUrl: imageUrlToUpdate,
-      tenantIdUrl: idUrlToUpdate,
+      tenantImage,
+      tenantId,
       bikeNumber,
       permnentAddress,
       bikeImage,
       bikeRcImage
-
       // tenantIdUrl,
     };
 
@@ -878,8 +896,8 @@ const DashboardBoys = () => {
     setErrors({});
     setTenantImage(null);
     setTenantId(null);
-    setTenantImageUrl('');
-    setTenantIdUrl('');
+    // setTenantImageUrl('');
+    // setTenantIdUrl('');
     setFloorNumber('');
     setRoomNumber('');
     setNumberOfBeds('');
@@ -1070,21 +1088,21 @@ const DashboardBoys = () => {
     }
   };
 
-  useEffect(() => {
-    if (selectedTenant) {
-      const tenant = tenants.find(t => t.id === selectedTenant);
-      if (tenant) {
-        // Set the date of join
-        setDateOfJoin(tenant.dateOfJoin || '');
+  // useEffect(() => {
+  //   if (selectedTenant) {
+  //     const tenant = tenants.find(t => t.id === selectedTenant);
+  //     if (tenant) {
+  //       // Set the date of join
+  //       setDateOfJoin(tenant.dateOfJoin || '');
 
-        // Calculate the due date (one day less than adding one month)
-        const currentDate = new Date(tenant.dateOfJoin); // Get the join date
-        const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1)); // Add one month and subtract one day
-        const formattedDueDate = dueDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
-        setDueDate(formattedDueDate);
-      }
-    }
-  }, [selectedTenant, tenants]);
+  //       // Calculate the due date (one day less than adding one month)
+  //       const currentDate = new Date(tenant.dateOfJoin); // Get the join date
+  //       const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1)); // Add one month and subtract one day
+  //       const formattedDueDate = dueDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+  //       setDueDate(formattedDueDate);
+  //     }
+  //   }
+  // }, [selectedTenant, tenants]);
 
   const handleFocus = (e) => {
     const { name } = e.target;
@@ -1164,18 +1182,11 @@ const DashboardBoys = () => {
               <div className='monthlyAddForm'>
                 <form class="row lg-10" onSubmit={handleRentSubmit}>
                   <div class='col-12 mb-3'>
-                    <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
+                    <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} name="selectedTenant" onFocus={handleFocus}>
                       <option value="">{t('dashboard.selectTenant')} *</option>
-                      {/* {availableTenants.map(tenant => (
+                      {availableTenants.map(tenant => (
                           <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
-                        ))} */}
-                      {isEditing ? (
-                        <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
-                      ) : (
-                        availableTenants.map(tenant => (
-                          <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
-                        ))
-                      )}
+                        ))}
                     </select>
                     {errors.selectedTenant && <div style={{ color: 'red' }}>{errors.selectedTenant}</div>}
                   </div>
@@ -1432,9 +1443,9 @@ const DashboardBoys = () => {
               <label htmlFor='tenantUpload' class="form-label">
                 {t('dashboard.uploadImage')}
               </label>
-              {isEditing && tenantImageUrl && (
+              {isEditing && tenantImage && (
                 <div>
-                  <img src={tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
+                  <img src={tenantImage} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
                   <p>{t('dashboard.currentImage')}</p>
                 </div>
               )}
@@ -1445,14 +1456,14 @@ const DashboardBoys = () => {
               <label htmlFor='tenantUploadId' class="form-label">
                 {t('dashboard.uploadId')}:
               </label>
-              {isEditing && tenantIdUrl && (
+              {isEditing && tenantId && (
                 <object
-                  data={tenantIdUrl}
+                  data={tenantId}
                   type="application/pdf"
                   width="50%"
                   height="200px"
                 >
-                  <a href={tenantIdUrl}>{t('dashboard.downloadPdf')}</a>
+                  <a href={tenantId}>{t('dashboard.downloadPdf')}</a>
                 </object>
               )}
               <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef} multiple />

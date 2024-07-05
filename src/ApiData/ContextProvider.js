@@ -3,6 +3,7 @@ import { FetchData } from './FetchData';
 import { onValue, ref } from 'firebase/database';
 import { database } from '../firebase/firebase';
 import isEqual from 'lodash/isEqual';
+import { firebaseInstances } from '../firebase/firebase';
 
 const DataContext = createContext();
 
@@ -22,6 +23,16 @@ const DataProvider = ({ children }) => {
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
   const [userarea, setUserArea] = useState();
   const [userUid, setUserUid] = useState()
+
+  // new code to implement multiple configuration
+  const [area, setArea] = useState('hyderabad');
+  const [firebase, setFirebase] = useState(firebaseInstances[area]);
+
+  useEffect(() => {
+    setFirebase(firebaseInstances[area]);
+    localStorage.setItem('userarea', area);
+  }, [area]);
+
 
   const areaToApiEndpoint = {
     hyderabad: "https://ameerpet-588ee-default-rtdb.firebaseio.com/register.json",
@@ -94,7 +105,7 @@ const DataProvider = ({ children }) => {
   console.log("user UID", userUid)
  
   return (
-    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid }}>
+    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid, firebase, setArea }}>
       {children}
     </DataContext.Provider>
   );

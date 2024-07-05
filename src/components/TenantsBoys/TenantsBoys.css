@@ -380,6 +380,7 @@
 }
 #presentTenantBtn{
   width:180px;
+  margin-right:60px;
 }
 @media screen and (max-width:1650px){
   #tenantAddButton{
