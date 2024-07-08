@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 // import Modal from 'react-modal';
 import ImageOne from "../../images/Vector 1 (1).png";
 import ImageTwo from "../../images/Vector 3 (2).png";
-import Google from '../../images/google.png'
+
 // import Logo from "../../images/image.png";
 import Logo from "../../images/HMLogo3.png"
 import newLogo from "../../images/favicon (2).jpg"
