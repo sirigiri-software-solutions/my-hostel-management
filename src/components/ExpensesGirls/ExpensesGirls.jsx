@@ -254,8 +254,6 @@ window.addEventListener('keydown',handleOutsideClick);
     })
   };
 
-
-
   const handleUpdate = () => {
     if (!editingExpense) return;
 
@@ -267,13 +265,11 @@ window.addEventListener('keydown',handleOutsideClick);
       formIsValid = false;
     }
 
-
     const expenseAmountString = String(formData.expenseAmount); // Convert to string
     if (!expenseAmountString.match(/^\d+(\.\d{1,2})?$/)) {
       errors.expenseAmount = t('errors.expenseAmountValidNumber');
       formIsValid = false;
     }
-
 
     if (!formData.expenseDate) {
       errors.expenseDate = t('errors.expenseDateRequired');
@@ -468,6 +464,7 @@ const handleExpensesFocus = (e) => {
   }));
 };
 
+
   return (
     <div className='h-100'>
       <>
@@ -506,7 +503,7 @@ const handleExpensesFocus = (e) => {
           </div>
           <div>
             <select style={{width:'70px'}}className='filterExpenseField' value={month} onChange={e => { setMonth(e.target.value) }}>
-            <option value="jan">{t('months.jan')}</option>
+              <option value="jan">{t('months.jan')}</option>
               <option value="feb">{t('months.feb')}</option>
               <option value="mar">{t('months.mar')}</option>
               <option value="apr">{t('months.apr')}</option>
@@ -551,14 +548,14 @@ const handleExpensesFocus = (e) => {
                       <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onChange={handleInputChange} onFocus={handleExpensesFocus} />
                       {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
                     </div>
-                    <div className="col-md-6">
-                      <label htmlFor="inputRole" className="form-label">{t('expensesPage.createdBy')} :</label>
+                    {/* <div className="col-md-6"> */}
+                      {/* <label htmlFor="inputRole" className="form-label">{t('expensesPage.createdBy')} :</label> */}
                       {/* <select className="form-select" id="inputRole" name="createdBy" value={formData.createdBy} onChange={handleInputChange}>
                         <option value="admin">{t('expensesPage.admin')}</option>
                         <option value="sub-admin">{t('expensesPage.subAdmin')} </option>
                       </select> */}
-                      <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={formData.createdBy} />
-                    </div>
+                      {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={formData.createdBy} /> */}
+                    {/* </div> */}
                     <div className="col-md-6">
                       <label htmlFor="inputDate" className="form-label">{t('expensesPage.expenseDate')} : </label>
                       <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
@@ -572,7 +569,7 @@ const handleExpensesFocus = (e) => {
                       {editingExpense && (
                         <>
                           <button type="button" className="btn btn-success" style={{ marginRight: '10px' }} onClick={handleUpdate}>{t('expensesPage.updateExpense')}</button>
-                          {role === "admin" ? <button type="button" className="btn btn-danger" onClick={handleDelete}>{t('expensesPage.deleteExpense')}</button> : null }
+                           <button type="button" className="btn btn-danger" onClick={handleDelete}>{t('expensesPage.deleteExpense')}</button> 
                         </>
                       )}
                     </div>

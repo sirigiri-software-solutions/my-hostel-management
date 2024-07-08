@@ -105,7 +105,7 @@ const RoomsBoys = () => {
     }
     // -----------------------------------------------
     if (isEditing) {
-      const roomRef = ref(database, `Hostel/${userUid}/boys${activeBoysHostel}/rooms/${currentId}`);
+      const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
       update(roomRef, {
         floorNumber,
         roomNumber,
@@ -463,7 +463,7 @@ const RoomsBoys = () => {
                       {isEditing ? (
                         <div className="roomsEditBtnsContainer">
                           <button type="button" className="btn btn-warning roomUpdateBtn" onClick={handleSubmit}>{t('roomsPage.Update Room')}</button>
-                          {role === "admin" ? <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button> : null}
+                          <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button> 
                         </div>
                       ) : (
                         <button type="submit" className="btn btn-warning" >{t('roomsPage.CreateRoom')}</button>

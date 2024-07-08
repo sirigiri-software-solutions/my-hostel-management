@@ -450,7 +450,7 @@ Please note that you made your last payment on ${paidDate}.\n`
   // console.log(rentsRows,'rent')
   // const count = 0;
 
-
+  console.log(rentsRows, "rentsRows")
   const rows = rentsRows.map((rent, index) => {
     const currentDate = new Date();
     const dueDate = new Date(rent.dueDate);
@@ -462,7 +462,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       person_name: rent.name,
       person_mobile: rent.mobileNo,
       bed_no: rent.bedNumber,
-      rent: "Rs. " + rent.totalFee,
+      bedRent: rent.totalFee,
       paid: rent.paid,
       due: rent.due,
       joining_date: rent.dateOfJoin,
@@ -590,11 +590,11 @@ Please note that you made your last payment on ${paidDate}.\n`
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
 
-          <div className="col-6 col-md-4 d-flex justify-content-end">
-            <div className="form-group">             
+          <div className="col-6 col-md-4 d-flex justify-content-end align-items-end"> 
+            <div className="filterRentDropDownContainer">
               <select
-                id="dueDateFilter"
-                className="form-control"
+                id="dueDateFilter" 
+                className="rentFilter"
                 value={filterOption}
                 onChange={handleSelectChange}
               >
@@ -602,11 +602,11 @@ Please note that you made your last payment on ${paidDate}.\n`
                 <option value="today">Today</option>
                 <option value="overdue">Due Over</option>
               </select>
-            </div>
+            </div> 
             <button id="roomPageAddBtn" type="button" class="add-button" onClick={() => { handleAddNew(); setShowForm(true) }} >
               {t('rentsPage.addRent')}
             </button>
-          </div>
+          </div> 
         </div>
         <div>
           <Table columns={columns} rows={filteredRows} />

@@ -32,7 +32,7 @@ import Hostels from '../../Sections/Hostels/Hostels'
 import LanguageSwitch from '../../LanguageSwitch'
 const MainPage = () => {
   const { t } = useTranslation()
-  const { activeBoysHostel, activeGirlsHostel } = useData();
+  const { activeBoysHostelName, activeGirlsHostelName } = useData();
   const name = localStorage.getItem("username");
   // Refer here for fetched Api Data use like this in all pages don't fetch api url
   const { data } = useContext(DataContext);
@@ -221,8 +221,8 @@ const MainPage = () => {
     }
     return(
       <>
-      {activeTab === 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeBoysHostel}&nbsp;{t('dashboard.boysHostel')}</p>}
-      {activeTab !== 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeGirlsHostel}&nbsp;{t('dashboard.girlsHostel')}</p>}
+      {activeTab === 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeBoysHostelName}&nbsp;{t('dashboard.boysHostel')}</p>}
+      {activeTab !== 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeGirlsHostelName}&nbsp;{t('dashboard.girlsHostel')}</p>}
       </>
     )
   }
@@ -244,10 +244,6 @@ const MainPage = () => {
           </div>
 
         </div>
-
-
-
-
 
         <div style={sidebarItems}>
           {
@@ -273,7 +269,6 @@ const MainPage = () => {
             }}>
               <div style={{ display: "flex", flexDirection: "Column" }}>
                 {
-
                   menuItems.map((item, index) => (
                     <div key={index} className="link" style={flag === item.id ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() => handleSidebarItemClick(item.id, close)}>
                       <img src={item.icon} alt={item.name} className='icon' />
@@ -301,8 +296,6 @@ const MainPage = () => {
             <div className='dashBoarWelcome'>
                 {renderWelcomeext(flag)}
 
-
-             
               {/* <text>
                 {t('dashboard.welcomeTo')}&nbsp;
                 {activeTab === 'boys' ? activeBoysHostel : activeGirlsHostel}&nbsp;
@@ -317,11 +310,7 @@ const MainPage = () => {
                 <RiLogoutCircleRLine />
 
               </div>
-
-
             </div>
-
-
           </div>
 
 

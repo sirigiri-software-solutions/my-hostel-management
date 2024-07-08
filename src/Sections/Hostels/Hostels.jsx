@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useData } from '../../ApiData/ContextProvider';
-import { set, ref, remove, onValue, update } from 'firebase/database';
+import { set, ref, remove, onValue, update ,get} from 'firebase/database';
 
 import { toast } from 'react-toastify';
 import './Hostels.css';
@@ -17,6 +17,7 @@ const Hostels = ({ onTabSelect, activeTab }) => {
   const [hostels, setHostels] = useState({ boys: [], girls: [] });
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
   const [hostelToDelete, setHostelToDelete] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null); // State for selected image
 
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
@@ -25,7 +26,6 @@ const Hostels = ({ onTabSelect, activeTab }) => {
     const fetchBoysHostels = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        console.log(data, "hostelsdata2");
         const formattedData = Object.keys(data).map(key => ({
           id: key,
           name: data[key].name,
@@ -59,17 +59,48 @@ const Hostels = ({ onTabSelect, activeTab }) => {
     };
   }, [userUid, database]);
 
-  const submitHostelEdit = (e) => {
+  const submitHostelEdit = async (e) => {
     e.preventDefault();
-    const { id, name, originalName, address, isBoys } = isEditing;
-    const basePath = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`;
-
-    if (name !== originalName) {
-      const updates = {};
-      updates[`${basePath}/${originalName}`] = null;
-      updates[`${basePath}/${name}`] = { name, address };
-
-      update(ref(database), updates)
+    const { id, name, address, hostelImage, isBoys } = isEditing;
+    const basePath = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
+    let updatedImageUrl = hostelImage;
+  
+    if (selectedImage) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        updatedImageUrl = reader.result;
+        // Only update the specific fields
+        const updateData = {
+          name, // Update name
+          address, // Update address
+          hostelImage: updatedImageUrl, // Update image URL
+        };
+        const hostelRef = ref(database, basePath);
+        update(hostelRef, updateData)
+          .then(() => {
+            toast.success("Hostel updated successfully.", {
+              position: "top-center",
+              autoClose: 3000,
+            });
+            cancelEdit();
+          })
+          .catch(error => {
+            toast.error("Failed to update hostel: " + error.message, {
+              position: "top-center",
+              autoClose: 3000,
+            });
+          });
+      };
+      reader.readAsDataURL(selectedImage);
+    } else {
+      // No new image, just update the name and address
+      const updateData = {
+        name, // Update name
+        address, // Update address
+      };
+  
+      const hostelRef = ref(database, basePath);
+      update(hostelRef, updateData)
         .then(() => {
           toast.success("Hostel updated successfully.", {
             position: "top-center",
@@ -83,24 +114,12 @@ const Hostels = ({ onTabSelect, activeTab }) => {
             autoClose: 3000,
           });
         });
-    } else {
-      const hostelRef = ref(database, `${basePath}/${name}`);
-      update(hostelRef, { name, address })
-        .then(() => {
-          toast.success("Hostel address updated successfully.", {
-            position: "top-center",
-            autoClose: 3000,
-          });
-          cancelEdit();
-        })
-        .catch(error => {
-          toast.error("Failed to update hostel address: " + error.message, {
-            position: "top-center",
-            autoClose: 3000,
-          });
-        });
     }
   };
+
+
+  
+  
 
   const deleteHostel = (id) => {
     const isBoys = activeTab === 'boys';
@@ -135,14 +154,22 @@ const Hostels = ({ onTabSelect, activeTab }) => {
 
   const cancelEdit = () => {
     setIsEditing(null);
+    setSelectedImage(null);
   };
 
-  const startEdit = (id, name, address, isBoys) => {
-    setIsEditing({ id, name, originalName: name, address, isBoys });
+  const startEdit = (id, name, address, hostelImage, isBoys) => {
+    setIsEditing({ id, name, originalName: name, address, hostelImage, isBoys });
+    setSelectedImage(null); // Reset selected image when starting to edit
   };
 
   const handleEditChange = (field, value) => {
     setIsEditing(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageChange = (e) => {
+    if (e.target.files[0]) {
+      setSelectedImage(e.target.files[0]);
+    }
   };
 
   const getHostelColumns = () => [
@@ -152,27 +179,23 @@ const Hostels = ({ onTabSelect, activeTab }) => {
     t("hostels.actions"),
     t("hostels.deleteData")
   ];
-console.log(hostels, "hhhh")
 
   const getHostelRows = (hostels, isBoys) => hostels.map(hostel => {
-    // Log the hostel image URL to the console
-    console.log("Hostel Image URL:", hostel.hostelImage);
-
     return {
       image: hostel.hostelImage,
       name: hostel.name,
       address: hostel.address,
       edit: <button
-        style={{ backgroundColor: '#ff8a00', padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
-        onClick={() => startEdit(hostel.id, hostel.name, hostel.address, isBoys)}
+        style={{ backgroundColor: '#ff8a00', padding: '4px', borderRadius: '5px', color: 'white', border: 'none' }}
+        onClick={() => startEdit(hostel.id, hostel.name, hostel.address, hostel.hostelImage, isBoys)}
       >Edit</button>,
       delete: <button
-        style={{ backgroundColor: "#ff8a00", padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
+        style={{ backgroundColor: "#ff8a00", padding: '4px', borderRadius: '5px', color: 'white', border: 'none' }}
         onClick={() => deleteHostel(hostel.id)}
       >Delete</button>
     };
   });
-  
+
   const handleTabSelect = (tab) => {
     onTabSelect(tab);
   };
@@ -236,6 +259,11 @@ console.log(hostels, "hhhh")
                 onChange={(e) => handleEditChange('address', e.target.value)}
                 className="edit-hostel-input"
               />
+              <img src={isEditing.hostelImage} alt='hostel image' style={{ width: '100px', borderRadius: '8px', margin: '10px 0' }} />
+              <div className="col-md-6">
+                <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
+                <input type="file" className="form-control" onChange={handleImageChange} />
+              </div>
             </div>
           )}
         </Modal.Body>
@@ -267,4 +295,3 @@ console.log(hostels, "hhhh")
 };
 
 export default Hostels;
-

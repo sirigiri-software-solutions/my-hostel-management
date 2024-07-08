@@ -18,14 +18,16 @@ function useDeepCompareEffect(callback, dependencies) {
 const DataProvider = ({ children }) => {
   const [data, setData] = useState(null);
   const [activeBoysHostel, setActiveBoysHostel] = useState(null);
+  const [activeBoysHostelName, setActiveBoysHostelName] = useState(null);
   const [activeBoysHostelButtons, setActiveBoysHostelButtons] = useState([]);
   const [activeGirlsHostel, setActiveGirlsHostel] = useState(null);
+  const [activeGirlsHostelName, setActiveGirlsHostelName] = useState(null);
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
   const [userarea, setUserArea] = useState();
   const [userUid, setUserUid] = useState('');
 
   // new code to implement multiple configuration
-  const [area, setArea] = useState(localStorage.getItem('userarea'));
+  const [area, setArea] = useState(localStorage.getItem('userarea') || 'hyderabad');
   const [firebase, setFirebase] = useState(firebaseInstances[area]);
 
   const {database}  = firebase;
@@ -65,34 +67,55 @@ const DataProvider = ({ children }) => {
     fetchApiData();
   }, []);
 
+  // useEffect(() => {
+  //   const boysRef = ref(database, `Hostel/${userUid}/boys`);
+  //   const unsubscribe = onValue(boysRef, (snapshot) => {
+  //     if (snapshot.exists()) {
+  //       const data = snapshot.val();
+  //       const keys = Object.keys(data);
+  //       setActiveBoysHostelButtons(keys);
+  //     } else {
+  //       setActiveBoysHostelButtons([]);
+  //     }
+  //   });
+
+  //   return () => unsubscribe();
+  // }, [userUid]);
+
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
     console.log(userUid,"dataNotGetting")
     const unsubscribe = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const keys = Object.keys(data);
-        setActiveBoysHostelButtons(keys);
+        const buttonData = Object.keys(data).map(key => ({
+          id: key,  // Unique identifier for the hostel
+          name: data[key].name  // Name of the hostel
+        }));
+        setActiveBoysHostelButtons(buttonData);
       } else {
         setActiveBoysHostelButtons([]);
       }
     });
-
     return () => unsubscribe();
   }, [userUid,area]);
 
+  //   return () => unsubscribe();
+  // }, [userUid]);
   useEffect(() => {
-    const girlsRef = ref(database, `Hostel/${userUid}/girls`);
-    const unsubscribe = onValue(girlsRef, (snapshot) => {
+    const boysRef = ref(database, `Hostel/${userUid}/girls`);
+    const unsubscribe = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const keys = Object.keys(data);
-        setActiveGirlsHostelButtons(keys);
+        const buttonData = Object.keys(data).map(key => ({
+          id: key,  // Unique identifier for the hostel
+          name: data[key].name  // Name of the hostel
+        }));
+        setActiveGirlsHostelButtons(buttonData);
       } else {
         setActiveGirlsHostelButtons([]);
       }
     });
-
     return () => unsubscribe();
   }, [userUid, area]);
 
@@ -100,13 +123,15 @@ const DataProvider = ({ children }) => {
 
   useDeepCompareEffect(() => {
     if (activeBoysHostelButtons.length > 0) {
-      setActiveBoysHostel(activeBoysHostelButtons[0]);
+      setActiveBoysHostel(activeBoysHostelButtons[0].id);
+      setActiveBoysHostelName(activeBoysHostelButtons[0].name)
     }
   }, [activeBoysHostelButtons]);
-
+console.log(activeBoysHostelName, "ActiveBoysHostelName")
   useDeepCompareEffect(() => {
     if (activeGirlsHostelButtons.length > 0) {
-      setActiveGirlsHostel(activeGirlsHostelButtons[0]);
+      setActiveGirlsHostel(activeGirlsHostelButtons[0].id);
+      setActiveGirlsHostelName(activeGirlsHostelButtons[0].name)
     }
   }, [activeGirlsHostelButtons]);
 
@@ -115,7 +140,7 @@ const DataProvider = ({ children }) => {
   console.log("user UID", userUid)
  
   return (
-    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid, firebase, setArea,setUserUid }}>
+    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid, firebase, setArea,setUserUid  }}>
       {children}
     </DataContext.Provider>
   );

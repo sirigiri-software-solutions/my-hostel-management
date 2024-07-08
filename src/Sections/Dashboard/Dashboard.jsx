@@ -14,8 +14,6 @@ const Dashboard = ({ onTabSelect,activeTab }) => {
   // const [activeTab, setActiveTab] = useState('boys');
   const name = localStorage.getItem("username");
 
-
-
   const handleTabSelect = (tab) => {
     // setActiveTab(tab);
     onTabSelect(tab);
