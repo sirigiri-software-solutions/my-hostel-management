@@ -21,7 +21,6 @@ const App = () => {
           <ProtectedRoute>
             <MainPage />
           </ProtectedRoute>} />
-        <Route path="/signUp" element={<SignUp />} />
       </Routes>
       </DataProvider>
     </BrowserRouter>

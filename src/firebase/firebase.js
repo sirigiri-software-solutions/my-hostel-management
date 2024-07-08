@@ -1,37 +1,10 @@
-// // Import the functions you need from the SDKs you need
-// import { initializeApp } from "firebase/app";
-// import { getDatabase, ref, push} from "firebase/database";
-// import { getStorage} from "firebase/storage";
-// // TODO: Add SDKs for Firebase products that you want to use
-// // https://firebase.google.com/docs/web/setup#available-libraries
-
-// // Your web app's Firebase configuration
-// const firebaseConfig = {
-//   apiKey: "AIzaSyDczL0G3Posqk67RnsB7en38zXsujEsZ9k",
-//   authDomain: "signuppage-2f4c8.firebaseapp.com",
-//   databaseURL: "https://signuppage-2f4c8-default-rtdb.firebaseio.com",
-//   projectId: "signuppage-2f4c8",
-//   storageBucket: "signuppage-2f4c8.appspot.com",
-//   messagingSenderId: "333871852694",
-//   appId: "1:333871852694:web:a6b7173d62a8842515e6b7"
-// };
-
-// // Initialize Firebase
-// const app = initializeApp(firebaseConfig);
-// const database = getDatabase(app);
-// const storage = getStorage(app);
-
-// export { database, storage, ref, push};
-
-// src/firebase-config.js
-
-
+// working firebase config for different locations
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, push } from "firebase/database";
 import { getStorage } from "firebase/storage";
-import { useEffect, useState } from "react";
+import { getAuth } from "firebase/auth";
 
-export const firebaseConfig = {
+const ameerpetFirebaseConfig = {
   apiKey: "AIzaSyAOHosh74ErvJ-NyySUluijsTv2ZvdC4SU",
   authDomain: "ameerpet-588ee.firebaseapp.com",
   databaseURL: "https://ameerpet-588ee-default-rtdb.firebaseio.com",
@@ -41,7 +14,7 @@ export const firebaseConfig = {
   appId: "1:497595268016:web:930213c3e11b95d2087475"
 };
 
-export const firebaseConfig1 = {
+const secunderabadFirebaseConfig = {
   apiKey: "AIzaSyBjWBFrZrUCSXGrnGv1xFp_B8J-PWENcQk",
   authDomain: "sr-nagar.firebaseapp.com",
   databaseURL: "https://sr-nagar-default-rtdb.firebaseio.com",
@@ -52,30 +25,31 @@ export const firebaseConfig1 = {
 };
 
 
-const initializeFirebase = () => {
+// Initialize Firebase apps
+const appAmeerpet = initializeApp(ameerpetFirebaseConfig, "appAmeerpet");
+const appSecunderabad = initializeApp(secunderabadFirebaseConfig, "appSecunderabad");
 
-  const area = localStorage.getItem('userarea');
-  let finalFirebaseConfig;
-  if (area === "undefined") {
-    finalFirebaseConfig = firebaseConfig
-  } else  if (area === null) {
-    finalFirebaseConfig = firebaseConfig
-  } else  if (area === 'hyderabad') {
-    finalFirebaseConfig = firebaseConfig
-  } else if (area === 'secunderabad') {
-    finalFirebaseConfig = firebaseConfig1
-  }
-  console.log("firebase area", area)
-
-  const app = initializeApp(finalFirebaseConfig);
-  const database = getDatabase(app);
-  const storage = getStorage(app);
-
-  return { database, storage, push, ref };
+// Firebase instances
+const firebaseInstances = {
+  hyderabad: {
+    app: appAmeerpet,
+    database: getDatabase(appAmeerpet),
+    storage: getStorage(appAmeerpet),
+    auth: getAuth(appAmeerpet),
+  },
+  secunderabad: {
+    app: appSecunderabad,
+    database: getDatabase(appSecunderabad),
+    storage: getStorage(appSecunderabad),
+    auth: getAuth(appSecunderabad),
+  },
 };
 
-const { database, storage } = initializeFirebase();
+// // export default firebaseInstances;
+// const defaultDatabase = firebaseInstances.hyderabad.database;
+// const defaultAuth = firebaseInstances.hyderabad.auth;
 
-console.log("finaldatabase", database)
+export { firebaseInstances, ref, push};
 
-export { database, storage, push, ref };
+// // Default export for the Ameerpet Firebase instance
+// export default firebaseInstances.hyderabad;

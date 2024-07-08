@@ -4,7 +4,7 @@ import SearchIcon from '../../images/Icons (9).png';
 import './RoomsGirls.css';
 import Table from '../../Elements/Table';
 // import { database, push, ref } from "../../firebase";
-import { database, push, ref } from "../../firebase/firebase";
+import { push, ref } from "../../firebase/firebase";
 import { DataContext } from '../../ApiData/ContextProvider';
 import { onValue, remove, update } from 'firebase/database';
 import { toast } from "react-toastify";
@@ -21,7 +21,8 @@ const RoomsGirls = () => {
   }else if(role === "subAdmin"){
     adminRole = "Sub-admin"
   }
-  const { activeGirlsHostel, userUid , activeGirlsHostelButtons} = useData();
+  const { activeGirlsHostel, userUid , activeGirlsHostelButtons,firebase} = useData();
+  const {database} = firebase;
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');

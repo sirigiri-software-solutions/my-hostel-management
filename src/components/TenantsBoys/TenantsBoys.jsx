@@ -5,7 +5,7 @@ import Table from '../../Elements/Table'
 import ImageIcon from '../../images/Icons (10).png'
 import { useState, useContext } from 'react'
 // import { database, push, ref, storage } from "../../firebase";
-import { database, push, ref, storage } from "../../firebase/firebase";
+import {push, ref, storage } from "../../firebase/firebase";
 import '../TenantsGirls/TenantsGirls.css';
 import './TenantsBoys.css'
 import { DataContext } from '../../ApiData/ContextProvider'
@@ -19,9 +19,9 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons } = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons,firebase } = useData();
   const role = localStorage.getItem('role');
-
+  const {database} = firebase;
 
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
@@ -206,16 +206,21 @@ const TenantsBoys = () => {
           setBoysTenants(boysTenantsData);
         } else {
           const apiData = await FetchData();
-          const boysTenantsData = Object.values(apiData.boys.tenants);
-          setBoysTenants(boysTenantsData)
+          if (apiData) { // Ensure apiData is not null or undefined
+            const boysTenantsData = Object.values(apiData.boys.tenants);
+            setBoysTenants(boysTenantsData);
+          } else {
+            console.error('API returned null or undefined data.');
+          }
         }
       } catch (error) {
         console.error('Error fetching tenants data:', error);
       }
     };
+  
     fetchDataFromAPI();
-
   }, [data]);
+  
 
   const validate = () => {
     let tempErrors = {};
@@ -608,7 +613,7 @@ console.log(errors, "errors")
   const filteredRows = rows.filter((row) => {
     // Check if any value in the row matches the search query
     const hasSearchQueryMatch = Object.values(row).some((value) =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     // Apply additional filtering based on the selected status
@@ -852,7 +857,7 @@ console.log(errors, "errors")
           <input type="text" placeholder={t('common.search')} className='search-input' value={searchQuery} onChange={handleSearchChange} />
           <img src={SearchIcon} alt="search-icon" className='search-icon' />
         </div>
-        <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end '>
+        <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end justify-cotent-end'>
           <div className='d-flex align-items-center text-center'>
             {showBikeFilter ? (<div className="toggle-container">
               <label className="toggle-label" htmlFor="status-toggleGirl">{t('tenantsPage.bike')}</label>
@@ -875,15 +880,15 @@ console.log(errors, "errors")
                 </button>}
 
               </div>
-              <div className={showExTenants ? "col-4 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
-                {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
-                  {t('tenantsPage.presentTenants')}
-                </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
-                  {t('tenantsPage.vacated')}
-                </button>}
-              </div>
+            <div className={showExTenants ? "col-8 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
+              {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
+              {t('tenantsPage.presentTenants')}
+              </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
+              {t('tenantsPage.vacated')}
+              </button>}
             </div>
-
+      </div>
+      
           </div>
         </div>
 

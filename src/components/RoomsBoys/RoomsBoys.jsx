@@ -5,7 +5,7 @@ import './RoomsBoys.css';
 import Table from '../../Elements/Table';
 // import { database, push, ref } from "../../firebase";
 
-import { database, push, ref } from "../../firebase/firebase";
+import {push, ref } from "../../firebase/firebase";
 import { DataContext } from "../../ApiData/ContextProvider"
 import { onValue, remove, update } from 'firebase/database';
 import { toast } from "react-toastify";
@@ -24,7 +24,8 @@ const RoomsBoys = () => {
     adminRole = "Sub-admin"
   }
 
-  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons } = useData();
+  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons,firebase } = useData();
+  const {database}  = firebase;
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');

@@ -1,8 +1,8 @@
 import React, { createContext, useState, useContext, useRef, useEffect } from 'react';
 import { FetchData } from './FetchData';
 import { onValue, ref } from 'firebase/database';
-import { database } from '../firebase/firebase';
 import isEqual from 'lodash/isEqual';
+import { firebaseInstances } from '../firebase/firebase';
 
 const DataContext = createContext();
 
@@ -14,6 +14,7 @@ function useDeepCompareEffect(callback, dependencies) {
   React.useEffect(callback, [currentDependenciesRef.current]);
 }
 
+
 const DataProvider = ({ children }) => {
   const [data, setData] = useState(null);
   const [activeBoysHostel, setActiveBoysHostel] = useState(null);
@@ -23,17 +24,34 @@ const DataProvider = ({ children }) => {
   const [activeGirlsHostelName, setActiveGirlsHostelName] = useState(null);
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
   const [userarea, setUserArea] = useState();
-  const [userUid, setUserUid] = useState()
+  const [userUid, setUserUid] = useState('');
+
+  // new code to implement multiple configuration
+  const [area, setArea] = useState(localStorage.getItem('userarea') || 'hyderabad');
+  const [firebase, setFirebase] = useState(firebaseInstances[area]);
+
+  const {database}  = firebase;
+
+  useEffect(() => {
+    setFirebase(firebaseInstances[area]);
+    localStorage.setItem('userarea', area);
+  }, [area]);
+
 
   const areaToApiEndpoint = {
     hyderabad: "https://ameerpet-588ee-default-rtdb.firebaseio.com/register.json",
     secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
   };
 
+  // useEffect(()=>{
+  //   const id = localStorage.getItem("userUid")
+  //   console.log(id,"dataNotGetting")
+  // },[])
+
   useEffect(()=>{
     const userId = localStorage.getItem('userUid')
     setUserUid(userId);
-  }, [userUid])
+  }, [userUid,area])
   console.log("user Id Context", userUid)
 
   useEffect(() => {
@@ -66,6 +84,7 @@ const DataProvider = ({ children }) => {
 
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
+    console.log(userUid,"dataNotGetting")
     const unsubscribe = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -79,22 +98,7 @@ const DataProvider = ({ children }) => {
       }
     });
     return () => unsubscribe();
-  }, [userUid]);
-  
-  
-  
-console.log(activeBoysHostelButtons, "activeBoysHostelButtons")
-  // useEffect(() => {
-  //   const girlsRef = ref(database, `Hostel/${userUid}/girls`);
-  //   const unsubscribe = onValue(girlsRef, (snapshot) => {
-  //     if (snapshot.exists()) {
-  //       const data = snapshot.val();
-  //       const keys = Object.keys(data);
-  //       setActiveGirlsHostelButtons(keys);
-  //     } else {
-  //       setActiveGirlsHostelButtons([]);
-  //     }
-  //   });
+  }, [userUid,area]);
 
   //   return () => unsubscribe();
   // }, [userUid]);
@@ -113,7 +117,9 @@ console.log(activeBoysHostelButtons, "activeBoysHostelButtons")
       }
     });
     return () => unsubscribe();
-  }, [userUid]);
+  }, [userUid, area]);
+
+  console.log(activeBoysHostelButtons,"dataNotGetting")
 
   useDeepCompareEffect(() => {
     if (activeBoysHostelButtons.length > 0) {
@@ -134,7 +140,7 @@ console.log(activeBoysHostelName, "ActiveBoysHostelName")
   console.log("user UID", userUid)
  
   return (
-    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid }}>
+    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid, firebase, setArea,setUserUid  }}>
       {children}
     </DataContext.Provider>
   );

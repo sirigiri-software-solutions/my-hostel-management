@@ -5,7 +5,7 @@ import Table from '../../Elements/Table'
 import ImageIcon from '../../images/Icons (10).png'
 import { useState, useEffect } from 'react'
 // import { database, push, ref, storage } from "../../firebase";
-import { database, push, ref, storage } from "../../firebase/firebase";
+import {push, ref, storage } from "../../firebase/firebase";
 import { FetchData } from '../../ApiData/FetchData'
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -19,8 +19,9 @@ import './TenantsGirls.css';
 const TenantsGirls = () => {
   const { t } = useTranslation();
 
-  const { activeGirlsHostel , userUid, activeGirlsHostelButtons} = useData();
+  const { activeGirlsHostel , userUid, activeGirlsHostelButtons,firebase} = useData();
   const role = localStorage.getItem('role');
+  const {database} = firebase;
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -561,7 +562,7 @@ const TenantsGirls = () => {
   const filteredRows = rows.filter((row) => {
     // Check if any value in the row matches the search query
     const hasSearchQueryMatch = Object.values(row).some((value) =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     );
   
     // Apply additional filtering based on the selected status
@@ -822,7 +823,7 @@ const TenantsGirls = () => {
               
             </div>
               <div className={showExTenants ? "col-8 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
-              {showExTenants ? <button type="button" id="presentTenantBtn1" class="add-button text-center" onClick={showExTenantsData} >
+              {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
               {t('tenantsPage.presentTenants')}
               </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
               {t('tenantsPage.vacated')}
