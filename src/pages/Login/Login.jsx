@@ -638,7 +638,7 @@ const Login = () => {
       .then(response => {
         setData(response.data);
         setResponseData(prevData => [...prevData, data]); // Append new response data to the array
-        console.log(response, 'responseData'); // Log the response data
+        // console.log(response, 'responseData'); // Log the response data
         if (response.status === 200) {
           const responseData = axios.get(apiEndpoint)
           setResponseData(response.data);
