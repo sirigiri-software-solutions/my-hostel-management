@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useRef, useEffect } from 'react';
 import { FetchData } from './FetchData';
 import { onValue, ref } from 'firebase/database';
-import { database } from '../firebase/firebase';
 import isEqual from 'lodash/isEqual';
 import { firebaseInstances } from '../firebase/firebase';
 
@@ -15,6 +14,7 @@ function useDeepCompareEffect(callback, dependencies) {
   React.useEffect(callback, [currentDependenciesRef.current]);
 }
 
+
 const DataProvider = ({ children }) => {
   const [data, setData] = useState(null);
   const [activeBoysHostel, setActiveBoysHostel] = useState(null);
@@ -22,11 +22,13 @@ const DataProvider = ({ children }) => {
   const [activeGirlsHostel, setActiveGirlsHostel] = useState(null);
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
   const [userarea, setUserArea] = useState();
-  const [userUid, setUserUid] = useState()
+  const [userUid, setUserUid] = useState('');
 
   // new code to implement multiple configuration
-  const [area, setArea] = useState('hyderabad');
+  const [area, setArea] = useState(localStorage.getItem('userarea'));
   const [firebase, setFirebase] = useState(firebaseInstances[area]);
+
+  const {database}  = firebase;
 
   useEffect(() => {
     setFirebase(firebaseInstances[area]);
@@ -39,10 +41,15 @@ const DataProvider = ({ children }) => {
     secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
   };
 
+  // useEffect(()=>{
+  //   const id = localStorage.getItem("userUid")
+  //   console.log(id,"dataNotGetting")
+  // },[])
+
   useEffect(()=>{
     const userId = localStorage.getItem('userUid')
     setUserUid(userId);
-  }, [userUid])
+  }, [userUid,area])
   console.log("user Id Context", userUid)
 
   useEffect(() => {
@@ -60,6 +67,7 @@ const DataProvider = ({ children }) => {
 
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
+    console.log(userUid,"dataNotGetting")
     const unsubscribe = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -71,7 +79,7 @@ const DataProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [userUid]);
+  }, [userUid,area]);
 
   useEffect(() => {
     const girlsRef = ref(database, `Hostel/${userUid}/girls`);
@@ -86,7 +94,9 @@ const DataProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [userUid]);
+  }, [userUid, area]);
+
+  console.log(activeBoysHostelButtons,"dataNotGetting")
 
   useDeepCompareEffect(() => {
     if (activeBoysHostelButtons.length > 0) {
@@ -105,7 +115,7 @@ const DataProvider = ({ children }) => {
   console.log("user UID", userUid)
  
   return (
-    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid, firebase, setArea }}>
+    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid, firebase, setArea,setUserUid }}>
       {children}
     </DataContext.Provider>
   );

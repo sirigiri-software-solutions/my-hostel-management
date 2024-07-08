@@ -7,23 +7,26 @@ import ImageTwo from "../../images/Vector 3 (2).png";
 import Google from '../../images/google.png'
 // import Logo from "../../images/image.png";
 import Logo from "../../images/HMLogo3.png"
+import newLogo from "../../images/favicon (2).jpg"
 import './Login.css';
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { DataContext } from "../../ApiData/ContextProvider";
+import { useData } from "../../ApiData/ContextProvider";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 import {createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { FirebaseError } from 'firebase/app';
+
+
 
 
 export const loginContext = createContext();
 
 const Login = () => {
   const navigate = useNavigate();
-  const { areaToApiEndpoint, setUserArea, setUserUid,firebase,setArea } = useContext(DataContext);
+  const { areaToApiEndpoint, setUserArea, setUserUid,firebase,setArea } = useData();
 
   const initialState = { Id: "", email: "", area: "", password: "" };
   const [loginData, setLoginData] = useState(initialState);
@@ -33,6 +36,7 @@ const Login = () => {
     area: "",
     phone: "",
     password: "",
+    confirmPassword:""
   });
 
   const [data, setData] = useState([]);
@@ -66,6 +70,9 @@ const Login = () => {
   const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
   const [signupError,setSignUpError] = useState("");
+  const [hidePassword, setHidePassword] = useState(true);
+  const [hideSingupPassword,sethideSingupPassword] = useState(true);
+  const [hideconfirmPassword,setHideConfirmPassword] = useState(true);
 
 
   // new firebase config based on location
@@ -73,16 +80,26 @@ const Login = () => {
 
 
 
+  const togglePasswordVisibility = () => {
+    setHidePassword(!hidePassword);
+  };
+  const toggleSignUpPasswordVisibility = () => {
+    sethideSingupPassword(!hideSingupPassword)
+  }
+
+  const toggleSignUpPasswordConfirmVisibility = () => {
+    setHideConfirmPassword(!hideconfirmPassword)
+  }
 
 
   useEffect(() => {
     if (loginData.area && areaToApiEndpoint[loginData.area]) {
-      axios.get(areaToApiEndpoint[loginData.area])
+    console.log("area==>", data)
+            axios.get(areaToApiEndpoint[loginData.area])
         .then((response) => {
           // let data = Object.values(response.data);
           const data = Object.entries(response.data).map(([uid, user]) => ({ uid, ...user }));
           setData(data);
-          console.log("area==>", data)
           console.log(data, "data response from firebase");
         });
     }
@@ -102,37 +119,58 @@ const Login = () => {
   };
 
 
-  const checkData =async (event) => {
+  const checkData = async (event) => {
     event.preventDefault();
-
-    if(validateForm()){
+  
+    if (validateForm()) {
       try {
-        const userCredential = await signInWithEmailAndPassword(auth,loginData.email,loginData.password);
-        if (userCredential.user.emailVerified) {
-
-          toast.success("You are logged in successfully.", {
-            position: "bottom-right",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          })
-          setLoginData({
-            Id: "", email: "", area: "", password: ""
-          });
- 
-          navigate("/mainPage");
-          const singleLoginuser = data.filter ((item) => item.signUpEmail === loginData.email && item.signUpPassword === loginData.password);
-
-          localStorage.setItem("username", singleLoginuser[0].firstname)
-          localStorage.setItem("userarea", singleLoginuser[0].area)
-          localStorage.setItem("userUid", singleLoginuser[0].uid);
-          
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          loginData.email,
+          loginData.password
+        );
+        const user = userCredential.user;
+  
+        if (user.emailVerified) {
+          // Assuming 'data' is the array of users where you check login details
+          const singleLoginUser = data.find(
+            (item) =>
+              item.signUpEmail === loginData.email &&
+              item.area === loginData.area
+          );
+  
+          if (singleLoginUser) {
+            // Update states and localStorage
+            setLoginData({
+              Id: "",
+              email: "",
+              area: "",
+              password: "",
+            });
+  
+            localStorage.setItem("username", singleLoginUser.firstname);
+            localStorage.setItem("userarea", singleLoginUser.area);
+            localStorage.setItem("userUid", singleLoginUser.uid);
+            setUserUid(singleLoginUser.uid);
+  
+            // Navigate to mainPage
+            navigate("/mainPage");
+  
+            toast.success("You are logged in successfully.", {
+              position: "bottom-right",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+            });
+          } else {
+            console.log("User not found in data array.");
+          }
         } else {
-          toast.error("Email is not registered", {
+          toast.error("Email is not verified.", {
             position: "bottom-right",
             autoClose: 2000,
             hideProgressBar: false,
@@ -141,11 +179,10 @@ const Login = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
-          })
-         
+          });
         }
       } catch (error) {
-        toast.error("Email is not registered", {
+        toast.error("Invalid credentials.", {
           position: "bottom-right",
           autoClose: 2000,
           hideProgressBar: false,
@@ -154,16 +191,13 @@ const Login = () => {
           draggable: true,
           progress: undefined,
           theme: "light",
-        })
-        
-        console.log(error.message);
+        });
+  
+        console.error("Login error:", error.message);
       }
     }
-
-
-   
-
   };
+  
 
   const validateForm = () => {
     let errors = {};
@@ -185,6 +219,7 @@ const Login = () => {
       setLoginErrors(errors);
       return false;
     }
+    
 
     setLoginErrors(errors);
     return Object.keys(errors).length === 0;
@@ -231,6 +266,20 @@ const Login = () => {
       return;
     }
 
+    let data;
+     await axios.get(areaToApiEndpoint[area])
+    .then((response) => {
+       data = Object.entries(response.data).map(([uid, user]) => ({ uid, ...user }));
+    })
+    .catch((e) => {
+      console.log("Error while fetching data");
+    });
+
+
+    const singleLoginuser = data.filter ((item) => item.signUpEmail === email && item.area === area);
+    console.log(data,"forgotPasswordList")
+    console.log(singleLoginuser,"forgotPasswordList")
+   if(singleLoginuser.length > 0){
     try {
       await sendPasswordResetEmail(auth, email);
       toast.success("Reset password link sent to email.", {
@@ -256,6 +305,16 @@ const Login = () => {
       console.log(error.message);
     }
 
+   }else{
+    toast.error("Invalid email", {
+      position: "bottom-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+   }
+
+  
+
   };
 
 
@@ -267,7 +326,7 @@ const Login = () => {
     area: "",
     phone: "",
     password: "",
-    confirmpassword: "",
+    confirmPassword: "",
     securityQuestion: "",
     securityAnswer: "",
 
@@ -314,7 +373,7 @@ const Login = () => {
     area: "",
     phone: "",
     password: "",
-    confirmpassword: "",
+    confirmPassword: "",
     securityQuestion: "",
     securityAnswer: "",
       
@@ -333,6 +392,7 @@ const Login = () => {
     area,
     phone,
     password,
+    confirmPassword
   } = signupData;
   // console.log(signupData,"mysignupdata");
 
@@ -353,91 +413,73 @@ const Login = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-  
+
     let formValid = true;
     const newErrors = {};
 
-     const firstname = e.target.firstname?.value || "";
-     const signUpEmail = e.target.email?.value || "";
-     const phone = e.target.phone?.value || "";
-     const area = e.target.area?.value || "";
-     const signUpPassword = e.target.password?.value || "";
-  
+    const firstname = e.target.firstname?.value || "";
+    const signUpEmail = e.target.email?.value || "";
+    const phone = e.target.phone?.value || "";
+    const area = e.target.area?.value || "";
+    // const signUpPassword = e.target.password?.value || "";
+    const confirmPassword = e.target.confirmPassword?.value || "";
+
     // Sequential validation
     if (firstname.trim() === "") {
-      newErrors.firstname = "required";
-      formValid = false;
+        newErrors.firstname = "required";
+        formValid = false;
+    } else if (signUpEmail.trim() === "") {
+        newErrors.email = "required";
+        formValid = false;
+    } else if (phone.trim() === "") {
+        newErrors.phone = "required";
+        formValid = false;
+    } else if (area.trim() === "") {
+        newErrors.area = "required";
+        formValid = false;
+    } else if (signUpPassword.trim() === "") {
+        newErrors.password = "required";
+        formValid = false;
+    } else if (signUpPassword.trim().length < 8) {
+        newErrors.password = "Weak password";
+        formValid = false;
+    } else if (confirmPassword.trim() === "") {
+        newErrors.confirmPassword = "required";
+        formValid = false;
+    } else if (signUpPassword !== confirmPassword) {
+        newErrors.confirmPassword = "Password doesn't match";
+        formValid = false;
     }
-    else if (signUpEmail.trim() === "") {
-      newErrors.email = "required";
-      formValid = false;
-    }else if (phone.trim() === "") {
-      newErrors.phone = "required";
-      formValid = false;
-    }
-    else if (area.trim() === "") {
-      newErrors.area = "required";
-      formValid = false;
-    }  else if (signUpPassword.trim() === "") {
-      newErrors.password = "required";
-      formValid = false;
-    }
-  
+
     if (!formValid) {
-      setSignupErrors(newErrors);
-      return; // Don't proceed with submission if form is invalid
+        setSignupErrors(newErrors);
+        return; // Don't proceed with submission if form is invalid
     }
-  
+
     // Create a data object for submission without errors
     const formData = {
-      area,firstname, phone ,signUpEmail,signUpPassword
+        area,
+        firstname,
+        phone,
+        signUpEmail,
     };
-  
+
     console.log(formData, 'signupdata1');
-  
+
     // Proceed with form submission if all fields are filled
     const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
-    console.log(areaToApiEndpoint[area.toLowerCase()]);
-  
+    console.log(apiEndpoint);
+
     try {
-      // Submit the form data using axios
-      const response = await axios.post(apiEndpoint, formData);
-      setData(response.data);
-  
-      // Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(auth, signUpEmail, signUpPassword);
-      await sendEmailVerification(userCredential.user);
-      console.log("Verification email sent");
-  
-      console.log(response.data, "apiendpointgetdata");
-      toast.success("A verification link has been sent to your email", {
-        position: "bottom-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-  
-      // Reset form and state after successful submission
-      setSignUp(false);
-      setSignupData({
-        email: "",
-        area: "",
-        password: "",
-        name: ""
-      });
-      setSignUpPassword("");
-      setSignUpEmail("");
-  
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error submitting data:", error);
-        toast.error(
-          "An error occurred while submitting the form. Please try again.",
-          {
+      
+
+        // Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, signUpEmail, signUpPassword);
+        await sendEmailVerification(userCredential.user);
+        console.log("Verification email sent");
+
+        
+        toast.success("A verification link has been sent to your email", {
             position: "bottom-right",
             autoClose: 2000,
             hideProgressBar: false,
@@ -446,23 +488,55 @@ const Login = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
-          }
-        );
-      } else if (error instanceof FirebaseError && error.code === 'auth/email-already-in-use') {
-        setSignUpError("Email already in use");
-        setSignUp(true);
-        setSignupData({
-          email: "",
-          area: "",
-          password: "",
-          name: "",
         });
-      } else {
-        setSignUpError(error.message);
-      }
-      console.log(error.message);
+
+
+          // Submit the form data using axios
+          const response = await axios.post(apiEndpoint, formData);
+          setData(response.data);
+          console.log(response.data, "apiendpointgetdata");
+        // Reset form and state after successful submission
+        setSignUp(false);
+        setSignupData({
+            email: "",
+            area: "",
+            password: "",
+            name: ""
+        });
+        setSignUpPassword("");
+        setSignUpEmail("");
+
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error("Error submitting data:", error);
+            toast.error(
+                "An error occurred while submitting the form. Please try again.",
+                {
+                    position: "bottom-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                }
+            );
+        } else if (error instanceof FirebaseError && error.code === 'auth/email-already-in-use') {
+            setSignUpError("Email already in use");
+            setSignUp(true);
+            setSignupData({
+                email: "",
+                area: "",
+                password: "",
+                name: "",
+            });
+        } else {
+            setSignUpError(error.message);
+        }
+        console.log(error.message);
     }
-  };
+};
 
  
 
@@ -477,10 +551,12 @@ const Login = () => {
     );
   }
 
+
+
   return (
     <>
       <div className="main-div">
-        <img src={ImageOne} alt="imageone" className="up-image" />
+        {/* <img src={ImageOne} alt="imageone" className="up-image" /> */}
 
         <div className="loginPage-left-mainContainer">
           <div className="left-logo-mainContainer">
@@ -490,6 +566,10 @@ const Login = () => {
         </div>
         <div className="loginPage-right-mainContainer">
           <div className="checkpage">
+            <div className="loginSingupHeadContianer">
+                <img src={newLogo} alt="HM" className="loginSigninLogo" />
+                <p className="cardsHeading">HOSTEL <br/>MANAGEMENT</p>
+            </div>
             {!signup ? (login ? (
               <>
               <form onSubmit={checkData} className="input-form w-100 p-2">
@@ -526,9 +606,10 @@ const Login = () => {
                   {loginErrors.area && <p className="form-error-msg">{loginErrors.area}</p>}
                 </div>
                 <div>
+                  <div class="showPasswordDiv">
                   <input
-                    type="password"
-                    className={`form-control custom-input ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
+                    type={hidePassword ? 'password' : 'text'}
+                    className={`form-control custom-input rounded-pill ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
                     placeholder="Password"
                     onChange={handleData}
                     value={loginData.password}
@@ -536,6 +617,13 @@ const Login = () => {
                     name="password"
                     id="pass"
                   />
+                   <FontAwesomeIcon
+       icon={hidePassword ? faEyeSlash : faEye}
+        className="password-toggle-icon"
+        onClick={togglePasswordVisibility}
+      />
+      </div>
+                 
                   <div className="forgotbtndiv">
                         <span className="forgotText" onClick={handleSwitch}>Forgot password?</span>
                       </div>
@@ -594,34 +682,34 @@ const Login = () => {
                 </form>) : null
 
             ) : (
-              <form className="row p-2 d-flex flex-column align-items-center w-100" onSubmit={submitHandler}>
+              <form className="row p-2  w-100 mt-3" onSubmit={submitHandler}>
                 <h2 className="text-center login-heading p-2">SignUp</h2>
-                <div className="form-group col-md-11">
+                <div className="form-group col-md-6">
                   <input
                     type="text"
                     name="firstname"
                     value={firstname}
                     onChange={changeHandler}
-                    placeholder="Enter Your Name"
+                    placeholder="Enter Name"
                     onFocus={() => clearErrorOnFocus("firstname")}
                     className="rounded-pill"
                   />
                   {signupErrors.firstname && <div className="form-error-msg">{signupErrors.firstname}</div>}
                 </div>
-                <div className="form-group col-md-11">
+                <div className="form-group col-md-6">
                   <input
                     type="email"
                     name="email"
                     value={signUpEmail}
                     onChange={(e) => setSignUpEmail(e.target.value)}
-                    placeholder="Enter Your Email"
+                    placeholder="Enter Email"
                     onFocus={() => clearErrorOnFocus("email")}
                     className="rounded-pill"
                   />
                   {signupErrors.email && <div className="form-error-msg">{signupErrors.email}</div>}
                 </div>
 
-                <div className="form-group col-md-11">
+                <div className="form-group col-md-6">
                   <input
                     type="tel"
                     name="phone"
@@ -635,7 +723,7 @@ const Login = () => {
                 </div>
 
 
-                <div className="form-group col-md-11">
+                <div className="form-group col-md-6">
                   <select
                     name="area"
                     value={area}
@@ -654,19 +742,46 @@ const Login = () => {
                 </div>
               
               
-                <div className="form-group col-md-11">
+              
+                <div className="form-group col-md-6 position-relative">
                   {/* <label htmlFor="password">Password:</label> */}
                   <input
-                    type="password"
+                    type={hideSingupPassword ? 'password' : 'text'}
                     name="password"
                     value={signUpPassword}
                     onChange={(e) => setSignUpPassword(e.target.value)}
-                    placeholder="Enter Your Password"
+                    placeholder="Enter Password"
                     onFocus={() => clearErrorOnFocus("password")}
                     className="form-control rounded-pill"
                   />
                   {signupErrors.password && <div className="form-error-msg">{signupErrors.password}</div>}
+                  <FontAwesomeIcon
+      icon={hideSingupPassword ? faEyeSlash : faEye}
+      className="password-toggle-icon-signup"
+      onClick={toggleSignUpPasswordVisibility}  // Function to toggle password visibility
+    />
                 </div>
+
+                <div className="form-group col-md-6 position-relative">
+                  {/* <label htmlFor="password">Password:</label> */}
+                  <input
+                    type={hideconfirmPassword? "password":"text"}
+                    name="confirmPassword"
+                    value={confirmPassword}
+                    onChange={changeHandler}
+                    placeholder="Confirm Password"
+                    onFocus={() => clearErrorOnFocus("confirmPassword")}
+                    className="form-control rounded-pill"
+                  />
+                  {signupErrors.confirmPassword && <div className="form-error-msg">{signupErrors.confirmPassword}</div>}
+                  <FontAwesomeIcon
+      icon={hideconfirmPassword ? faEyeSlash : faEye}
+      className="password-toggle-icon-signup"
+      onClick={toggleSignUpPasswordConfirmVisibility}  // Function to toggle password visibility
+    />
+                </div>
+
+                
                 
                {signupError && <p className="text-center error-message">{signupError}</p>}
                 <div className="form-group col-md-11">
@@ -684,7 +799,7 @@ const Login = () => {
 
         
 
-        <img src={ImageTwo} alt="imagetwo" className="down-image" />
+        {/* <img src={ImageTwo} alt="imagetwo" className="down-image" /> */}
       </div>
     </>
   );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useData } from '../../ApiData/ContextProvider';
 import { set, ref, remove, onValue, update } from 'firebase/database';
-import { database } from '../../firebase/firebase';
+
 import { toast } from 'react-toastify';
 import './Hostels.css';
 import { Modal, Button, Tab, Tabs } from 'react-bootstrap';
@@ -11,7 +11,8 @@ import Table from '../../Elements/Table';
 
 const Hostels = ({ onTabSelect, activeTab }) => {
   const { t } = useTranslation();
-  const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, setActiveBoysHostelButtons, userUid } = useData();
+  const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, setActiveBoysHostelButtons, userUid,firebase} = useData();
+  const {database} = firebase;
   const [isEditing, setIsEditing] = useState(null);
   const [hostels, setHostels] = useState({ boys: [], girls: [] });
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);

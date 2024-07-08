@@ -3,7 +3,7 @@ import Table from '../../Elements/Table'
 import RentIcon from '../../images/Icons (6).png'
 import SearchIcon from '../../images/Icons (9).png'
 // import { database, push, ref } from "../../firebase";
-import { database, push, ref } from "../../firebase/firebase";
+import { push, ref } from "../../firebase/firebase";
 import { useState } from 'react'
 import { DataContext } from '../../ApiData/ContextProvider';
 import { onValue, update } from 'firebase/database';
@@ -18,7 +18,8 @@ import { useData } from '../../ApiData/ContextProvider';
 const RentPageBoys = () => {
   const { t } = useTranslation();
   const { data } = useContext(DataContext);
-  const { activeBoysHostel, userUid, activeBoysHostelButtons } = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons,firebase } = useData();
+  const {database} = firebase;
   const [searchQuery, setSearchQuery] = useState('');
   const [tenants, setTenants] = useState([]);
   const [rooms, setRooms] = useState({});

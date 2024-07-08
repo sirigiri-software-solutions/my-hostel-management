@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ref, set } from 'firebase/database';
-// import { database } from '../../firebase';
-import { database } from '../../firebase/firebase';
+
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LanguageSwitch from '../../LanguageSwitch';
@@ -11,11 +10,12 @@ import { Modal, Button } from 'react-bootstrap';
 import { useData } from '../../ApiData/ContextProvider';
 import { useEffect } from 'react';
 import { get, onValue } from 'firebase/database';
-// import { database } from '../../firebase/firebase';
 
 
 const Settings = () => {
-  const { userUid } = useData();
+  const { firebase } = useData();
+  const userUid = localStorage.getItem('userUid')
+  const {database} = firebase
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
   const [newBoysHostelAddress, setNewBoysHostelAddress] = useState('');
   const [newGirlsHostelName, setNewGirlsHostelName] = useState('');
@@ -27,6 +27,9 @@ const Settings = () => {
   const [girlsHostels, setGirlsHostels] = useState([]);
   const [boysHostelImage, setBoysHostelImage] = useState('');
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
+
+  console.log(firebase," ")
+  console.log(database,"lookwhichfirebaseConfigisThese")
 
   useEffect(() => {
     if (userUid) {
@@ -58,7 +61,7 @@ const Settings = () => {
         setGirlsHostels(hostels);
       });
     }
-  }, [userUid]);
+  }, []);
 
   const capitalizeFirstLetter = (string) => {
     return string.replace(/\b\w/g, char => char.toUpperCase());
@@ -106,7 +109,7 @@ const Settings = () => {
       });
       return;
     }
-
+    console.log(userUid,"dataNotGetting")
     const hostelRef = ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
     const hostelDetails = { name, address , hostelImage};
 

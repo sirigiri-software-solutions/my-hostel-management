@@ -5,7 +5,7 @@ import Table from '../../Elements/Table'
 import ImageIcon from '../../images/Icons (10).png'
 import { useState, useContext } from 'react'
 // import { database, push, ref, storage } from "../../firebase";
-import { database, push, ref, storage } from "../../firebase/firebase";
+import {push, ref, storage } from "../../firebase/firebase";
 import '../TenantsGirls/TenantsGirls.css';
 import './TenantsBoys.css'
 import { DataContext } from '../../ApiData/ContextProvider'
@@ -19,9 +19,9 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons } = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons,firebase } = useData();
   const role = localStorage.getItem('role');
-
+  const {database} = firebase;
 
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
@@ -206,16 +206,21 @@ const TenantsBoys = () => {
           setBoysTenants(boysTenantsData);
         } else {
           const apiData = await FetchData();
-          const boysTenantsData = Object.values(apiData.boys.tenants);
-          setBoysTenants(boysTenantsData)
+          if (apiData) { // Ensure apiData is not null or undefined
+            const boysTenantsData = Object.values(apiData.boys.tenants);
+            setBoysTenants(boysTenantsData);
+          } else {
+            console.error('API returned null or undefined data.');
+          }
         }
       } catch (error) {
         console.error('Error fetching tenants data:', error);
       }
     };
+  
     fetchDataFromAPI();
-
   }, [data]);
+  
 
   const validate = () => {
     let tempErrors = {};

@@ -7,11 +7,8 @@ import './DashboardBoys.css'
 import SmallCard from '../../Elements/SmallCard'
 import './DashboardBoys.css';
 import PlusIcon from "../../images/Icons (8).png"
-// import { database, push, ref, storage } from "../../firebase";
-// import { database, push, ref, storage } from "../../firebase/firebase";
-import { database, storage } from '../../firebase/firebase';
+
 import { onValue, push, ref, update } from 'firebase/database'
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 // import Table from '../../Elements/Table';
@@ -35,7 +32,9 @@ const DashboardBoys = () => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
 
 
-  const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, userArea, userUid } = useData();
+  const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, userArea, userUid,firebase } = useData();
+  const {database} = firebase;
+
   const [modelText, setModelText] = useState('');
   const [formLayout, setFormLayout] = useState('');
   const [floorNumber, setFloorNumber] = useState('');
@@ -103,6 +102,8 @@ const DashboardBoys = () => {
     console.log(file, "file2 created");
   };
 
+
+  
 
   const handleRcChange = (e) => {
     const file1 = e.target.files[0];
@@ -1686,7 +1687,7 @@ const DashboardBoys = () => {
       )}
       <div className="menu">
         {menu.map((item, index) => (
-          <div className='cardWithBtnsContainer'>
+          <div key={index} className='cardWithBtnsContainer'>
             <SmallCard key={index} index={index} item={item} handleClick={handleCardClick} />
             <button id="mbladdButton" type="button" onClick={() => { handleClick(item.btntext) }}><img src={PlusIcon} alt="plusIcon" className='plusIconProperties' /> {item.btntext}</button>
           </div>

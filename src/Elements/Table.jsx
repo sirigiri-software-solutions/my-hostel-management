@@ -35,7 +35,7 @@ const Table = ({ columns, rows, onClickTentantRow }) => {
         <thead>
           <tr className="fixed">
             {
-              columns.map((item, index) => <th style={{ padding: "10px" }}>{item}</th>)
+              columns.map((item, index) => <th key={index} style={{ padding: "10px" }}>{item}</th>)
             }
           </tr>
         </thead>

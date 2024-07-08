@@ -221,8 +221,8 @@ const MainPage = () => {
     }
     return(
       <>
-      {activeTab === 'boys' && <text>{t('dashboard.welcomeTo')}&nbsp;{activeBoysHostel}&nbsp;{t('dashboard.boysHostel')}</text>}
-      {activeTab !== 'boys' && <text>{t('dashboard.welcomeTo')}&nbsp;{activeGirlsHostel}&nbsp;{t('dashboard.girlsHostel')}</text>}
+      {activeTab === 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeBoysHostel}&nbsp;{t('dashboard.boysHostel')}</p>}
+      {activeTab !== 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeGirlsHostel}&nbsp;{t('dashboard.girlsHostel')}</p>}
       </>
     )
   }

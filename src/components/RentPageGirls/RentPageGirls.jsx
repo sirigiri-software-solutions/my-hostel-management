@@ -3,7 +3,7 @@ import RentIcon from '../../images/Icons (6).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
 // import { database, push, ref } from "../../firebase";
-import { database, push, ref } from "../../firebase/firebase";
+import {  push, ref } from "../../firebase/firebase";
 import { useState } from 'react'
 import { DataContext } from '../../ApiData/ContextProvider';
 import { onValue, update } from 'firebase/database';
@@ -17,7 +17,8 @@ import { useTranslation } from 'react-i18next';
 const RentPageGirls = () => {
   const { t } = useTranslation();
   const { data } = useContext(DataContext);
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons } = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons,firebase } = useData();
+  const {database} = firebase;
   const [searchQuery, setSearchQuery] = useState('');
   const [tenants, setTenants] = useState([]);
   const [rooms, setRooms] = useState({});

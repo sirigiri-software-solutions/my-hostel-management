@@ -3,7 +3,7 @@ import ExpenseIcon from '../../images/Icons (5).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
 // import { database, push, ref } from "../../firebase";
-import { database, push, ref } from "../../firebase/firebase";
+import { push, ref } from "../../firebase/firebase";
 import "../RoomsBoys/RoomsBoys.css"
 import { onValue } from 'firebase/database';
 import { remove, update, set } from 'firebase/database';
@@ -14,7 +14,8 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const ExpensesGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel , userUid, activeGirlsHostelButtons} = useData();
+  const { activeGirlsHostel , userUid, activeGirlsHostelButtons,firebase} = useData();
+  const {database} = firebase;
 
   const  role = localStorage.getItem('role');
   let adminRole = "";

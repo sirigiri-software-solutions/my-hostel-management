@@ -9,10 +9,14 @@
   background-image: linear-gradient(to bottom left, #efefef 20%, #ffffff 35%);
   display: flex;
   /* background-size: cover; */
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
 @media screen and (min-width:768px) {
   .main-div{
     height:100vh;
+    
   }
   
 }
@@ -21,6 +25,7 @@
   .main-div {
     flex-direction: column;
     justify-content: center;
+    align-items:center;
   }
 }
 
@@ -83,6 +88,8 @@
 @media screen and (max-width:768px) {
   .loginPage-right-mainContainer {
     width: 100%;
+    margin-top:10px;
+    margin-bottom:10px;
   }
 }
 
@@ -182,9 +189,10 @@
 }
 .forgotbtndiv{
   text-align:right;
-  margin-top:-10px;
+  margin-top:-1px;
   margin-bottom:5px;
 }
+
 
 
 .loginfooter {
@@ -243,4 +251,83 @@
 }
 .signupdiv{
   margin-top:-20px;
+}
+
+.loginSingupHeadContianer{
+  display:flex;
+  justify-content:center;
+  margin-top:20px;
+  margin-bottom:-20px;
+  align-items:center;
+}
+.loginSigninLogo{
+  height:60px;
+  width:50px;
+  margin-right:5px;
+}
+.cardsHeading{
+  text-align:center;
+  line-height:20px;
+  font-family:"Roboto";
+  font-weight:800;
+  margin-top:15px;
+  margin-left:5px;
+
+}
+
+@media screen and (min-width:768px){
+  .loginSingupHeadContianer{
+    display:none;
+  }
+}
+@media screen and (max-width:768px){
+  .login-heading{
+    display:none;
+  }
+  .loginPage-left-mainContainer{
+    display:none;
+  }
+}
+.showPasswordDiv{
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem; /* Adjust as needed for positioning */
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #ccc; /* Icon color */
+}
+
+.password-toggle-icon:hover {
+  color: #333; /* Icon color on hover */
+}
+.password-toggle-icon-signup{
+  position: absolute;
+  top: 50%;
+  right:1.2rem;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #ccc; /* Icon color */
+}
+.password-toggle-icon-signup:hover{
+  color:#333;
+}
+
+/* For WebKit browsers (Chrome, Safari, Opera) */
+input[type="password"]::-webkit-input-decoration {
+  display: none;
+}
+
+/* For Mozilla Firefox */
+input[type="password"]::-moz-eye {
+  display: none;
+}
+
+/* For Microsoft Edge */
+input[type="password"]::-ms-reveal {
+  display: none;
 }

@@ -5,11 +5,11 @@ import './index.css'
 import { I18nextProvider } from 'react-i18next'; // Import I18nextProvider
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import { createRoot } from 'react-dom/client';
 // Import i18n configuration
 import i18n from './i18n';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <I18nextProvider i18n={i18n}>
