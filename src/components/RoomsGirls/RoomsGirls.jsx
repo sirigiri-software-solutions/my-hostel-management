@@ -432,7 +432,7 @@ function capitalizeFirstLetter(string) {
                     {isEditing ? (
                       <>
                       <button type="button" className="btn btn-warning roomUpdateBtn" onClick={handleSubmit}>{t('roomsPage.Update Room')}</button>
-                      {role === "admin" ? <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button> : null}
+                       <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button> 
                       </>
                     ) : (
                       <button type="submit" className="btn btn-warning">{t('roomsPage.CreateRoom')}</button>

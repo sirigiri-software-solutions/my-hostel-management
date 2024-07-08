@@ -202,8 +202,7 @@ const BedsPageBoys = () => {
             <option value="Unoccupied">{t('bedsPage.unoccupied')}</option>
           </select>
           <select className='col-4 bedPageFilterDropdown' value={selectedFloor} onChange={onChangeFloor}>
-            <option value="">{t('bedsPage.floorNumber')}</option>
-           
+            <option value="">{t('bedsPage.floorNumber')}</option>         
             {
               floorNumbersToShow.map((floor) => (
                 <option key={floor} value={floor}>

@@ -924,6 +924,7 @@ const DashboardBoys = () => {
       expenseDate: '',
       createdBy: 'admin'
     })
+    setPermnentAddress('')
   };
 
 
