@@ -30,6 +30,7 @@ import { useTranslation } from 'react-i18next'
 import { useData } from '../../ApiData/ContextProvider';
 import Hostels from '../../Sections/Hostels/Hostels'
 import LanguageSwitch from '../../LanguageSwitch'
+// import Onboarding from '../../Onboarding'
 const MainPage = () => {
   const { t } = useTranslation()
   const { activeBoysHostelName, activeGirlsHostelName } = useData();
@@ -109,6 +110,8 @@ const MainPage = () => {
   ];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showSuggestionModal, setShowSuggestionModal] = useState(true); // State for suggestion modal
+
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -333,6 +336,8 @@ const MainPage = () => {
           </div>)}
 
       </div>
+      {/* <Onboarding show={showSuggestionModal} handleClose={() => setShowSuggestionModal(false)} /> */}
+
     </div>
   )
 }

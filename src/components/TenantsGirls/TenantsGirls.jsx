@@ -42,7 +42,8 @@ const TenantsGirls = () => {
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
-  // const [tenantImageUrl, setTenantImageUrl] = useState('');
+   const [tenantImageUrl, setTenantImageUrl] = useState('');
+   const [tenantIdUrl,setTenantIdUrl]= useState('')
   const [tenantId, setTenantId] = useState(null);
   // const [tenantIdUrl, setTenantIdUrl] = useState('');
   // const imageInputRef = useRef(null);

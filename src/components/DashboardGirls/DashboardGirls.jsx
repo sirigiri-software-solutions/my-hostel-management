@@ -22,10 +22,49 @@ import { useTranslation } from 'react-i18next';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera } from '@fortawesome/free-solid-svg-icons';
+import Joyride, { STATUS } from "react-joyride";
+
 
 const DashboardGirls = () => {
-  const { t } = useTranslation();
 
+  const [run, setRun] = useState(true);
+  const [steps] = useState([
+    {
+      target: '.hamburger-menu',
+      content: 'Click here to open the menu.',
+    },
+    {
+      target: '.menu-item-1',
+      content: 'This is the first menu item. Click to navigate.',
+    },
+    {
+      target: '.menu-item-2',
+      content: 'This is the second menu item. Click to navigate.',
+    },
+    // Add more steps as needed
+    {
+      target: '.total-rooms-card',
+      content: 'Here you can see the total rooms. Click to add rooms.',
+    },
+    {
+      target: '.total-tenants-card',
+      content: 'Here you can see the total tenants. Click to add tenants.',
+    },
+    {
+      target: '.total-beds-card',
+      content: 'Here you can see the total beds. Click to manage rent.',
+    }
+  ]);
+
+  const handleJoyrideCallback = (data) => {
+    const { status, type } = data;
+    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+      setRun(false);
+    }
+  };
+
+
+  const { t } = useTranslation();
   // created by admin or subAdmin 
   const role = localStorage.getItem('role');
   let adminRole = "";
@@ -69,9 +108,9 @@ const DashboardGirls = () => {
   const [currentTenantId, setCurrentTenantId] = useState('');
   const [tenatErrors, setTenantErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
-  // const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
+   const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
   const [tenantId, setTenantId] = useState(null);
-  // const [tenantIdUrl, setTenantIdUrl] = useState('');
+   const [tenantIdUrl, setTenantIdUrl] = useState('');
   const imageInputRef = useRef(null);
   const idInputRef = useRef(null);
   const [girlsRoomsData, setGirlsRoomsData] = useState([]);
@@ -1735,6 +1774,15 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   return (
     <div className="dashboardgirls">
+      {/* <Joyride
+        run={run}
+        steps={steps}
+        continuous
+        scrollToFirstStep
+        showProgress
+        showSkipButton
+        callback={handleJoyrideCallback}
+      /> */}
       <h1 className="heading1">{t('dashboard.womens')}</h1>
       <br />
       {activeGirlsHostelButtons.length > 0 ? (

@@ -40,9 +40,9 @@ const TenantsBoys = () => {
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
-  // const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
+   const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
   const [tenantId, setTenantId] = useState(null);
-  // const [tenantIdUrl, setTenantIdUrl] = useState('');
+   const [tenantIdUrl, setTenantIdUrl] = useState('');
  
   const [showModal, setShowModal] = useState(false);
   const [userDetailsTenantPopup, setUserDetailsTenantsPopup] = useState(false);

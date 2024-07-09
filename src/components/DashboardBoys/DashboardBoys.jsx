@@ -22,6 +22,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera } from '@fortawesome/free-solid-svg-icons';
 import { FaWhatsapp } from "react-icons/fa";
 import { useData } from '../../ApiData/ContextProvider';
+// import Onboarding from '../../Onboarding';
+
 
 const DashboardBoys = () => {
 
@@ -68,9 +70,9 @@ const DashboardBoys = () => {
   const [currentTenantId, setCurrentTenantId] = useState('');
   const [tenatErrors, setTenantErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
-  // const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
+   const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
   const [tenantId, setTenantId] = useState(null);
-  // const [tenantIdUrl, setTenantIdUrl] = useState('');
+   const [tenantIdUrl, setTenantIdUrl] = useState('');
   const imageInputRef = useRef(null);
   const idInputRef = useRef(null);
   const [showForm, setShowForm] = useState(true);
