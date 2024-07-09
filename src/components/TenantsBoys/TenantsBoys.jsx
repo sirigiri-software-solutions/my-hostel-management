@@ -5,7 +5,7 @@ import Table from '../../Elements/Table'
 import ImageIcon from '../../images/Icons (10).png'
 import { useState, useContext } from 'react'
 // import { database, push, ref, storage } from "../../firebase";
-import { database, push, ref, storage } from "../../firebase/firebase";
+import {push, ref, storage } from "../../firebase/firebase";
 import '../TenantsGirls/TenantsGirls.css';
 import './TenantsBoys.css'
 import { DataContext } from '../../ApiData/ContextProvider'
@@ -22,9 +22,9 @@ import { faCamera } from '@fortawesome/free-solid-svg-icons';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons } = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons,firebase } = useData();
   const role = localStorage.getItem('role');
-
+  const {database} = firebase;
 
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
@@ -152,7 +152,7 @@ const TenantsBoys = () => {
       setBikeRcImage(reader.result);
     }
     reader.readAsDataURL(file1);
-    console.log(file1, "file1 created");
+
   }
   // const uploadImage = async () => {
   //   if (bikeImage) {
@@ -274,16 +274,21 @@ const TenantsBoys = () => {
           setBoysTenants(boysTenantsData);
         } else {
           const apiData = await FetchData();
-          const boysTenantsData = Object.values(apiData.boys.tenants);
-          setBoysTenants(boysTenantsData)
+          if (apiData) { // Ensure apiData is not null or undefined
+            const boysTenantsData = Object.values(apiData.boys.tenants);
+            setBoysTenants(boysTenantsData);
+          } else {
+            console.error('API returned null or undefined data.');
+          }
         }
       } catch (error) {
         console.error('Error fetching tenants data:', error);
       }
     };
+  
     fetchDataFromAPI();
-
   }, [data]);
+  
 
   const validate = () => {
     let tempErrors = {};
@@ -301,7 +306,14 @@ const TenantsBoys = () => {
     } else if (!/^\d{10,13}$/.test(mobileNo)) {
       tempErrors.mobileNo = t('errors.mobileNumberInvalid');
     }
-    tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
+    if(!idNumber){
+      tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
+    } else if(idNumber.length < 6){
+      tempErrors.idNumber = 'Id should be min 6 characters';
+    } else if (!/^[a-zA-Z0-9_\-\/\\\s]+$/.test(idNumber)) {
+      tempErrors.idNumber = 'It does not allow special charecters';
+    }
+    
     // Validate emergency contact
     if (!emergencyContact) {
       tempErrors.emergencyContact = t('errors.emergencyContactRequired');
@@ -319,16 +331,24 @@ const TenantsBoys = () => {
     if (!tenantImage ) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
+    if (!bikeNumber) {
+      tempErrors.bikeNumber = 'Bike number required';
+    } else if (!/^[a-zA-Z0-9\s]+$/.test(bikeNumber)) {
+      tempErrors.bikeNumber = 'Bike number must contain only alphabets, numbers, and spaces';
+    } 
+    // else if (bikeNumber.length < 5 || bikeNumber.length > 13) {
+    //   tempErrors.bikeNumber = 'Bike number must be between 5 and 13 characters';
+    // }
     setErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
-
+console.log(errors, "errors")
   // const handleTenantImageChange = (e) => {
   //   if (e.target.files[0]) {
   //     setTenantImage(e.target.files[0]);
   //   }
   // };
-  
+
   const handleTenantImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -454,8 +474,7 @@ const TenantsBoys = () => {
       // tenantIdUrl,
     };
 
-    console.log(permnentAddress, "addressWhileSubmiting")
-    console.log(tenantData, "addressWhileSubmiting1")
+
 
     if (isEditing) {
       await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData).then(() => {
@@ -581,6 +600,7 @@ const TenantsBoys = () => {
     // setTenantIdUrl('');
     setTenantId('')
     setBikeNumber('NA');
+    setPermnentAddress('')
     tenantImageInputRef.current.value = null;
     tenantProofIdRef.current.value = null;
 
@@ -661,7 +681,7 @@ const TenantsBoys = () => {
   const filteredRows = rows.filter((row) => {
     // Check if any value in the row matches the search query
     const hasSearchQueryMatch = Object.values(row).some((value) =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     // Apply additional filtering based on the selected status
@@ -702,11 +722,11 @@ const TenantsBoys = () => {
       eachTenant.roomNo === roomNo &&
       eachTenant.bedNo === bedNo
     );
-    console.log(tenants, "tenantdetails5")
+
     if (singleUserDueDate && singleUserDueDate.rents) {
       const dataWithDueDate = Object.values(singleUserDueDate.rents);
       const dueDate = dataWithDueDate[0].dueDate;
-      console.log("Due date:", dueDate);
+
       setDueDateOfTenant(dueDate);
     } else {
       console.log("Tenant with due date not found or due date is missing");
@@ -717,7 +737,6 @@ const TenantsBoys = () => {
     }
 
     if (singleUserDueDate && singleUserDueDate.permnentAddress) {
-      console.log("permnent", "address")
       setTenantAddress(singleUserDueDate.permnentAddress);
     }
     else {
@@ -880,7 +899,7 @@ const TenantsBoys = () => {
   };
 
   const handleChange = (event) => {
-    const value = event.target.checked ? 'YES' : 'NA';
+    const value = event.target.checked ? 'YES' : '';
     onChangeStatus({ target: { value } });
   };
   const handleTenantFocus = (e) => {
@@ -906,7 +925,7 @@ const TenantsBoys = () => {
           <input type="text" placeholder={t('common.search')} className='search-input' value={searchQuery} onChange={handleSearchChange} />
           <img src={SearchIcon} alt="search-icon" className='search-icon' />
         </div>
-        <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end '>
+        <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end justify-cotent-end'>
           <div className='d-flex align-items-center text-center'>
             {showBikeFilter ? (<div className="toggle-container">
               <label className="toggle-label" htmlFor="status-toggleGirl">{t('tenantsPage.bike')}</label>
@@ -929,15 +948,15 @@ const TenantsBoys = () => {
                 </button>}
 
               </div>
-              <div className={showExTenants ? "col-4 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
-                {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
-                  {t('tenantsPage.presentTenants')}
-                </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
-                  {t('tenantsPage.vacated')}
-                </button>}
-              </div>
+            <div className={showExTenants ? "col-8 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
+              {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
+              {t('tenantsPage.presentTenants')}
+              </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
+              {t('tenantsPage.vacated')}
+              </button>}
             </div>
-
+      </div>
+      
           </div>
         </div>
 
@@ -1111,7 +1130,7 @@ const TenantsBoys = () => {
                   </div>
 
                   {hasBike && (
-                    <div className='bikeField' style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
+                    <div className='bikeField' >
                       <label class="bikenumber" htmlFor="bikeNumber" >{t('dashboard.bikeNumber')}</label>
                       <input
                         type="text"
@@ -1120,8 +1139,9 @@ const TenantsBoys = () => {
                         placeholder="Enter number plate ID"
                         value={bikeNumber}
                         onChange={(event) => setBikeNumber(event.target.value)}
-                        style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px', marginLeft: '8px' }}
+                        style={{  borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px',  }}
                       />
+                      {errors.bikeNumber && <p style={{ color: 'red' }}>{errors.bikeNumber}</p>}
                     </div>
                   )
                   }

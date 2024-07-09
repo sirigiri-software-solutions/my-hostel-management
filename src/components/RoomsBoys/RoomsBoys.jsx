@@ -5,7 +5,7 @@ import './RoomsBoys.css';
 import Table from '../../Elements/Table';
 // import { database, push, ref } from "../../firebase";
 
-import { database, push, ref } from "../../firebase/firebase";
+import {push, ref } from "../../firebase/firebase";
 import { DataContext } from "../../ApiData/ContextProvider"
 import { onValue, remove, update } from 'firebase/database';
 import { toast } from "react-toastify";
@@ -24,7 +24,8 @@ const RoomsBoys = () => {
     adminRole = "Sub-admin"
   }
 
-  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons } = useData();
+  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons,firebase } = useData();
+  const {database}  = firebase;
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
@@ -104,7 +105,7 @@ const RoomsBoys = () => {
     }
     // -----------------------------------------------
     if (isEditing) {
-      const roomRef = ref(database, `Hostel/${userUid}/boys${activeBoysHostel}/rooms/${currentId}`);
+      const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
       update(roomRef, {
         floorNumber,
         roomNumber,
@@ -462,7 +463,7 @@ const RoomsBoys = () => {
                       {isEditing ? (
                         <div className="roomsEditBtnsContainer">
                           <button type="button" className="btn btn-warning roomUpdateBtn" onClick={handleSubmit}>{t('roomsPage.Update Room')}</button>
-                          {role === "admin" ? <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button> : null}
+                          <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button> 
                         </div>
                       ) : (
                         <button type="submit" className="btn btn-warning" >{t('roomsPage.CreateRoom')}</button>

@@ -3,7 +3,7 @@ import ExpenseIcon from '../../images/Icons (5).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
 // import { database, push, ref } from "../../firebase";
-import { database, push, ref } from "../../firebase/firebase";
+import {push, ref } from "../../firebase/firebase";
 import { onValue } from 'firebase/database';
 import { remove, update, set } from 'firebase/database';
 import { toast } from "react-toastify";
@@ -23,7 +23,8 @@ const ExpensesBoys = () => {
   }
 
   const isUneditable = role === 'admin' || role === 'subAdmin';
-  const { activeBoysHostel,userUid, activeBoysHostelButtons } = useData();
+  const { activeBoysHostel,userUid, activeBoysHostelButtons,firebase } = useData();
+  const {database } = firebase;
   const [searchTerm, setSearchTerm] = useState('');
   const [initialRows, setInitialRows] = useState([]);
   const [expenses, setExpenses] = useState([]);

@@ -3,7 +3,7 @@ import RentIcon from '../../images/Icons (6).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
 // import { database, push, ref } from "../../firebase";
-import { database, push, ref } from "../../firebase/firebase";
+import {  push, ref } from "../../firebase/firebase";
 import { useState } from 'react'
 import { DataContext } from '../../ApiData/ContextProvider';
 import { onValue, update } from 'firebase/database';
@@ -17,7 +17,8 @@ import { useTranslation } from 'react-i18next';
 const RentPageGirls = () => {
   const { t } = useTranslation();
   const { data } = useContext(DataContext);
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons } = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons,firebase } = useData();
+  const {database} = firebase;
   const [searchQuery, setSearchQuery] = useState('');
   const [tenants, setTenants] = useState([]);
   const [rooms, setRooms] = useState({});
@@ -560,11 +561,11 @@ Please note that you made your last payment on ${paidDate}.\n`
               onChange={handleSearch} />
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
-          <div className="col-6 col-md-4 d-flex justify-content-end">
-            <div className="form-group">
+          <div className="col-6 col-md-4 d-flex justify-content-end align-items-end">
+            <div className="filterRentDropDownContainer">
               <select
                 id="dueDateFilter"
-                className="form-control"
+                className="rentFilter"
                 value={filterOption}
                 onChange={handleSelectChange}
               >

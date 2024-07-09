@@ -3,7 +3,7 @@ import bedIcon from '../../images/Icons (3).png'
 import Table from '../../Elements/Table'
 import SearchIcon from '../../images/Icons (9).png'
 // import {database, ref, push} from '../../firebase/'
-import { database, push, ref } from '../../firebase/firebase'
+import { push, ref } from '../../firebase/firebase'
 import { onValue } from 'firebase/database'
 import "../BedsPageBoys/BedsPageBoys.css"
 import { useData } from '../../ApiData/ContextProvider';
@@ -11,7 +11,8 @@ import { useTranslation } from 'react-i18next';
 
 const BedsPageGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel, userUid } = useData();
+  const { activeGirlsHostel, userUid,firebase } = useData();
+  const {database} = firebase;
   const [girlsRooms, setGirlsRooms]= useState([])
   const [bedsData, setBedsData] = useState([]);
   const [tenants, setTenants] = useState([]);

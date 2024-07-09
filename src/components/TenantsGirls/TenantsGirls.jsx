@@ -5,7 +5,7 @@ import Table from '../../Elements/Table'
 import ImageIcon from '../../images/Icons (10).png'
 import { useState, useEffect } from 'react'
 // import { database, push, ref, storage } from "../../firebase";
-import { database, push, ref, storage } from "../../firebase/firebase";
+import {push, ref, storage } from "../../firebase/firebase";
 import { FetchData } from '../../ApiData/FetchData'
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -23,8 +23,9 @@ import { faCamera } from '@fortawesome/free-solid-svg-icons';
 const TenantsGirls = () => {
   const { t } = useTranslation();
 
-  const { activeGirlsHostel , userUid, activeGirlsHostelButtons} = useData();
+  const { activeGirlsHostel , userUid, activeGirlsHostelButtons,firebase} = useData();
   const role = localStorage.getItem('role');
+  const {database} = firebase;
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -267,14 +268,18 @@ const TenantsGirls = () => {
     } else if (!/^\d{10,13}$/.test(mobileNo)) {
       tempErrors.mobileNo = t('errors.mobileNumberInvalid');
     }
-    tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
+    if(!idNumber){
+      tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
+    } else if(idNumber.length < 6){
+      tempErrors.idNumber = 'Id should be min 6 characters';
+    }
+    
     // Validate emergency contact
     if (!emergencyContact) {
       tempErrors.emergencyContact = t('errors.emergencyContactRequired');
     } else if (!/^\d{10,13}$/.test(emergencyContact)) {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
-
     // Check if the selected bed is already occupied
     const isBedOccupied = tenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentId;
@@ -286,7 +291,13 @@ const TenantsGirls = () => {
     if (!tenantImage ) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
-
+    if (!bikeNumber) {
+      tempErrors.bikeNumber = 'Bike number required';
+    } else if (!/^[a-zA-Z0-9\s]+$/.test(bikeNumber)) {
+      tempErrors.bikeNumber = 'Bike number must contain only alphabets, numbers, and spaces';
+    } else if (bikeNumber.length < 5 || bikeNumber.length > 13) {
+      tempErrors.bikeNumber = 'Bike number must be between 5 and 13 characters';
+    }
     setErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
@@ -513,7 +524,7 @@ const TenantsGirls = () => {
     setTenantImage('')
     setTenantId('')
     setBikeNumber('NA');
-
+    setPermnentAddress('')
     tenantImageInputRef.current.value = null;
     tenantProofIdRef.current.value = null;
   };
@@ -623,7 +634,7 @@ const TenantsGirls = () => {
   const filteredRows = rows.filter((row) => {
     // Check if any value in the row matches the search query
     const hasSearchQueryMatch = Object.values(row).some((value) =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     );
   
     // Apply additional filtering based on the selected status
@@ -835,7 +846,7 @@ const TenantsGirls = () => {
     setShowBikeFilter(!showBikeFilter);
   }
   const handleChange = (event) => {
-    const value = event.target.checked ? 'YES' : 'NA';
+    const value = event.target.checked ? 'YES' : '';
     onChangeStatus({ target: { value } });
   };
 
@@ -846,7 +857,6 @@ const TenantsGirls = () => {
       [name]: '',  
     }));
   };
-
 
   return (
     <>
@@ -885,7 +895,7 @@ const TenantsGirls = () => {
               
             </div>
               <div className={showExTenants ? "col-8 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
-              {showExTenants ? <button type="button" id="presentTenantBtn1" class="add-button text-center" onClick={showExTenantsData} >
+              {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
               {t('tenantsPage.presentTenants')}
               </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
               {t('tenantsPage.vacated')}
@@ -1072,7 +1082,7 @@ const TenantsGirls = () => {
                   </div>
 
                   {hasBike && (
-                    <div className='bikeField' style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
+                    <div className='bikeField' >
                       <label class="bikenumber" htmlFor="bikeNumber" >{t('dashboard.bikeNumber')}</label>
                       <input
                         type="text"
@@ -1082,8 +1092,9 @@ const TenantsGirls = () => {
                         placeholder="Enter number plate ID"
                         value={bikeNumber}
                         onChange={(event) => setBikeNumber(event.target.value)}
-                        style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px', marginLeft: '8px' }}
+                        style={{  borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px' }}
                       />
+                      {errors.bikeNumber && <p style={{ color: 'red' }}>{errors.bikeNumber}</p>}
                     </div>
                   // ) : (
                   //   <div className='bikeField' style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>

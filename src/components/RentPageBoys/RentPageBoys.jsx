@@ -3,7 +3,7 @@ import Table from '../../Elements/Table'
 import RentIcon from '../../images/Icons (6).png'
 import SearchIcon from '../../images/Icons (9).png'
 // import { database, push, ref } from "../../firebase";
-import { database, push, ref } from "../../firebase/firebase";
+import { push, ref } from "../../firebase/firebase";
 import { useState } from 'react'
 import { DataContext } from '../../ApiData/ContextProvider';
 import { onValue, update } from 'firebase/database';
@@ -18,7 +18,8 @@ import { useData } from '../../ApiData/ContextProvider';
 const RentPageBoys = () => {
   const { t } = useTranslation();
   const { data } = useContext(DataContext);
-  const { activeBoysHostel, userUid, activeBoysHostelButtons } = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons,firebase } = useData();
+  const {database} = firebase;
   const [searchQuery, setSearchQuery] = useState('');
   const [tenants, setTenants] = useState([]);
   const [rooms, setRooms] = useState({});
@@ -589,11 +590,11 @@ Please note that you made your last payment on ${paidDate}.\n`
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
 
-          <div className="col-6 col-md-4 d-flex justify-content-end">
-            <div className="form-group">
+          <div className="col-6 col-md-4 d-flex justify-content-end align-items-end"> 
+            <div className="filterRentDropDownContainer">
               <select
-                id="dueDateFilter"
-                className="form-control"
+                id="dueDateFilter" 
+                className="rentFilter"
                 value={filterOption}
                 onChange={handleSelectChange}
               >
@@ -601,11 +602,11 @@ Please note that you made your last payment on ${paidDate}.\n`
                 <option value="today">Today</option>
                 <option value="overdue">Due Over</option>
               </select>
-            </div>
+            </div> 
             <button id="roomPageAddBtn" type="button" class="add-button" onClick={() => { handleAddNew(); setShowForm(true) }} >
               {t('rentsPage.addRent')}
             </button>
-          </div>
+          </div> 
         </div>
         <div>
           <Table columns={columns} rows={filteredRows} />

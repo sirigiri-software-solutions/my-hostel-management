@@ -7,7 +7,7 @@ import './DashboardGirls.css'
 import SmallCard from '../../Elements/SmallCard'
 import PlusIcon from '../../images/Icons (8).png'
 // import { database, push, ref, storage } from "../../firebase";
-import { database, push, ref, storage } from "../../firebase/firebase";
+import { push, ref, storage } from "../../firebase/firebase";
 import { onValue, update } from 'firebase/database';
 import { DataContext } from '../../ApiData/ContextProvider';
 import { FetchData } from '../../ApiData/FetchData';
@@ -76,7 +76,8 @@ const DashboardGirls = () => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
 
 
-  const { activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, userUid } = useData();
+  const { activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, userUid,firebase } = useData();
+  const {database} = firebase;
   const [modelText, setModelText] = useState('');
   const [formLayout, setFormLayout] = useState('');
   const [floorNumber, setFloorNumber] = useState('');
@@ -1808,7 +1809,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
       <div className="menu">
         {menu.map((item, index) => (
-          <div className='cardWithBtnsContainer'>
+          <div key={index} className='cardWithBtnsContainer'>
             <SmallCard key={index} index={index} item={item} handleClick={handleCardClick} />
             <button id="mbladdButton" type="button" onClick={() => handleClick(item.btntext)}><img src={PlusIcon} alt="plusIcon" className='plusIconProperties' /> {item.btntext} </button>
           </div>
