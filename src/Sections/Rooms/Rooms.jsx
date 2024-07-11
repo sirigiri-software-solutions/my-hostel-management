@@ -7,11 +7,9 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const Rooms =({ onTabSelect,activeTab }) => {
     const { t } = useTranslation();
-    // const [activeTab, setActiveTab] = useState('boys');
 
 
     const handleTabSelect = (tab) => {
-        // setActiveTab(tab);
         onTabSelect(tab);
     };
 

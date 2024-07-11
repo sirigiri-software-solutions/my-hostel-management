@@ -69,11 +69,10 @@ const Hostels = ({ onTabSelect, activeTab }) => {
       const reader = new FileReader();
       reader.onloadend = async () => {
         updatedImageUrl = reader.result;
-        // Only update the specific fields
         const updateData = {
-          name, // Update name
-          address, // Update address
-          hostelImage: updatedImageUrl, // Update image URL
+          name, 
+          address, 
+          hostelImage: updatedImageUrl, 
         };
         const hostelRef = ref(database, basePath);
         update(hostelRef, updateData)
@@ -93,10 +92,9 @@ const Hostels = ({ onTabSelect, activeTab }) => {
       };
       reader.readAsDataURL(selectedImage);
     } else {
-      // No new image, just update the name and address
       const updateData = {
-        name, // Update name
-        address, // Update address
+        name, 
+        address, 
       };
   
       const hostelRef = ref(database, basePath);
@@ -159,7 +157,7 @@ const Hostels = ({ onTabSelect, activeTab }) => {
 
   const startEdit = (id, name, address, hostelImage, isBoys) => {
     setIsEditing({ id, name, originalName: name, address, hostelImage, isBoys });
-    setSelectedImage(null); // Reset selected image when starting to edit
+    setSelectedImage(null); 
   };
 
   const handleEditChange = (field, value) => {

@@ -45,11 +45,6 @@ const firebaseInstances = {
   },
 };
 
-// // export default firebaseInstances;
-// const defaultDatabase = firebaseInstances.hyderabad.database;
-// const defaultAuth = firebaseInstances.hyderabad.auth;
+
 
 export { firebaseInstances, ref, push};
-
-// // Default export for the Ameerpet Firebase instance
-// export default firebaseInstances.hyderabad;

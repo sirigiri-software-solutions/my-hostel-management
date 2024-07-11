@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef } from 'react'
 import Table from '../../Elements/Table'
 import RentIcon from '../../images/Icons (6).png'
 import SearchIcon from '../../images/Icons (9).png'
-// import { database, push, ref } from "../../firebase";
 import { push, ref } from "../../firebase/firebase";
 import { useState } from 'react'
 import { DataContext } from '../../ApiData/ContextProvider';
@@ -18,8 +17,8 @@ import { useData } from '../../ApiData/ContextProvider';
 const RentPageBoys = () => {
   const { t } = useTranslation();
   const { data } = useContext(DataContext);
-  const { activeBoysHostel, userUid, activeBoysHostelButtons,firebase } = useData();
-  const {database} = firebase;
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase } = useData();
+  const { database } = firebase;
   const [searchQuery, setSearchQuery] = useState('');
   const [tenants, setTenants] = useState([]);
   const [rooms, setRooms] = useState({});
@@ -42,6 +41,7 @@ const RentPageBoys = () => {
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [showForm, setShowForm] = useState(true);
   const [filterOption, setFilterOption] = useState('all');
+
   // Function to send WhatsApp message
   const sendMessage = (tenant, rentRecord) => {
     const totalFee = rentRecord.totalFee;
@@ -60,29 +60,20 @@ Therefore, your remaining due amount is ${amount}.\n
 You joined on ${dateOfJoin}, and your due date is ${dueDate}.\n
 Please note that you made your last payment on ${paidDate}.\n`
 
-    const phoneNumber = tenant.mobileNo; // Replace with the recipient's phone number
-
-    // Check if the phone number starts with '+91' (India's country code)
+    const phoneNumber = tenant.mobileNo;
     const formattedPhoneNumber = phoneNumber.startsWith('+91') ? phoneNumber : `+91${phoneNumber}`;
 
     const encodedMessage = encodeURIComponent(message);
 
-
-    // Use web link for non-mobile devices
     let whatsappLink = `https://wa.me/${formattedPhoneNumber}?text=${encodedMessage}`;
 
-
-    // Open the WhatsApp link
     window.open(whatsappLink, '_blank');
   };
 
-  // Event handler for the notify checkbox
   const handleNotifyCheckbox = (rentData) => {
-    // Toggle the state of the notify checkbox
     if (notify && notifyUserInfo) {
       const { tenant, rentRecord } = notifyUserInfo;
-      console.log(tenant, "InNotify")
-      sendMessage(tenant, rentData); // If checkbox is checked and tenant info is available, send WhatsApp message
+      sendMessage(tenant, rentData);
     }
     setNotify(!notify);
   };
@@ -90,7 +81,6 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      console.log("Triggering")
       if (showModal && (event.target.id === "exampleModalRentsBoys" || event.key === "Escape")) {
         setShowModal(false);
       }
@@ -103,7 +93,6 @@ Please note that you made your last payment on ${paidDate}.\n`
 
 
   useEffect(() => {
-    // Fetch tenants data once when component mounts
     const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
     onValue(tenantsRef, (snapshot) => {
       const data = snapshot.val();
@@ -114,7 +103,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       setTenants(loadedTenants);
     });
 
-    // Fetch room data once when component mounts
+
     const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
     onValue(roomsRef, (snapshot) => {
       const data = snapshot.val() || {};
@@ -124,15 +113,12 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   useEffect(() => {
     const updateTotalFeeFromRoom = () => {
-      // Convert the rooms object into an array of its values
       const roomsArray = Object.values(rooms);
-      // Find the room that matches the roomNumber
       const matchingRoom = roomsArray.find(room => room.roomNumber === roomNumber);
 
       if (matchingRoom && matchingRoom.bedRent) {
         setTotalFee(matchingRoom.bedRent.toString());
       } else {
-        // Reset totalFee if no matching room is found
         setTotalFee('');
       }
     };
@@ -152,7 +138,6 @@ Please note that you made your last payment on ${paidDate}.\n`
         setDateOfJoin(tenant.dateOfJoin || '');
       }
     } else {
-      // Reset these fields if no tenant is selected
       setRoomNumber('');
       setBedNumber('');
       setPaidAmount('');
@@ -163,7 +148,6 @@ Please note that you made your last payment on ${paidDate}.\n`
   }, [selectedTenant, tenants]);
 
   useEffect(() => {
-    // Assuming tenantsWithRents already populated
     const tenantIdsWithRents = tenantsWithRents.flatMap(tenant =>
       tenant.rents.length > 0 ? [tenant.id] : []
     );
@@ -171,26 +155,21 @@ Please note that you made your last payment on ${paidDate}.\n`
     const availableTenants = tenants.filter(
       tenant => !tenantIdsWithRents.includes(tenant.id)
     );
-
-    // Optionally, you can store availableTenants in a state if you need to use it elsewhere
     setAvailableTenants(availableTenants);
   }, [tenants, tenantsWithRents, activeBoysHostel]);
 
 
   useEffect(() => {
-    // Recalculate due when paid amount changes
     const calculatedDue = Math.max(parseFloat(totalFee) - parseFloat(paidAmount), 0).toString();
     setDue(calculatedDue);
   }, [paidAmount, totalFee]);
 
   useEffect(() => {
-    // Fetch tenants data once when component mounts
     const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
     onValue(tenantsRef, (snapshot) => {
       const tenantsData = snapshot.val();
       const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
 
-      // Initialize an array to hold promises for fetching each tenant's rents
       const rentsPromises = tenantIds.map(tenantId => {
         return new Promise((resolve) => {
           const rentsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantId}/rents`);
@@ -201,19 +180,17 @@ Please note that you made your last payment on ${paidDate}.\n`
             })) : [];
             resolve({ id: tenantId, ...tenantsData[tenantId], rents });
           }, {
-            onlyOnce: true // This ensures the callback is only executed once.
+            onlyOnce: true
           });
         });
       });
 
-      // Wait for all promises to resolve and then set the state
       Promise.all(rentsPromises).then(tenantsWithTheirRents => {
         setTenantsWithRents(tenantsWithTheirRents);
       });
     });
   }, [activeBoysHostel]);
 
-  // edit======================
   const loadRentForEditing = (tenantId, rentId) => {
     const tenant = tenantsWithRents.find(t => t.id === tenantId);
     const rentRecord = tenant.rents.find(r => r.id === rentId);
@@ -232,7 +209,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       setEditingRentId(rentId);
     }
     setShowModal(true);
-    // console.log(selectedTenant)
+
     setNotifyUserInfo({ tenant, rentRecord });
   };
 
@@ -245,19 +222,18 @@ Please note that you made your last payment on ${paidDate}.\n`
       errors["selectedTenant"] = t('errors.selectedTenantRequired');
     }
 
-    // Paid Amount
+
     if (!paidAmount) {
       formIsValid = false;
       errors["paidAmount"] = t('errors.paidAmountRequired');
     }
 
-    // Paid Date
+
     if (!paidDate) {
       formIsValid = false;
       errors["paidDate"] = t('errors.paidDateRequired');
     }
 
-    // Due Date
     if (!dueDate) {
       formIsValid = false;
       errors["dueDate"] = t('errors.dueDateRequired');
@@ -268,28 +244,10 @@ Please note that you made your last payment on ${paidDate}.\n`
   };
 
 
-  // useEffect(() => {
-  //   if (selectedTenant) {
-  //     const tenant = tenants.find(t => t.id === selectedTenant);
-  //     if (tenant) {
-  //       // Set the date of join
-  //       setDateOfJoin(tenant.dateOfJoin || '');
-  //       // Calculate the due date (one day less than adding one month)
-  //       const joinDate = new Date(tenant.dateOfJoin); // Get the join date
-  //       console.log("current Date:", joinDate)
-  //       const dueDate = new Date(joinDate.getFullYear(), joinDate.getMonth() + 1, joinDate.getDate(-1)); // Add one month and subtract one day
-  //       const formattedDueDate = dueDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
-  //       setDueDate(formattedDueDate);
-  //     }
-  //   }
-  // }, [selectedTenant, tenants]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate form before proceeding
     if (!validateForm()) {
-      // If validation fails, stop form submission
       return;
     }
 
@@ -306,7 +264,6 @@ Please note that you made your last payment on ${paidDate}.\n`
     };
 
     if (isEditing) {
-      // Update the existing rent record
       const rentRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${selectedTenant}/rents/${editingRentId}`);
       await update(rentRef, rentData).then(() => {
         toast.success(t('toastMessages.rentUpdatedSuccess'), {
@@ -318,9 +275,8 @@ Please note that you made your last payment on ${paidDate}.\n`
           draggable: true,
           progress: undefined,
         });
-        setIsEditing(false); // Reset editing state
+        setIsEditing(false);
 
-        console.log(rentData, "Getting");
         if (notify) {
           handleNotifyCheckbox(rentData);
         }
@@ -337,7 +293,6 @@ Please note that you made your last payment on ${paidDate}.\n`
       });
 
     } else {
-      // Create a new rent record
       const rentRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${selectedTenant}/rents`);
       await push(rentRef, rentData).then(() => {
         toast.success(t('toastMessages.rentAddedSuccess'), {
@@ -349,8 +304,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           draggable: true,
           progress: undefined,
         });
-        setIsEditing(false); // Reset editing state
-        console.log(rentData, "Getting");
+        setIsEditing(false);
         if (notify) {
           handleNotifyCheckbox(rentData);
         }
@@ -373,7 +327,6 @@ Please note that you made your last payment on ${paidDate}.\n`
 
 
   };
-  //===> For Clear Form for Add Rents
   const handleAddNew = () => {
     if (activeBoysHostelButtons.length == 0) {
       toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
@@ -386,11 +339,8 @@ Please note that you made your last payment on ${paidDate}.\n`
         progress: undefined,
       })
     } else {
-      // Reset any previous data
       resetForm();
-      // Set modal for a new entry
       setIsEditing(false);
-      // Open the modal
       setShowModal(true);
     }
   };
@@ -447,10 +397,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     tenantId: tenant.id,
     rentId: rent.id,
   })))
-  // console.log(rentsRows,'rent')
-  // const count = 0;
 
-  console.log(rentsRows, "rentsRows")
   const rows = rentsRows.map((rent, index) => {
     const currentDate = new Date();
     const dueDate = new Date(rent.dueDate);
@@ -489,12 +436,6 @@ Please note that you made your last payment on ${paidDate}.\n`
     };
   });
 
-  // const filteredRows = rows.filter(row => {
-  //   return Object.values(row).some(value =>
-  //     value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-  //   );
-  // });
-
   const filteredRows = rows.filter(row => {
     const currentDate = new Date();
     const dueDate = new Date(row.due_date);
@@ -531,8 +472,6 @@ Please note that you made your last payment on ${paidDate}.\n`
 
     if (selectedTenant) {
       const tenant = tenantsWithRents.find(t => t.id === selectedTenant);
-      console.log(tenant, "unique")
-      console.log(selectedTenant, "unique")
       const rentRecord = tenant.rents
       setNotifyUserInfo({ tenant, rentRecord });
     }
@@ -590,10 +529,10 @@ Please note that you made your last payment on ${paidDate}.\n`
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
 
-          <div className="col-6 col-md-4 d-flex justify-content-end align-items-end"> 
+          <div className="col-6 col-md-4 d-flex justify-content-end align-items-end">
             <div className="filterRentDropDownContainer">
               <select
-                id="dueDateFilter" 
+                id="dueDateFilter"
                 className="rentFilter"
                 value={filterOption}
                 onChange={handleSelectChange}
@@ -602,11 +541,11 @@ Please note that you made your last payment on ${paidDate}.\n`
                 <option value="today">Today</option>
                 <option value="overdue">Due Over</option>
               </select>
-            </div> 
+            </div>
             <button id="roomPageAddBtn" type="button" class="add-button" onClick={() => { handleAddNew(); setShowForm(true) }} >
               {t('rentsPage.addRent')}
             </button>
-          </div> 
+          </div>
         </div>
         <div>
           <Table columns={columns} rows={filteredRows} />
@@ -726,9 +665,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                         <div class='col-12 mb-3'>
                           <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
                             <option value="">{t('dashboard.selectTenant')} *</option>
-                            {/* {availableTenants.map(tenant => (
-                          <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
-                        ))} */}
+
                             {isEditing ? (
                               <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
                             ) : (
@@ -799,7 +736,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                               type="checkbox"
                               checked={notify}
                               onChange={onClickCheckbox}
-                            // Toggle the state on change
+
                             />
                             <label className="form-check-label" htmlFor="notifyCheckbox">
                               {t('dashboard.notify')}

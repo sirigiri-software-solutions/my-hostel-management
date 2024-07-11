@@ -1,11 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-// import Modal from 'react-modal';
 import ImageOne from "../../images/Vector 1 (1).png";
 import ImageTwo from "../../images/Vector 3 (2).png";
 
-// import Logo from "../../images/image.png";
 import Logo from "../../images/HMLogo3.png"
 import newLogo from "../../images/favicon (2).jpg"
 import './Login.css';
@@ -16,7 +14,7 @@ import { useData } from "../../ApiData/ContextProvider";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
-import {createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { FirebaseError } from 'firebase/app';
 
 
@@ -26,7 +24,7 @@ export const loginContext = createContext();
 
 const Login = () => {
   const navigate = useNavigate();
-  const { areaToApiEndpoint, setUserArea, setUserUid,firebase,setArea } = useData();
+  const { areaToApiEndpoint, setUserArea, setUserUid, firebase, setArea } = useData();
 
   const initialState = { Id: "", email: "", area: "", password: "" };
   const [loginData, setLoginData] = useState(initialState);
@@ -36,7 +34,7 @@ const Login = () => {
     area: "",
     phone: "",
     password: "",
-    confirmPassword:""
+    confirmPassword: ""
   });
 
   const [data, setData] = useState([]);
@@ -65,18 +63,15 @@ const Login = () => {
   const areaOptions = ["hyderabad", "secunderabad"];
 
 
-
-  // latest login & signup forms 
   const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
-  const [signupError,setSignUpError] = useState("");
+  const [signupError, setSignUpError] = useState("");
   const [hidePassword, setHidePassword] = useState(true);
-  const [hideSingupPassword,sethideSingupPassword] = useState(true);
-  const [hideconfirmPassword,setHideConfirmPassword] = useState(true);
+  const [hideSingupPassword, sethideSingupPassword] = useState(true);
+  const [hideconfirmPassword, setHideConfirmPassword] = useState(true);
 
 
-  // new firebase config based on location
-  const {auth} = firebase;
+  const { auth } = firebase;
 
 
 
@@ -94,13 +89,11 @@ const Login = () => {
 
   useEffect(() => {
     if (loginData.area && areaToApiEndpoint[loginData.area]) {
-    console.log("area==>", data)
-            axios.get(areaToApiEndpoint[loginData.area])
+      axios.get(areaToApiEndpoint[loginData.area])
         .then((response) => {
-          // let data = Object.values(response.data);
           const data = Object.entries(response.data).map(([uid, user]) => ({ uid, ...user }));
           setData(data);
-          console.log(data, "data response from firebase");
+
         });
     }
     setUserArea(loginData.area)
@@ -112,16 +105,16 @@ const Login = () => {
       ...loginData,
       [event.target.name]: event.target.value,
     });
-    if(event.target.name === "area"){
+    if (event.target.name === "area") {
       setArea(event.target.value)
     }
-    
+
   };
 
 
   const checkData = async (event) => {
     event.preventDefault();
-  
+
     if (validateForm()) {
       try {
         const userCredential = await signInWithEmailAndPassword(
@@ -130,32 +123,28 @@ const Login = () => {
           loginData.password
         );
         const user = userCredential.user;
-  
+
         if (user.emailVerified) {
-          // Assuming 'data' is the array of users where you check login details
           const singleLoginUser = data.find(
             (item) =>
               item.signUpEmail === loginData.email &&
               item.area === loginData.area
           );
-  
+
           if (singleLoginUser) {
-            // Update states and localStorage
             setLoginData({
               Id: "",
               email: "",
               area: "",
               password: "",
             });
-  
+
             localStorage.setItem("username", singleLoginUser.firstname);
             localStorage.setItem("userarea", singleLoginUser.area);
             localStorage.setItem("userUid", singleLoginUser.uid);
             setUserUid(singleLoginUser.uid);
-  
-            // Navigate to mainPage
             navigate("/mainPage");
-  
+
             toast.success("You are logged in successfully.", {
               position: "bottom-right",
               autoClose: 2000,
@@ -192,12 +181,12 @@ const Login = () => {
           progress: undefined,
           theme: "light",
         });
-  
-        console.error("Login error:", error.message);
+
+
       }
     }
   };
-  
+
 
   const validateForm = () => {
     let errors = {};
@@ -219,7 +208,7 @@ const Login = () => {
       setLoginErrors(errors);
       return false;
     }
-    
+
 
     setLoginErrors(errors);
     return Object.keys(errors).length === 0;
@@ -232,7 +221,7 @@ const Login = () => {
       ...forgotPasswordData,
       [event.target.name]: event.target.value,
     });
-    if(event.target.name === "area"){
+    if (event.target.name === "area") {
       setArea(event.target.value);
     }
   };
@@ -245,7 +234,6 @@ const Login = () => {
 
     const { email, area } = forgotPasswordData;
 
-    // Validate all fields are filled
     if (!email || !area) {
       toast.error("Please fill in all fields.", {
         position: "bottom-right",
@@ -255,7 +243,6 @@ const Login = () => {
       return;
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address.", {
@@ -267,75 +254,73 @@ const Login = () => {
     }
 
     let data;
-     await axios.get(areaToApiEndpoint[area])
-    .then((response) => {
-       data = Object.entries(response.data).map(([uid, user]) => ({ uid, ...user }));
-    })
-    .catch((e) => {
-      console.log("Error while fetching data");
-    });
-
-
-    const singleLoginuser = data.filter ((item) => item.signUpEmail === email && item.area === area);
-    console.log(data,"forgotPasswordList")
-    console.log(singleLoginuser,"forgotPasswordList")
-   if(singleLoginuser.length > 0){
-    try {
-      await sendPasswordResetEmail(auth, email);
-      toast.success("Reset password link sent to email.", {
-              position: "bottom-right",
-              autoClose: 2000,
-              theme: "light",
+    await axios.get(areaToApiEndpoint[area])
+      .then((response) => {
+        data = Object.entries(response.data).map(([uid, user]) => ({ uid, ...user }));
+      })
+      .catch((e) => {
+        console.log("Error while fetching data");
       });
-      setForgotPasswordData({
-              email: '',
-              area: ''
-      });
-      setLogin(true);
-      setIsForget(false);
 
-     
-      console.log("Password reset email sent");
-    } catch (error) {
+
+    const singleLoginuser = data.filter((item) => item.signUpEmail === email && item.area === area);
+
+    if (singleLoginuser.length > 0) {
+      try {
+        await sendPasswordResetEmail(auth, email);
+        toast.success("Reset password link sent to email.", {
+          position: "bottom-right",
+          autoClose: 2000,
+          theme: "light",
+        });
+        setForgotPasswordData({
+          email: '',
+          area: ''
+        });
+        setLogin(true);
+        setIsForget(false);
+
+
+      } catch (error) {
+        toast.error("Invalid email", {
+          position: "bottom-right",
+          autoClose: 2000,
+          theme: "light",
+        });
+
+      }
+
+    } else {
       toast.error("Invalid email", {
-              position: "bottom-right",
-              autoClose: 2000,
-              theme: "light",
-            });
-      console.log(error.message);
+        position: "bottom-right",
+        autoClose: 2000,
+        theme: "light",
+      });
     }
 
-   }else{
-    toast.error("Invalid email", {
-      position: "bottom-right",
-      autoClose: 2000,
-      theme: "light",
-    });
-   }
 
-  
 
   };
 
 
-  function onClickLogin(e){
+  function onClickLogin(e) {
     setSignUp(false);
     setSignupData({
       firstname: "",
-    email: "",
-    area: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    securityQuestion: "",
-    securityAnswer: "",
+      email: "",
+      area: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+      securityQuestion: "",
+      securityAnswer: "",
 
     });
     setLoginData({
-      id:"",
-      email:"",
-      area:"",
-      password:"",
+      id: "",
+      email: "",
+      area: "",
+      password: "",
     })
 
     setSignUpEmail("");
@@ -358,10 +343,10 @@ const Login = () => {
 
     )
     setLoginData({
-      id:"",
-      email:"",
-      area:"",
-      password:"",
+      id: "",
+      email: "",
+      area: "",
+      password: "",
     })
     setLogin(true);
   }
@@ -369,14 +354,14 @@ const Login = () => {
   const handleSignUp = (e) => {
     setSignupData({
       firstname: "",
-    email: "",
-    area: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    securityQuestion: "",
-    securityAnswer: "",
-      
+      email: "",
+      area: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+      securityQuestion: "",
+      securityAnswer: "",
+
     })
 
     setIsForget(false);
@@ -394,20 +379,19 @@ const Login = () => {
     password,
     confirmPassword
   } = signupData;
-  // console.log(signupData,"mysignupdata");
 
   const changeHandler = (e) => {
     setSignupData({ ...signupData, [e.target.name]: e.target.value });
-    console.log(signupData, "mysignupdata");
+
     setSignupErrors({ ...signupErrors, [e.target.name]: "" });
-    if(e.target.name === "area"){
+    if (e.target.name === "area") {
       setArea(e.target.value)
     }
   };
 
   const clearErrorOnFocus = (fieldName) => {
-    setSignupErrors({ ...signupErrors, [fieldName]: "" });
-    setLoginErrors({ ...loginErrors, [fieldName]: "" })
+    setSignupErrors((prevErrors) => ({ ...prevErrors, [fieldName]: "" }));
+    setLoginErrors((prevErrors) => ({ ...prevErrors, [fieldName]: "" }));
   };
 
 
@@ -421,65 +405,94 @@ const Login = () => {
     const signUpEmail = e.target.email?.value || "";
     const phone = e.target.phone?.value || "";
     const area = e.target.area?.value || "";
-    // const signUpPassword = e.target.password?.value || "";
+
     const confirmPassword = e.target.confirmPassword?.value || "";
 
-    // Sequential validation
+    const phoneRegexWithCountryCode = /^\+\d{12}$/;
+    const phoneRegexWithoutCountryCode = /^\d{10}$/;
+
     if (firstname.trim() === "") {
-        newErrors.firstname = "required";
-        formValid = false;
+      newErrors.firstname = "required";
+      formValid = false;
     } else if (signUpEmail.trim() === "") {
-        newErrors.email = "required";
-        formValid = false;
+      newErrors.email = "required";
+      formValid = false;
     } else if (phone.trim() === "") {
-        newErrors.phone = "required";
-        formValid = false;
+      newErrors.phone = "required";
+      formValid = false;
+    } else if (!phoneRegexWithCountryCode.test(phone) && !phoneRegexWithoutCountryCode.test(phone)) {
+      newErrors.phone = "Enter valid number";
+      formValid = false;
     } else if (area.trim() === "") {
-        newErrors.area = "required";
-        formValid = false;
+      newErrors.area = "required";
+      formValid = false;
     } else if (signUpPassword.trim() === "") {
-        newErrors.password = "required";
-        formValid = false;
+      newErrors.password = "required";
+      formValid = false;
     } else if (signUpPassword.trim().length < 8) {
-        newErrors.password = "Weak password";
-        formValid = false;
+      newErrors.password = "Weak password";
+      formValid = false;
     } else if (confirmPassword.trim() === "") {
-        newErrors.confirmPassword = "required";
-        formValid = false;
+      newErrors.confirmPassword = "required";
+      formValid = false;
     } else if (signUpPassword !== confirmPassword) {
-        newErrors.confirmPassword = "Password doesn't match";
-        formValid = false;
+      newErrors.confirmPassword = "Password doesn't match";
+      formValid = false;
     }
 
     if (!formValid) {
-        setSignupErrors(newErrors);
-        return; // Don't proceed with submission if form is invalid
+      setSignupErrors(newErrors);
+      return;
     }
 
-    // Create a data object for submission without errors
+
     const formData = {
-        area,
-        firstname,
-        phone,
-        signUpEmail,
+      area,
+      firstname,
+      phone,
+      signUpEmail,
     };
 
-    console.log(formData, 'signupdata1');
 
-    // Proceed with form submission if all fields are filled
+
     const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
-    console.log(apiEndpoint);
+
 
     try {
-      
+      const userCredential = await createUserWithEmailAndPassword(auth, signUpEmail, signUpPassword);
+      await sendEmailVerification(userCredential.user);
 
-        // Firebase Authentication
-        const userCredential = await createUserWithEmailAndPassword(auth, signUpEmail, signUpPassword);
-        await sendEmailVerification(userCredential.user);
-        console.log("Verification email sent");
 
-        
-        toast.success("A verification link has been sent to your email", {
+      toast.success("A verification link has been sent to your email", {
+        position: "bottom-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+
+      const response = await axios.post(apiEndpoint, formData);
+      setData(response.data);
+
+      setSignUp(false);
+      setSignupData({
+        email: "",
+        area: "",
+        password: "",
+        name: ""
+      });
+      setSignUpPassword("");
+      setSignUpEmail("");
+
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+
+        toast.error(
+          "An error occurred while submitting the form. Please try again.",
+          {
             position: "bottom-right",
             autoClose: 2000,
             hideProgressBar: false,
@@ -488,75 +501,46 @@ const Login = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
-        });
-
-
-          // Submit the form data using axios
-          const response = await axios.post(apiEndpoint, formData);
-          setData(response.data);
-          console.log(response.data, "apiendpointgetdata");
-        // Reset form and state after successful submission
-        setSignUp(false);
+          }
+        );
+      } else if (error instanceof FirebaseError && error.code === 'auth/email-already-in-use') {
+        setSignUpError("Email already in use");
+        setSignUp(true);
         setSignupData({
-            email: "",
-            area: "",
-            password: "",
-            name: ""
+          email: "",
+          area: "",
+          password: "",
+          name: "",
         });
-        setSignUpPassword("");
-        setSignUpEmail("");
+      } else {
+        setSignUpError(error.message);
+      }
 
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error("Error submitting data:", error);
-            toast.error(
-                "An error occurred while submitting the form. Please try again.",
-                {
-                    position: "bottom-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                }
-            );
-        } else if (error instanceof FirebaseError && error.code === 'auth/email-already-in-use') {
-            setSignUpError("Email already in use");
-            setSignUp(true);
-            setSignupData({
-                email: "",
-                area: "",
-                password: "",
-                name: "",
-            });
-        } else {
-            setSignUpError(error.message);
-        }
-        console.log(error.message);
     }
-};
-
- 
+  };
 
 
 
-  
+
+
+
 
   const isPasswordValid = (password) => {
-    // Password must be at least 8 characters long and contain at least 1 character, 1 symbol, and 1 number
+
     return /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
       password
     );
   }
 
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
 
 
   return (
     <>
       <div className="main-div">
-        {/* <img src={ImageOne} alt="imageone" className="up-image" /> */}
+
 
         <div className="loginPage-left-mainContainer">
           <div className="left-logo-mainContainer">
@@ -567,81 +551,82 @@ const Login = () => {
         <div className="loginPage-right-mainContainer">
           <div className="checkpage">
             <div className="loginSingupHeadContianer">
-                <img src={newLogo} alt="HM" className="loginSigninLogo" />
-                <p className="cardsHeading">HOSTEL <br/>MANAGEMENT</p>
+              <img src={newLogo} alt="HM" className="loginSigninLogo" />
+              <p className="cardsHeading">HOSTEL <br />MANAGEMENT</p>
             </div>
             {!signup ? (login ? (
               <>
-              <form onSubmit={checkData} className="input-form w-100 p-2">
-                <h1 className="login-heading mb-3">Login</h1>
-                <div className="mbl-inputField">
-                  <input
-                    type="email"
-                    className={`form-control custom-input ${loginErrors?.email && "is-invalid"} ${loginData.email.trim() === "" && "empty-field"}`}
-                    placeholder="Enter email"
-                    onChange={handleData}
-                    value={loginData.email}
-                    onFocus={() => clearErrorOnFocus("email")}
-                    name="email"
-                    id="mail"
-                  />
-                  {loginErrors.email && <p className="form-error-msg">{loginErrors.email}</p>}
-                </div>
-                <div className="mbl-inputField ">
-                  <select
-                    className={`form-control custom-input rounded-pill selectarea ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
-                    onChange={handleData}
-                    value={loginData.area}
-                    onFocus={() => clearErrorOnFocus("area")}
-                    name="area"
-                    id="area"
-                  >
-                    <option id= "selectarea" value="" disabled>Select Your Area</option>
-                    {areaOptions.map((area, index) => (
-                      <option key={index} value={area}>
-                        {area}
-                      </option>
-                    ))}
-                  </select>
-                  {loginErrors.area && <p className="form-error-msg">{loginErrors.area}</p>}
-                </div>
-                <div>
-                  <div class="showPasswordDiv">
-                  <input
-                    type={hidePassword ? 'password' : 'text'}
-                    className={`form-control custom-input rounded-pill ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
-                    placeholder="Password"
-                    onChange={handleData}
-                    value={loginData.password}
-                    onFocus={() => clearErrorOnFocus("password")}
-                    name="password"
-                    id="pass"
-                  />
-                   <FontAwesomeIcon
-       icon={hidePassword ? faEyeSlash : faEye}
-        className="password-toggle-icon"
-        onClick={togglePasswordVisibility}
-      />
-      </div>
-                 
-                  <div className="forgotbtndiv">
-                        <span className="forgotText" onClick={handleSwitch}>Forgot password?</span>
-                      </div>
-                  {loginErrors.password && <p className="form-error-msg">{loginErrors.password}</p>}
-                </div>
-                <div>
-                  <button type="submit" className="login-button">Login</button>
-                </div>
-              </form>
-                      <div className="signupdiv">
-                     <p className="mt-2"> Are you new user? &nbsp; 
-                      <span className="forgotText" onClick={(e) => handleSignUp()}>
+                <form onSubmit={checkData} className="input-form w-100 p-2">
+                  <h1 className="login-heading mb-3">Login</h1>
+                  <div className="mbl-inputField">
+                    <input
+                      type="email"
+                      className={`form-control custom-input ${loginErrors?.email && "is-invalid"} ${loginData.email.trim() === "" && "empty-field"}`}
+                      placeholder="Enter email"
+                      onChange={handleData}
+                      value={loginData.email}
+                      onFocus={() => clearErrorOnFocus("email")}
+                      name="email"
+                      id="mail"
+                    />
+                    {loginErrors.email && <p className="form-error-msg">{loginErrors.email}</p>}
+                  </div>
+                  <div className="mbl-inputField ">
+                    <select
+                      className={`form-control custom-input rounded-pill selectarea ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
+                      onChange={handleData}
+                      value={loginData.area}
+                      onFocus={() => clearErrorOnFocus("area")}
+                      name="area"
+                      id="area"
+                    >
+                      <option id="selectarea" value="" disabled>Select Your Area</option>
+                      {areaOptions.map((area, index) => (
+
+                        <option key={index} value={area}>
+                          {capitalizeFirstLetter(area)}
+                        </option>
+                      ))}
+                    </select>
+                    {loginErrors.area && <p className="form-error-msg">{loginErrors.area}</p>}
+                  </div>
+                  <div>
+                    <div class="showPasswordDiv">
+                      <input
+                        type={hidePassword ? 'password' : 'text'}
+                        className={`form-control custom-input rounded-pill ${loginErrors?.password && "is-invalid"} ${loginData.password.trim() === "" && "empty-field"}`}
+                        placeholder="Password"
+                        onChange={handleData}
+                        value={loginData.password}
+                        onFocus={() => clearErrorOnFocus("password")}
+                        name="password"
+                        id="pass"
+                      />
+                      <FontAwesomeIcon
+                        icon={hidePassword ? faEyeSlash : faEye}
+                        className="password-toggle-icon"
+                        onClick={togglePasswordVisibility}
+                      />
+                    </div>
+
+                    <div className="forgotbtndiv">
+                      <span className="forgotText" onClick={handleSwitch}>Forgot password?</span>
+                    </div>
+                    {loginErrors.password && <p className="form-error-msg">{loginErrors.password}</p>}
+                  </div>
+                  <div>
+                    <button type="submit" className="login-button">Login</button>
+                  </div>
+                </form>
+                <div className="signupdiv">
+                  <p className="mt-2"> Are you new user? &nbsp;
+                    <span className="forgotText" onClick={(e) => handleSignUp()}>
                       Register here
                     </span>
-                    </p>
-                      </div>
+                  </p>
+                </div>
               </>
-              ) :
+            ) :
               isForget ? (
                 <form onSubmit={handleForgotPasswordSubmit} className="input-form w-100">
                   <h1 className="login-heading mb-3">Forgot Password</h1>
@@ -667,7 +652,7 @@ const Login = () => {
                       <option value="" disabled>Select Your Area</option>
                       {areaOptions.map((area, index) => (
                         <option key={index} value={area}>
-                          {area}
+                          {capitalizeFirstLetter(area)}
                         </option>
                       ))}
                     </select>
@@ -734,17 +719,16 @@ const Login = () => {
                     <option value="" disabled>Select Your Area</option>
                     {areaOptions.map((area, index) => (
                       <option key={index} value={area}>
-                        {area}
+                        {capitalizeFirstLetter(area)}
                       </option>
                     ))}
                   </select>
                   {signupErrors.area && <div className="form-error-msg">{signupErrors.area}</div>}
                 </div>
-              
-              
-              
+
+
+
                 <div className="form-group col-md-6 position-relative">
-                  {/* <label htmlFor="password">Password:</label> */}
                   <input
                     type={hideSingupPassword ? 'password' : 'text'}
                     name="password"
@@ -756,16 +740,15 @@ const Login = () => {
                   />
                   {signupErrors.password && <div className="form-error-msg">{signupErrors.password}</div>}
                   <FontAwesomeIcon
-      icon={hideSingupPassword ? faEyeSlash : faEye}
-      className="password-toggle-icon-signup"
-      onClick={toggleSignUpPasswordVisibility}  // Function to toggle password visibility
-    />
+                    icon={hideSingupPassword ? faEyeSlash : faEye}
+                    className="password-toggle-icon-signup"
+                    onClick={toggleSignUpPasswordVisibility}
+                  />
                 </div>
 
                 <div className="form-group col-md-6 position-relative">
-                  {/* <label htmlFor="password">Password:</label> */}
                   <input
-                    type={hideconfirmPassword? "password":"text"}
+                    type={hideconfirmPassword ? "password" : "text"}
                     name="confirmPassword"
                     value={confirmPassword}
                     onChange={changeHandler}
@@ -775,31 +758,28 @@ const Login = () => {
                   />
                   {signupErrors.confirmPassword && <div className="form-error-msg">{signupErrors.confirmPassword}</div>}
                   <FontAwesomeIcon
-      icon={hideconfirmPassword ? faEyeSlash : faEye}
-      className="password-toggle-icon-signup"
-      onClick={toggleSignUpPasswordConfirmVisibility}  // Function to toggle password visibility
-    />
+                    icon={hideconfirmPassword ? faEyeSlash : faEye}
+                    className="password-toggle-icon-signup"
+                    onClick={toggleSignUpPasswordConfirmVisibility}
+                  />
                 </div>
 
-                
-                
-               {signupError && <p className="text-center error-message">{signupError}</p>}
+
+
+                {signupError && <p className="text-center error-message">{signupError}</p>}
                 <div className="form-group col-md-11">
-                  {/* <input type="submit" className="btn btn-primary rounded-pill" value="Sign up" /> */}
                   <input type="submit" id='submit' className="btn btn-primary rounded-pill" value="Sign up" />
                 </div>
                 <p className="text-center">
-                  Already have an account?<span className="forgotText" onClick={(e) =>onClickLogin(e)} > Login</span>
+                  Already have an account?<span className="forgotText" onClick={(e) => onClickLogin(e)} > Login</span>
                 </p>
               </form>
             )}
-           
+
           </div>
         </div>
 
-        
 
-        {/* <img src={ImageTwo} alt="imagetwo" className="down-image" /> */}
       </div>
     </>
   );

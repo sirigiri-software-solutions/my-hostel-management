@@ -1,5 +1,5 @@
-import React, { useState,useEffect } from 'react';
-import { ref, set,push, onValue } from 'firebase/database';
+import React, { useState, useEffect } from 'react';
+import { ref, set, push, onValue } from 'firebase/database';
 
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -12,7 +12,7 @@ import { useData } from '../../ApiData/ContextProvider';
 const Settings = () => {
   const { firebase } = useData();
   const userUid = localStorage.getItem('userUid')
-  const {database} = firebase
+  const { database } = firebase
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
   const [newBoysHostelAddress, setNewBoysHostelAddress] = useState('');
   const [newGirlsHostelName, setNewGirlsHostelName] = useState('');
@@ -25,12 +25,11 @@ const Settings = () => {
   const [boysHostelImage, setBoysHostelImage] = useState('');
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
 
-  console.log(firebase," ")
-  console.log(database,"lookwhichfirebaseConfigisThese")
+  console.log(firebase, " ")
+  console.log(database, "lookwhichfirebaseConfigisThese")
 
   useEffect(() => {
     if (userUid) {
-      // Fetch boys hostels
       const boysHostelsRef = ref(database, `Hostel/${userUid}/boys`);
       onValue(boysHostelsRef, (snapshot) => {
         const hostels = [];
@@ -43,7 +42,6 @@ const Settings = () => {
         setBoysHostels(hostels);
       });
 
-      // Fetch girls hostels
       const girlsHostelsRef = ref(database, `Hostel/${userUid}/girls`);
       onValue(girlsHostelsRef, (snapshot) => {
         const hostels = [];
@@ -125,10 +123,9 @@ const Settings = () => {
       return;
     }
 
-    // Create a new reference with a unique ID
     const newHostelRef = push(ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`));
     const hostelDetails = {
-      id: newHostelRef.key, // Store the unique key if needed
+      id: newHostelRef.key,
       name,
       address,
       hostelImage
