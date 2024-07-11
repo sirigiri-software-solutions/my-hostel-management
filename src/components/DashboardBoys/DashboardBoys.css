@@ -268,4 +268,7 @@
 .flex{
     margin-bottom: -8px;
 }
-
+.menu > .cardWithBtnsContainer:nth-child(3),
+.menu > .cardWithBtnsContainer:nth-child(4) {
+  cursor: pointer;
+}

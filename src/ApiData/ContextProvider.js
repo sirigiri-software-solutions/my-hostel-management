@@ -24,7 +24,7 @@ const DataProvider = ({ children }) => {
   const [activeGirlsHostelName, setActiveGirlsHostelName] = useState(null);
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
   const [userarea, setUserArea] = useState();
-  const [userUid, setUserUid] = useState(localStorage.getItem('userUid') || '');
+  const [userUid, setUserUid] = useState(localStorage.getItem('userUid' || ''));
 
   // new code to implement multiple configuration
   const [area, setArea] = useState(localStorage.getItem('userarea') || 'hyderabad');

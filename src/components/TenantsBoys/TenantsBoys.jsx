@@ -175,28 +175,28 @@ const TenantsBoys = () => {
   }, [activeBoysHostel]);
 
 
-  useEffect(() => {
-    const fetchDataFromAPI = async () => {
-      try {
-        if (data) {
-          const boysTenantsData = Object.values(data.boys.tenants);
-          setBoysTenants(boysTenantsData);
-        } else {
-          const apiData = await FetchData();
-          if (apiData) { 
-            const boysTenantsData = Object.values(apiData.boys.tenants);
-            setBoysTenants(boysTenantsData);
-          } else {
-            console.error('API returned null or undefined data.');
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching tenants data:', error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchDataFromAPI = async () => {
+  //     try {
+  //       if (data) {
+  //         const boysTenantsData = Object.values(data.boys.tenants);
+  //         setBoysTenants(boysTenantsData);
+  //       } else {
+  //         const apiData = await FetchData();
+  //         if (apiData) { // Ensure apiData is not null or undefined
+  //           const boysTenantsData = Object.values(apiData.boys.tenants);
+  //           setBoysTenants(boysTenantsData);
+  //         } else {
+  //           console.error('API returned null or undefined data.');
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching tenants data:', error);
+  //     }
+  //   };
   
-    fetchDataFromAPI();
-  }, [data]);
+  //   fetchDataFromAPI();
+  // }, [data]);
   
 
   const validate = () => {

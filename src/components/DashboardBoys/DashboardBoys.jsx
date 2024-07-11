@@ -14,6 +14,7 @@ import { Modal, Button } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { FaWhatsapp } from "react-icons/fa";
 import { useData } from '../../ApiData/ContextProvider';
+import Spinner from '../../Elements/Spinner';
 
 const DashboardBoys = () => {
 
@@ -29,7 +30,7 @@ const DashboardBoys = () => {
   const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase } = useData();
   const { database } = firebase;
 
-
+  const [loading,setLoading] = useState(false);
 
   const [modelText, setModelText] = useState('');
   const [formLayout, setFormLayout] = useState('');
@@ -564,6 +565,11 @@ const DashboardBoys = () => {
     tempErrors.selectedRoom = selectedRoom ? "" : t('errors.roomNumberRequired');
     tempErrors.selectedBed = selectedBed ? "" : t('errors.bedNumberRequired');
     tempErrors.dateOfJoin = dateOfJoin ? "" : t('errors.dateOfJoinRequired');
+
+    const phoneRegexWithCountryCode = /^\+\d{12}$/;
+    const phoneRegexWithoutCountryCode = /^\d{10}$/;
+
+
     if (!name) {
       tempErrors.name = t('errors.nameRequired');
     } else if (!/^[a-zA-Z\s]+$/.test(name)) {
@@ -572,14 +578,20 @@ const DashboardBoys = () => {
 
     if (!mobileNo) {
       tempErrors.mobileNo = t('errors.mobileNumberRequired');
-    } else if (!/^\d{10,13}$/.test(mobileNo)) {
+    } else if (!phoneRegexWithCountryCode.test(mobileNo) && !phoneRegexWithoutCountryCode.test(mobileNo)) {
       tempErrors.mobileNo = t('errors.mobileNumberInvalid');
     }
-    tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
+    if(!idNumber){
+      tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
+    } else if(idNumber.length < 6){
+      tempErrors.idNumber = 'Id should be min 6 characters';
+    } else if (!/^[a-zA-Z0-9]+$/.test(idNumber)) {
+      tempErrors.idNumber = 'It does not allow special charecters';
+    }
 
     if (!emergencyContact) {
       tempErrors.emergencyContact = t('errors.emergencyContactRequired');
-    } else if (!/^\d{10,13}$/.test(emergencyContact)) {
+    } else if (!phoneRegexWithCountryCode.test(emergencyContact) && !phoneRegexWithoutCountryCode.test(emergencyContact)) {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
 
@@ -593,6 +605,14 @@ const DashboardBoys = () => {
     if (!tenantImage) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
+    if (hasBike) {
+      if (!bikeNumber) {
+          tempErrors.bikeNumber = 'Bike number required';
+      } else if (!/^[A-Za-z]{2}\s\d{2,4}\s[A-Za-z]{1,2}\s?\d{4}$/.test(bikeNumber)) {
+          tempErrors.bikeNumber = 'Enter a valid bike number';
+      }
+  }
+    
     setTenantErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
@@ -653,6 +673,8 @@ const DashboardBoys = () => {
     
 
     if (isEditing) {
+      setShowModal(false);
+      setLoading(true);
       await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentTenantId}`), tenantData).then(() => {
         toast.success("Tenant updated successfully.", {
           position: "top-center",
@@ -675,6 +697,8 @@ const DashboardBoys = () => {
         });
       });
     } else {
+      setShowModal(false);
+      setLoading(true)
       await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData).then(() => {
         toast.success(t('toastMessages.tenantAddedSuccess'), {
           position: "top-center",
@@ -685,6 +709,7 @@ const DashboardBoys = () => {
           draggable: true,
           progress: undefined,
         });
+        e.target.querySelector('button[type="submit"]').disabled = false;
       }).catch(error => {
         toast.error(t('toastMessages.errorAddingTenant') + error.message, {
           position: "top-center",
@@ -699,12 +724,7 @@ const DashboardBoys = () => {
     }
     setShowModal(false);
     resetForm();
-    if (imageInputRef.current) {
-      imageInputRef.current.value = '';
-    }
-    if (idInputRef.current) {
-      idInputRef.current.value = "";
-    }
+    setLoading(false);
 
 
   };
@@ -867,6 +887,10 @@ const DashboardBoys = () => {
       createdBy: 'admin'
     })
     setPermnentAddress('')
+    setHasBike(false)
+    setBikeNumber('NA')
+    setBikeImage(null);
+    setBikeRcImage(null);
   };
 
 
@@ -948,7 +972,6 @@ const DashboardBoys = () => {
       tenant.id === selectedTenant
     );
     const singleTenantData = singleTenant[0];
-    console.log(singleTenantData, "addedToNotify")
     setNotifyUserInfo(singleTenantData)
   }
 
@@ -1415,7 +1438,7 @@ const DashboardBoys = () => {
             </div>
 
             {hasBike && (
-              <div className='bikeField' style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
+              <div className=' bikeField'>
                 <label class="bikenumber" htmlFor="bikeNumber" >{t('dashboard.bikeNumber')}</label>
                 <input
                   type="text"
@@ -1425,11 +1448,13 @@ const DashboardBoys = () => {
                   placeholder="Enter number plate ID"
                   value={bikeNumber}
                   onChange={(event) => setBikeNumber(event.target.value)}
-                  style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px', marginLeft: '8px' }}
+                  style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px' }}
                 />
               </div>
             )
             }
+
+            {tenatErrors.bikeNumber && <p style={{ color: 'red',marginLeft:"4px" }}>{tenatErrors.bikeNumber}</p>}
 
             {hasBike && (
               <>
@@ -1583,10 +1608,13 @@ const DashboardBoys = () => {
               <div className="container-fluid">
                 {renderFormLayout()}
               </div>
+             
             </div>
           </div>
         </div>
       </div>
+
+      {loading && <Spinner />}
 
       {popupOpen &&
         <div className="popupBeds" id="example">

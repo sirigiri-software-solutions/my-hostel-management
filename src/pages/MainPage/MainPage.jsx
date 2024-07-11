@@ -32,12 +32,7 @@ const MainPage = () => {
   const { t } = useTranslation()
   const { activeBoysHostelName, activeGirlsHostelName } = useData();
   const name = localStorage.getItem("username");
-  const { data } = useContext(DataContext);
-  console.log("start")
-  if (data != null) {
-    console.log(data && data);
-  }
-  console.log("end");
+
 
 
   const [activeTab, setActiveTab] = useState('boys');
