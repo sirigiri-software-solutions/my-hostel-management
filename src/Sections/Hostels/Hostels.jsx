@@ -452,7 +452,6 @@ const Hostels = ({ onTabSelect, activeTab }) => {
 
           </div>
         </Modal.Body>
-
       </Modal>
       <Modal show={isDeleteConfirmationOpen} onHide={cancelDeleteHostel}>
         <Modal.Header closeButton>
