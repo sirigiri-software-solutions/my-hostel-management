@@ -7,11 +7,9 @@ import { useTranslation } from 'react-i18next';
 
 const Beds = ({ onTabSelect,activeTab }) => {
     const { t } = useTranslation();
-    // const [activeTab, setActiveTab] = useState('boys');
     const [key, setKey] = useState('boys');
 
     const handleTabSelect = (tab) => {
-        // setActiveTab(tab);
         setKey(tab);
         onTabSelect(tab);
     };

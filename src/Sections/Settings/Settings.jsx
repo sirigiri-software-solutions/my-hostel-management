@@ -1,16 +1,13 @@
-import React, { useState,useEffect } from 'react';
-import { ref, set,push, onValue } from 'firebase/database';
+import React from 'react';
 
-import { toast } from 'react-toastify';
+
 import 'react-toastify/dist/ReactToastify.css';
 import LanguageSwitch from '../../LanguageSwitch';
 import { useTranslation } from 'react-i18next';
 import './settings.css';
-import { Modal, Button } from 'react-bootstrap';
-import { useData } from '../../ApiData/ContextProvider';
+
 
 const Settings = () => {
-  const { firebase } = useData();
 
   const { t } = useTranslation();
 

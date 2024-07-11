@@ -8,7 +8,7 @@ const CreateExpensesBoys = () => {
  
   const toggleCreateExpensesBoys = () => {
     setShowCreateExpensesBoys(!showCreateExpensesBoys);
-    setErrors({}); // Clear errors when toggling
+    setErrors({}); 
   };
  
   const handleSubmit = (event) => {
@@ -17,36 +17,30 @@ const CreateExpensesBoys = () => {
     const formData = new FormData(form);
     const newErrors = {};
  
-    // Required field validation
     ['inputName', 'inputDate', 'inputMonth', 'inputAmount', 'inputYear', 'inputMobile', 'inputdes', 'inputCreatedOn'].forEach((field) => {
       if (!formData.get(field)) {
         newErrors[field] = 'This field is required';
       }
     });
- 
-    // Mobile number format validation
+
     const mobileRegex = /^[0-9]{10}$/;
     if (!mobileRegex.test(formData.get('inputMobile'))) {
       newErrors['inputMobile'] = 'Mobile number must be 10 digits';
     }
  
-    // Amount validation
     if (formData.get('inputAmount') <= 0) {
       newErrors['inputAmount'] = 'Amount must be greater than zero';
     }
- 
-    // Due date validation
+
     const currentDate = new Date().toISOString().split('T')[0];
     if (formData.get('inputDate') < currentDate) {
       newErrors['inputDate'] = 'Due date must be after today';
     }
  
     if (Object.keys(newErrors).length === 0) {
-      // Submit form if there are no errors
-      // console.log('Form submitted successfully');
-      form.reset(); // Reset form after successful submission
+      form.reset(); 
     } else {
-      setErrors(newErrors); // Set errors state to trigger re-render with error messages
+      setErrors(newErrors);
     }
   };
  
@@ -60,7 +54,7 @@ const CreateExpensesBoys = () => {
             </h1>
             <h1 className="text-center mb-2 fs-5">Create Expenses</h1>
             <form className="row g-3" onSubmit={handleSubmit}>
-              {/* Form fields */}
+
               <div className="col-md-6">
                 <label htmlFor="inputName" className="form-label">
                   Name

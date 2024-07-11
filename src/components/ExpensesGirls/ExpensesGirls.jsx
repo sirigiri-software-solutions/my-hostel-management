@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import ExpenseIcon from '../../images/Icons (5).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
-// import { database, push, ref } from "../../firebase";
 import { push, ref } from "../../firebase/firebase";
 import "../RoomsBoys/RoomsBoys.css"
 import { onValue } from 'firebase/database';
@@ -39,12 +38,12 @@ const ExpensesGirls = () => {
 
   const getCurrentMonth = () => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-    const currentMonth = new Date().getMonth(); // getMonth returns month index (0 = January, 11 = December)
+    const currentMonth = new Date().getMonth(); 
     return monthNames[currentMonth];
   };
   
   const getCurrentYear = () => {
-    return new Date().getFullYear().toString(); // getFullYear returns the full year (e.g., 2024)
+    return new Date().getFullYear().toString();
   };
 
   const [year, setYear] = useState(getCurrentYear());
@@ -90,14 +89,14 @@ window.addEventListener('keydown',handleOutsideClick);
 
   const getMonthYearKey = (dateString) => {
     const date = new Date(dateString);
-    const month = date.toLocaleString('default', { month: 'short' }).toLowerCase(); // get short month name
+    const month = date.toLocaleString('default', { month: 'short' }).toLowerCase(); 
     const year = date.getFullYear();
     return `${year}-${month}`;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Validate the necessary fields
+
     let errors = {};
     let formIsValid = true;
 
@@ -127,14 +126,13 @@ window.addEventListener('keydown',handleOutsideClick);
       formIsValid = false;
     }
 
-    // Only proceed if form is valid
     if (formIsValid) {
       const monthYear = getMonthYearKey(formData.expenseDate);
       const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}`);
       push(expensesRef, {
         ...formData,
         expenseAmount: parseFloat(formData.expenseAmount),
-        expenseDate: new Date(formData.expenseDate).toISOString() // Proper ISO formatting
+        expenseDate: new Date(formData.expenseDate).toISOString() 
       }).then(() => {
         toast.success(t('toastMessages.expenseAddedSuccessfully'), {
           position: "top-center",
@@ -145,7 +143,6 @@ window.addEventListener('keydown',handleOutsideClick);
           draggable: true,
           progress: undefined,
         });
-        // setIsEditing(false); // Reset editing state
       }).catch(error => {
         toast.error(t('toastMessages.errorAddingExpense') + error.message, {
           position: "top-center",
@@ -168,15 +165,14 @@ window.addEventListener('keydown',handleOutsideClick);
 
 
     } else {
-      // Set errors in state if form is not valid
       setFormErrors(errors);
     }
   };
 
   function formatDate(dateString) {
     const date = new Date(dateString);
-    const day = ('0' + date.getDate()).slice(-2); // Add leading zero if needed
-    const month = ('0' + (date.getMonth() + 1)).slice(-2); // Add leading zero if needed
+    const day = ('0' + date.getDate()).slice(-2); 
+    const month = ('0' + (date.getMonth() + 1)).slice(-2); 
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   }
@@ -191,7 +187,7 @@ window.addEventListener('keydown',handleOutsideClick);
         loadedExpenses.push({
           id: key,
           ...data[key],
-          expenseDate: formatDate(data[key].expenseDate) // Format date as you retrieve it
+          expenseDate: formatDate(data[key].expenseDate) 
         });
       }
       setExpenses(loadedExpenses);
@@ -204,7 +200,6 @@ window.addEventListener('keydown',handleOutsideClick);
     t('expensesPage.sNo'),
     t('expensesPage.expenseName'),
     t('expensesPage.expenseAmount'),
-    // t('expensesPage.createdBy'),
     t('expensesPage.date'),
     t('expensesPage.actions')
   ];
@@ -224,8 +219,6 @@ window.addEventListener('keydown',handleOutsideClick);
       edit_room: <button
         style={{ backgroundColor: '#ff8a00', padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
         onClick={() => handleEdit(expense)}
-      // data-bs-toggle="modal"
-      // data-bs-target="#exampleModalExpensesGirls"
       >
         Edit
       </button>
@@ -236,7 +229,6 @@ window.addEventListener('keydown',handleOutsideClick);
 
   const handleEdit = (expense) => {
     setEditingExpense(expense);
-    // console.log(expense.expenseDate,"data was formated")
     const [day, month, year] = expense.expenseDate.split('-');
     const formattedDate = `${year}-${month}-${day}`;
     setFormData({
@@ -265,7 +257,7 @@ window.addEventListener('keydown',handleOutsideClick);
       formIsValid = false;
     }
 
-    const expenseAmountString = String(formData.expenseAmount); // Convert to string
+    const expenseAmountString = String(formData.expenseAmount);
     if (!expenseAmountString.match(/^\d+(\.\d{1,2})?$/)) {
       errors.expenseAmount = t('errors.expenseAmountValidNumber');
       formIsValid = false;
@@ -282,7 +274,6 @@ window.addEventListener('keydown',handleOutsideClick);
       formIsValid = false;
     }
 
-    // Log the value of formData.expenseDate before conversion
     console.log('Expense Date:', formData.expenseDate);
 
     if (formIsValid) {
@@ -325,7 +316,6 @@ window.addEventListener('keydown',handleOutsideClick);
         createdBy: adminRole
       });
     } else {
-      // Set errors in state if form is not valid
       setFormErrors(errors);
     }
   };
@@ -345,7 +335,6 @@ window.addEventListener('keydown',handleOutsideClick);
         progress: undefined,
       });
       setEditingExpense(null);
-      // alert('Expense deleted!');
     }).catch(error => {
       toast.error(t('toastMessages.errorDeletingExpense') + error.message, {
         position: "top-center",
@@ -357,7 +346,6 @@ window.addEventListener('keydown',handleOutsideClick);
         progress: undefined,
       });
       console.error("Error deleting document: ", error);
-      // alert('Error deleting expense!');
     });
     setShowModal(false);
     setFormData({
@@ -420,7 +408,6 @@ window.addEventListener('keydown',handleOutsideClick);
   }
 
   
-// =======  calculate year expenses
 const [totalAnnualExpenses, setTotalAnnualExpenses] = useState(0);
 useEffect(() => {
   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
@@ -518,16 +505,13 @@ const handleExpensesFocus = (e) => {
             </select>
           </div>
       </div>       
-          {/* Additional UI and functionality here */}
+        
    </div>
 
         <div>
           <Table columns={columns} rows={filteredRows} />
         </div>
-        {/* <div>
-          <text><strong>{month} month expenses : {total} </strong>
-          <strong>{year},total expenses :{totalAnnualExpenses} </strong> </text>
-        </div> */}
+    
         <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalExpensesGirls" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -548,14 +532,6 @@ const handleExpensesFocus = (e) => {
                       <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onChange={handleInputChange} onFocus={handleExpensesFocus} />
                       {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
                     </div>
-                    {/* <div className="col-md-6"> */}
-                      {/* <label htmlFor="inputRole" className="form-label">{t('expensesPage.createdBy')} :</label> */}
-                      {/* <select className="form-select" id="inputRole" name="createdBy" value={formData.createdBy} onChange={handleInputChange}>
-                        <option value="admin">{t('expensesPage.admin')}</option>
-                        <option value="sub-admin">{t('expensesPage.subAdmin')} </option>
-                      </select> */}
-                      {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={formData.createdBy} /> */}
-                    {/* </div> */}
                     <div className="col-md-6">
                       <label htmlFor="inputDate" className="form-label">{t('expensesPage.expenseDate')} : </label>
                       <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />

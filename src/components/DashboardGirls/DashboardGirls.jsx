@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Rooms from '../../images/Icons (2).png'
 import Beds from '../../images/Icons (3).png'
 import Tenants from '../../images/Icons (4).png'
@@ -6,24 +6,19 @@ import Expenses from '../../images/Icons (5).png'
 import './DashboardGirls.css'
 import SmallCard from '../../Elements/SmallCard'
 import PlusIcon from '../../images/Icons (8).png'
-// import { database, push, ref, storage } from "../../firebase";
-import { push, ref, storage } from "../../firebase/firebase";
+import { push, ref } from "../../firebase/firebase";
 import { onValue, update } from 'firebase/database';
-import { DataContext } from '../../ApiData/ContextProvider';
-import { FetchData } from '../../ApiData/FetchData';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-// import Table from '../../Elements/Table'
 import { Modal, Button } from 'react-bootstrap';
 import { useData } from '../../ApiData/ContextProvider';
 import { FaWhatsapp } from "react-icons/fa";
 import { useTranslation } from 'react-i18next';
+import Spinner from '../../Elements/Spinner'
 
 const DashboardGirls = () => {
   const { t } = useTranslation();
 
-  // created by admin or subAdmin 
   const role = localStorage.getItem('role');
   let adminRole = "";
   if (role === "admin") {
@@ -34,8 +29,14 @@ const DashboardGirls = () => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
 
 
-  const { activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, userUid,firebase } = useData();
-  const {database} = firebase;
+  const { activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, userUid, firebase } = useData();
+  const { database } = firebase;
+  
+  const [loading,setLoading] = useState(false);
+
+
+
+
   const [modelText, setModelText] = useState('');
   const [formLayout, setFormLayout] = useState('');
   const [floorNumber, setFloorNumber] = useState('');
@@ -44,15 +45,12 @@ const DashboardGirls = () => {
   const [rooms, setRooms] = useState([]);
   const [bedRent, setBedRent] = useState('');
   const [currentId, setCurrentId] = useState('');
-  const [createdBy, setCreatedBy] = useState(adminRole); // Default to 'admin'
+  const [createdBy, setCreatedBy] = useState(adminRole);
   const [updateDate, setUpdateDate] = useState('');
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
-
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [currentMonthExpenses, setCurrentMonthExpenses] = useState([])
-
-  //=====================================================
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
   const [selectedBed, setSelectedBed] = useState('');
@@ -67,18 +65,12 @@ const DashboardGirls = () => {
   const [currentTenantId, setCurrentTenantId] = useState('');
   const [tenatErrors, setTenantErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
-  // const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
   const [tenantId, setTenantId] = useState(null);
-  // const [tenantIdUrl, setTenantIdUrl] = useState('');
   const imageInputRef = useRef(null);
   const idInputRef = useRef(null);
   const [girlsRoomsData, setGirlsRoomsData] = useState([]);
-  // const { data } = useContext(DataContext);
+
   const [showForm, setShowForm] = useState(true);
-
-
-  // expenses related 
-
   const [hasBike, setHasBike] = useState(false);
   const [bikeNumber, setBikeNumber] = useState('NA');
   const [selectedTenant, setSelectedTenant] = useState('');
@@ -92,6 +84,288 @@ const DashboardGirls = () => {
   const [bikeRcImageField, setBikeRcImageField] = useState('');
   const [tenantAddress, setTenantAddress] = useState('');
 
+  const [formData, setFormData] = useState({
+    expenseName: '',
+    expenseAmount: '',
+    expenseDate: '',
+    createdBy: 'admin'
+  });
+
+  const [formErrors, setFormErrors] = useState({
+    number: '',
+    rent: '',
+    rooms: '',
+    status: ''
+  });
+  const [girlsRooms, setGirlsRooms] = useState([]);
+  const [bedNumber, setBedNumber] = useState('');
+  const [totalFee, setTotalFee] = useState('');
+  const [paidAmount, setPaidAmount] = useState('');
+  const [due, setDue] = useState('');
+  const [tenantsWithRents, setTenantsWithRents] = useState([]);
+  const [paidDate, setPaidDate] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [editingRentId, setEditingRentId] = useState(null);
+  const [availableTenants, setAvailableTenants] = useState([]);
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [expensePopupOpen, setExpensePopupOpen] = useState(false);
+  const [bedsData, setBedsData] = useState([]);
+
+  const getCurrentMonth = () => {
+    const monthNames = [
+      t('months.jan'),
+      t('months.feb'),
+      t('months.mar'),
+      t('months.apr'),
+      t('months.may'),
+      t('months.jun'),
+      t('months.jul'),
+      t('months.aug'),
+      t('months.sep'),
+      t('months.oct'),
+      t('months.nov'),
+      t('months.dec')
+    ];
+    const currentMonth = new Date().getMonth(); 
+    return monthNames[currentMonth];
+  };
+
+  const getCurrentYear = () => {
+    return new Date().getFullYear().toString(); 
+  };
+
+  const [year, setYear] = useState(getCurrentYear());
+  const [month, setMonth] = useState(getCurrentMonth());
+
+
+
+
+
+  // useEffects 
+  useEffect(() => {
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+    onValue(tenantsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedTenants = data ? Object.keys(data).map(key => ({
+        id: key,
+        ...data[key],
+      })) : []; 
+      setTotalTenantData(loadedTenants)
+    })
+
+
+  }, [selectedTenant])
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (showModal && (event.target.id === "exampleModalRoomsGirls" || event.key === "Escape")) {
+        setShowModal(false);
+        setHasBike(false);
+        setBikeNumber('NA');
+        handleCloseModal();
+      }
+
+    };
+    window.addEventListener('click', handleOutsideClick);
+    window.addEventListener('keydown', handleOutsideClick)
+
+  }, [showModal]);
+
+
+  useEffect(() => {
+    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+    onValue(roomsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedRooms = [];
+      for (const key in data) {
+        loadedRooms.push({
+          id: key,
+          ...data[key]
+        });
+      }
+      setRooms(loadedRooms);
+    });
+  }, [activeGirlsHostel]);
+
+  useEffect(() => {
+    const formattedMonth = month.slice(0, 3).toLowerCase();
+    const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
+    onValue(expensesRef, (snapshot) => {
+      const data = snapshot.val();
+      let total = 0; 
+      const expensesArray = [];
+      for (const key in data) {
+        const expense = {
+          id: key,
+          ...data[key],
+          expenseDate: formatDate(data[key].expenseDate)
+        };
+        total += expense.expenseAmount; 
+        expensesArray.push(expense);
+      }
+      setCurrentMonthExpenses(expensesArray);
+      setTotalExpenses(total); 
+    });
+  }, [activeGirlsHostel]);
+
+
+  useEffect(() => {
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+    onValue(tenantsRef, snapshot => {
+      const data = snapshot.val() || {};
+      const loadedTenants = Object.entries(data).map(([key, value]) => ({
+        id: key,
+        ...value,
+      }));
+      setTenants(loadedTenants);
+    });
+  }, [activeGirlsHostel]);
+
+  useEffect(() => {
+    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+    onValue(roomsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedRooms = [];
+      for (const key in data) {
+        loadedRooms.push({
+          id: key,
+          ...data[key]
+        });
+      }
+      setGirlsRooms(loadedRooms);
+    });
+    // Fetch tenants
+  }, [activeGirlsHostel]);
+
+
+
+  useEffect(() => {
+    if (selectedRoom) {
+      const room = girlsRooms.find(room => room.roomNumber === selectedRoom);
+      if (room) {
+        const options = Array.from({ length: room.numberOfBeds }, (_, i) => i + 1);
+        setBedOptions(options);
+      }
+    } else {
+      setBedOptions([]);
+    }
+  }, [selectedRoom, girlsRooms, activeGirlsHostel]);
+
+  useEffect(() => {
+    const updateTotalFeeFromRoom = () => {
+      const roomsArray = Object.values(rooms);
+      const matchingRoom = roomsArray.find(room => room.roomNumber === roomNumber);
+
+      if (matchingRoom && matchingRoom.bedRent) {
+        setTotalFee(matchingRoom.bedRent.toString());
+      } else {
+        setTotalFee('');
+      }
+    };
+
+    if (roomNumber) {
+      updateTotalFeeFromRoom();
+    }
+  }, [roomNumber, rooms]);
+
+
+  useEffect(() => {
+    if (selectedTenant) {
+      const tenant = tenants.find(t => t.id === selectedTenant);
+      if (tenant) {
+        setRoomNumber(tenant.roomNo || '');
+        setBedNumber(tenant.bedNo || '');
+        setDateOfJoin(tenant.dateOfJoin || '');
+      }
+    } else {
+      setRoomNumber('');
+      setBedNumber('');
+      setPaidAmount('');
+      setDue('');
+      setDateOfJoin('');
+      setDueDate('');
+    }
+  }, [selectedTenant, tenants, activeGirlsHostel]);
+
+  useEffect(() => {
+    const tenantIdsWithRents = tenantsWithRents.flatMap(tenant =>
+      tenant.rents.length > 0 ? [tenant.id] : []
+    );
+
+    const availableTenants = tenants.filter(
+      tenant => !tenantIdsWithRents.includes(tenant.id)
+    );
+
+    setAvailableTenants(availableTenants);
+  }, [tenants, tenantsWithRents, activeGirlsHostel]);
+
+
+  useEffect(() => {
+    const calculatedDue = Math.max(parseFloat(totalFee) - parseFloat(paidAmount), 0).toString();
+    setDue(calculatedDue);
+  }, [paidAmount, totalFee]);
+
+  useEffect(() => {
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+    onValue(tenantsRef, (snapshot) => {
+      const tenantsData = snapshot.val();
+      const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
+
+      const rentsPromises = tenantIds.map(tenantId => {
+        return new Promise((resolve) => {
+          const rentsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
+          onValue(rentsRef, (rentSnapshot) => {
+            const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
+              id: key,
+              ...rentSnapshot.val()[key],
+            })) : [];
+            resolve({ id: tenantId, ...tenantsData[tenantId], rents });
+          }, {
+            onlyOnce: true 
+          });
+        });
+      });
+
+      Promise.all(rentsPromises).then(tenantsWithTheirRents => {
+        setTenantsWithRents(tenantsWithTheirRents);
+      });
+    });
+  }, []);
+
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (popupOpen && event.target.id === "example") {
+        setPopupOpen(false)
+        setHasBike(false);
+        setBikeNumber('NA');
+      }
+    };
+    window.addEventListener('click', handleOutsideClick)
+  }, [popupOpen])
+
+  useEffect(() => {
+    if (!girlsRooms || girlsRooms.length === 0) {
+      setBedsData([]);
+      return;
+    }
+
+    const allBeds = girlsRooms.flatMap(room => {
+      return Array.from({ length: room.numberOfBeds }, (_, i) => {
+        const bedNumber = i + 1;
+        const tenant = tenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        return {
+          floorNumber: room.floorNumber,
+          roomNumber: room.roomNumber,
+          bedNumber: bedNumber,
+          rent: room.bedRent || "N/A",
+          status: tenant ? "Occupied" : "Unoccupied"
+        };
+      });
+    });
+    setBedsData(allBeds);
+  }, [girlsRooms, tenants]); 
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -99,15 +373,11 @@ const DashboardGirls = () => {
     const reader = new FileReader();
 
     reader.onload = () => {
-      // Once the file is loaded, set the image in state
       setBikeImage(reader.result);
 
     };
-    // console.log(file,"file created");
-
 
     reader.readAsDataURL(file);
-    console.log(file, "file created");
   };
 
 
@@ -118,29 +388,12 @@ const DashboardGirls = () => {
       setBikeRcImage(reader.result);
     }
     reader.readAsDataURL(file1);
-    console.log(file1, "file1 created");
 
   }
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-      })) : [];
-      setTotalTenantData(loadedTenants)
-    })
 
-
-  }, [selectedTenant])
 
   const sendMessage = (tenant, rentRecord) => {
-
-    console.log(tenant, "sendMessages")
-    console.log(tenant, "sendMessages")
-
 
     const totalFee = rentRecord.totalFee;
     const tenantName = tenant.name;
@@ -158,61 +411,25 @@ Therefore, your remaining due amount is ${amount}.\n
 You joined on ${dateOfJoin}, and your due date is ${dueDate}.\n
 Please note that you made your last payment on ${paidDate}.\n`
 
-    const phoneNumber = tenant.mobileNo; // Replace with the recipient's phone number
-
-    // Check if the phone number starts with '+91' (India's country code)
+    const phoneNumber = tenant.mobileNo; 
     const formattedPhoneNumber = phoneNumber.startsWith('+91') ? phoneNumber : `+91${phoneNumber}`;
 
     const encodedMessage = encodeURIComponent(message);
 
-
-    // Use web link for non-mobile devices
     let whatsappLink = `https://wa.me/${formattedPhoneNumber}?text=${encodedMessage}`;
 
-
-    // Open the WhatsApp link
     window.open(whatsappLink, '_blank');
   };
-
-  // Event handler for the notify checkbox
   const handleNotifyCheckbox = (rentData) => {
-    // Toggle the state of the notify checkbox
-
-    console.log(notify, notifyUserInfo, "addedToNotify")
     if (notify && notifyUserInfo) {
-      // const { tenant, rentRecord } = notifyUserInfo;
-      // console.log(tenant, "InNotify")
-      sendMessage(notifyUserInfo, rentData); // If checkbox is checked and tenant info is available, send WhatsApp message
+
+      sendMessage(notifyUserInfo, rentData);
     }
     setNotify(!notify);
   };
 
 
-  const getCurrentMonth = () => {
-    const monthNames = [
-      t('months.jan'),
-      t('months.feb'),
-      t('months.mar'),
-      t('months.apr'),
-      t('months.may'),
-      t('months.jun'),
-      t('months.jul'),
-      t('months.aug'),
-      t('months.sep'),
-      t('months.oct'),
-      t('months.nov'),
-      t('months.dec')
-    ];
-    const currentMonth = new Date().getMonth(); // getMonth returns month index (0 = January, 11 = December)
-    return monthNames[currentMonth];
-  };
 
-  const getCurrentYear = () => {
-    return new Date().getFullYear().toString(); // getFullYear returns the full year (e.g., 2024)
-  };
-
-  const [year, setYear] = useState(getCurrentYear());
-  const [month, setMonth] = useState(getCurrentMonth());
 
   const handleCheckboxChange = (e) => {
     setHasBike(e.target.value == 'yes');
@@ -224,19 +441,6 @@ Please note that you made your last payment on ${paidDate}.\n`
     }
   };
 
-  const [formData, setFormData] = useState({
-    expenseName: '',
-    expenseAmount: '',
-    expenseDate: '',
-    createdBy: 'admin'
-  });
-
-  const [formErrors, setFormErrors] = useState({
-    number: '',
-    rent: '',
-    rooms: '',
-    status: ''
-  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -245,39 +449,20 @@ Please note that you made your last payment on ${paidDate}.\n`
       [name]: value
     });
   };
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (showModal && (event.target.id === "exampleModalRoomsGirls" || event.key === "Escape")) {
-        setShowModal(false);
-        setHasBike(false);
-        setBikeNumber('NA');
-        handleCloseModal();
-      }
-
-    };
-    window.addEventListener('click', handleOutsideClick);
-    window.addEventListener('keydown', handleOutsideClick)
-
-  }, [showModal]);
 
 
 
 
   const handleRoomsIntegerChange = (event) => {
     const { name, value } = event.target;
-    // const re = /^[0-9\b]+$/; // Regular expression to allow only numbers
-
     let sanitizedValue = value;
 
     if (name === 'floorNumber' || name === 'roomNumber') {
-      // Allow alphanumeric characters and hyphens only
+
       sanitizedValue = value.replace(/[^a-zA-Z0-9-]/g, '');
     } else if (name === 'numberOfBeds' || name === 'bedRent') {
-      // Allow numbers only
       sanitizedValue = value.replace(/[^0-9]/g, '');
     }
-
-    // if (value === '' || re.test(sanitizedValue)) {
     switch (name) {
       case 'floorNumber':
         setFloorNumber(sanitizedValue);
@@ -298,10 +483,8 @@ Please note that you made your last payment on ${paidDate}.\n`
   };
   const handleGirlsRoomsSubmit = (e) => {
     e.preventDefault();
-    const now = new Date().toISOString();  // Get current date-time in ISO format
-    // Initialize an object to collect errors
+    const now = new Date().toISOString(); 
     const newErrors = {};
-    // Validation checks
     if (!floorNumber.trim()) newErrors.floorNumber = t('errors.floorNumberRequired');
     if (!roomNumber.trim()) newErrors.roomNumber = t('errors.roomNumberRequired');
     else if (rooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
@@ -309,11 +492,9 @@ Please note that you made your last payment on ${paidDate}.\n`
     }
     if (!numberOfBeds) newErrors.numberOfBeds = t('errors.numberOfBedsRequired');
     if (!bedRent) newErrors.bedRent = t('errors.bedRentRequired');
-
-    // Check if there are any errors
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      return; // Prevent form submission if there are errors
+      return;
     }
 
     const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
@@ -346,38 +527,17 @@ Please note that you made your last payment on ${paidDate}.\n`
       });
     });
 
-    // }
-
-    // Reset form
     setFloorNumber('');
     setRoomNumber('');
     setNumberOfBeds('');
     setBedRent('');
     setCurrentId('');
-    setUpdateDate(now); // Update state with current date-time
-    setErrors({}); // Clear errors
+    setUpdateDate(now);
+    setErrors({});
     setShowModal(false);
   };
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setRooms(loadedRooms);
-    });
-  }, [activeGirlsHostel]);
-  // Calculate the total number of beds
   const totalBeds = rooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
-
-
-  //-======================================
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -387,97 +547,49 @@ Please note that you made your last payment on ${paidDate}.\n`
     return `${year}-${month}-${day}`;
   };
 
-  useEffect(() => {
-    const formattedMonth = month.slice(0, 3).toLowerCase();
-    const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
-    onValue(expensesRef, (snapshot) => {
-      const data = snapshot.val();
-      let total = 0; // Variable to hold the total expenses
-      const expensesArray = [];
-      for (const key in data) {
-        const expense = {
-          id: key,
-          ...data[key],
-          expenseDate: formatDate(data[key].expenseDate)
-        };
-        total += expense.expenseAmount; // Add expense amount to total
-        expensesArray.push(expense);
-      }
-      setCurrentMonthExpenses(expensesArray);
-      setTotalExpenses(total); // Set total expenses state
-    });
-  }, [activeGirlsHostel]);
-
-
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      setTenants(loadedTenants);
-    });
-  }, [activeGirlsHostel]);
-
-
-  const [girlsRooms, setGirlsRooms] = useState([]);
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setGirlsRooms(loadedRooms);
-    });
-    // Fetch tenants
-  }, [activeGirlsHostel]);
 
 
 
-  useEffect(() => {
-    if (selectedRoom) {
-      const room = girlsRooms.find(room => room.roomNumber === selectedRoom);
-      if (room) {
-        const options = Array.from({ length: room.numberOfBeds }, (_, i) => i + 1);
-        setBedOptions(options);
-      }
-    } else {
-      setBedOptions([]);
-    }
-  }, [selectedRoom, girlsRooms, activeGirlsHostel]);
+
+
 
 
   const validate = () => {
+
     let tempErrors = {};
     tempErrors.selectedRoom = selectedRoom ? "" : t('errors.roomNumberRequired');
     tempErrors.selectedBed = selectedBed ? "" : t('errors.bedNumberRequired');
     tempErrors.dateOfJoin = dateOfJoin ? "" : t('errors.dateOfJoinRequired');
+
+    const phoneRegexWithCountryCode = /^\+\d{12}$/;
+    const phoneRegexWithoutCountryCode = /^\d{10}$/;
+
+
     if (!name) {
       tempErrors.name = t('errors.nameRequired');
     } else if (!/^[a-zA-Z\s]+$/.test(name)) {
       tempErrors.name = t('errors.nameInvalid');
     }
-    // Validate mobile number
+
     if (!mobileNo) {
       tempErrors.mobileNo = t('errors.mobileNumberRequired');
-    } else if (!/^\d{10,13}$/.test(mobileNo)) {
+    } else if (!phoneRegexWithCountryCode.test(mobileNo) && !phoneRegexWithoutCountryCode.test(mobileNo)) {
       tempErrors.mobileNo = t('errors.mobileNumberInvalid');
     }
-    tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
-    // Validate emergency contact
+    if(!idNumber){
+      tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
+    } else if(idNumber.length < 6){
+      tempErrors.idNumber = 'Id should be min 6 characters';
+    } else if (!/^[a-zA-Z0-9]+$/.test(idNumber)) {
+      tempErrors.idNumber = 'It does not allow special charecters';
+    }
+
     if (!emergencyContact) {
       tempErrors.emergencyContact = t('errors.emergencyContactRequired');
-    } else if (!/^\d{10,13}$/.test(emergencyContact)) {
+    } else if (!phoneRegexWithCountryCode.test(emergencyContact) && !phoneRegexWithoutCountryCode.test(emergencyContact)) {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
-    // Check if the selected bed is already occupied
+
     const isBedOccupied = tenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentTenantId;
     });
@@ -485,41 +597,38 @@ Please note that you made your last payment on ${paidDate}.\n`
     if (isBedOccupied) {
       tempErrors.selectedBed = t('errors.bedAlreadyOccupied');
     }
-    if (!tenantImage && !tenantImage) {
+    if (!tenantImage) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
+    if (hasBike) {
+      if (!bikeNumber) {
+          tempErrors.bikeNumber = 'Bike number required';
+      } else if (!/^[A-Za-z]{2}\s\d{2,4}\s[A-Za-z]{1,2}\s?\d{4}$/.test(bikeNumber)) {
+          tempErrors.bikeNumber = 'Enter a valid bike number';
+      }
+  }
+    
     setTenantErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
-  // const handleTenantImageChange = (e) => {
-  //   if (e.target.files[0]) {
-  //     setTenantImage(e.target.files[0]);
-  //   }
-  // };
-  // const handleTenantIdChange = (e) => {
-  //   if (e.target.files[0]) {
-  //     setTenantId(e.target.files[0]);
-  //   }
-  // };
   const handleTenantImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        // Once the file is loaded, set the image in state as a base64 URL
+ 
         setTenantImage(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
-  
+
   const handleTenantIdChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        // Once the file is loaded, set the image in state as a base64 URL
         setTenantId(reader.result);
       };
       reader.readAsDataURL(file);
@@ -528,37 +637,15 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   const handleTenantSubmit = async (e) => {
     e.preventDefault();
-
-    // if (!validate()) return;
-    e.target.querySelector('button[type="submit"]').disabled = true;
-    if (!validate()) {
-      e.target.querySelector('button[type="submit"]').disabled = false;
-      return
-    };
-
-    // let imageUrlToUpdate = tenantImageUrl;
-
-    // if (tenantImage) {
-    //   const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
-    //   try {
-    //     const snapshot = await uploadBytes(imageRef, tenantImage);
-    //     imageUrlToUpdate = await getDownloadURL(snapshot.ref);
-    //   } catch (error) {
-    //     console.error("Error uploading tenant image:", error);
-
-    //   }
-    // }
-
-    // let idUrlToUpdate = tenantIdUrl;
-    // if (tenantId) {
-    //   const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
-    //   try {
-    //     const snapshot = await uploadBytes(imageRef, tenantId);
-    //     idUrlToUpdate = await getDownloadURL(snapshot.ref);
-    //   } catch (error) {
-    //     console.error("Error uploading tenant image:", error);
-    //   }
-    // }
+    if (!isEditing) {
+      e.target.querySelector('button[type="submit"]').disabled = true;
+      if (!validate()) {
+        e.target.querySelector('button[type="submit"]').disabled = false;
+        return
+      };
+    } else {
+      if (!validate()) return;
+    }
 
     const tenantData = {
       roomNo: selectedRoom,
@@ -575,12 +662,11 @@ Please note that you made your last payment on ${paidDate}.\n`
       permnentAddress,
       bikeImage,
       bikeRcImage
-
-      // tenantIdUrl,
     };
-    console.log(tenantData, "dashtenant");
 
     if (isEditing) {
+      setShowModal(false);
+      setLoading(true);
       await update(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${currentTenantId}`), tenantData).then(() => {
         toast.success(t('toastMessages.tenantUpdated'), {
           position: "top-center",
@@ -603,6 +689,8 @@ Please note that you made your last payment on ${paidDate}.\n`
         });
       });
     } else {
+      setShowModal(false);
+      setLoading(true);
       await push(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`), tenantData).then(() => {
         toast.success(t('toastMessages.tenantAddedSuccess'), {
           position: "top-center",
@@ -613,6 +701,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           draggable: true,
           progress: undefined,
         });
+        e.target.querySelector('button[type="submit"]').disabled = false;
       }).catch(error => {
         toast.error(t('toastMessages.errorAddingTenant') + error.message, {
           position: "top-center",
@@ -625,118 +714,18 @@ Please note that you made your last payment on ${paidDate}.\n`
         });
       });
     }
-    // setShowModal(false);
     setShowModal(false);
     resetForm();
     imageInputRef.current.value = "";
     idInputRef.current.value = "";
+    setLoading(false);
   };
 
-  //===============================
-
-  //handle add rent==============================================
 
 
-  const [bedNumber, setBedNumber] = useState('');
-  const [totalFee, setTotalFee] = useState('');
-  const [paidAmount, setPaidAmount] = useState('');
-  const [due, setDue] = useState('');
-  const [tenantsWithRents, setTenantsWithRents] = useState([]);
-  const [paidDate, setPaidDate] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [editingRentId, setEditingRentId] = useState(null);
-  const [availableTenants, setAvailableTenants] = useState([]);
-
-  useEffect(() => {
-    const updateTotalFeeFromRoom = () => {
-      // Convert the rooms object into an array of its values
-      const roomsArray = Object.values(rooms);
-      // Find the room that matches the roomNumber
-      const matchingRoom = roomsArray.find(room => room.roomNumber === roomNumber);
-
-      if (matchingRoom && matchingRoom.bedRent) {
-        setTotalFee(matchingRoom.bedRent.toString());
-      } else {
-        // Reset totalFee if no matching room is found
-        setTotalFee('');
-      }
-    };
-
-    if (roomNumber) {
-      updateTotalFeeFromRoom();
-    }
-  }, [roomNumber, rooms]);
 
 
-  useEffect(() => {
-    if (selectedTenant) {
-      const tenant = tenants.find(t => t.id === selectedTenant);
-      if (tenant) {
-        setRoomNumber(tenant.roomNo || '');
-        setBedNumber(tenant.bedNo || '');
-        setDateOfJoin(tenant.dateOfJoin || '');
-      }
-    } else {
-      // Reset these fields if no tenant is selected
-      setRoomNumber('');
-      setBedNumber('');
-      setPaidAmount('');
-      setDue('');
-      setDateOfJoin('');
-      setDueDate('');
-    }
-  }, [selectedTenant, tenants, activeGirlsHostel]);
 
-  useEffect(() => {
-    // Assuming tenantsWithRents already populated
-    const tenantIdsWithRents = tenantsWithRents.flatMap(tenant =>
-      tenant.rents.length > 0 ? [tenant.id] : []
-    );
-
-    const availableTenants = tenants.filter(
-      tenant => !tenantIdsWithRents.includes(tenant.id)
-    );
-
-    // Optionally, you can store availableTenants in a state if you need to use it elsewhere
-    setAvailableTenants(availableTenants);
-  }, [tenants, tenantsWithRents, activeGirlsHostel]);
-
-
-  useEffect(() => {
-    // Recalculate due when paid amount changes
-    const calculatedDue = Math.max(parseFloat(totalFee) - parseFloat(paidAmount), 0).toString();
-    setDue(calculatedDue);
-  }, [paidAmount, totalFee]);
-
-  useEffect(() => {
-    // Fetch tenants data once when component mounts
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const tenantsData = snapshot.val();
-      const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
-
-      // Initialize an array to hold promises for fetching each tenant's rents
-      const rentsPromises = tenantIds.map(tenantId => {
-        return new Promise((resolve) => {
-          const rentsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
-          onValue(rentsRef, (rentSnapshot) => {
-            const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
-              id: key,
-              ...rentSnapshot.val()[key],
-            })) : [];
-            resolve({ id: tenantId, ...tenantsData[tenantId], rents });
-          }, {
-            onlyOnce: true // This ensures the callback is only executed once.
-          });
-        });
-      });
-
-      // Wait for all promises to resolve and then set the state
-      Promise.all(rentsPromises).then(tenantsWithTheirRents => {
-        setTenantsWithRents(tenantsWithTheirRents);
-      });
-    });
-  }, []);
 
   const validateRentForm = () => {
     let formIsValid = true;
@@ -773,9 +762,9 @@ Please note that you made your last payment on ${paidDate}.\n`
   const handleRentSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate form before proceeding
+
     if (!validateRentForm()) {
-      // If validation fails, stop form submission
+      
       return;
     }
 
@@ -792,7 +781,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     };
 
     if (isEditing) {
-      // Update the existing rent record
+  
       const rentRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents/${editingRentId}`);
       await update(rentRef, rentData).then(() => {
         toast.success(t('toastMessages.rentUpdatedSuccess'), {
@@ -804,7 +793,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           draggable: true,
           progress: undefined,
         });
-        setIsEditing(false); // Reset editing state
+        setIsEditing(false); 
         if (notify) {
           handleNotifyCheckbox(rentData);
         }
@@ -821,7 +810,7 @@ Please note that you made your last payment on ${paidDate}.\n`
         });
       });
     } else {
-      // Create a new rent record
+      
       const rentRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents`);
       await push(rentRef, rentData).then(() => {
         toast.success(t('toastMessages.rentAddedSuccess'), {
@@ -833,7 +822,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           draggable: true,
           progress: undefined,
         });
-        setIsEditing(false); // Reset editing state
+        setIsEditing(false); 
         if (notify) {
           handleNotifyCheckbox(rentData);
         }
@@ -855,7 +844,6 @@ Please note that you made your last payment on ${paidDate}.\n`
     resetForm();
 
   };
-  //---------------------------------
 
   const resetForm = () => {
     setSelectedRoom('');
@@ -871,8 +859,6 @@ Please note that you made your last payment on ${paidDate}.\n`
     setErrors({});
     setTenantImage(null);
     setTenantId(null);
-    // setTenantImageUrl('');
-    // setTenantIdUrl('');
     setFloorNumber('');
     setRoomNumber('');
     setNumberOfBeds('');
@@ -901,6 +887,11 @@ Please note that you made your last payment on ${paidDate}.\n`
       expenseDate: '',
       createdBy: 'admin'
     })
+    setPermnentAddress('')
+    setHasBike(false)
+    setBikeNumber('NA')
+    setBikeImage(null);
+    setBikeRcImage(null);
   };
 
   const menu = [
@@ -930,6 +921,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       btntext: t('dashboard.addExpenses'),
     },
   ];
+
 
   const Buttons = ['Add Rooms', 'Add Tenants', 'Add Rent', 'Add Expenses'];
 
@@ -964,14 +956,13 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   const getMonthYearKey = (dateString) => {
     const date = new Date(dateString);
-    const month = date.toLocaleString('default', { month: 'short' }).toLowerCase(); // get short month name
+    const month = date.toLocaleString('default', { month: 'short' }).toLowerCase();
     const year = date.getFullYear();
     return `${year}-${month}`;
   };
 
   const expensesHandleSubmit = (e) => {
     e.preventDefault();
-    // Validate the necessary fields
     let errors = {};
     let formIsValid = true;
 
@@ -1001,15 +992,13 @@ Please note that you made your last payment on ${paidDate}.\n`
       errors.expenseDate = t('errors.expenseDateRequired');
       formIsValid = false;
     }
-
-    // Only proceed if form is valid
     if (formIsValid) {
       const monthYear = getMonthYearKey(formData.expenseDate);
       const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}`);
       push(expensesRef, {
         ...formData,
         expenseAmount: parseFloat(formData.expenseAmount),
-        expenseDate: new Date(formData.expenseDate).toISOString() // Proper ISO formatting
+        expenseDate: new Date(formData.expenseDate).toISOString() 
       }).then(() => {
         toast.success(t('toastMessages.expenseAddedSuccessfully'), {
           position: "top-center",
@@ -1020,7 +1009,6 @@ Please note that you made your last payment on ${paidDate}.\n`
           draggable: true,
           progress: undefined,
         });
-        // setIsEditing(false); // Reset editing state
       }).catch(error => {
         toast.error(t('toastMessages.errorAddingExpense') + error.message, {
           position: "top-center",
@@ -1046,25 +1034,12 @@ Please note that you made your last payment on ${paidDate}.\n`
         createdBy: 'admin'
       });
     } else {
-      // Set errors in state if form is not valid
+
       setFormErrors(errors);
     }
   };
 
-  // useEffect(() => {
-  //   if (selectedTenant) {
-  //     const tenant = tenants.find(t => t.id === selectedTenant);
-  //     if (tenant) {
-  //       // Set the date of join
-  //       setDateOfJoin(tenant.dateOfJoin || '');
-  //       // Calculate the due date (one day less than adding one month)
-  //       const currentDate = new Date(tenant.dateOfJoin); // Get the join date
-  //       const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1)); // Add one month and subtract one day
-  //       const formattedDueDate = dueDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
-  //       setDueDate(formattedDueDate);
-  //     }
-  //   }
-  // }, [selectedTenant, tenants]);
+
 
   const onClickCheckbox = () => {
     setNotify(!notify)
@@ -1072,7 +1047,6 @@ Please note that you made your last payment on ${paidDate}.\n`
       tenant.id === selectedTenant
     );
     const singleTenantData = singleTenant[0];
-    console.log(singleTenantData, "addedToNotify")
     setNotifyUserInfo(singleTenantData)
 
   }
@@ -1089,7 +1063,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     const { name } = e.target;
     setTenantErrors((prevErrors) => ({
       ...prevErrors,
-      [name]: '',  // Clear the error message for the focused field
+      [name]: '',  
     }));
   };
 
@@ -1128,15 +1102,6 @@ Please note that you made your last payment on ${paidDate}.\n`
               <input type="text" className="form-control" id="inputStatus" name="bedRent" value={bedRent} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
               {errors.bedRent && <div style={{ color: 'red' }}>{errors.bedRent}</div>}
             </div>
-            {/* <div className="col-md-6"> */}
-            {/* <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label> */}
-            {/* <select className="form-select" id="inputRole" name="role" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}>
-
-                <option value="admin">{t('dashboard.admin')}</option>
-                <option value="sub-admin">{t('dashboard.subAdmin')}</option>
-              </select> */}
-            {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} /> */}
-            {/* </div> */}
             <div className="col-12 text-center">
               <button type="submit" className="btn btn-warning" onClick={handleGirlsRoomsSubmit}>{t('dashboard.createRoom')}</button>
             </div>
@@ -1157,7 +1122,7 @@ Please note that you made your last payment on ${paidDate}.\n`
               <div className='monthlyAddForm'>
                 <form class="row lg-10" onSubmit={handleRentSubmit}>
                   <div class='col-12 mb-3'>
-                    <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)}  name="selectedTenant" onFocus={handleFocus}>
+                    <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} name="selectedTenant" onFocus={handleFocus}>
                       <option value="">{t('dashboard.selectTenant')} *</option>
                       {availableTenants.map(tenant => (
                         <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
@@ -1188,7 +1153,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor='DateOfJoin' class="form-label">{t('dashboard.dateOfJoin')}:</label>
-                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly // Make this field read-only since it's auto-populated 
+                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly 
                     />
                   </div>
                   <div class="col-md-6 mb-3">
@@ -1224,7 +1189,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                         className="form-check-input"
                         type="checkbox"
                         checked={notify}
-                        onChange={onClickCheckbox} // Toggle the state on change
+                        onChange={onClickCheckbox} 
                       />
                       <label className="form-check-label" htmlFor="notifyCheckbox">
                         {t('dashboard.notify')}
@@ -1242,9 +1207,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                   <div class='col-12 mb-3'>
                     <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
                       <option value="">{t('dashboard.selectTenant')} *</option>
-                      {/* {availableTenants.map(tenant => (
-                                    <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
-                                  ))} */}
+                
 
                       {isEditing ? (
                         <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
@@ -1281,7 +1244,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor='DateOfJoin' class="form-label">{t('dashboard.dateOfJoin')}</label>
-                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly // Make this field read-only since it's auto-populated 
+                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly 
                     />
                   </div>
                   <div class="col-md-6 mb-3">
@@ -1317,7 +1280,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                         className="form-check-input"
                         type="checkbox"
                         checked={notify}
-                        onChange={onClickCheckbox} // Toggle the state on change
+                        onChange={onClickCheckbox} 
                       />
                       <label className="form-check-label" htmlFor="notifyCheckbox">
                         {t('dashboard.notify')}
@@ -1475,7 +1438,7 @@ Please note that you made your last payment on ${paidDate}.\n`
             </div>
 
             {hasBike && (
-              <div className='bikeField' style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
+              <div className='bikeField'>
                 <label class="bikenumber" htmlFor="bikeNumber" >{t('dashboard.bikeNumber')}</label>
                 <input
                   type="text"
@@ -1485,15 +1448,14 @@ Please note that you made your last payment on ${paidDate}.\n`
                   placeholder="Enter number plate ID"
                   value={bikeNumber}
                   onChange={(event) => setBikeNumber(event.target.value)}
-                  style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px', marginLeft: '8px' }}
+                  style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px' }}
                 />
               </div>
             )
             }
 
+{tenatErrors.bikeNumber && <p style={{ color: 'red',marginLeft:"4px" }}>{tenatErrors.bikeNumber}</p>}
 
-
-            {/* ===== */}
             {hasBike && (
               <>
                 <div className="col-md-6">
@@ -1508,7 +1470,6 @@ Please note that you made your last payment on ${paidDate}.\n`
             )}
 
 
-            {/* =============== */}
             <div className='col-12 text-center mt-3'>
               {isEditing ? (
                 <button type="button" className="btn btn-warning" onClick={handleTenantSubmit}>{t('dashboard.updateTenant')}</button>
@@ -1531,14 +1492,7 @@ Please note that you made your last payment on ${paidDate}.\n`
               <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onChange={handleInputChange} onFocus={handleExpensesFocus} />
               {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
             </div>
-            {/* <div className="col-md-6"> */}
-            {/* <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label> */}
-            {/* <select className="form-select" id="inputRole" name="createdBy" value={formData.createdBy} onChange={handleInputChange}>
-                <option value="admin">{t('dashboard.admin')}</option>
-                <option value="sub-admin">{t('dashboard.subAdmin')}</option>
-              </select> */}
-            {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} /> */}
-            {/* </div> */}
+        
             <div className="col-md-6">
               <label htmlFor="inputDate" className="form-label">{t('dashboard.expenseDate')}</label>
               <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
@@ -1558,12 +1512,9 @@ Please note that you made your last payment on ${paidDate}.\n`
     }
   }
 
-  const [popupOpen, setPopupOpen] = useState(false);
-  const [expensePopupOpen, setExpensePopupOpen] = useState(false);
-  const [bedsData, setBedsData] = useState([]);
+
   const handleCardClick = (item) => {
     if (item.heading === t('dashboard.totalBeds')) {
-      // Logic to open the popup for "Total Beds" card
       setPopupOpen(true);
     }
     if (item.heading === 'Total Expenses') {
@@ -1579,56 +1530,20 @@ Please note that you made your last payment on ${paidDate}.\n`
     setExpensePopupOpen(false);
   }
 
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      console.log("closed")
-      if (popupOpen && event.target.id === "example") {
-        setPopupOpen(false)
-        setHasBike(false);
-        setBikeNumber('NA');
-      }
-    };
-    window.addEventListener('click', handleOutsideClick)
-  }, [popupOpen])
 
-  useEffect(() => {
-    if (!girlsRooms || girlsRooms.length === 0) {
-      // If rooms are not defined or the array is empty, clear bedsData and exit early
-      setBedsData([]);
-      return;
-    }
-
-    const allBeds = girlsRooms.flatMap(room => {
-      return Array.from({ length: room.numberOfBeds }, (_, i) => {
-        const bedNumber = i + 1;
-        // Find if there's a tenant for the current bed
-        const tenant = tenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
-        return {
-          floorNumber: room.floorNumber,
-          roomNumber: room.roomNumber,
-          bedNumber: bedNumber,
-          rent: room.bedRent || "N/A", // Assuming rent is provided by the tenant data
-          status: tenant ? "Occupied" : "Unoccupied"
-        };
-      });
-    });
-    setBedsData(allBeds);
-  }, [girlsRooms, tenants]); // Depend on rooms and tenants data
 
   const rows = bedsData.filter((bed) => bed.status === 'Unoccupied').map((bed, index) => ({
-    // s_no: index + 1,
+
     bed_number: bed.bedNumber,
     room_no: bed.roomNumber,
     floor: bed.floorNumber,
-    // status: bed.status
   }));
 
   const columns = [
-    // 'S. No',
+
     t('table.bedNumber'),
     t('table.roomNo'),
     t('table.floor'),
-    // 'Status'
   ];
 
   const expenseColumns = [
@@ -1641,10 +1556,8 @@ Please note that you made your last payment on ${paidDate}.\n`
     expense: expense.expenseName,
     amount: expense.expenseAmount,
   }));
-  console.log("hostels names", activeGirlsHostelButtons)
 
-  console.log(userUid, "uuuIIDGG");
-console.log(activeGirlsHostel, "uuuHHGG")
+
 
   return (
     <div className="dashboardgirls">
@@ -1655,14 +1568,14 @@ console.log(activeGirlsHostel, "uuuHHGG")
           {activeGirlsHostelButtons.map((button, index) => (
             <button
               className={`btn m-1 ${activeGirlsHostel === button.id ? 'active-button' : 'inactive-button'}`}
-               onClick={() => setActiveGirlsHostel(button.id)} // Assuming you want to track active hostel by id
-              key={button.id} 
+              onClick={() => setActiveGirlsHostel(button.id)} 
+              key={button.id}
               style={{
-                backgroundColor: activeGirlsHostel === button.id ? '#FF8A00' : '#fac38c', 
-                color: activeGirlsHostel === button.id ? 'white' : '#333333' 
+                backgroundColor: activeGirlsHostel === button.id ? '#FF8A00' : '#fac38c',
+                color: activeGirlsHostel === button.id ? 'white' : '#333333'
               }}
             >
-              {button.name} 
+              {button.name}
             </button>
           ))}
         </div>
@@ -1678,14 +1591,10 @@ console.log(activeGirlsHostel, "uuuHHGG")
             <button id="mbladdButton" type="button" onClick={() => handleClick(item.btntext)}><img src={PlusIcon} alt="plusIcon" className='plusIconProperties' /> {item.btntext} </button>
           </div>
         ))}
-        {/* <div className='button-container'>
-          {Buttons?.map((item, index) => (
-            <button id="deskaddButton" type="button" onClick={() => {handleClick(item); setShowForm(true)}}><img src={PlusIcon} alt="plusIcon" className='plusIconProperties' /> {item} </button>
-          ))}
-        </div> */}
+   
       </div>
 
-      {/* popup model */}
+
       <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalRoomsGirls" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal} >
         <div className="modal-dialog ">
           <div className="modal-content">
@@ -1701,6 +1610,8 @@ console.log(activeGirlsHostel, "uuuHHGG")
           </div>
         </div>
       </div>
+
+      {loading && <Spinner />}
 
       {popupOpen &&
         <div className="popupBeds" id="example">

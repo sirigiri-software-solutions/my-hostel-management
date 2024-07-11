@@ -3,9 +3,7 @@ import RoomsIcon from '../../images/Icons (2).png';
 import SearchIcon from '../../images/Icons (9).png';
 import './RoomsBoys.css';
 import Table from '../../Elements/Table';
-// import { database, push, ref } from "../../firebase";
-
-import {push, ref } from "../../firebase/firebase";
+import { push, ref } from "../../firebase/firebase";
 import { DataContext } from "../../ApiData/ContextProvider"
 import { onValue, remove, update } from 'firebase/database';
 import { toast } from "react-toastify";
@@ -24,8 +22,8 @@ const RoomsBoys = () => {
     adminRole = "Sub-admin"
   }
 
-  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons,firebase } = useData();
-  const {database}  = firebase;
+  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons, firebase } = useData();
+  const { database } = firebase;
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
@@ -33,14 +31,13 @@ const RoomsBoys = () => {
   const [rooms, setRooms] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState('');
-  const [createdBy, setCreatedBy] = useState(adminRole); // Default to 'admin'
+  const [createdBy, setCreatedBy] = useState(adminRole);
   const [updateDate, setUpdateDate] = useState('');
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      console.log("Triggering")
       if (showModal && (event.target.id === "exampleModalRoomsBoys" || event.key === "Escape")) {
         setShowModal(false);
       }
@@ -51,18 +48,15 @@ const RoomsBoys = () => {
 
   const handleRoomsIntegerChange = (event) => {
     const { name, value } = event.target;
-    // const re = /^[0-9\b]+$/; // Regular expression to allow only numbers
     let sanitizedValue = value;
 
     if (name === 'floorNumber' || name === 'roomNumber') {
-      // Allow alphanumeric characters and hyphens only
+
       sanitizedValue = value.replace(/[^a-zA-Z0-9-]/g, '');
     } else if (name === 'numberOfBeds' || name === 'bedRent') {
-      // Allow numbers only
+
       sanitizedValue = value.replace(/[^0-9]/g, '');
     }
-
-    // if (value === '' || re.test(sanitizedValue)) {
     switch (name) {
       case 'floorNumber':
         setFloorNumber(sanitizedValue);
@@ -79,12 +73,11 @@ const RoomsBoys = () => {
       default:
         break;
     }
-    // }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const now = new Date().toISOString();  // Get current date-time in ISO format
+    const now = new Date().toISOString();
 
 
     const newErrors = {};
@@ -98,12 +91,10 @@ const RoomsBoys = () => {
     if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
     if (!bedRent) newErrors.bedRent = 'Bed rent is required';
 
-    // Check if there are any errors
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      return; // Prevent form submission if there are errors
+      return;
     }
-    // -----------------------------------------------
     if (isEditing) {
       const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
       update(roomRef, {
@@ -123,7 +114,7 @@ const RoomsBoys = () => {
           draggable: true,
           progress: undefined,
         });
-        setIsEditing(false); // Reset editing state
+        setIsEditing(false);
       }).catch(error => {
         toast.error("Error updating room: " + error.message, {
           position: "top-center",
@@ -167,47 +158,16 @@ const RoomsBoys = () => {
       });
     }
 
-
-
-    // Close the modal
     setShowModal(false);
 
     resetForm();
-    setUpdateDate(now); // Update state with current date-time
-    setErrors({}); // Clear errors
+    setUpdateDate(now);
+    setErrors({});
   };
-
-  // const handleDelete = (id) => {
-  //   console.log(id);
-  //   // const roomRef = ref(database, `Hostel/boys/rooms/${id}`);
-  //   // remove(roomRef);
-  // };
 
   const [showConfirmationPopUp, setShowConfirmationPopUp] = useState(false);
 
   const handleDeleteRoom = () => {
-    // const roomRef = ref(database, `Hostel/boys/rooms/${id}`);
-    // remove(roomRef).then(() => {
-    //   toast.success("Room deleted successfully.", {
-    //     position: "top-center",
-    //     autoClose: 2000,
-    //     hideProgressBar: false,
-    //     closeOnClick: true,
-    //     pauseOnHover: true,
-    //     draggable: true,
-    //     progress: undefined,
-    //   });
-    // }).catch(error => {
-    //   toast.error("Error deleting room: " + error.message, {
-    //     position: "top-center",
-    //     autoClose: 2000,
-    //     hideProgressBar: false,
-    //     closeOnClick: true,
-    //     pauseOnHover: true,
-    //     draggable: true,
-    //     progress: undefined,
-    //   });
-    // });
     setShowConfirmationPopUp(true);
     setShowModal(false);
   };
@@ -251,7 +211,6 @@ const RoomsBoys = () => {
     setBedRent(room.bedRent || '');
     setIsEditing(true);
     setCurrentId(room.id);
-    // Open the modal
     setShowModal(true);
     const formatedDate = formatDate(room.updateDate)
     setUpdateDate(formatedDate);
@@ -305,11 +264,10 @@ const RoomsBoys = () => {
     });
   }, [activeBoysHostel]);
 
-  //--------------------------------==================================
   let roomsData = []
   const { data } = useContext(DataContext);
 
-  // console.log(data && data, "ApiData")
+
 
   if (data && data.boys && data.boys.rooms) {
     const RoomsBoysData = data.boys.rooms;
@@ -325,19 +283,15 @@ const RoomsBoys = () => {
     t('roomsPage.Floor'),
     t('roomsPage.No.of Beds'),
     t('roomsPage.Bed Rent'),
-    // t('roomsPage.Created By'),
     t('roomsPage.Last Updated Date'),
     t('roomsPage.Edit')
 
   ]
 
-
-
-  //for date format
   function formatDate(dateString) {
     const date = new Date(dateString);
-    const day = ('0' + date.getDate()).slice(-2); // Add leading zero if needed
-    const month = ('0' + (date.getMonth() + 1)).slice(-2); // Add leading zero if needed
+    const day = ('0' + date.getDate()).slice(-2);
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   }
@@ -348,7 +302,6 @@ const RoomsBoys = () => {
 
 
   useEffect(() => {
-    // if (data !== null) {
     const rows = rooms.map((room, index) => ({
       s_no: index + 1,
       room_no: room.roomNumber,
@@ -428,47 +381,38 @@ const RoomsBoys = () => {
                     <div className="col-md-6">
                       <label htmlFor="inputNumber" className="form-label">{t('roomsPage.floorNumber')}</label>
                       <input type="text" className="form-control" id="inputNumber" name="floorNumber" value={floorNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
-                      {/* {formErrors.number && <div className="text-danger">{formErrors.number}</div>} */}
+
                       {errors.floorNumber && <div style={{ color: 'red' }}>{errors.floorNumber}</div>}
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputRent" className="form-label">{t('roomsPage.roomNumber')}</label>
                       <input type="text" className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
-                      {/* {formErrors.rent && <div className="text-danger">{formErrors.rent}</div>} */}
+
                       {errors.roomNumber && <div style={{ color: 'red' }}>{errors.roomNumber}</div>}
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputRooms" className="form-label">{t('roomsPage.numberOfBeds')}</label>
                       <input type="text" className="form-control" id="inputRooms" name="numberOfBeds" value={numberOfBeds} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
-                      {/* {formErrors.rooms && <div className="text-danger">{formErrors.rooms}</div>} */}
+
                       {errors.numberOfBeds && <div style={{ color: 'red' }}>{errors.numberOfBeds}</div>}
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputStatus" className="form-label">{t('roomsPage.bedRent')}</label>
                       <input type="text" className="form-control" id="inputStatus" name="bedRent" value={bedRent} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
-                      {/* {formErrors.status && <div className="text-danger">{formErrors.status}</div>} */}
+
                       {errors.bedRent && <div style={{ color: 'red' }}>{errors.bedRent}</div>}
                     </div>
-                    {/* <div className="col-md-6"> */}
-                    {/* <label htmlFor="inputRole" className="form-label">{t('roomsPage.createdBy')}</label> */}
-                    {/* <select disabled={isUneditable} className="form-select" id="inputRole" name="role" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}>
 
-                      <option value="Admin">{t('dashboard.admin')}</option>
-                      <option value="Sub-admin">{t('dashboard.subAdmin')}</option>
-                    </select> */}
-                    {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}/> */}
-                    {/* {formErrors.role && <div className="text-danger">{formErrors.role}</div>} */}
-                    {/* </div> */}
                     <div className="col-12 text-center">
                       {isEditing ? (
                         <div className="roomsEditBtnsContainer">
                           <button type="button" className="btn btn-warning roomUpdateBtn" onClick={handleSubmit}>{t('roomsPage.Update Room')}</button>
-                          <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button> 
+                          <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button>
                         </div>
                       ) : (
                         <button type="submit" className="btn btn-warning" >{t('roomsPage.CreateRoom')}</button>
                       )}
-                      {/* <button type="submit" className="btn btn-warning">Create Room</button> */}
+
                     </div>
                   </form>
                 </div>

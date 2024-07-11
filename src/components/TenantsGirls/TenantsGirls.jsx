@@ -4,8 +4,7 @@ import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
 import ImageIcon from '../../images/Icons (10).png'
 import { useState, useEffect } from 'react'
-// import { database, push, ref, storage } from "../../firebase";
-import {push, ref, storage } from "../../firebase/firebase";
+import { push, ref, storage } from "../../firebase/firebase";
 import { FetchData } from '../../ApiData/FetchData'
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -15,13 +14,14 @@ import { useTranslation } from 'react-i18next'
 import { useData } from '../../ApiData/ContextProvider';
 import '../TenantsBoys/TenantsBoys.css'
 import './TenantsGirls.css';
+import Spinner from '../../Elements/Spinner'
 
 const TenantsGirls = () => {
   const { t } = useTranslation();
 
-  const { activeGirlsHostel , userUid, activeGirlsHostelButtons,firebase} = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase } = useData();
   const role = localStorage.getItem('role');
-  const {database} = firebase;
+  const { database } = firebase;
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -39,11 +39,8 @@ const TenantsGirls = () => {
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
-  // const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantId, setTenantId] = useState(null);
-  // const [tenantIdUrl, setTenantIdUrl] = useState('');
-  // const imageInputRef = useRef(null);
-  // const idInputRef = useRef(null);
+
   const [girlsRoomsData, setGirlsRoomsData] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
@@ -60,7 +57,7 @@ const TenantsGirls = () => {
   const [hasBike, setHasBike] = useState(false);
   const [bikeNumber, setBikeNumber] = useState('NA');
   const [selectedStatus, setSelectedStatus] = useState('');
-  const [showBikeFilter,setShowBikeFilter] = useState(true);
+  const [showBikeFilter, setShowBikeFilter] = useState(true);
 
   const tenantImageInputRef = useRef(null);
   const tenantProofIdRef = useRef(null);
@@ -70,6 +67,7 @@ const TenantsGirls = () => {
   const [bikeRcImage, setBikeRcImage] = useState('');
   const [bikeRcImageField, setBikeRcImageField] = useState('');
   const [tenantAddress, setTenantAddress] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -77,12 +75,9 @@ const TenantsGirls = () => {
     const reader = new FileReader();
 
     reader.onload = () => {
-      // Once the file is loaded, set the image in state
       setBikeImage(reader.result);
     };
-    // console.log(file,"file created");
     reader.readAsDataURL(file);
-    console.log(file, "file created");
   };
 
 
@@ -93,7 +88,6 @@ const TenantsGirls = () => {
       setBikeRcImage(reader.result);
     }
     reader.readAsDataURL(file1);
-    console.log(file1, "file1 created");
 
   }
 
@@ -111,7 +105,6 @@ const TenantsGirls = () => {
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      console.log("Triggering")
       if (showModal && (event.target.id === "exampleModalTenantsGirls" || event.key === "Escape")) {
         setShowModal(false);
         setTenantId('')
@@ -161,7 +154,6 @@ const TenantsGirls = () => {
       }
       setGirlsRooms(loadedRooms);
     });
-    // Fetch tenants
   }, [activeGirlsHostel]);
 
 
@@ -185,30 +177,36 @@ const TenantsGirls = () => {
     tempErrors.selectedRoom = selectedRoom ? "" : t('errors.roomNumberRequired');
     tempErrors.selectedBed = selectedBed ? "" : t('errors.bedNumberRequired');
     tempErrors.dateOfJoin = dateOfJoin ? "" : t('errors.dateOfJoinRequired');
+
+
+    const phoneRegexWithCountryCode = /^\+\d{12}$/;
+    const phoneRegexWithoutCountryCode = /^\d{10}$/;
+
     if (!name) {
       tempErrors.name = t('errors.nameRequired');
     } else if (!/^[a-zA-Z\s]+$/.test(name)) {
       tempErrors.name = t('errors.nameInvalid');
     }
-    // Validate mobile number
+
     if (!mobileNo) {
       tempErrors.mobileNo = t('errors.mobileNumberRequired');
-    } else if (!/^\d{10,13}$/.test(mobileNo)) {
+    } else if (!phoneRegexWithCountryCode.test(mobileNo) && !phoneRegexWithoutCountryCode.test(mobileNo)) {
       tempErrors.mobileNo = t('errors.mobileNumberInvalid');
     }
-    if(!idNumber){
+    if (!idNumber) {
       tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
-    } else if(idNumber.length < 6){
+    } else if (idNumber.length < 6) {
       tempErrors.idNumber = 'Id should be min 6 characters';
+    } else if (!/^[a-zA-Z0-9]+$/.test(idNumber)) {
+      tempErrors.idNumber = 'It does not allow special charecters';
     }
-    
-    // Validate emergency contact
+
     if (!emergencyContact) {
       tempErrors.emergencyContact = t('errors.emergencyContactRequired');
-    } else if (!/^\d{10,13}$/.test(emergencyContact)) {
+    } else if (!phoneRegexWithCountryCode.test(emergencyContact) && !phoneRegexWithoutCountryCode.test(emergencyContact)) {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
-    // Check if the selected bed is already occupied
+
     const isBedOccupied = tenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentId;
     });
@@ -216,59 +214,43 @@ const TenantsGirls = () => {
     if (isBedOccupied) {
       tempErrors.selectedBed = t('errors.bedAlreadyOccupied');
     }
-    if (!tenantImage ) {
+    if (!tenantImage) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
-    if (!bikeNumber) {
-      tempErrors.bikeNumber = 'Bike number required';
-    } else if (!/^[a-zA-Z0-9\s]+$/.test(bikeNumber)) {
-      tempErrors.bikeNumber = 'Bike number must contain only alphabets, numbers, and spaces';
-    } 
-    // else if (bikeNumber.length < 5 || bikeNumber.length > 13) {
-    //   tempErrors.bikeNumber = 'Bike number must be between 5 and 13 characters';
-    // }
+    if (hasBike) {
+      if (!bikeNumber) {
+        tempErrors.bikeNumber = 'Bike number required';
+      } else if (!/^[A-Za-z]{2}\s\d{2,4}\s[A-Za-z]{1,2}\s?\d{4}$/.test(bikeNumber)) {
+        tempErrors.bikeNumber = 'Enter valid bike number';
+      }
+    }
     setErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
-  // const handleTenantImageChange = (e) => {
-  //   if (e.target.files[0]) {
-  //     setTenantImage(e.target.files[0]);
-  //   }
-  // };
+
   const handleTenantImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        // Once the file is loaded, set the image in state as a base64 URL
         setTenantImage(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
-  console.log("tenant image", tenantImage)
 
   const handleTenantIdChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        // Once the file is loaded, set the image in state as a base64 URL
         setTenantId(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
-  console.log("tenant id", tenantId)
-  // const handleTenantIdChange = (e) => {
-  //   if (e.target.files[0]) {
-  //     const file = e.target.files[0]
-  //     console.log(file, "filename");
-  //     setFileName(file.name)
-  //     setTenantId(e.target.files[0]);
-  //   }
-  // };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -282,29 +264,6 @@ const TenantsGirls = () => {
     } else {
       if (!validate()) return;
     }
-
-    // let imageUrlToUpdate = tenantImageUrl;
-
-    // if (tenantImage) {
-    //   const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
-    //   try {
-    //     const snapshot = await uploadBytes(imageRef, tenantImage);
-    //     imageUrlToUpdate = await getDownloadURL(snapshot.ref);
-    //   } catch (error) {
-    //     console.error("Error uploading tenant image:", error);
-    //   }
-    // }
-
-    // let idUrlToUpdate = tenantIdUrl;
-    // if (tenantId) {
-    //   const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
-    //   try {
-    //     const snapshot = await uploadBytes(imageRef, tenantId);
-    //     idUrlToUpdate = await getDownloadURL(snapshot.ref);
-    //   } catch (error) {
-    //     console.error("Error uploading tenant image:", error);
-    //   }
-    // }
 
 
 
@@ -320,13 +279,14 @@ const TenantsGirls = () => {
       tenantImage,
       tenantId,
       bikeNumber,
-      // fileName: fileName,
       permnentAddress,
       bikeImage,
       bikeRcImage
     };
 
     if (isEditing) {
+      setShowModal(false);
+      setLoading(true);
       await update(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${currentId}`), tenantData).then(() => {
         toast.success(t('toastMessages.tenantUpdated'), {
           position: "top-center",
@@ -349,6 +309,8 @@ const TenantsGirls = () => {
         });
       });;
     } else {
+      setShowModal(false);
+      setLoading(true)
       await push(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`), tenantData).then(() => {
         toast.success(t('toastMessages.tenantAddedSuccess'), {
           position: "top-center",
@@ -372,11 +334,8 @@ const TenantsGirls = () => {
         });
       });
     }
-    setShowModal(false);
-
+    setLoading(false);
     resetForm();
-    // imageInputRef.current.value = "";
-    // idInputRef.current.value = "";
     setErrors({});
 
   };
@@ -392,15 +351,13 @@ const TenantsGirls = () => {
     setStatus(tenant.status);
     setIsEditing(true);
     setCurrentId(tenant.id);
-    // setTenantImage(tenant.tenantImageUrl);
     setTenantImage(tenant.tenantImage)
-    // setTenantIdUrl(tenant.tenantIdUrl || '');
     setTenantId(tenant.tenantId || '');
     setFileName(tenant.fileName || '');
-    console.log(tenant, "tenantDetails")
     setHasBike(false);
     setShowModal(true);
     setBikeNumber(tenant.bikeNumber);
+    setPermnentAddress(tenant.permnentAddress);
     if (tenant.bikeNumber == 'NA') {
       setHasBike(false);
       setBikeNumber(tenant.bikeNumber);
@@ -424,17 +381,14 @@ const TenantsGirls = () => {
       })
     } else {
 
-    resetForm();
-    setIsEditing(false);
-    setShowModal(true);
-    setUserDetailsTenantsPopup(false);
-    setHasBike(false);
+      resetForm();
+      setIsEditing(false);
+      setShowModal(true);
+      setUserDetailsTenantsPopup(false);
+      setHasBike(false);
     }
   };
 
-  // const handleDelete = async (id) => {
-  //   await remove(ref(database, `Hostel/girls/tenants/${id}`));
-  // };
 
   const resetForm = () => {
     setSelectedRoom('');
@@ -459,46 +413,6 @@ const TenantsGirls = () => {
   };
 
 
-  // useEffect(() => {
-  //   const fetchDataFromAPI = async () => {
-  //     try {
-  //       if (data) {
-  //         const girlsTenantsData = Object.values(data.girls.tenants);
-  //         setGirlsTenants(girlsTenantsData);
-
-  //       } else {
-  //         const apiData = await FetchData();
-  //         const girlsTenantsData = Object.values(apiData.girls.tenants);
-  //         setGirlsTenants(girlsTenantsData);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching tenants data:', error);
-  //     }
-  //   };
-
-  //   fetchDataFromAPI();
-  // }, [data]);
-
-  // useEffect(() => {
-  //   const fetchDataFromAPI = async () => {
-  //     try {
-  //       if (data) {
-  //         const girlsRoomsData = Object.values(data.girls.rooms);
-  //         setGirlsRoomsData(girlsRoomsData);
-
-  //       } else {
-  //         const apiData = await FetchData();
-  //         const girlsRoomsData = Object.values(apiData.girls.rooms);
-  //         setGirlsRoomsData(girlsRoomsData);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching tenants data:', error);
-  //     }
-  //   };
-
-  //   fetchDataFromAPI();
-  // }, [data]);
-
 
   const columnsEx = [
     t('tenantsPage.sNo'),
@@ -510,7 +424,7 @@ const TenantsGirls = () => {
     t('tenantsPage.joiningDate'),
     t('tenantsPage.status'),
   ]
-  if(role === "admin"){
+  if (role === "admin") {
     columnsEx.push(t('tenantsPage.actions'))
   }
   const columns = [
@@ -533,18 +447,16 @@ const TenantsGirls = () => {
   const rows = tenants.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImage,
-    name: capitalizeFirstLetter(tenant.name), // Assuming 'name' property exists in the fetched data
-    id: tenant.idNumber, // Assuming 'id' property exists in the fetched data
-    mobile_no: tenant.mobileNo, // Assuming 'mobile_no' property exists in the fetched data
-    room_bed_no: `${tenant.roomNo}/${tenant.bedNo}`, // Assuming 'room_bed_no' property exists in the fetched data
-    joining_date: tenant.dateOfJoin, // Assuming 'payment_date' property exists in the fetched data
+    name: capitalizeFirstLetter(tenant.name),
+    id: tenant.idNumber,
+    mobile_no: tenant.mobileNo,
+    room_bed_no: `${tenant.roomNo}/${tenant.bedNo}`,
+    joining_date: tenant.dateOfJoin,
     bike_number: tenant.bikeNumber,
     status: capitalizeFirstLetter(tenant.status),
     actions: <button
       style={{ backgroundColor: '#ff8a00', padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
       onClick={() => handleEdit(tenant)}
-    // data-bs-toggle="modal"
-    // data-bs-target="#exampleModalTenantsGirls"
     >
       Edit
     </button>,
@@ -561,28 +473,22 @@ const TenantsGirls = () => {
 
 
   const filteredRows = rows.filter((row) => {
-    // Check if any value in the row matches the search query
     const hasSearchQueryMatch = Object.values(row).some((value) =>
       value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     );
-  
-    // Apply additional filtering based on the selected status
+
     if (selectedStatus === 'YES') {
-      // Include only rows with a bike number that is not 'NA' and matches the search query
       return row.bike_number !== 'NA' && hasSearchQueryMatch;
     } else if (selectedStatus === 'NA') {
-      // Include only rows with a bike number that is 'NA' and matches the search query
       return row.bike_number === 'NA' && hasSearchQueryMatch;
     } else {
-      // Include all rows that match the search query, regardless of bike number
       return hasSearchQueryMatch;
     }
   });
-  
+
 
   const handleClosePopUp = () => {
     setShowModal(false);
-    // setTenantIdUrl('')
     setTenantId('')
     setHasBike(false);
     setBikeNumber("");
@@ -598,17 +504,15 @@ const TenantsGirls = () => {
 
 
     const [roomNo, bedNo] = tenant.room_bed_no.split('/');
-    const singleUserDueDate = tenants.find(eachTenant => 
-      eachTenant.name === tenant.name && 
+    const singleUserDueDate = tenants.find(eachTenant =>
+      eachTenant.name === tenant.name &&
       eachTenant.mobileNo === tenant.mobile_no &&
       eachTenant.roomNo === roomNo &&
       eachTenant.bedNo === bedNo
     );
-    console.log(singleUserDueDate, "tenantdetails5")
     if (singleUserDueDate && singleUserDueDate.rents) {
       const dataWithDueDate = Object.values(singleUserDueDate.rents);
       const dueDate = dataWithDueDate[0].dueDate;
-      console.log("Due date:", dueDate);
       setDueDateOfTenant(dueDate);
     } else {
       console.log("Tenant with due date not found or due date is missing");
@@ -619,7 +523,6 @@ const TenantsGirls = () => {
     }
 
     if (singleUserDueDate && singleUserDueDate.permnentAddress) {
-      console.log("permnent", "address")
       setTenantAddress(singleUserDueDate.permnentAddress);
     }
     else {
@@ -648,17 +551,13 @@ const TenantsGirls = () => {
     setSingleTenantProofId("")
   }
 
-  //=====Vacate tenant ===========
   const handleVacate = async (id) => {
     const tenantRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${currentId}`);
     const newTenantRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants/${currentId}`);
-    // Retrieve the data from the original location
     onValue(tenantRef, async (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        // Write the data to the new location
         await set(newTenantRef, data);
-        // Remove the data from the original location
         await remove(tenantRef).then(() => {
           toast.success("Tenant Vacated", {
             position: "top-center",
@@ -683,14 +582,13 @@ const TenantsGirls = () => {
         fetchExTenants()
       }
     }, {
-      onlyOnce: true // This ensures the callback is only executed once
+      onlyOnce: true
     });
 
     setShowModal(false);
     resetForm();
     setErrors({});
-    // imageInputRef.current.value = "";
-    // idInputRef.current.value = "";
+
   };
   const fetchExTenants = () => {
     const exTenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
@@ -746,7 +644,7 @@ const TenantsGirls = () => {
 
 
   const exTenantRows = exTenants.map((tenant, index) => ({
-    s_no: index + 1, // Assuming `id` is a unique identifier for each tenant
+    s_no: index + 1,
     image: tenant.tenantImage,
     name: capitalizeFirstLetter(tenant.name),
     id: tenant.idNumber,
@@ -754,7 +652,7 @@ const TenantsGirls = () => {
     room_bed_no: `${tenant.roomNo}/${tenant.bedNo}`,
     joining_date: tenant.dateOfJoin,
     status: 'Vacated',
-   actions: role === 'admin' ? (
+    actions: role === 'admin' ? (
       <button
         style={{
           backgroundColor: '#ff8a00',
@@ -763,7 +661,7 @@ const TenantsGirls = () => {
           color: 'white',
           border: 'none',
         }}
-        onClick={() => handleExTenantDelete(tenant.id, tenant.name)} // Pass the `id` of the tenant
+        onClick={() => handleExTenantDelete(tenant.id, tenant.name)}
       >
         Delete
       </button>
@@ -783,7 +681,7 @@ const TenantsGirls = () => {
     const { name } = e.target;
     setErrors((prevErrors) => ({
       ...prevErrors,
-      [name]: '',  
+      [name]: '',
     }));
   };
 
@@ -802,7 +700,7 @@ const TenantsGirls = () => {
         </div>
         <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end'>
           <div className='d-flex align-items-center text-center'>
-          {showBikeFilter ? (<div className="toggle-container">
+            {showBikeFilter ? (<div className="toggle-container">
               <label className="toggle-label" htmlFor="status-toggleGirl1">{t('tenantsPage.bike')}</label>
               <input
                 type="checkbox"
@@ -817,23 +715,23 @@ const TenantsGirls = () => {
               </label>
             </div>) : null}
             <div className='d-flex justify-content-center align-items-center'>
-            <div className={showExTenants ? "col-1 bedPageFilterDropdown" : "col-5 bedPageFilterDropdown"}>
-              {showExTenants ? '' : <button id="tenantAddButton" type="button" class="add-button" onClick={() => { handleAddNew(); }} >
-               {t('dashboard.addTenants')}
-              </button>}
-              
-            </div>
+              <div className={showExTenants ? "col-1 bedPageFilterDropdown" : "col-5 bedPageFilterDropdown"}>
+                {showExTenants ? '' : <button id="tenantAddButton" type="button" class="add-button" onClick={() => { handleAddNew(); }} >
+                  {t('dashboard.addTenants')}
+                </button>}
+
+              </div>
               <div className={showExTenants ? "col-8 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
-              {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
-              {t('tenantsPage.presentTenants')}
-              </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
-              {t('tenantsPage.vacated')}
-              </button>}
-              
+                {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
+                  {t('tenantsPage.presentTenants')}
+                </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
+                  {t('tenantsPage.vacated')}
+                </button>}
+
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
 
       <div>
@@ -887,7 +785,7 @@ const TenantsGirls = () => {
                     <label htmlFor='dataofJoin' class="form-label">
                       {t('dashboard.dateOfJoin')}
                     </label>
-                    <input id="dataofJoin" class="form-control" type="date" value={dateOfJoin} onChange={(e) => setDateOfJoin(e.target.value)}  name="dateOfJoin" onFocus={handleTenantFocus} />
+                    <input id="dataofJoin" class="form-control" type="date" value={dateOfJoin} onChange={(e) => setDateOfJoin(e.target.value)} name="dateOfJoin" onFocus={handleTenantFocus} />
 
                     {errors.dateOfJoin && <p style={{ color: 'red' }}>{errors.dateOfJoin}</p>}
                   </div>
@@ -895,7 +793,7 @@ const TenantsGirls = () => {
                     <label htmlFor='tenantName' class="form-label">
                       {t('dashboard.name')}
                     </label>
-                    <input id="tenantName" class="form-control" type="text" value={name} onChange={(e) => setName(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} name="name" onFocus={handleTenantFocus}  />
+                    <input id="tenantName" class="form-control" type="text" value={name} onChange={(e) => setName(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} name="name" onFocus={handleTenantFocus} />
 
                     {errors.name && <p style={{ color: 'red' }}>{errors.name}</p>}
                   </div>
@@ -1000,31 +898,12 @@ const TenantsGirls = () => {
                         placeholder="Enter number plate ID"
                         value={bikeNumber}
                         onChange={(event) => setBikeNumber(event.target.value)}
-                        style={{  borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px' }}
+                        style={{ borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px' }}
                       />
                       {errors.bikeNumber && <p style={{ color: 'red' }}>{errors.bikeNumber}</p>}
                     </div>
-                  // ) : (
-                  //   <div className='bikeField' style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
-                  //     <label class="bikenumber" htmlFor="bikeNumber" >{t('dashboard.bikeNumber')}</label>
-                  //     <input
-                  //       type="text"
-                  //       id="bikeNumber"
-
-                  //       className='form-control'
-                  //       placeholder="Enter number plate ID"
-                  //       value={bikeNumber}
-                  //       onChange={(event) => setBikeNumber(event.target.value)}
-                  //       style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px', marginLeft: '8px' }}
-                  //     />
-                  //   </div>
-
-                  // )}
                   )}
 
-
-
-                  {/* ===== */}
                   {hasBike && (
                     <>
                       <div className="col-md-6">
@@ -1038,8 +917,7 @@ const TenantsGirls = () => {
                     </>
                   )}
 
-                  {/* =============== */}
-                  <div className='col-12 text-center'>
+                  <div className='col-12 text-center mt-3'>
                     {isEditing ? (
                       <div className="d-flex justify-content-center gap-2 mt-3">
                         <button type="button" className="btn btn-warning" onClick={handleSubmit}>{t('tenantsPage.updateTenant')}</button>
@@ -1058,6 +936,7 @@ const TenantsGirls = () => {
         </div>
       </div>
 
+      {loading && <Spinner />}
 
       {userDetailsTenantPopup &&
         <div id="userDetailsTenantPopupIdGirl" className='userDetailsTenantPopup'>
@@ -1075,7 +954,7 @@ const TenantsGirls = () => {
                 <p><strong>{t('tenantsPage.joiningDate')} :</strong> {singleTenantDetails.joining_date}</p>
                 <p><strong>{t('tenantsPage.dueDate')} :</strong> {dueDateOfTenant}</p>
                 <p><strong>{t('tenantsPage.idProof')} :</strong>
-              
+
 
                   {singleTenantProofId ? (
                     <a className='downloadPdfText' href={singleTenantProofId} download> <FaDownload /> {t('tenantsPage.downloadPdf')}</a>
