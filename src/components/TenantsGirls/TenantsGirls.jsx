@@ -223,9 +223,10 @@ const TenantsGirls = () => {
       tempErrors.bikeNumber = 'Bike number required';
     } else if (!/^[a-zA-Z0-9\s]+$/.test(bikeNumber)) {
       tempErrors.bikeNumber = 'Bike number must contain only alphabets, numbers, and spaces';
-    } else if (bikeNumber.length < 5 || bikeNumber.length > 13) {
-      tempErrors.bikeNumber = 'Bike number must be between 5 and 13 characters';
-    }
+    } 
+    // else if (bikeNumber.length < 5 || bikeNumber.length > 13) {
+    //   tempErrors.bikeNumber = 'Bike number must be between 5 and 13 characters';
+    // }
     setErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };

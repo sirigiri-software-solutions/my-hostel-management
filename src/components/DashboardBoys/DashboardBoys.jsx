@@ -32,7 +32,7 @@ const DashboardBoys = () => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
 
 
-  const { activeBoysHostel, setActiveBoysHostel,setActiveBoysHostelName, activeBoysHostelButtons, userArea, userUid,firebase } = useData();
+  const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, userArea, userUid,firebase } = useData();
   const {database} = firebase;
 
   const [modelText, setModelText] = useState('');
@@ -375,6 +375,7 @@ const DashboardBoys = () => {
   };
 
   useEffect(() => {
+    console.log(activeBoysHostel, 'activeBoysHostel')
     const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
     onValue(roomsRef, (snapshot) => {
       const data = snapshot.val();
@@ -385,12 +386,16 @@ const DashboardBoys = () => {
           ...data[key]
         });
       }
+      console.log(loadedRooms, "loaded")
       setRooms(loadedRooms);
     });
   }, [activeBoysHostel]);
   // Calculate the total number of beds
   const totalBeds = rooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
-
+  console.log("active boys hostel11", activeBoysHostel);
+  console.log("active buttons11", activeBoysHostelButtons);
+  console.log("user UID11", userUid)
+ 
   //==============================================================
 
   const formatDate = (dateString) => {
@@ -457,6 +462,7 @@ const DashboardBoys = () => {
   const [boysRooms, setBoysRooms] = useState([]);
   useEffect(() => {
     const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+    console.log(roomsRef, "roomsRef")
     onValue(roomsRef, (snapshot) => {
       const data = snapshot.val();
       const loadedRooms = [];
@@ -470,6 +476,8 @@ const DashboardBoys = () => {
     });
     // Fetch tenants
   }, [activeBoysHostel]);
+
+console.log(boysRooms, "active boys rooms")
 
   useEffect(() => {
     if (selectedRoom) {
@@ -1667,7 +1675,8 @@ const DashboardBoys = () => {
     expense: expense.expenseName,
     amount: expense.expenseAmount,
   }));
-
+console.log(userUid, "uuuIIDBB");
+console.log(activeBoysHostel, "uuuHHBB")
 
   return (
     <div className="dashboardboys">
@@ -1677,7 +1686,7 @@ const DashboardBoys = () => {
           {activeBoysHostelButtons.map((button, index) => (
             <button
               className={`btn m-1 ${activeBoysHostel === button.id ? 'active-button' : 'inactive-button'}`}
-               onClick={() =>{ setActiveBoysHostel(button.id); setActiveBoysHostelName(button.name)}} // Assuming you want to track active hostel by id
+               onClick={() =>{ setActiveBoysHostel(button.id)}} // Assuming you want to track active hostel by id
               key={button.id} // It's better to use unique ID than index for key if possible
               style={{
                 backgroundColor: activeBoysHostel === button.id ? '#FF8A00' : '#fac38c', // Example colors
