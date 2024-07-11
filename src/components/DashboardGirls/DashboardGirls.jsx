@@ -1643,6 +1643,9 @@ Please note that you made your last payment on ${paidDate}.\n`
   }));
   console.log("hostels names", activeGirlsHostelButtons)
 
+  console.log(userUid, "uuuIIDGG");
+console.log(activeGirlsHostel, "uuuHHGG")
+
   return (
     <div className="dashboardgirls">
       <h1 className="heading1">{t('dashboard.womens')}</h1>

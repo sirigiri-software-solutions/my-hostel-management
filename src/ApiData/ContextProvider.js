@@ -24,7 +24,7 @@ const DataProvider = ({ children }) => {
   const [activeGirlsHostelName, setActiveGirlsHostelName] = useState(null);
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
   const [userarea, setUserArea] = useState();
-  const [userUid, setUserUid] = useState('');
+  const [userUid, setUserUid] = useState(localStorage.getItem('userUid' || ''));
 
   // new code to implement multiple configuration
   const [area, setArea] = useState(localStorage.getItem('userarea') || 'hyderabad');
@@ -52,6 +52,7 @@ const DataProvider = ({ children }) => {
     const userId = localStorage.getItem('userUid')
     setUserUid(userId);
   }, [userUid,area])
+
   console.log("user Id Context", userUid)
 
   useEffect(() => {
@@ -84,7 +85,6 @@ const DataProvider = ({ children }) => {
 
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
-    console.log(userUid,"dataNotGetting")
     const unsubscribe = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
