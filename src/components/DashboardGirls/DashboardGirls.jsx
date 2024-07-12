@@ -252,14 +252,12 @@ Please note that you made your last payment on ${paidDate}.\n`
         allowEditing: false,
         resultType: CameraResultType.Uri
       });
-      const response = await fetch(photo.webPath);
-      const blob = await response.blob();
-      const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-      const snapshot = await uploadBytes(imageRef, blob);
-      const url = await getDownloadURL(snapshot.ref);
-      
-      setPhotoUrl(url); // Display in UI
-      setTenantImageUrl(url); // Use in form submission
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoUrl(reader.result);
+        setTenantImage(reader.result);
+      };
+      fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
       // setPhotoUrl(photo.webPath);
     } catch (error) {
       console.error("Error accessing the camera", error);
@@ -279,14 +277,20 @@ Please note that you made your last payment on ${paidDate}.\n`
         allowEditing: false,
         resultType: CameraResultType.Uri
       });
-      const response = await fetch(photo.webPath);
-      const blob = await response.blob();
-      const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-      const snapshot = await uploadBytes(imageRef, blob);
-      const url = await getDownloadURL(snapshot.ref);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setIdUrl(reader.result);
+        setTenantId(reader.result);
+      };
+      fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
+      // const response = await fetch(photo.webPath);
+      // const blob = await response.blob();
+      // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
+      // const snapshot = await uploadBytes(imageRef, blob);
+      // const url = await getDownloadURL(snapshot.ref);
       
-      setPhotoUrl(url); // Display in UI
-      setTenantImageUrl(url); // Use in form submission
+      // setPhotoUrl(url); // Display in UI
+      // setTenantImageUrl(url); // Use in form submission
       // setPhotoUrl(photo.webPath);
     } catch (error) {
       console.error("Error accessing the camera", error);
