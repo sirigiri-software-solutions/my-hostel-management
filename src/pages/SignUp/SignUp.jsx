@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const { areaToApiEndpoint } = useData();
-  let navigate=useNavigate();
+  let navigate = useNavigate();
   const [data, setData] = useState({
     firstname: "",
     lastname: "",
@@ -40,11 +40,11 @@ const SignUp = () => {
     setSelectedRole(event.target.value);
   };
 
-  const { firstname, lastname, area, email, phone, password, confirmpassword,securityQuestion,securityAnswer } = data;
+  const { firstname, lastname, area, email, phone, password, confirmpassword, securityQuestion, securityAnswer } = data;
 
   const changeHandler = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" }); // Reset error when input changes
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const clearErrorOnFocus = (fieldName) => {
@@ -56,7 +56,6 @@ const SignUp = () => {
     let formValid = true;
     const newErrors = { ...errors };
 
-    // Check for empty fields
     if (firstname.trim() === "") {
       newErrors.firstname = "Please enter your first name";
       formValid = false;
@@ -116,10 +115,9 @@ const SignUp = () => {
 
     if (!formValid) {
       setErrors(newErrors);
-      return; // Don't proceed with submission if form is invalid
+      return;
     }
 
-    // Create a data object for submission without errors
     const formData = {
       firstname,
       lastname,
@@ -132,13 +130,11 @@ const SignUp = () => {
       securityAnswer,
       role: selectedRole,
     };
-    console.log(formData,'signupdata');
-   
+
 
     const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
-    console.log(areaToApiEndpoint[area.toLowerCase()]);
 
-    // Proceed with form submission if all fields are filled
+
     axios
       .post(apiEndpoint, formData)
       .then(() => {
@@ -162,10 +158,9 @@ const SignUp = () => {
           confirmpassword: "",
           securityQuestion: "",
           securityAnswer: "",
-        }); // Clear input fields after successful submission
+        });
         navigate("/");
       })
-      // navigate("/login");
       .catch((error) => {
         console.error("Error submitting data:", error);
         toast.error(
@@ -185,7 +180,6 @@ const SignUp = () => {
   };
 
   const isPasswordValid = (password) => {
-    // Password must be at least 8 characters long and contain at least 1 character, 1 symbol, and 1 number
     return /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
       password
     );
@@ -197,8 +191,8 @@ const SignUp = () => {
         <text id='signuphead' className="signuphead">SignUp</text>
         <form autoComplete="off" onSubmit={submitHandler} className="row">
           <div className="form-group col-md-6">
-            {/* <label htmlFor="firstname">Firstname:</label> */}
-            <input 
+
+            <input
               type="text"
               name="firstname"
               value={firstname}
@@ -210,7 +204,6 @@ const SignUp = () => {
             {errors.firstname && <div className="text-danger">{errors.firstname}</div>}
           </div>
           <div className="form-group col-md-6">
-            {/* <label htmlFor="lastname">Lastname:</label> */}
             <input
               type="text"
               name="lastname"
@@ -223,7 +216,6 @@ const SignUp = () => {
             {errors.lastname && <div className="text-danger">{errors.lastname}</div>}
           </div>
           <div className="form-group col-md-6">
-            {/* <label htmlFor="lastname">Lastname:</label> */}
             <input
               type="text"
               name="area"
@@ -235,9 +227,9 @@ const SignUp = () => {
             />
             {errors.area && <div className="text-danger">{errors.area}</div>}
           </div>
-          
+
           <div className="form-group col-md-6">
-            {/* <label htmlFor="email">Email:</label> */}
+
             <input
               type="email"
               name="email"
@@ -250,7 +242,7 @@ const SignUp = () => {
             {errors.email && <div className="text-danger">{errors.email}</div>}
           </div>
           <div className="form-group col-md-6">
-            {/* <label htmlFor="mobile">Mobile:</label> */}
+
             <input
               type="tel"
               name="phone"
@@ -263,7 +255,7 @@ const SignUp = () => {
             {errors.phone && <div className="text-danger">{errors.phone}</div>}
           </div>
           <div className="form-group col-md-6">
-            {/* <label htmlFor="password">Password:</label> */}
+
             <input
               type="password"
               name="password"
@@ -276,7 +268,6 @@ const SignUp = () => {
             {errors.password && <div className="text-danger">{errors.password}</div>}
           </div>
           <div className="form-group col-md-6">
-            {/* <label htmlFor="confirmPassword">Confirm Password:</label> */}
             <input
               type="password"
               name="confirmpassword"
@@ -291,7 +282,6 @@ const SignUp = () => {
             )}
           </div>
           <div className="form-group col-md-6">
-            {/* <label htmlFor="securityQuestion">Security Question:</label> */}
             <select
               name="securityQuestion"
               value={securityQuestion}
@@ -309,7 +299,6 @@ const SignUp = () => {
             {errors.securityQuestion && <div className="text-danger">{errors.securityQuestion}</div>}
           </div>
           <div className="form-group col-md-6">
-            {/* <label htmlFor="securityAnswer">Security Answer:</label> */}
             <input
               type="text"
               name="securityAnswer"
@@ -322,7 +311,7 @@ const SignUp = () => {
             {errors.securityAnswer && <div className="text-danger">{errors.securityAnswer}</div>}
           </div>
           <div className="form-group col-md-12">
-     
+
             <div className="confirmationContainer">
               <div className="form-check form-check-inline">
                 <input
@@ -358,7 +347,7 @@ const SignUp = () => {
             {errors.role && <div className="text-danger">{errors.role}</div>}
           </div>
           <div className="form-group col-md-12">
-            {/* <input type="submit" className="btn btn-primary rounded-pill" value="Sign up" /> */}
+
             <input type="submit" id='submit' className="btn btn-primary rounded-pill" value="Sign up" />
           </div>
         </form>

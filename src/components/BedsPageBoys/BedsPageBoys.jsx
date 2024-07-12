@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import bedIcon from '../../images/Icons (3).png'
 import Table from '../../Elements/Table'
 import SearchIcon from '../../images/Icons (9).png'
-// import { database, push, ref } from "../../firebase";
 import { push, ref } from '../../firebase/firebase'
 import { onValue } from 'firebase/database';
 import "../BedsPageBoys/BedsPageBoys.css"
@@ -12,8 +11,8 @@ import { useTranslation } from 'react-i18next';
 const BedsPageBoys = () => {
   const { t } = useTranslation();
 
-  const { activeBoysHostel, userUid,firebase } = useData();
-  const {database} = firebase;
+  const { activeBoysHostel, userUid, firebase } = useData();
+  const { database } = firebase;
   const [boysRooms, setBoysRooms] = useState([])
   const [bedsData, setBedsData] = useState([]);
   const [tenants, setTenants] = useState([]);
@@ -39,6 +38,8 @@ const BedsPageBoys = () => {
       setBoysRooms(loadedRooms);
     })
   }, [activeBoysHostel]);
+
+
   // Fetch tenants data
   useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
@@ -66,7 +67,6 @@ const BedsPageBoys = () => {
     const allBeds = boysRooms.flatMap(room => {
       return Array.from({ length: room.numberOfBeds }, (_, i) => {
         const bedNumber = i + 1;
-        // Find if there's a tenant for the current bed
         const tenant = tenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
         const tenantName = tenant ? tenant.name : "-";
         return {
@@ -74,7 +74,7 @@ const BedsPageBoys = () => {
           floorNumber: room.floorNumber,
           roomNumber: room.roomNumber,
           bedNumber: bedNumber,
-          rent: room.bedRent || "N/A", // Assuming rent is provided by the tenant data
+          rent: room.bedRent || "N/A",
           status: tenant ? "Occupied" : "Unoccupied"
         };
       });
@@ -85,7 +85,6 @@ const BedsPageBoys = () => {
     ))
     const uniqueFloornumbers = [...new Set(allFloornumbers)];
     setFloorNumbersToShow(uniqueFloornumbers);
-    console.log(uniqueFloornumbers, "getting")
 
     return () => {
       setSelectedStatus('');
@@ -94,7 +93,7 @@ const BedsPageBoys = () => {
       setRoomNumbersToShow([]);
     };
 
-  }, [boysRooms, tenants, activeBoysHostel]); // Depend on rooms and tenants data
+  }, [boysRooms, tenants, activeBoysHostel]);
 
   const columns = [
     t('bedsPage.sNo'),
@@ -106,7 +105,6 @@ const BedsPageBoys = () => {
     t('bedsPage.status')
   ]
 
-  //console.log(bedsData,"DataFromBeds")
 
   const rows = bedsData.map((beds, index) => ({
     s_no: index + 1,
@@ -142,25 +140,18 @@ const BedsPageBoys = () => {
   }
 
   const compareFloor = (floor1, floor2) => {
-    // Check if both floors are purely numeric
     const isNumericFloor = /^\d+$/.test(floor1) && /^\d+$/.test(floor2);
 
     if (isNumericFloor) {
-      // If both floors are numeric, compare them as numbers
       const numericPart1 = parseInt(floor1);
       const numericPart2 = parseInt(floor2);
       return numericPart1 - numericPart2;
     } else {
-      // If floors are not purely numeric, compare them as alphanumeric identifiers
       const prefix1 = floor1.charAt(0);
       const prefix2 = floor2.charAt(0);
-
-      // Compare alphanumeric identifiers
       if (prefix1 !== prefix2) {
         return prefix1.localeCompare(prefix2);
       }
-
-      // Compare numeric parts if alphanumeric identifiers are the same
       const numericPart1 = parseInt(floor1.substring(1));
       const numericPart2 = parseInt(floor2.substring(1));
 
@@ -181,63 +172,63 @@ const BedsPageBoys = () => {
   });
 
   return (
-    <div className='h-100'> 
-    <>
-    <div className="row d-flex flex-wrap align-items-center justify-content-between">
-      <div className="col-12 col-md-4 d-flex align-items-center mr-5 mb-2">
-        <div className='roomlogo-container'>
-          <img src={bedIcon} alt="RoomsIcon" className='roomlogo'/>
+    <div className='h-100'>
+      <>
+        <div className="row d-flex flex-wrap align-items-center justify-content-between">
+          <div className="col-12 col-md-4 d-flex align-items-center mr-5 mb-2">
+            <div className='roomlogo-container'>
+              <img src={bedIcon} alt="RoomsIcon" className='roomlogo' />
+            </div>
+            <h1 className='management-heading'>{t('bedsPage.bedsManagement')}</h1>
+          </div>
+          <div className="col-12 col-md-4 search-wrapper ">
+            <input value={searchValue} onChange={onChangeSearch} type="text" placeholder={t('common.search')} className='search-input' />
+            <img src={SearchIcon} alt="search-icon" className='search-icon' />
+          </div>
+
+          <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end '>
+            <div className='d-flex filterDropDownContainer'>
+              <select className="col-4 bedPageFilterDropdown" value={selectedStatus} onChange={onChangeStatus}>
+                <option value="">{t('bedsPage.status')}</option>
+                <option value="Occupied">{t('bedsPage.occupied')}</option>
+                <option value="Unoccupied">{t('bedsPage.unoccupied')}</option>
+              </select>
+              <select className='col-4 bedPageFilterDropdown' value={selectedFloor} onChange={onChangeFloor}>
+                <option value="">{t('bedsPage.floorNumber')}</option>
+                {
+                  floorNumbersToShow.map((floor) => (
+                    <option key={floor} value={floor}>
+                      {floor}
+                    </option>
+                  ))
+                }
+              </select>
+              <select className='col-4 bedPageFilterDropdown' value={selectedRoomNo} onChange={onChangeRoomNo}>
+                <option value="">{t('bedsPage.roomNumber')}</option>
+                {roomNumbersToShow.map((room) => (
+                  <option key={room} value={room}>
+                    {room}
+                  </option>
+                ))}
+
+              </select>
+
+            </div>
+          </div>
         </div>
-        <h1 className='management-heading'>{t('bedsPage.bedsManagement')}</h1>
-      </div>
-      <div className="col-12 col-md-4 search-wrapper ">
-        <input value={searchValue} onChange={onChangeSearch} type="text" placeholder={t('common.search')} className='search-input'/>
-        <img src={SearchIcon} alt="search-icon" className='search-icon'/>
-      </div>
 
-      <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end '>
-        <div className='d-flex filterDropDownContainer'>
-          <select className="col-4 bedPageFilterDropdown" value={selectedStatus} onChange={onChangeStatus}>
-            <option value="">{t('bedsPage.status')}</option>
-            <option value="Occupied">{t('bedsPage.occupied')}</option>
-            <option value="Unoccupied">{t('bedsPage.unoccupied')}</option>
-          </select>
-          <select className='col-4 bedPageFilterDropdown' value={selectedFloor} onChange={onChangeFloor}>
-            <option value="">{t('bedsPage.floorNumber')}</option>         
-            {
-              floorNumbersToShow.map((floor) => (
-                <option key={floor} value={floor}>
-                  {floor}
-                </option>
-              ))
-            }
-          </select> 
-          <select className='col-4 bedPageFilterDropdown' value={selectedRoomNo} onChange={onChangeRoomNo}>
-            <option value="">{t('bedsPage.roomNumber')}</option>
-            {roomNumbersToShow.map((room) => (
-              <option key={room} value={room}>
-                {room}
-              </option>
-            ))}
-            
-          </select>
-          
+
+
+        <div>
+          <Table columns={columns} rows={filteredRows} />
         </div>
-      </div>
-    </div>
 
-
-
-    <div>   
-        <Table columns={columns} rows={filteredRows}/>
-    </div>
-
-    <div class="modal fade" id="exampleModalBedsBoys" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal fade" id="exampleModalBedsBoys" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
                 <div className="container-fluid">

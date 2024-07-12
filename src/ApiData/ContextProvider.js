@@ -1,8 +1,8 @@
 import React, { createContext, useState, useContext, useRef, useEffect } from 'react';
-import { FetchData } from './FetchData';
-import { onValue, ref } from 'firebase/database';
+
+import { onValue } from 'firebase/database';
 import isEqual from 'lodash/isEqual';
-import { firebaseInstances } from '../firebase/firebase';
+import { firebaseInstances, ref } from '../firebase/firebase';
 
 const DataContext = createContext();
 
@@ -24,17 +24,17 @@ const DataProvider = ({ children }) => {
   const [activeGirlsHostelName, setActiveGirlsHostelName] = useState(null);
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
   const [userarea, setUserArea] = useState();
-  const [userUid, setUserUid] = useState('');
+  const [userUid, setUserUid] = useState(localStorage.getItem('userUid' || ''));
 
   // new code to implement multiple configuration
   const [area, setArea] = useState(localStorage.getItem('userarea') || 'hyderabad');
   const [firebase, setFirebase] = useState(firebaseInstances[area]);
 
-  const {database}  = firebase;
+  const { database } = firebase;
 
   useEffect(() => {
     setFirebase(firebaseInstances[area]);
-    localStorage.setItem('userarea', area);
+
   }, [area]);
 
 
@@ -43,54 +43,22 @@ const DataProvider = ({ children }) => {
     secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
   };
 
-  // useEffect(()=>{
-  //   const id = localStorage.getItem("userUid")
-  //   console.log(id,"dataNotGetting")
-  // },[])
-
-  useEffect(()=>{
+  useEffect(() => {
     const userId = localStorage.getItem('userUid')
     setUserUid(userId);
-  }, [userUid,area])
-  console.log("user Id Context", userUid)
+  }, [userUid, area])
 
-  useEffect(() => {
-    const fetchApiData = async () => {
-      try {
-        const fetchedData = await FetchData();
-        setData(fetchedData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
 
-    fetchApiData();
-  }, []);
 
-  // useEffect(() => {
-  //   const boysRef = ref(database, `Hostel/${userUid}/boys`);
-  //   const unsubscribe = onValue(boysRef, (snapshot) => {
-  //     if (snapshot.exists()) {
-  //       const data = snapshot.val();
-  //       const keys = Object.keys(data);
-  //       setActiveBoysHostelButtons(keys);
-  //     } else {
-  //       setActiveBoysHostelButtons([]);
-  //     }
-  //   });
-
-  //   return () => unsubscribe();
-  // }, [userUid]);
 
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
-    console.log(userUid,"dataNotGetting")
     const unsubscribe = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         const buttonData = Object.keys(data).map(key => ({
-          id: key,  // Unique identifier for the hostel
-          name: data[key].name  // Name of the hostel
+          id: key,
+          name: data[key].name
         }));
         setActiveBoysHostelButtons(buttonData);
       } else {
@@ -98,18 +66,16 @@ const DataProvider = ({ children }) => {
       }
     });
     return () => unsubscribe();
-  }, [userUid,area]);
+  }, [userUid, area]);
 
-  //   return () => unsubscribe();
-  // }, [userUid]);
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/girls`);
     const unsubscribe = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         const buttonData = Object.keys(data).map(key => ({
-          id: key,  // Unique identifier for the hostel
-          name: data[key].name  // Name of the hostel
+          id: key,
+          name: data[key].name
         }));
         setActiveGirlsHostelButtons(buttonData);
       } else {
@@ -119,7 +85,7 @@ const DataProvider = ({ children }) => {
     return () => unsubscribe();
   }, [userUid, area]);
 
-  console.log(activeBoysHostelButtons,"dataNotGetting")
+
 
   useDeepCompareEffect(() => {
     if (activeBoysHostelButtons.length > 0) {
@@ -127,7 +93,7 @@ const DataProvider = ({ children }) => {
       setActiveBoysHostelName(activeBoysHostelButtons[0].name)
     }
   }, [activeBoysHostelButtons]);
-console.log(activeBoysHostelName, "ActiveBoysHostelName")
+
   useDeepCompareEffect(() => {
     if (activeGirlsHostelButtons.length > 0) {
       setActiveGirlsHostel(activeGirlsHostelButtons[0].id);
@@ -135,12 +101,10 @@ console.log(activeBoysHostelName, "ActiveBoysHostelName")
     }
   }, [activeGirlsHostelButtons]);
 
-  console.log("active boys hostel", activeBoysHostel);
-  console.log("active buttons", activeBoysHostelButtons);
-  console.log("user UID", userUid)
- 
+
+
   return (
-    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea , userUid, firebase, setArea,setUserUid  }}>
+    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid }}>
       {children}
     </DataContext.Provider>
   );

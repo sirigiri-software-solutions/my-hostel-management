@@ -90,7 +90,6 @@ const AllHostels = ({ onTabSelect, activeTab }) => {
         <option value="hyderabad">Hyderabad</option>
         <option value="secunderabadr">Secunderabad</option>
         <option value="Gachibowli">Gachibowli</option>
-        {/* Add more areas as needed */}
       </select>
       <Tabs activeKey={selectedGender} onSelect={handleTabSelect} className="mb-3 tabs-nav">
         <Tab eventKey="boys" title="Mens">

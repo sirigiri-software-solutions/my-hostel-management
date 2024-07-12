@@ -7,8 +7,6 @@ import Admin from '../../images/Icons.png';
 import ExpensesImage from '../../images/Icons (5).png'
 import RentImage from '../../images/Icons (6).png'
 import SettingsImage from '../../images/Icons (7).png'
-// import logo from "../../images/image.png"
-// import logo from "../../images/HMLogo2.png"
 import logo from "../../images/HMLogo3.png"
 import './MainPage.css'
 
@@ -35,13 +33,7 @@ const MainPage = () => {
   const { t } = useTranslation()
   const { activeBoysHostelName, activeGirlsHostelName } = useData();
   const name = localStorage.getItem("username");
-  // Refer here for fetched Api Data use like this in all pages don't fetch api url
-  const { data } = useContext(DataContext);
-  console.log("start")
-  if (data != null) {
-    console.log(data && data);
-  }
-  console.log("end");
+
 
 
   const [activeTab, setActiveTab] = useState('boys');
@@ -51,9 +43,9 @@ const MainPage = () => {
   };
 
 
-  useEffect(()=>{
+  useEffect(() => {
     setActiveTab("boys")
-  },[])
+  }, [])
 
 
 
@@ -127,7 +119,6 @@ const MainPage = () => {
   }
 
   useEffect(() => {
-    // Add event listener to handle clicks outside the popup
     const handleClickOutsideModal = (event) => {
       const popup = document.getElementById('poplogoutbtn');
       if (popup && !popup.contains(event.target)) {
@@ -136,10 +127,8 @@ const MainPage = () => {
       }
     };
 
-    // Attach the event listener
     document.addEventListener('mousedown', handleClickOutsideModal);
 
-    // Cleanup: remove event listener on component unmount
     return () => {
       document.removeEventListener('mousedown', handleClickOutsideModal);
     };
@@ -196,16 +185,10 @@ const MainPage = () => {
     setActiveTab('boys');
   }
 
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // const toggleModal = () => {
-  //   setIsModalOpen(!isModalOpen);
-  // };
 
   const navigate = useNavigate();
 
   const logout = () => {
-    // Clear any stored data related to user session
     localStorage.removeItem('username');
     localStorage.removeItem('userarea');
     localStorage.removeItem('role');
@@ -213,19 +196,18 @@ const MainPage = () => {
     localStorage.removeItem('rememberedUsername');
     localStorage.removeItem('rememberedUserarea');
     localStorage.removeItem('rememberedPassword');
-    // Redirect to login page
     navigate('/');
   };
 
 
-  const renderWelcomeext = index =>{
+  const renderWelcomeext = index => {
     if (index === Components.length) {
       return null;
     }
-    return(
+    return (
       <>
-      {activeTab === 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeBoysHostelName}&nbsp;{t('dashboard.boysHostel')}</p>}
-      {activeTab !== 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeGirlsHostelName}&nbsp;{t('dashboard.girlsHostel')}</p>}
+        {activeTab === 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeBoysHostelName}&nbsp;{t('dashboard.boysHostel')}</p>}
+        {activeTab !== 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeGirlsHostelName}&nbsp;{t('dashboard.girlsHostel')}</p>}
       </>
     )
   }
@@ -297,14 +279,10 @@ const MainPage = () => {
         <div >
           <div className='dashboardHead'>
             <div className='dashBoarWelcome'>
-                {renderWelcomeext(flag)}
+              {renderWelcomeext(flag)}
 
-              {/* <text>
-                {t('dashboard.welcomeTo')}&nbsp;
-                {activeTab === 'boys' ? activeBoysHostel : activeGirlsHostel}&nbsp;
-                {activeTab === 'boys' ? t('dashboard.boysHostel') : t('dashboard.girlsHostel')}
-              </text> */}
-              
+
+
             </div>
             <div className='top-div'>
               <img src={Admin} alt="admin" className='dashboard-icon' />
