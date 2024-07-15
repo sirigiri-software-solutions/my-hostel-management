@@ -529,7 +529,7 @@ Please note that you made your last payment on ${paidDate}.\n`
               onChange={handleSearch} />
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
-          <div className="col-6 col-md-4 d-flex justify-content-end align-items-end">
+          <div className="col-6 col-md-4 d-flex justify-content-end align-items-end gap-3">
             <div className="filterRentDropDownContainer">
               <select
                 id="dueDateFilter"

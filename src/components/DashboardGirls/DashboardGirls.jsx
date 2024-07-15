@@ -1348,7 +1348,7 @@ Please note that you made your last payment on ${paidDate}.\n`
               <label htmlFor='tenantMobileNo' class="form-label">
                 {t('dashboard.mobileNo')}
               </label>
-              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} name="mobileNo" onFocus={handleTenantFocus} />
+              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
 
               {tenatErrors.mobileNo && <p style={{ color: 'red' }}>{tenatErrors.mobileNo}</p>}
             </div>
@@ -1364,7 +1364,7 @@ Please note that you made your last payment on ${paidDate}.\n`
               <label htmlFor='tenantEmergency' class="form-label">
                 {t('dashboard.emergencyContact')}
               </label>
-              <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} name="emergencyContact" onFocus={handleTenantFocus} />
+              <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)}  name="emergencyContact" onFocus={handleTenantFocus} />
 
               {tenatErrors.emergencyContact && <p style={{ color: 'red' }}>{tenatErrors.emergencyContact}</p>}
             </div>
