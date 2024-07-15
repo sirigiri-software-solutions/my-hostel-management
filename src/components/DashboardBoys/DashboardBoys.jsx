@@ -893,7 +893,7 @@ const DashboardBoys = () => {
     setBikeRcImage(null);
   };
 
-
+console.log(tenantImage, "tenantImage");
 
 
   const menu = [
@@ -942,9 +942,8 @@ const DashboardBoys = () => {
     } else {
       setModelText(text);
       setFormLayout(text);
-      setShowModal(true);
+      setShowModal(true); 
     }
-
   };
 
   const handleCloseModal = () => {
@@ -1348,15 +1347,14 @@ const DashboardBoys = () => {
               <label htmlFor='tenantMobileNo' class="form-label">
                 {t('dashboard.mobileNo')}
               </label>
-              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} name="mobileNo" onFocus={handleTenantFocus} />
-
+              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
               {tenatErrors.mobileNo && <p style={{ color: 'red' }}>{tenatErrors.mobileNo}</p>}
             </div>
             <div class="col-md-6">
               <label htmlFor='tenantIdNum' class="form-label">
                 {t('dashboard.idNumber')}
               </label>
-              <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} name="idNumber" onFocus={handleTenantFocus} />
+              <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')} name="idNumber" onFocus={handleTenantFocus} />
 
               {tenatErrors.idNumber && <p style={{ color: 'red' }}>{tenatErrors.idNumber}</p>}
             </div>
@@ -1364,7 +1362,7 @@ const DashboardBoys = () => {
               <label htmlFor='tenantEmergency' class="form-label">
                 {t('dashboard.emergencyContact')}
               </label>
-              <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} name="emergencyContact" onFocus={handleTenantFocus} />
+              <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="emergencyContact" onFocus={handleTenantFocus} />
 
               {tenatErrors.emergencyContact && <p style={{ color: 'red' }}>{tenatErrors.emergencyContact}</p>}
             </div>
@@ -1406,7 +1404,6 @@ const DashboardBoys = () => {
                 </object>
               )}
               <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef} multiple />
-
             </div>
             <div className='col-md-12'>
               <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
@@ -1443,7 +1440,7 @@ const DashboardBoys = () => {
                 <input
                   type="text"
                   id="bikeNumber"
-
+                  onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')}
                   className='form-control'
                   placeholder="Enter number plate ID"
                   value={bikeNumber}
