@@ -64,3 +64,13 @@
   height: 34px;
 }
 
+/* men and women buttons=== */
+.custom-tabs .nav-link {
+  color: black; /* Default color */
+}
+
+.custom-tabs .nav-link.active-tab,
+.custom-tabs .nav-link.active {
+  color: blue !important; /* Active tab color */
+}
+

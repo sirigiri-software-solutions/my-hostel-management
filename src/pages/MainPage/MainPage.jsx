@@ -70,15 +70,15 @@ const MainPage = () => {
     },
     {
       id: 4,
-      path: "/rent",
-      name: t("menuItems.rent"),
-      icon: RentImage,
-    },
-    {
-      id: 5,
       path: "/tenants",
       name: t("menuItems.tenants"),
       icon: TenantsImage,
+    },
+    {
+      id: 5,
+      path: "/rent",
+      name: t("menuItems.rent"),
+      icon: RentImage,
     },
     {
       id: 6,
@@ -106,7 +106,7 @@ const MainPage = () => {
     setIsModalOpen(!isModalOpen);
   };
 
-  const Components = [<Dashboard activeTab={activeTab} onTabSelect={handleTabSelect} />, <Rooms activeTab={activeTab} onTabSelect={handleTabSelect} />, <Beds activeTab={activeTab} onTabSelect={handleTabSelect} />, <Rents activeTab={activeTab} onTabSelect={handleTabSelect} />, <Tenants activeTab={activeTab} onTabSelect={handleTabSelect} />, <Expenses activeTab={activeTab} onTabSelect={handleTabSelect} />, <Hostels activeTab={activeTab} onTabSelect={handleTabSelect} />, <Settings />]
+  const Components = [<Dashboard activeTab={activeTab} onTabSelect={handleTabSelect} />, <Rooms activeTab={activeTab} onTabSelect={handleTabSelect} />, <Beds activeTab={activeTab} onTabSelect={handleTabSelect} />, <Tenants activeTab={activeTab} onTabSelect={handleTabSelect} />, <Rents activeTab={activeTab} onTabSelect={handleTabSelect} />, <Expenses activeTab={activeTab} onTabSelect={handleTabSelect} />, <Hostels activeTab={activeTab} onTabSelect={handleTabSelect} />, <Settings />]
 
   const [flag, setFlag] = useState(1);
 
@@ -277,9 +277,6 @@ const MainPage = () => {
           <div className='dashboardHead'>
             <div className='dashBoarWelcome'>
               {renderWelcomeext(flag)}
-
-
-
             </div>
             <div className='top-div'>
               <img src={Admin} alt="admin" className='dashboard-icon' />

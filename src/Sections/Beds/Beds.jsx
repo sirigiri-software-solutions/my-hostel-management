@@ -4,6 +4,7 @@ import { Tab, Tabs } from 'react-bootstrap';
 import BedsPageBoys from '../../components/BedsPageBoys/BedsPageBoys';
 import BedsPageGirls from '../../components/BedsPageGirls/BedsPageGirls';
 import { useTranslation } from 'react-i18next';
+import './Beds.css'
 
 const Beds = ({ onTabSelect,activeTab }) => {
     const { t } = useTranslation();
@@ -16,11 +17,11 @@ const Beds = ({ onTabSelect,activeTab }) => {
 
     return (
         <div className="container">
-            <Tabs activeKey={activeTab} onSelect={handleTabSelect} className="mb-3">
-                <Tab eventKey="boys" title={t('dashboard.mens')}>
+            <Tabs activeKey={activeTab} onSelect={handleTabSelect} className="mb-3 custom-tabs">
+                <Tab eventKey="boys" title={t('dashboard.mens')} className={activeTab === 'boys' ? 'active-tab' : ''}>
                     <BedsPageBoys key={key} />
                 </Tab>
-                <Tab eventKey="girls" title={t('dashboard.womens')}>
+                <Tab eventKey="girls" title={t('dashboard.womens')} className={activeTab === 'girls' ? 'active-tab' : ''}>
                     <BedsPageGirls key={key} />
                 </Tab>
             </Tabs>
