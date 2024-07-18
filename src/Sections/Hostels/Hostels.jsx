@@ -296,9 +296,10 @@ const Hostels = ({ onTabSelect, activeTab }) => {
     };
     reader.readAsDataURL(file);
   };
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const addNewHostel = (e, isBoys) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
     const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
     const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
@@ -343,6 +344,9 @@ const Hostels = ({ onTabSelect, activeTab }) => {
           position: "top-center",
           autoClose: 3000,
         });
+      })
+      .finally(() => {
+        setIsSubmitting(false); // Reset isSubmitting to false when submission completes
       });
   };
 
@@ -363,8 +367,8 @@ const Hostels = ({ onTabSelect, activeTab }) => {
 
   return (
     <div className='container'>
-      <Tabs activeKey={activeTab} onSelect={handleTabSelect} className=" mb-3 tabs-nav">
-        <Tab eventKey="boys" title={t('dashboard.mens')}>
+      <Tabs activeKey={activeTab} onSelect={handleTabSelect} className=" mb-3 tabs-nav custom-tabs">
+        <Tab eventKey="boys" title={t('dashboard.mens')} className={activeTab === 'boys' ? 'active-tab' : ''}>
           <div className=" row d-flex flex-wrap align-items-center justify-content-between">
             <div className="col-12  col-md-4 d-flex justify-content-between align-items-center mr-5 mb-2 w-100">
               <div className='d-flex align-items-center'>
@@ -386,7 +390,7 @@ const Hostels = ({ onTabSelect, activeTab }) => {
             />
           </div>
         </Tab>
-        <Tab eventKey="girls" title={t('dashboard.womens')}>
+        <Tab eventKey="girls" title={t('dashboard.womens')} className={activeTab === 'girls' ? 'active-tab' : ''}>
           <div className="row d-flex flex-wrap align-items-center justify-content-between">
             <div className="col-12 col-md-4 d-flex justify-content-between align-items-center mr-5 mb-2 w-100">
               <div className='d-flex align-items-center'>
@@ -501,7 +505,7 @@ const Hostels = ({ onTabSelect, activeTab }) => {
               <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, true)} />
             </div>
             <div className='mt-3 d-flex justify-content-between'>
-              <Button variant="primary" style={{ marginRight: '10px' }} type="submit">{t("settings.addHostel")}</Button>
+              <Button variant="primary" style={{ marginRight: '10px' }} type="submit" disabled={isSubmitting}>{isSubmitting ? 'Adding...' : t("settings.addHostel")}</Button>
               <Button variant="secondary" onClick={() => handleModalClose(true)}>{t("settings.close")}</Button>
             </div>
           </form>
@@ -541,7 +545,7 @@ const Hostels = ({ onTabSelect, activeTab }) => {
               <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, false)} />
             </div>
             <div className='mt-3 d-flex justify-content-between'>
-              <Button variant="primary" type="submit" style={{ marginRight: '10px' }}>{t("settings.addHostel")}</Button>
+              <Button variant="primary" type="submit" style={{ marginRight: '10px' }} disabled={isSubmitting}>{isSubmitting ? 'Adding...' : t("settings.addHostel")}</Button>
               <Button variant="secondary" onClick={() => handleModalClose(false)}>{t("settings.close")}</Button>
             </div>
           </form>

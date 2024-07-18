@@ -53,7 +53,7 @@ const RoomsGirls = () => {
 
     if (name === 'floorNumber' || name === 'roomNumber') {
 
-      sanitizedValue = value.replace(/[^a-zA-Z0-9-]/g, '');
+      sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
     } else if (name === 'numberOfBeds' || name === 'bedRent') {
 
       sanitizedValue = value.replace(/[^0-9]/g, '');

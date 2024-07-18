@@ -527,12 +527,16 @@ const DashboardBoys = () => {
 
 
 
+
+
+
+
   const handleRoomsIntegerChange = (event) => {
     const { name, value } = event.target;
     let sanitizedValue = value;
 
     if (name === 'floorNumber' || name === 'roomNumber') {
-      sanitizedValue = value.replace(/[^a-zA-Z0-9-]/g, '');
+      sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
     } else if (name === 'numberOfBeds' || name === 'bedRent') {
       sanitizedValue = value.replace(/[^0-9]/g, '');
     }
@@ -727,12 +731,16 @@ const DashboardBoys = () => {
     }
     if (hasBike) {
       if (!bikeNumber) {
-          tempErrors.bikeNumber = 'Bike number required';
-      } else if (!/^[A-Za-z]{2}\s\d{2,4}\s[A-Za-z]{1,2}\s?\d{4}$/.test(bikeNumber)) {
-          tempErrors.bikeNumber = 'Enter a valid bike number';
+        tempErrors.bikeNumber = 'Bike number required';
+      } else {
+        // Remove spaces for validation
+        const bikeNumberWithoutSpaces = bikeNumber.replace(/\s+/g, '');
+        
+        if (!/^[A-Za-z0-9]{6,10}$/.test(bikeNumberWithoutSpaces)) {
+          tempErrors.bikeNumber = 'Enter a valid bike number (letters and numbers only)';
+        }
       }
-  }
-    
+    }
     setTenantErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
@@ -1014,8 +1022,6 @@ const DashboardBoys = () => {
   };
 
 
-
-
   const menu = [
     {
       image: Rooms,
@@ -1062,9 +1068,8 @@ const DashboardBoys = () => {
     } else {
       setModelText(text);
       setFormLayout(text);
-      setShowModal(true);
+      setShowModal(true); 
     }
-
   };
 
   const handleCloseModal = () => {
@@ -1468,15 +1473,14 @@ const DashboardBoys = () => {
               <label htmlFor='tenantMobileNo' class="form-label">
                 {t('dashboard.mobileNo')}
               </label>
-              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} name="mobileNo" onFocus={handleTenantFocus} />
-
+              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
               {tenatErrors.mobileNo && <p style={{ color: 'red' }}>{tenatErrors.mobileNo}</p>}
             </div>
             <div class="col-md-6">
               <label htmlFor='tenantIdNum' class="form-label">
                 {t('dashboard.idNumber')}
               </label>
-              <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} name="idNumber" onFocus={handleTenantFocus} />
+              <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')} name="idNumber" onFocus={handleTenantFocus} />
 
               {tenatErrors.idNumber && <p style={{ color: 'red' }}>{tenatErrors.idNumber}</p>}
             </div>
@@ -1484,7 +1488,7 @@ const DashboardBoys = () => {
               <label htmlFor='tenantEmergency' class="form-label">
                 {t('dashboard.emergencyContact')}
               </label>
-              <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} name="emergencyContact" onFocus={handleTenantFocus} />
+              <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="emergencyContact" onFocus={handleTenantFocus} />
 
               {tenatErrors.emergencyContact && <p style={{ color: 'red' }}>{tenatErrors.emergencyContact}</p>}
             </div>
@@ -1537,17 +1541,6 @@ const DashboardBoys = () => {
                 </object>
               )}
               <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef} multiple />
-              {isMobile && (
-                  <div>
-                  <p>{t('tenantsPage.or')}</p>
-                  <div style={{display:'flex',flexDirection:'row'}}>
-                  <p>{t('tenantsPage.takePhoto')}</p>
-                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeIdPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
-                  {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
-                  </div>
-                  </div>
-                    )}
-
 
             </div>
             <div className='col-md-12'>
@@ -1585,7 +1578,7 @@ const DashboardBoys = () => {
                 <input
                   type="text"
                   id="bikeNumber"
-
+                  onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')}
                   className='form-control'
                   placeholder="Enter number plate ID"
                   value={bikeNumber}

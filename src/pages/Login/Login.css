@@ -331,3 +331,7 @@ input[type="password"]::-moz-eye {
 input[type="password"]::-ms-reveal {
   display: none;
 }
+
+.custom-select {
+  opacity: 0.8; 
+}

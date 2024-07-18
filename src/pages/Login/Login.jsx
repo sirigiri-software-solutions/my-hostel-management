@@ -573,14 +573,14 @@ const Login = () => {
                   </div>
                   <div className="mbl-inputField ">
                     <select
-                      className={`form-control custom-input rounded-pill selectarea ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
+                      className={`custom-select form-control custom-input rounded-pill selectarea ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"} `}
                       onChange={handleData}
                       value={loginData.area}
                       onFocus={() => clearErrorOnFocus("area")}
                       name="area"
                       id="area"
                     >
-                      <option id="selectarea" value="" disabled>Select Your Area</option>
+                      <option id="selectarea" value=""  disabled >Select Your Area</option>
                       {areaOptions.map((area, index) => (
 
                         <option key={index} value={area}>
@@ -643,7 +643,7 @@ const Login = () => {
                   </div>
                   <div className="form-group">
                     <select
-                      className="form-control rounded-pill"
+                      className="form-control rounded-pill custom-select"
                       name="area"
                       value={forgotPasswordData.area}
                       onChange={handleForgotPasswordData}
@@ -714,7 +714,7 @@ const Login = () => {
                     value={area}
                     onChange={changeHandler}
                     onFocus={() => clearErrorOnFocus("area")}
-                    className="rounded-pill"
+                    className="rounded-pill custom-select"
                   >
                     <option value="" disabled>Select Your Area</option>
                     {areaOptions.map((area, index) => (

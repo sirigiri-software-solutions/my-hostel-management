@@ -4,7 +4,7 @@ import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
 import ImageIcon from '../../images/Icons (10).png'
 import { useState, useContext } from 'react'
-import {push, ref, storage } from "../../firebase/firebase";
+import { push, ref, storage } from "../../firebase/firebase";
 import '../TenantsGirls/TenantsGirls.css';
 import './TenantsBoys.css'
 import { DataContext } from '../../ApiData/ContextProvider'
@@ -22,9 +22,9 @@ import Spinner from '../../Elements/Spinner'
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons,firebase } = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase } = useData();
   const role = localStorage.getItem('role');
-  const {database} = firebase;
+  const { database } = firebase;
 
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
@@ -51,7 +51,7 @@ const TenantsBoys = () => {
   const [tenantAddress, setTenantAddress] = useState("");
   const [singleTenantProofId, setSingleTenantProofId] = useState("");
   const [fileName, setFileName] = useState('');
-  const [singleTenantAddress,setSingleTenantAddress] = useState('');
+  const [singleTenantAddress, setSingleTenantAddress] = useState('');
 
   const [boysRooms, setBoysRooms] = useState([]);
   const [exTenants, setExTenants] = useState([]);
@@ -147,7 +147,7 @@ const TenantsBoys = () => {
   };
 
 
-  const [loading,setLoading ] = useState(false); 
+  const [loading, setLoading] = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -277,10 +277,10 @@ const TenantsBoys = () => {
   //       console.error('Error fetching tenants data:', error);
   //     }
   //   };
-  
+
   //   fetchDataFromAPI();
   // }, [data]);
-  
+
 
   const validate = () => {
     let tempErrors = {};
@@ -303,9 +303,9 @@ const TenantsBoys = () => {
     } else if (!phoneRegexWithCountryCode.test(mobileNo) && !phoneRegexWithoutCountryCode.test(mobileNo)) {
       tempErrors.mobileNo = t('errors.mobileNumberInvalid');
     }
-    if(!idNumber){
+    if (!idNumber) {
       tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
-    } else if(idNumber.length < 6){
+    } else if (idNumber.length < 6) {
       tempErrors.idNumber = 'Id should be min 6 characters';
     } else if (!/^[a-zA-Z0-9]+$/.test(idNumber)) {
       tempErrors.idNumber = 'It does not allow special charecters';
@@ -316,7 +316,7 @@ const TenantsBoys = () => {
     } else if (!phoneRegexWithCountryCode.test(emergencyContact) && !phoneRegexWithoutCountryCode.test(emergencyContact)) {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
-  
+
     const isBedOccupied = tenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentId;
     });
@@ -324,16 +324,21 @@ const TenantsBoys = () => {
     if (isBedOccupied) {
       tempErrors.selectedBed = t('errors.bedAlreadyOccupied');
     }
-    if (!tenantImage ) {
+    if (!tenantImage) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
     if (hasBike) {
       if (!bikeNumber) {
-          tempErrors.bikeNumber = 'Bike number required';
-      } else if (!/^[A-Za-z]{2}\s\d{2,4}\s[A-Za-z]{1,2}\s?\d{4}$/.test(bikeNumber)) {
-          tempErrors.bikeNumber = 'Enter a valid bike number';
+        tempErrors.bikeNumber = 'Bike number required';
+      } else {
+        // Remove spaces for validation
+        const bikeNumberWithoutSpaces = bikeNumber.replace(/\s+/g, '');
+        
+        if (!/^[A-Za-z0-9]{6,10}$/.test(bikeNumberWithoutSpaces)) {
+          tempErrors.bikeNumber = 'Enter a valid bike number (letters and numbers only)';
+        }
       }
-  }
+    }
     
     setErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
@@ -350,7 +355,7 @@ const TenantsBoys = () => {
       reader.readAsDataURL(file);
     }
   };
-  
+
   const handleTenantIdChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -361,7 +366,7 @@ const TenantsBoys = () => {
       reader.readAsDataURL(file);
     }
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isEditing) {
@@ -498,7 +503,7 @@ const TenantsBoys = () => {
       setIsEditing(false);
       setShowModal(true);
       setUserDetailsTenantsPopup(false);
-      
+
       setHasBike(false);
     }
   };
@@ -566,10 +571,10 @@ const TenantsBoys = () => {
   const rows = tenants.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImage,
-    name: tenant.name, 
+    name: tenant.name,
     id: tenant.idNumber,
     mobile_no: tenant.mobileNo,
-    room_bed_no: `${tenant.roomNo}/${tenant.bedNo}`, 
+    room_bed_no: `${tenant.roomNo}/${tenant.bedNo}`,
     joining_date: tenant.dateOfJoin,
     bike_number: tenant.bikeNumber ? tenant.bikeNumber : '-',
     status: capitalizeFirstLetter(tenant.status),
@@ -693,7 +698,7 @@ const TenantsBoys = () => {
         fetchExTenants()
       }
     }, {
-      onlyOnce: true 
+      onlyOnce: true
     });
 
     setShowModal(false);
@@ -755,7 +760,7 @@ const TenantsBoys = () => {
 
 
   const exTenantRows = exTenants.map((tenant, index) => ({
-    s_no: index + 1, 
+    s_no: index + 1,
     image: tenant.tenantImage,
     name: tenant.name,
     id: tenant.idNumber,
@@ -772,7 +777,7 @@ const TenantsBoys = () => {
           color: 'white',
           border: 'none',
         }}
-        onClick={() => handleExTenantDelete(tenant.id, tenant.name)} 
+        onClick={() => handleExTenantDelete(tenant.id, tenant.name)}
       >
         Delete
       </button>
@@ -839,15 +844,15 @@ const TenantsBoys = () => {
                 </button>}
 
               </div>
-            <div className={showExTenants ? "col-8 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
-              {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
-              {t('tenantsPage.presentTenants')}
-              </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
-              {t('tenantsPage.vacated')}
-              </button>}
+              <div className={showExTenants ? "col-8 bedPageFilterDropdown" : "col-4 bedPageFilterDropdown"}>
+                {showExTenants ? <button type="button" id="presentTenantBtn" class="add-button text-center" onClick={showExTenantsData} >
+                  {t('tenantsPage.presentTenants')}
+                </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
+                  {t('tenantsPage.vacated')}
+                </button>}
+              </div>
             </div>
-      </div>
-      
+
           </div>
         </div>
 
@@ -976,7 +981,7 @@ const TenantsBoys = () => {
                         <p>{fileName}</p>
                       </div>
                     )}
-                    
+
 
                     <input ref={tenantProofIdRef} id="tenantUploadId" className="form-control" type="file" onChange={handleTenantIdChange} />
                     {isMobile && (
@@ -1030,14 +1035,14 @@ const TenantsBoys = () => {
                         placeholder="Enter number plate ID"
                         value={bikeNumber}
                         onChange={(event) => setBikeNumber(event.target.value)}
-                        style={{  borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px',  }}
+                        style={{ borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px', }}
                       />
                       {errors.bikeNumber && <p style={{ color: 'red' }}>{errors.bikeNumber}</p>}
                     </div>
                   )
                   }
-                  
-               
+
+
                   {hasBike && (
                     <>
                       <div className="col-md-6">
@@ -1068,7 +1073,7 @@ const TenantsBoys = () => {
           </div>
         </div>
       </div>
-      
+
       {loading && <Spinner />}
 
 
