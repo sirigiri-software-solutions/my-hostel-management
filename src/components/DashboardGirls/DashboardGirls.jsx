@@ -23,41 +23,41 @@ import Spinner from '../../Elements/Spinner'
 
 const DashboardGirls = () => {
 
-  const [run, setRun] = useState(true);
-  const [steps] = useState([
-    {
-      target: '.hamburger-menu',
-      content: 'Click here to open the menu.',
-    },
-    {
-      target: '.menu-item-1',
-      content: 'This is the first menu item. Click to navigate.',
-    },
-    {
-      target: '.menu-item-2',
-      content: 'This is the second menu item. Click to navigate.',
-    },
-    // Add more steps as needed
-    {
-      target: '.total-rooms-card',
-      content: 'Here you can see the total rooms. Click to add rooms.',
-    },
-    {
-      target: '.total-tenants-card',
-      content: 'Here you can see the total tenants. Click to add tenants.',
-    },
-    {
-      target: '.total-beds-card',
-      content: 'Here you can see the total beds. Click to manage rent.',
-    }
-  ]);
+  // const [run, setRun] = useState(true);
+  // const [steps] = useState([
+  //   {
+  //     target: '.hamburger-menu',
+  //     content: 'Click here to open the menu.',
+  //   },
+  //   {
+  //     target: '.menu-item-1',
+  //     content: 'This is the first menu item. Click to navigate.',
+  //   },
+  //   {
+  //     target: '.menu-item-2',
+  //     content: 'This is the second menu item. Click to navigate.',
+  //   },
+  //   // Add more steps as needed
+  //   {
+  //     target: '.total-rooms-card',
+  //     content: 'Here you can see the total rooms. Click to add rooms.',
+  //   },
+  //   {
+  //     target: '.total-tenants-card',
+  //     content: 'Here you can see the total tenants. Click to add tenants.',
+  //   },
+  //   {
+  //     target: '.total-beds-card',
+  //     content: 'Here you can see the total beds. Click to manage rent.',
+  //   }
+  // ]);
 
-  const handleJoyrideCallback = (data) => {
-    const { status, type } = data;
-    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
-      setRun(false);
-    }
-  };
+  // const handleJoyrideCallback = (data) => {
+  //   const { status, type } = data;
+  //   if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+  //     setRun(false);
+  //   }
+  // };
 
 
   const { t } = useTranslation();

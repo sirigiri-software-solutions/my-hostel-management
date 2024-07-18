@@ -527,10 +527,6 @@ const DashboardBoys = () => {
 
 
 
-
-
-
-
   const handleRoomsIntegerChange = (event) => {
     const { name, value } = event.target;
     let sanitizedValue = value;
