@@ -15,11 +15,11 @@ const Rooms =({ onTabSelect,activeTab }) => {
 
     return (
         <div className='container'>
-            <Tabs activeKey={activeTab} onSelect={handleTabSelect} className="mb-3 tabs-nav">
-                <Tab eventKey="boys" title={t('dashboard.mens')}>
+            <Tabs activeKey={activeTab} onSelect={handleTabSelect} className="mb-3 tabs-nav custom-tabs">
+                <Tab eventKey="boys" title={t('dashboard.mens')}  className={activeTab === 'boys' ? 'active-tab' : ''}>
                     <RoomsBoys />
                 </Tab>
-                <Tab eventKey="girls" title={t('dashboard.womens')}>
+                <Tab eventKey="girls" title={t('dashboard.womens')} className={activeTab === 'girls' ? 'active-tab' : ''}>
                     <RoomsGirls />
                 </Tab>
             </Tabs>

@@ -459,7 +459,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
     if (name === 'floorNumber' || name === 'roomNumber') {
 
-      sanitizedValue = value.replace(/[^a-zA-Z0-9-]/g, '');
+      sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
     } else if (name === 'numberOfBeds' || name === 'bedRent') {
       sanitizedValue = value.replace(/[^0-9]/g, '');
     }
@@ -602,11 +602,16 @@ Please note that you made your last payment on ${paidDate}.\n`
     }
     if (hasBike) {
       if (!bikeNumber) {
-          tempErrors.bikeNumber = 'Bike number required';
-      } else if (!/^[A-Za-z]{2}\s\d{2,4}\s[A-Za-z]{1,2}\s?\d{4}$/.test(bikeNumber)) {
-          tempErrors.bikeNumber = 'Enter a valid bike number';
+        tempErrors.bikeNumber = 'Bike number required';
+      } else {
+        // Remove spaces for validation
+        const bikeNumberWithoutSpaces = bikeNumber.replace(/\s+/g, '');
+        
+        if (!/^[A-Za-z0-9]{6,10}$/.test(bikeNumberWithoutSpaces)) {
+          tempErrors.bikeNumber = 'Enter a valid bike number (letters and numbers only)';
+        }
       }
-  }
+    }
     
     setTenantErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
@@ -1207,8 +1212,6 @@ Please note that you made your last payment on ${paidDate}.\n`
                   <div class='col-12 mb-3'>
                     <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
                       <option value="">{t('dashboard.selectTenant')} *</option>
-                
-
                       {isEditing ? (
                         <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
                       ) : (
@@ -1216,8 +1219,6 @@ Please note that you made your last payment on ${paidDate}.\n`
                           <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
                         ))
                       )}
-
-
                     </select>
                     {errors.selectedTenant && <div style={{ color: 'red' }}>{errors.selectedTenant}</div>}
                   </div>

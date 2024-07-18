@@ -437,21 +437,12 @@ const DashboardBoys = () => {
 
 
 
-
-
-
-
-
-
-
-
-
   const handleRoomsIntegerChange = (event) => {
     const { name, value } = event.target;
     let sanitizedValue = value;
 
     if (name === 'floorNumber' || name === 'roomNumber') {
-      sanitizedValue = value.replace(/[^a-zA-Z0-9-]/g, '');
+      sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
     } else if (name === 'numberOfBeds' || name === 'bedRent') {
       sanitizedValue = value.replace(/[^0-9]/g, '');
     }
@@ -607,12 +598,16 @@ const DashboardBoys = () => {
     }
     if (hasBike) {
       if (!bikeNumber) {
-          tempErrors.bikeNumber = 'Bike number required';
-      } else if (!/^[A-Za-z]{2}\s\d{2,4}\s[A-Za-z]{1,2}\s?\d{4}$/.test(bikeNumber)) {
-          tempErrors.bikeNumber = 'Enter a valid bike number';
+        tempErrors.bikeNumber = 'Bike number required';
+      } else {
+        // Remove spaces for validation
+        const bikeNumberWithoutSpaces = bikeNumber.replace(/\s+/g, '');
+        
+        if (!/^[A-Za-z0-9]{6,10}$/.test(bikeNumberWithoutSpaces)) {
+          tempErrors.bikeNumber = 'Enter a valid bike number (letters and numbers only)';
+        }
       }
-  }
-    
+    }
     setTenantErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
@@ -892,8 +887,6 @@ const DashboardBoys = () => {
     setBikeImage(null);
     setBikeRcImage(null);
   };
-
-console.log(tenantImage, "tenantImage");
 
 
   const menu = [
