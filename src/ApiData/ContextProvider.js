@@ -29,9 +29,16 @@ const DataProvider = ({ children }) => {
   // new code to implement multiple configuration
   const [area, setArea] = useState(localStorage.getItem('userarea') || 'hyderabad');
   const [firebase, setFirebase] = useState(firebaseInstances[area]);
+  const [activeFlag, setActiveFlag] = useState();
 
   const { database } = firebase;
+  // const [activeFlag, setActiveFlag] = useState(
+  //   activeBoysHostelButtons.length > 0 && activeGirlsHostelButtons.length > 0 ? 'boys' : activeGirlsHostelButtons.length > 0 ? 'girls': activeBoysHostelButtons.length > 0 ? 'boys':'hhh'
+  // )
+  // console.log(activeFlag, "flag")
+  // console.log(activeBoysHostelButtons.length > 0 , "flag")
 
+  
   useEffect(() => {
     setFirebase(firebaseInstances[area]);
 
@@ -86,7 +93,6 @@ const DataProvider = ({ children }) => {
   }, [userUid, area]);
 
 
-
   useDeepCompareEffect(() => {
     if (activeBoysHostelButtons.length > 0) {
       setActiveBoysHostel(activeBoysHostelButtons[0].id);
@@ -102,9 +108,29 @@ const DataProvider = ({ children }) => {
   }, [activeGirlsHostelButtons]);
 
 
+   // Determine the initial active flag
+   useEffect(() => {
+    let initialActiveFlag = '';
+    if (activeBoysHostelButtons.length > 0) {
+      initialActiveFlag = 'boys';
+    } else if (activeGirlsHostelButtons.length > 0) {
+      initialActiveFlag = 'girls';
+    }
+    setActiveFlag(initialActiveFlag);
+  }, [activeBoysHostelButtons, activeGirlsHostelButtons]);
+
+
+  // Function to update activeFlag
+  const changeActiveFlag = (newFlag) => {
+    setActiveFlag(newFlag);
+  };
+  console.log(activeFlag, "flaggg"); // ===> 'boys', 'girls', or 'hhh' based on conditions
+  console.log(activeBoysHostelButtons.length > 0, "activeBoysHostelButtons flag"); // ===> true or false
+
+
 
   return (
-    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid }}>
+    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag}}>
       {children}
     </DataContext.Provider>
   );

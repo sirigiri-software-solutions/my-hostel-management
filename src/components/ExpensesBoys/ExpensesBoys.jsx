@@ -524,7 +524,7 @@ const ExpensesBoys = () => {
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputRent" className="form-label">{t('expensesPage.expenseAmount')} :</label>
-                      <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+                      <input type="text" className="form-control" name="expenseAmount" value={formData.expenseAmount} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} onChange={handleInputChange} onFocus={handleExpensesFocus} />
                       {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
                     </div>
                     <div className="col-md-6">

@@ -28,26 +28,27 @@ import { useTranslation } from 'react-i18next'
 import { useData } from '../../ApiData/ContextProvider';
 import Hostels from '../../Sections/Hostels/Hostels'
 import LanguageSwitch from '../../LanguageSwitch'
+import { toast } from 'react-toastify'
+import { Database, push, ref, set } from 'firebase/database'
+import { Modal, Button, Tab, Tabs, Form } from 'react-bootstrap';
+import DefaultModal from './DefaultModal'
 const MainPage = () => {
   const { t } = useTranslation()
-  const { activeBoysHostelName, activeGirlsHostelName } = useData();
+  const [isHostels, setIsHostels] = useState(true)
+  const { activeBoysHostelName, activeGirlsHostelName, activeBoysHostelButtons, activeGirlsHostelButtons, userUid, firebase, activeFlag,  changeActiveFlag } = useData();
   const name = localStorage.getItem("username");
+  const [isModalOpen1, setIsModalOpen1] = useState(true);
 
 
-
-  const [activeTab, setActiveTab] = useState('boys');
-
-  const handleTabSelect = (tab) => {
-    setActiveTab(tab);
-  };
-
-
+  // useEffect(() => {
+  //   setActiveTab("boys")
+  // }, [])
+  
   useEffect(() => {
-    setActiveTab("boys")
-  }, [])
+    setIsHostels(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
+    setIsModalOpen1(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
 
-
-
+  }, [activeBoysHostelButtons, activeGirlsHostelButtons, isModalOpen1])
 
   const menuItems = [
     {
@@ -106,13 +107,13 @@ const MainPage = () => {
     setIsModalOpen(!isModalOpen);
   };
 
-  const Components = [<Dashboard activeTab={activeTab} onTabSelect={handleTabSelect} />, <Rooms activeTab={activeTab} onTabSelect={handleTabSelect} />, <Beds activeTab={activeTab} onTabSelect={handleTabSelect} />, <Tenants activeTab={activeTab} onTabSelect={handleTabSelect} />, <Rents activeTab={activeTab} onTabSelect={handleTabSelect} />, <Expenses activeTab={activeTab} onTabSelect={handleTabSelect} />, <Hostels activeTab={activeTab} onTabSelect={handleTabSelect} />, <Settings />]
+  const Components = [<Dashboard  />, <Rooms  />, <Beds  />, <Tenants  />, <Rents  />, <Expenses  />, <Hostels />, <Settings />]
 
   const [flag, setFlag] = useState(1);
 
   const handlesideBar = (value) => {
     setFlag(value);
-    setActiveTab("boys")
+    // setActiveTab("boys")
   }
 
   useEffect(() => {
@@ -179,7 +180,7 @@ const MainPage = () => {
   const handleSidebarItemClick = (itemId, close) => {
     handlesideBar(itemId);
     close();
-    setActiveTab('boys');
+    // setActiveTab('boys');
   }
 
 
@@ -196,6 +197,11 @@ const MainPage = () => {
     navigate('/');
   };
 
+  console.log(activeBoysHostelButtons, "activeBoysHostelButtons")
+  console.log(activeBoysHostelButtons.length, "activeBoysHostelButtons")
+  console.log(activeGirlsHostelButtons.length, 'activeGirlsHostelButtons')
+
+  console.log(isHostels, "isHostels")
 
   const renderWelcomeext = index => {
     if (index === Components.length) {
@@ -203,12 +209,21 @@ const MainPage = () => {
     }
     return (
       <>
-        {activeTab === 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeBoysHostelName}&nbsp;{t('dashboard.boysHostel')}</p>}
-        {activeTab !== 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeGirlsHostelName}&nbsp;{t('dashboard.girlsHostel')}</p>}
+        {activeFlag === 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeBoysHostelName}&nbsp;{t('dashboard.boysHostel')}</p>}
+        {activeFlag !== 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeGirlsHostelName}&nbsp;{t('dashboard.girlsHostel')}</p>}
       </>
     )
   }
+  
 
+  const handleOpenModal = () => {
+    setIsModalOpen1(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen1(false);
+  };
+  console.log(isModalOpen1, "isHostelsss")
   return (
     <div className='bg-container' style={mainBackgroundContainerStyle}>
       <div className='sidebar' style={sidebarStyle}>
@@ -276,19 +291,16 @@ const MainPage = () => {
         <div >
           <div className='dashboardHead'>
             <div className='dashBoarWelcome'>
-              {renderWelcomeext(flag)}
+              { isHostels ? '': renderWelcomeext(flag)} 
             </div>
             <div className='top-div'>
               <img src={Admin} alt="admin" className='dashboard-icon' />
               <h1 className='dashboard-heading'>{name}</h1>
               <div className='logoutButton' onClick={toggleModal}>
                 <RiLogoutCircleRLine />
-
               </div>
             </div>
           </div>
-
-
 
           {isModalOpen && (
             <div id="poplogoutbtn" className="mainPagepPopup">
@@ -297,15 +309,24 @@ const MainPage = () => {
               </div>
               <p>Are you sure you want to logout?</p>
               <button onClick={logout} className="logout-button">Logout</button>
-
               <button className='logout-closeBtn' onClick={toggleModal}>Close</button>
             </div>
           )}
         </div>
-        {Components && Components.map((item, index) =>
-          <div key={index} style={flag === index + 1 ? { display: 'block' } : { display: 'none' }}>
-            {item}
-          </div>)}
+        {
+          isHostels ? (
+            <div>
+                {/* <Button onClick={handleOpenModal}>Open Modal</Button> */}
+                <DefaultModal show={isModalOpen1} handleClose={handleCloseModal} /> 
+            </div>
+          ) : (
+            Components && Components.map((item, index) => (
+              <div key={index} style={flag === index + 1 ? { display: 'block' } : { display: 'none' }}>
+                {item}
+              </div>
+            ))
+          )
+        }
 
       </div>
     </div>
