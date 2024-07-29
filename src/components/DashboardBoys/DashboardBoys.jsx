@@ -27,7 +27,7 @@ const DashboardBoys = () => {
     adminRole = "Sub-admin"
   }
   const isUneditable = role === 'admin' || role === 'subAdmin';
-  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase } = useData();
+  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag } = useData();
   const { database } = firebase;
 
   const [loading,setLoading] = useState(false);
@@ -1480,7 +1480,7 @@ const DashboardBoys = () => {
             </div>
             <div className="col-md-6">
               <label htmlFor="inputRent" className="form-label">{t('dashboard.expenseAmount')}</label>
-              <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+              <input type="text" className="form-control" name="expenseAmount" value={formData.expenseAmount} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} onChange={handleInputChange} onFocus={handleExpensesFocus} />
               {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
             </div>
             {/* <div className="col-md-6"> */}
@@ -1557,13 +1557,16 @@ const DashboardBoys = () => {
 
   return (
     <div className="dashboardboys">
-      <h1 className="heading">{t('dashboard.mens')}</h1>
+      
       {activeBoysHostelButtons.length > 0 ? (
+        <div>
+          <h1 className="heading">{t('dashboard.mens')}</h1>
+       
         <div className={"flex"}>
           {activeBoysHostelButtons.map((button, index) => (
             <button
               className={`btn m-1 ${activeBoysHostel === button.id ? 'active-button' : 'inactive-button'}`}
-              onClick={() => { setActiveBoysHostel(button.id); setActiveBoysHostelName(button.name) }}
+              onClick={() => { setActiveBoysHostel(button.id); setActiveBoysHostelName(button.name) ; changeActiveFlag('boys')}}
               key={button.id}
               style={{
                 backgroundColor: activeBoysHostel === button.id ? '#FF8A00' : '#fac38c',
@@ -1574,11 +1577,8 @@ const DashboardBoys = () => {
             </button>
           ))}
         </div>
-      ) : (
-        <p>No active hostels found.</p>
-      )}
-
-      <div className="menu">
+        <br/>
+        <div className="menu">
         {menu.map((item, index) => (
           <div key={index} className='cardWithBtnsContainer'>
             <SmallCard key={index} index={index} item={item} handleClick={handleCardClick} />
@@ -1587,6 +1587,12 @@ const DashboardBoys = () => {
         ))}
 
       </div>
+        </div>
+      ) : (
+        ''
+      )}
+
+     
       <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalRoomsBoys" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal} >
         <div className="modal-dialog ">
           <div className="modal-content">
