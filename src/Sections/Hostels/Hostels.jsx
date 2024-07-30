@@ -366,23 +366,23 @@ const Hostels = () => {
 
 
   return (
+    <div className='h-100'>
     <div className='container'>
       <Tabs activeKey={activeFlag} onSelect={handleTabSelect} className=" mb-3 tabs-nav custom-tabs">
         {
           activeBoysHostelButtons.length > 0 ?
           <Tab eventKey="boys" title={t('dashboard.mens')} className={activeFlag === 'boys' ? 'active-tab' : ''}>
           <div className=" row d-flex flex-wrap align-items-center justify-content-between">
-            <div className="col-12  col-md-4 d-flex justify-content-between align-items-center mr-5 mb-2 w-100">
-              <div className='d-flex align-items-center'>
+            <div className="col-6  col-md-6 d-flex align-items-center mr-5 mb-2">
+             
                 <div className='roomlogo-container'>
                   <img src={RoomsIcon} alt="RoomsIcon" className='roomlogo' />
                 </div>
                 <text className='management-heading2'>{t('roomsPage.HostelsManagement')}</text>
-              </div>
-              <div>
-                <button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button>
-              </div>
             </div>
+            <div className='col-6 col-md-6 d-flex justify-content-end'>
+                <button className="add-button" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button>
+              </div>
           </div>
           <div>
             <Table
@@ -398,17 +398,18 @@ const Hostels = () => {
           activeGirlsHostelButtons.length > 0 ?
           <Tab eventKey="girls" title={t('dashboard.womens')} className={activeFlag === 'girls' ? 'active-tab' : ''}>
           <div className="row d-flex flex-wrap align-items-center justify-content-between">
-            <div className="col-12 col-md-4 d-flex justify-content-between align-items-center mr-5 mb-2 w-100">
-              <div className='d-flex align-items-center'>
+            <div className="col-6 col-md-6 d-flex align-items-center mr-5 mb-2">
+    
                 <div className='roomlogo-container'>
                   <img src={RoomsIcon} alt="RoomsIcon" className='roomlogo' />
                 </div>
                 <text className='management-heading2'>{t('roomsPage.HostelsManagement')}</text>
-              </div>
-              <div>
-                <button className="addHostelBtn" onClick={() => setIsGirlsModalOpen(true)}>{t("settings.addHostel")}</button>
-              </div>
+              
+             
             </div>
+            <div className='col-6 col-md-6 d-flex justify-content-end'>
+                <button className="add-button" onClick={() => setIsGirlsModalOpen(true)}>{t("settings.addHostel")}</button>
+              </div>
           </div>
 
           <div>
@@ -559,6 +560,7 @@ const Hostels = () => {
           </form>
         </Modal.Body>
       </Modal>
+    </div>
     </div>
   );
 };

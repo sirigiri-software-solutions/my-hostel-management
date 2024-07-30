@@ -16,7 +16,6 @@ function useDeepCompareEffect(callback, dependencies) {
 
 
 const DataProvider = ({ children }) => {
-  const [data, setData] = useState(null);
   const [activeBoysHostel, setActiveBoysHostel] = useState(null);
   const [activeBoysHostelName, setActiveBoysHostelName] = useState(null);
   const [activeBoysHostelButtons, setActiveBoysHostelButtons] = useState([]);
@@ -130,7 +129,7 @@ const DataProvider = ({ children }) => {
 
 
   return (
-    <DataContext.Provider value={{ data, activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag}}>
+    <DataContext.Provider value={{  activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag}}>
       {children}
     </DataContext.Provider>
   );

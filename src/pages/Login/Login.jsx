@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import ImageOne from "../../images/Vector 1 (1).png";
 import ImageTwo from "../../images/Vector 3 (2).png";
+import moment from 'moment';
 
 import Logo from "../../images/HMLogo3.png"
 import newLogo from "../../images/favicon (2).jpg"
@@ -16,6 +17,7 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { FirebaseError } from 'firebase/app';
+import { ref, set, get,update} from 'firebase/database';
 
 
 
@@ -24,7 +26,7 @@ export const loginContext = createContext();
 
 const Login = () => {
   const navigate = useNavigate();
-  const { areaToApiEndpoint, setUserArea, setUserUid, firebase, setArea } = useData();
+  const { areaToApiEndpoint, setUserArea, setUserUid, firebase, setArea,setIsSubscribed} = useData();
 
   const initialState = { Id: "", email: "", area: "", password: "" };
   const [loginData, setLoginData] = useState(initialState);
@@ -71,8 +73,7 @@ const Login = () => {
   const [hideconfirmPassword, setHideConfirmPassword] = useState(true);
 
 
-  const { auth } = firebase;
-
+  const { auth, database, setFirstLogin  } = firebase;
 
 
   const togglePasswordVisibility = () => {
@@ -124,12 +125,16 @@ const Login = () => {
         );
         const user = userCredential.user;
 
+        console.log(user,"user")
+
         if (user.emailVerified) {
           const singleLoginUser = data.find(
             (item) =>
               item.signUpEmail === loginData.email &&
               item.area === loginData.area
           );
+
+          
 
           if (singleLoginUser) {
             setLoginData({
@@ -139,9 +144,32 @@ const Login = () => {
               password: "",
             });
 
+            console.log("Username:", singleLoginUser.firstname);
+            console.log("User Area:", singleLoginUser.area);
+            console.log("User UID:", singleLoginUser.uid);
             localStorage.setItem("username", singleLoginUser.firstname);
             localStorage.setItem("userarea", singleLoginUser.area);
             localStorage.setItem("userUid", singleLoginUser.uid);
+            setUserUid(singleLoginUser.uid);
+            const now = moment();
+            const accessEnd = singleLoginUser.accessEnd ? moment(singleLoginUser.accessEnd) : null;
+
+            if(singleLoginUser.firstLogin === false){
+              const userRef = ref(database, `register/${singleLoginUser.uid}`);
+              update(userRef, {
+                firstLogin: true,
+                accessEnd: now.add(5, 'minute').toISOString(),
+              })
+              localStorage.setItem('accessEnd', now.add(5, 'minute').toISOString());
+
+            }else if (accessEnd && now.isAfter(accessEnd)) {
+              navigate('/subscribe');
+              return;
+            } else {
+              // Set access end from the database
+              localStorage.setItem('accessEnd', accessEnd.toISOString());
+            }
+
             setUserUid(singleLoginUser.uid);
             navigate("/mainPage");
 
@@ -186,6 +214,9 @@ const Login = () => {
       }
     }
   };
+
+ 
+  
 
 
   const validateForm = () => {
@@ -451,6 +482,9 @@ const Login = () => {
       firstname,
       phone,
       signUpEmail,
+      firstLogin:false,
+      subscriptionPlan:null,
+      accessEnd:null
     };
 
 

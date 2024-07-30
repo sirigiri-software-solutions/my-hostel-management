@@ -160,13 +160,13 @@ const Settings = () => {
         {
           activeBoysHostelButtons.length > 0 ? '' :
             <div className='d-flex  align-items-center'>
-              <h5>Add Your Boys Hostel</h5><button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button>
+              <h5 className="addHostelTextBtn">Add Your Boys Hostel</h5><button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button>
             </div>
         }
         {
           activeGirlsHostelButtons.length > 0 ? '' :
             <div className='d-flex  align-items-center'>
-              <h5>Add Your Girls Hostel</h5><button className="addHostelBtn" onClick={() => setIsGirlsModalOpen(true)}>{t("settings.addHostel")}</button>
+              <h5 className="addHostelTextBtn">Add Your Girls Hostel</h5><button className="addHostelBtn" onClick={() => setIsGirlsModalOpen(true)}>{t("settings.addHostel")}</button>
             </div>
         }
 

@@ -9,7 +9,7 @@ import RentImage from '../../images/Icons (6).png'
 import SettingsImage from '../../images/Icons (7).png'
 import logo from "../../images/HMLogo3.png"
 import './MainPage.css'
-
+import moment from "moment"
 import '../../Sections/Dashboard/Dashboard.css'
 import Dashboard from '../../Sections/Dashboard/Dashboard'
 import Beds from '../../Sections/Beds/Beds'
@@ -29,26 +29,76 @@ import { useData } from '../../ApiData/ContextProvider';
 import Hostels from '../../Sections/Hostels/Hostels'
 import LanguageSwitch from '../../LanguageSwitch'
 import { toast } from 'react-toastify'
-import { Database, push, ref, set } from 'firebase/database'
+import { Database, onValue, push, ref, set } from 'firebase/database'
 import { Modal, Button, Tab, Tabs, Form } from 'react-bootstrap';
 import DefaultModal from './DefaultModal'
+// import Spinner from '../../Elements/Spinner'
+import Spinner from 'react-bootstrap/Spinner';
 const MainPage = () => {
   const { t } = useTranslation()
-  const [isHostels, setIsHostels] = useState(true)
+  const [isHostels, setIsHostels] = useState(false)
   const { activeBoysHostelName, activeGirlsHostelName, activeBoysHostelButtons, activeGirlsHostelButtons, userUid, firebase, activeFlag,  changeActiveFlag } = useData();
   const name = localStorage.getItem("username");
   const [isModalOpen1, setIsModalOpen1] = useState(true);
+  const {database} = firebase;
+  const [welcomeText,setWelcomeText] = useState(false);
+  const [loading, setLoading] = useState(true);
 
 
   // useEffect(() => {
   //   setActiveTab("boys")
   // }, [])
   
-  useEffect(() => {
-    setIsHostels(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
-    setIsModalOpen1(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
+  // useEffect(() => {
+  //   setIsHostels(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
+  //   setIsModalOpen1(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
 
-  }, [activeBoysHostelButtons, activeGirlsHostelButtons, isModalOpen1])
+  // }, [activeBoysHostelButtons, activeGirlsHostelButtons, isModalOpen1])
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userUid');
+    const dataref = ref(database, `Hostel/${userId}`);
+    
+    onValue(dataref, (snapshot) => {
+      const data = snapshot.val();
+   
+      if (data) {
+        const boys = data.boys || [];
+        const girls = data.girls || [];
+       
+        // Check if boys and girls are arrays before accessing length
+        if (Array.isArray(boys) || Array.isArray(girls)) {
+          setIsHostels(boys.length === 0 && girls.length === 0);
+          setIsModalOpen1(boys.length === 0 && girls.length === 0);
+          
+          
+        }
+  
+        setWelcomeText(true);
+        setLoading(false);
+      } else {
+        setIsHostels(true);
+        setIsModalOpen1(true)
+        setWelcomeText(false);
+        setLoading(false);
+      
+      }
+    });
+  }, [isModalOpen1]);
+  
+
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+  //   onValue(tenantsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedTenants = data ? Object.keys(data).map(key => ({
+  //       id: key,
+  //       ...data[key],
+  //     })) : [];
+  //     setTotalTenantData(loadedTenants)
+  //   })
+
+  // }, [selectedTenant])
 
   const menuItems = [
     {
@@ -186,6 +236,30 @@ const MainPage = () => {
 
   const navigate = useNavigate();
 
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const uid = localStorage.getItem('userUid');
+      const accessEnd = localStorage.getItem('accessEnd');
+
+      if (uid && accessEnd) {
+        const now = moment();
+        const endTime = moment(accessEnd);
+
+        if (now.isAfter(endTime)) {
+          navigate('/subscribe');
+        } 
+      } else {
+
+        navigate('/subscribe');
+      }
+    };
+
+    checkSession();
+
+   
+  }, [navigate,flag]);
+
   const logout = () => {
     localStorage.removeItem('username');
     localStorage.removeItem('userarea');
@@ -194,14 +268,10 @@ const MainPage = () => {
     localStorage.removeItem('rememberedUsername');
     localStorage.removeItem('rememberedUserarea');
     localStorage.removeItem('rememberedPassword');
+    localStorage.removeItem("accessEnd");
     navigate('/');
   };
 
-  console.log(activeBoysHostelButtons, "activeBoysHostelButtons")
-  console.log(activeBoysHostelButtons.length, "activeBoysHostelButtons")
-  console.log(activeGirlsHostelButtons.length, 'activeGirlsHostelButtons')
-
-  console.log(isHostels, "isHostels")
 
   const renderWelcomeext = index => {
     if (index === Components.length) {
@@ -223,7 +293,7 @@ const MainPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen1(false);
   };
-  console.log(isModalOpen1, "isHostelsss")
+
   return (
     <div className='bg-container' style={mainBackgroundContainerStyle}>
       <div className='sidebar' style={sidebarStyle}>
@@ -287,11 +357,14 @@ const MainPage = () => {
         </Popup>
       </div>
 
+       
+
       <div style={rightSectionMainContainer} >
+     
         <div >
           <div className='dashboardHead'>
             <div className='dashBoarWelcome'>
-              { isHostels ? '': renderWelcomeext(flag)} 
+              { welcomeText ?  renderWelcomeext(flag):null} 
             </div>
             <div className='top-div'>
               <img src={Admin} alt="admin" className='dashboard-icon' />
@@ -313,6 +386,11 @@ const MainPage = () => {
             </div>
           )}
         </div>
+
+        {loading && <div className="spinnerContainer"> <Spinner animation="border" variant="info" role="status" size="lg">
+      <span className="visually-hidden">Loading...</span>
+    </Spinner>
+            </div>}
         {
           isHostels ? (
             <div>
