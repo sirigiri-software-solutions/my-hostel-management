@@ -34,6 +34,10 @@ const SubscriptionPage = () => {
     });
   };
 
+  const handleOnClickBackBtn = () => {
+    navigate('/')
+  }
+
   return (
     <div className="subscription-container">
       <h1 className="subscription-title">Choose Your Subscription Plan</h1>
@@ -54,6 +58,9 @@ const SubscriptionPage = () => {
           <h2>12 Months</h2>
           <button onClick={() => handleSubscription(365)}>Subscribe</button>
         </div>
+      </div>
+      <div className="backBtnContainer">
+      <button onClick={handleOnClickBackBtn} className='backBtn'>Back</button>
       </div>
     </div>
   );

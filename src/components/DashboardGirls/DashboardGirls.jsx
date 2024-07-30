@@ -29,10 +29,10 @@ const DashboardGirls = () => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
 
 
-  const { activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, userUid, firebase } = useData();
+  const { activeGirlsHostel, setActiveGirlsHostel,setActiveGirlsHostelName, activeGirlsHostelButtons, userUid, firebase,  changeActiveFlag } = useData();
   const { database } = firebase;
-  
-  const [loading,setLoading] = useState(false);
+
+  const [loading, setLoading] = useState(false);
 
 
 
@@ -126,12 +126,12 @@ const DashboardGirls = () => {
       t('months.nov'),
       t('months.dec')
     ];
-    const currentMonth = new Date().getMonth(); 
+    const currentMonth = new Date().getMonth();
     return monthNames[currentMonth];
   };
 
   const getCurrentYear = () => {
-    return new Date().getFullYear().toString(); 
+    return new Date().getFullYear().toString();
   };
 
   const [year, setYear] = useState(getCurrentYear());
@@ -149,7 +149,7 @@ const DashboardGirls = () => {
       const loadedTenants = data ? Object.keys(data).map(key => ({
         id: key,
         ...data[key],
-      })) : []; 
+      })) : [];
       setTotalTenantData(loadedTenants)
     })
 
@@ -192,7 +192,7 @@ const DashboardGirls = () => {
     const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
     onValue(expensesRef, (snapshot) => {
       const data = snapshot.val();
-      let total = 0; 
+      let total = 0;
       const expensesArray = [];
       for (const key in data) {
         const expense = {
@@ -200,11 +200,11 @@ const DashboardGirls = () => {
           ...data[key],
           expenseDate: formatDate(data[key].expenseDate)
         };
-        total += expense.expenseAmount; 
+        total += expense.expenseAmount;
         expensesArray.push(expense);
       }
       setCurrentMonthExpenses(expensesArray);
-      setTotalExpenses(total); 
+      setTotalExpenses(total);
     });
   }, [activeGirlsHostel]);
 
@@ -321,7 +321,7 @@ const DashboardGirls = () => {
             })) : [];
             resolve({ id: tenantId, ...tenantsData[tenantId], rents });
           }, {
-            onlyOnce: true 
+            onlyOnce: true
           });
         });
       });
@@ -364,7 +364,7 @@ const DashboardGirls = () => {
       });
     });
     setBedsData(allBeds);
-  }, [girlsRooms, tenants]); 
+  }, [girlsRooms, tenants]);
 
 
   const handleImageChange = (e) => {
@@ -411,7 +411,7 @@ Therefore, your remaining due amount is ${amount}.\n
 You joined on ${dateOfJoin}, and your due date is ${dueDate}.\n
 Please note that you made your last payment on ${paidDate}.\n`
 
-    const phoneNumber = tenant.mobileNo; 
+    const phoneNumber = tenant.mobileNo;
     const formattedPhoneNumber = phoneNumber.startsWith('+91') ? phoneNumber : `+91${phoneNumber}`;
 
     const encodedMessage = encodeURIComponent(message);
@@ -459,7 +459,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
     if (name === 'floorNumber' || name === 'roomNumber') {
 
-      sanitizedValue = value.replace(/[^a-zA-Z0-9-]/g, '');
+      sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
     } else if (name === 'numberOfBeds' || name === 'bedRent') {
       sanitizedValue = value.replace(/[^0-9]/g, '');
     }
@@ -483,7 +483,7 @@ Please note that you made your last payment on ${paidDate}.\n`
   };
   const handleGirlsRoomsSubmit = (e) => {
     e.preventDefault();
-    const now = new Date().toISOString(); 
+    const now = new Date().toISOString();
     const newErrors = {};
     if (!floorNumber.trim()) newErrors.floorNumber = t('errors.floorNumberRequired');
     if (!roomNumber.trim()) newErrors.roomNumber = t('errors.roomNumberRequired');
@@ -576,9 +576,9 @@ Please note that you made your last payment on ${paidDate}.\n`
     } else if (!phoneRegexWithCountryCode.test(mobileNo) && !phoneRegexWithoutCountryCode.test(mobileNo)) {
       tempErrors.mobileNo = t('errors.mobileNumberInvalid');
     }
-    if(!idNumber){
+    if (!idNumber) {
       tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
-    } else if(idNumber.length < 6){
+    } else if (idNumber.length < 6) {
       tempErrors.idNumber = 'Id should be min 6 characters';
     } else if (!/^[a-zA-Z0-9]+$/.test(idNumber)) {
       tempErrors.idNumber = 'It does not allow special charecters';
@@ -602,12 +602,17 @@ Please note that you made your last payment on ${paidDate}.\n`
     }
     if (hasBike) {
       if (!bikeNumber) {
-          tempErrors.bikeNumber = 'Bike number required';
-      } else if (!/^[A-Za-z]{2}\s\d{2,4}\s[A-Za-z]{1,2}\s?\d{4}$/.test(bikeNumber)) {
-          tempErrors.bikeNumber = 'Enter a valid bike number';
+        tempErrors.bikeNumber = 'Bike number required';
+      } else {
+        // Remove spaces for validation
+        const bikeNumberWithoutSpaces = bikeNumber.replace(/\s+/g, '');
+
+        if (!/^[A-Za-z0-9]{6,10}$/.test(bikeNumberWithoutSpaces)) {
+          tempErrors.bikeNumber = 'Enter a valid bike number (letters and numbers only)';
+        }
       }
-  }
-    
+    }
+
     setTenantErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
@@ -617,7 +622,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
- 
+
         setTenantImage(reader.result);
       };
       reader.readAsDataURL(file);
@@ -764,7 +769,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
 
     if (!validateRentForm()) {
-      
+
       return;
     }
 
@@ -781,7 +786,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     };
 
     if (isEditing) {
-  
+
       const rentRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents/${editingRentId}`);
       await update(rentRef, rentData).then(() => {
         toast.success(t('toastMessages.rentUpdatedSuccess'), {
@@ -793,7 +798,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           draggable: true,
           progress: undefined,
         });
-        setIsEditing(false); 
+        setIsEditing(false);
         if (notify) {
           handleNotifyCheckbox(rentData);
         }
@@ -810,7 +815,7 @@ Please note that you made your last payment on ${paidDate}.\n`
         });
       });
     } else {
-      
+
       const rentRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents`);
       await push(rentRef, rentData).then(() => {
         toast.success(t('toastMessages.rentAddedSuccess'), {
@@ -822,7 +827,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           draggable: true,
           progress: undefined,
         });
-        setIsEditing(false); 
+        setIsEditing(false);
         if (notify) {
           handleNotifyCheckbox(rentData);
         }
@@ -998,7 +1003,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       push(expensesRef, {
         ...formData,
         expenseAmount: parseFloat(formData.expenseAmount),
-        expenseDate: new Date(formData.expenseDate).toISOString() 
+        expenseDate: new Date(formData.expenseDate).toISOString()
       }).then(() => {
         toast.success(t('toastMessages.expenseAddedSuccessfully'), {
           position: "top-center",
@@ -1063,7 +1068,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     const { name } = e.target;
     setTenantErrors((prevErrors) => ({
       ...prevErrors,
-      [name]: '',  
+      [name]: '',
     }));
   };
 
@@ -1153,7 +1158,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor='DateOfJoin' class="form-label">{t('dashboard.dateOfJoin')}:</label>
-                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly 
+                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly
                     />
                   </div>
                   <div class="col-md-6 mb-3">
@@ -1189,7 +1194,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                         className="form-check-input"
                         type="checkbox"
                         checked={notify}
-                        onChange={onClickCheckbox} 
+                        onChange={onClickCheckbox}
                       />
                       <label className="form-check-label" htmlFor="notifyCheckbox">
                         {t('dashboard.notify')}
@@ -1207,8 +1212,6 @@ Please note that you made your last payment on ${paidDate}.\n`
                   <div class='col-12 mb-3'>
                     <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
                       <option value="">{t('dashboard.selectTenant')} *</option>
-                
-
                       {isEditing ? (
                         <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
                       ) : (
@@ -1216,8 +1219,6 @@ Please note that you made your last payment on ${paidDate}.\n`
                           <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
                         ))
                       )}
-
-
                     </select>
                     {errors.selectedTenant && <div style={{ color: 'red' }}>{errors.selectedTenant}</div>}
                   </div>
@@ -1244,7 +1245,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor='DateOfJoin' class="form-label">{t('dashboard.dateOfJoin')}</label>
-                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly 
+                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly
                     />
                   </div>
                   <div class="col-md-6 mb-3">
@@ -1280,7 +1281,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                         className="form-check-input"
                         type="checkbox"
                         checked={notify}
-                        onChange={onClickCheckbox} 
+                        onChange={onClickCheckbox}
                       />
                       <label className="form-check-label" htmlFor="notifyCheckbox">
                         {t('dashboard.notify')}
@@ -1348,7 +1349,7 @@ Please note that you made your last payment on ${paidDate}.\n`
               <label htmlFor='tenantMobileNo' class="form-label">
                 {t('dashboard.mobileNo')}
               </label>
-              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} name="mobileNo" onFocus={handleTenantFocus} />
+              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
 
               {tenatErrors.mobileNo && <p style={{ color: 'red' }}>{tenatErrors.mobileNo}</p>}
             </div>
@@ -1454,7 +1455,7 @@ Please note that you made your last payment on ${paidDate}.\n`
             )
             }
 
-{tenatErrors.bikeNumber && <p style={{ color: 'red',marginLeft:"4px" }}>{tenatErrors.bikeNumber}</p>}
+            {tenatErrors.bikeNumber && <p style={{ color: 'red', marginLeft: "4px" }}>{tenatErrors.bikeNumber}</p>}
 
             {hasBike && (
               <>
@@ -1489,10 +1490,10 @@ Please note that you made your last payment on ${paidDate}.\n`
             </div>
             <div className="col-md-6">
               <label htmlFor="inputRent" className="form-label">{t('dashboard.expenseAmount')}</label>
-              <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+              <input type="text" className="form-control" name="expenseAmount" value={formData.expenseAmount} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} onChange={handleInputChange} onFocus={handleExpensesFocus} />
               {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
             </div>
-        
+
             <div className="col-md-6">
               <label htmlFor="inputDate" className="form-label">{t('dashboard.expenseDate')}</label>
               <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
@@ -1561,39 +1562,37 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   return (
     <div className="dashboardgirls">
-      <h1 className="heading1">{t('dashboard.womens')}</h1>
-      <br />
       {activeGirlsHostelButtons.length > 0 ? (
-        <div className={"flex1"}>
-          {activeGirlsHostelButtons.map((button, index) => (
-            <button
-              className={`btn m-1 ${activeGirlsHostel === button.id ? 'active-button' : 'inactive-button'}`}
-              onClick={() => setActiveGirlsHostel(button.id)} 
-              key={button.id}
-              style={{
-                backgroundColor: activeGirlsHostel === button.id ? '#FF8A00' : '#fac38c',
-                color: activeGirlsHostel === button.id ? 'white' : '#333333'
-              }}
-            >
-              {button.name}
-            </button>
-          ))}
+        <div>
+          <h1 className="heading1">{t('dashboard.womens')}</h1>
+          <div className={"flex1"}>
+            {activeGirlsHostelButtons.map((button, index) => (
+              <button
+                className={`btn m-1 ${activeGirlsHostel === button.id ? 'active-button' : 'inactive-button'}`}
+                onClick={() =>{ setActiveGirlsHostel(button.id); setActiveGirlsHostelName(button.name); changeActiveFlag('girls') }}
+                key={button.id}
+                style={{
+                  backgroundColor: activeGirlsHostel === button.id ? '#FF8A00' : '#fac38c',
+                  color: activeGirlsHostel === button.id ? 'white' : '#333333'
+                }}
+              >
+                {button.name}
+              </button>
+            ))}
+          </div>
+          <div className="menu">
+            {menu.map((item, index) => (
+              <div key={index} className='cardWithBtnsContainer'>
+                <SmallCard key={index} index={index} item={item} handleClick={handleCardClick} />
+                <button id="mbladdButton" type="button" onClick={() => handleClick(item.btntext)}><img src={PlusIcon} alt="plusIcon" className='plusIconProperties' /> {item.btntext} </button>
+              </div>
+            ))}
+
+          </div>
         </div>
       ) : (
-        <p>No active hostels found.</p>
+        ''
       )}
-
-
-      <div className="menu">
-        {menu.map((item, index) => (
-          <div key={index} className='cardWithBtnsContainer'>
-            <SmallCard key={index} index={index} item={item} handleClick={handleCardClick} />
-            <button id="mbladdButton" type="button" onClick={() => handleClick(item.btntext)}><img src={PlusIcon} alt="plusIcon" className='plusIconProperties' /> {item.btntext} </button>
-          </div>
-        ))}
-   
-      </div>
-
 
       <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalRoomsGirls" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal} >
         <div className="modal-dialog ">

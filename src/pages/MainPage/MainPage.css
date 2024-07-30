@@ -221,3 +221,60 @@
     /* margin-right: 10px; */
    /* background-color:red; */
 }
+
+
+.defaultPopUpComponent{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    height:80vh;  
+}
+@media screen and (max-width:768px){
+    .defaultPopUpComponent{
+        height:auto;
+    }
+}
+.defaultPopUp{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* border: 1px solid rgb(112, 111, 111); */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 -4px 8px rgba(0, 0, 0, 0.15), 4px 0 8px rgba(0, 0, 0, 0.15), -4px 0 8px rgba(0, 0, 0, 0.15);
+    width: 360px ;
+    padding: 15px;
+}
+
+
+.defaultPopUpHead{
+    font-size: 24px;
+    font-weight: 600;
+    color: #ff8a00;
+    border-bottom: #ff8a00 2px solid;
+    margin-bottom: 5px;
+}
+
+.defaultPopUpText{
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.defaultPageButton{
+    width: 100%;
+    background-color: #ff8a00;
+    border: none;
+    color: #ffffff;
+    border-radius: 5px;
+    padding: 5px;
+    margin-top: 4px;
+}
+.spinnerContainer{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:80vh;
+}
+

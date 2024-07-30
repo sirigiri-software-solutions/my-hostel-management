@@ -523,13 +523,13 @@ Please note that you made your last payment on ${paidDate}.\n`
             </div>
             <h1 className='management-heading'>{t('rentsPage.rentsManagement')}</h1>
           </div>
-          <div className="col-6 col-md-4 search-wrapper">
+          <div className="col-12 col-md-4 search-wrapper">
             <input type="text" placeholder={t('common.search')} className='search-input' value={searchQuery}
               onChange={handleSearch} />
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
 
-          <div className="col-6 col-md-4 d-flex justify-content-end align-items-end">
+          <div id="rentPagefilterbtn" className="col-12 col-md-4 d-flex justify-content-md-end align-items-end gap-3">
             <div className="filterRentDropDownContainer">
               <select
                 id="dueDateFilter"

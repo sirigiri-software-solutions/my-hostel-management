@@ -158,9 +158,9 @@ const Login = () => {
               const userRef = ref(database, `register/${singleLoginUser.uid}`);
               update(userRef, {
                 firstLogin: true,
-                accessEnd: now.add(1, 'minute').toISOString(),
+                accessEnd: now.add(5, 'minute').toISOString(),
               })
-              localStorage.setItem('accessEnd', now.add(1, 'minute').toISOString());
+              localStorage.setItem('accessEnd', now.add(5, 'minute').toISOString());
 
             }else if (accessEnd && now.isAfter(accessEnd)) {
               navigate('/subscribe');
@@ -607,14 +607,14 @@ const Login = () => {
                   </div>
                   <div className="mbl-inputField ">
                     <select
-                      className={`form-control custom-input rounded-pill selectarea ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"}`}
+                      className={`custom-select form-control custom-input rounded-pill selectarea ${loginErrors?.area && "is-invalid"} ${loginData.area.trim() === "" && "empty-field"} `}
                       onChange={handleData}
                       value={loginData.area}
                       onFocus={() => clearErrorOnFocus("area")}
                       name="area"
                       id="area"
                     >
-                      <option id="selectarea" value="" disabled>Select Your Area</option>
+                      <option id="selectarea" value=""  disabled >Select Your Area</option>
                       {areaOptions.map((area, index) => (
 
                         <option key={index} value={area}>
@@ -677,7 +677,7 @@ const Login = () => {
                   </div>
                   <div className="form-group">
                     <select
-                      className="form-control rounded-pill"
+                      className="form-control rounded-pill custom-select"
                       name="area"
                       value={forgotPasswordData.area}
                       onChange={handleForgotPasswordData}
@@ -711,6 +711,7 @@ const Login = () => {
                     onChange={changeHandler}
                     placeholder="Enter Name"
                     onFocus={() => clearErrorOnFocus("firstname")}
+                    onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')}
                     className="rounded-pill"
                   />
                   {signupErrors.firstname && <div className="form-error-msg">{signupErrors.firstname}</div>}
@@ -736,19 +737,18 @@ const Login = () => {
                     onChange={changeHandler}
                     placeholder="Mobile number"
                     onFocus={() => clearErrorOnFocus("phone")}
+                    onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
                     className="rounded-pill"
                   />
                   {signupErrors.phone && <div className="form-error-msg">{signupErrors.phone}</div>}
                 </div>
-
-
                 <div className="form-group col-md-6">
                   <select
                     name="area"
                     value={area}
                     onChange={changeHandler}
                     onFocus={() => clearErrorOnFocus("area")}
-                    className="rounded-pill"
+                    className="rounded-pill custom-select"
                   >
                     <option value="" disabled>Select Your Area</option>
                     {areaOptions.map((area, index) => (
@@ -797,8 +797,6 @@ const Login = () => {
                     onClick={toggleSignUpPasswordConfirmVisibility}
                   />
                 </div>
-
-
 
                 {signupError && <p className="text-center error-message">{signupError}</p>}
                 <div className="form-group col-md-11">

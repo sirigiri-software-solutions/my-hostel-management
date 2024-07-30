@@ -5,23 +5,30 @@ import RoomsGirls from '../../components/RoomsGirls/RoomsGirls';
 import { useTranslation } from 'react-i18next';
 import { useData } from '../../ApiData/ContextProvider';
 
-const Rooms =({ onTabSelect,activeTab }) => {
+const Rooms = () => {
     const { t } = useTranslation();
-
+    const { activeBoysHostelButtons, activeGirlsHostelButtons, activeFlag,  changeActiveFlag } = useData()
 
     const handleTabSelect = (tab) => {
-        onTabSelect(tab);
+        // onTabSelect(tab);
+        changeActiveFlag(tab)    
     };
 
     return (
         <div className='container'>
-            <Tabs activeKey={activeTab} onSelect={handleTabSelect} className="mb-3 tabs-nav">
-                <Tab eventKey="boys" title={t('dashboard.mens')}>
-                    <RoomsBoys />
-                </Tab>
-                <Tab eventKey="girls" title={t('dashboard.womens')}>
-                    <RoomsGirls />
-                </Tab>
+            <Tabs activeKey={activeFlag} onSelect={handleTabSelect} className="mb-3 tabs-nav custom-tabs">
+                {activeBoysHostelButtons.length > 0 ?
+                    <Tab eventKey="boys" title={t('dashboard.mens')} className={activeFlag === 'boys' ? 'active-tab' : ''}>
+                        <RoomsBoys />
+                    </Tab> : ''
+                }
+                {
+                    activeGirlsHostelButtons.length > 0 ?
+                        <Tab eventKey="girls" title={t('dashboard.womens')} className={activeFlag === 'girls' ? 'active-tab' : ''}>
+                            <RoomsGirls />
+                        </Tab> : ''
+                }
+
             </Tabs>
         </div>
     );

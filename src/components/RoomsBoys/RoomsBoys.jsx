@@ -52,7 +52,7 @@ const RoomsBoys = () => {
 
     if (name === 'floorNumber' || name === 'roomNumber') {
 
-      sanitizedValue = value.replace(/[^a-zA-Z0-9-]/g, '');
+      sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
     } else if (name === 'numberOfBeds' || name === 'bedRent') {
 
       sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -85,7 +85,7 @@ const RoomsBoys = () => {
     // Validation checks
     if (!floorNumber.trim()) newErrors.floorNumber = 'Floor number is required';
     if (!roomNumber.trim()) newErrors.roomNumber = 'Room number is required';
-    else if (rooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
+    else if (rooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) { 
       newErrors.roomNumber = 'Room number already exists';
     }
     if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
