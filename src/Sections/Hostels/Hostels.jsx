@@ -184,7 +184,7 @@ const Hostels = ({ onTabSelect, activeTab }) => {
   };
 
   const getHostelColumns = () => [
-    'image',
+    t('tenantsPage.image'),
     t("hostels.name"),
     t("hostels.address"),
     t("hostels.actions"),

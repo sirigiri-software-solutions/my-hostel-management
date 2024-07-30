@@ -9,7 +9,7 @@ import RentImage from '../../images/Icons (6).png'
 import SettingsImage from '../../images/Icons (7).png'
 import logo from "../../images/HMLogo3.png"
 import './MainPage.css'
-
+import moment from "moment"
 import '../../Sections/Dashboard/Dashboard.css'
 import Dashboard from '../../Sections/Dashboard/Dashboard'
 import Beds from '../../Sections/Beds/Beds'
@@ -185,6 +185,30 @@ const MainPage = () => {
 
   const navigate = useNavigate();
 
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const uid = localStorage.getItem('userUid');
+      const accessEnd = localStorage.getItem('accessEnd');
+
+      if (uid && accessEnd) {
+        const now = moment();
+        const endTime = moment(accessEnd);
+
+        if (now.isAfter(endTime)) {
+          navigate('/subscribe');
+        } 
+      } else {
+
+        navigate('/subscribe');
+      }
+    };
+
+    checkSession();
+
+   
+  }, [navigate,flag,activeTab]);
+
   const logout = () => {
     localStorage.removeItem('username');
     localStorage.removeItem('userarea');
@@ -193,6 +217,7 @@ const MainPage = () => {
     localStorage.removeItem('rememberedUsername');
     localStorage.removeItem('rememberedUserarea');
     localStorage.removeItem('rememberedPassword');
+    localStorage.removeItem("accessEnd");
     navigate('/');
   };
 
