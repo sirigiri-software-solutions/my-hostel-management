@@ -133,8 +133,9 @@ const Login = () => {
               item.signUpEmail === loginData.email &&
               item.area === loginData.area
           );
-
-          
+         console.log(data,"singleLogin")
+         console.log(singleLoginUser,"singleLogin")
+         console.log(singleLoginUser.firstLogin,"singleLogin")
 
           if (singleLoginUser) {
             setLoginData({
@@ -154,13 +155,21 @@ const Login = () => {
             const now = moment();
             const accessEnd = singleLoginUser.accessEnd ? moment(singleLoginUser.accessEnd) : null;
 
-            if(singleLoginUser.firstLogin === false){
+             if (typeof singleLoginUser.firstLogin === 'undefined') {
+            const userRef = ref(database, `register/${singleLoginUser.uid}`);
+            update(userRef, {
+              firstLogin: true,
+              accessEnd: now.add(1, 'minute').toISOString(),
+            });
+            localStorage.setItem('accessEnd', now.add(1, 'minute').toISOString());
+          } 
+            else if(singleLoginUser.firstLogin === false){
               const userRef = ref(database, `register/${singleLoginUser.uid}`);
               update(userRef, {
                 firstLogin: true,
-                accessEnd: now.add(5, 'minute').toISOString(),
+                accessEnd: now.add(1, 'minute').toISOString(),
               })
-              localStorage.setItem('accessEnd', now.add(5, 'minute').toISOString());
+              localStorage.setItem('accessEnd', now.add(1, 'minute').toISOString());
 
             }else if (accessEnd && now.isAfter(accessEnd)) {
               navigate('/subscribe');
