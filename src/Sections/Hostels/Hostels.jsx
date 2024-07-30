@@ -10,9 +10,9 @@ import RoomsIcon from '../../images/Icons (2).png';
 import Table from '../../Elements/Table';
 import './Hostels.css'
 
-const Hostels = ({ onTabSelect, activeTab }) => {
+const Hostels = () => {
   const { t } = useTranslation();
-  const { userUid, firebase } = useData();
+  const { userUid, firebase, activeFlag,  changeActiveFlag, activeBoysHostelButtons, activeGirlsHostelButtons, } = useData();
   const { database } = firebase;
   const [isEditing, setIsEditing] = useState(null);
   const [hostels, setHostels] = useState({ boys: [], girls: [] });
@@ -31,6 +31,7 @@ const Hostels = ({ onTabSelect, activeTab }) => {
   const [girlsHostels, setGirlsHostels] = useState([]);
   const [boysHostelImage, setBoysHostelImage] = useState('');
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
+  
 
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
@@ -129,11 +130,8 @@ const Hostels = ({ onTabSelect, activeTab }) => {
   };
 
 
-
-
-
   const deleteHostel = (id) => {
-    const isBoys = activeTab === 'boys';
+    const isBoys = activeFlag === 'boys';
     setIsDeleteConfirmationOpen(true);
     setHostelToDelete({ isBoys, id });
   };
@@ -184,7 +182,7 @@ const Hostels = ({ onTabSelect, activeTab }) => {
   };
 
   const getHostelColumns = () => [
-    'image',
+    t('tenantsPage.image'),
     t("hostels.name"),
     t("hostels.address"),
     t("hostels.actions"),
@@ -208,9 +206,11 @@ const Hostels = ({ onTabSelect, activeTab }) => {
   });
 
   const handleTabSelect = (tab) => {
-    onTabSelect(tab);
+
+    changeActiveFlag(tab)
   };
 
+  console.log(handleTabSelect , "aaaff")
   // ================================
 
 
@@ -367,8 +367,10 @@ const Hostels = ({ onTabSelect, activeTab }) => {
 
   return (
     <div className='container'>
-      <Tabs activeKey={activeTab} onSelect={handleTabSelect} className=" mb-3 tabs-nav custom-tabs">
-        <Tab eventKey="boys" title={t('dashboard.mens')} className={activeTab === 'boys' ? 'active-tab' : ''}>
+      <Tabs activeKey={activeFlag} onSelect={handleTabSelect} className=" mb-3 tabs-nav custom-tabs">
+        {
+          activeBoysHostelButtons.length > 0 ?
+          <Tab eventKey="boys" title={t('dashboard.mens')} className={activeFlag === 'boys' ? 'active-tab' : ''}>
           <div className=" row d-flex flex-wrap align-items-center justify-content-between">
             <div className="col-12  col-md-4 d-flex justify-content-between align-items-center mr-5 mb-2 w-100">
               <div className='d-flex align-items-center'>
@@ -389,8 +391,12 @@ const Hostels = ({ onTabSelect, activeTab }) => {
               onClickTentantRow={(row) => console.log(row)}
             />
           </div>
-        </Tab>
-        <Tab eventKey="girls" title={t('dashboard.womens')} className={activeTab === 'girls' ? 'active-tab' : ''}>
+        </Tab> : ''
+        }
+        
+        {
+          activeGirlsHostelButtons.length > 0 ?
+          <Tab eventKey="girls" title={t('dashboard.womens')} className={activeFlag === 'girls' ? 'active-tab' : ''}>
           <div className="row d-flex flex-wrap align-items-center justify-content-between">
             <div className="col-12 col-md-4 d-flex justify-content-between align-items-center mr-5 mb-2 w-100">
               <div className='d-flex align-items-center'>
@@ -412,7 +418,9 @@ const Hostels = ({ onTabSelect, activeTab }) => {
               onClickTentantRow={(row) => console.log(row)}
             />
           </div>
-        </Tab>
+        </Tab>: ''
+        }
+        
       </Tabs>
       <Modal show={isEditing !== null} onHide={cancelEdit}>
         <Modal.Header closeButton>

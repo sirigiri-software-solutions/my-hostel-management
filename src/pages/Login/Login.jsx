@@ -677,6 +677,7 @@ const Login = () => {
                     onChange={changeHandler}
                     placeholder="Enter Name"
                     onFocus={() => clearErrorOnFocus("firstname")}
+                    onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')}
                     className="rounded-pill"
                   />
                   {signupErrors.firstname && <div className="form-error-msg">{signupErrors.firstname}</div>}
@@ -702,12 +703,11 @@ const Login = () => {
                     onChange={changeHandler}
                     placeholder="Mobile number"
                     onFocus={() => clearErrorOnFocus("phone")}
+                    onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
                     className="rounded-pill"
                   />
                   {signupErrors.phone && <div className="form-error-msg">{signupErrors.phone}</div>}
                 </div>
-
-
                 <div className="form-group col-md-6">
                   <select
                     name="area"
@@ -763,8 +763,6 @@ const Login = () => {
                     onClick={toggleSignUpPasswordConfirmVisibility}
                   />
                 </div>
-
-
 
                 {signupError && <p className="text-center error-message">{signupError}</p>}
                 <div className="form-group col-md-11">

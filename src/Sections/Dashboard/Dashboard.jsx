@@ -9,18 +9,19 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const Dashboard = ({ onTabSelect, activeTab }) => {
   const { t } = useTranslation()
-  const { activeBoysHostel } = useData();
+  const { activeBoysHostel , activeFlag,  changeActiveFlag} = useData();
   const name = localStorage.getItem("username");
 
   const handleTabSelect = (tab) => {
-    onTabSelect(tab);
+    // onTabSelect(tab);
+    changeActiveFlag(tab)
   };
 
 
   return (
     <div className='container_main'>
       <div className='mobile-layout'>
-        <Tabs activeKey={activeTab} onSelect={handleTabSelect} className="mb-3">
+        <Tabs activeKey={activeFlag} onSelect={handleTabSelect} className="mb-3">
           <Tab eventKey="boys" title={t('dashboard.mens')}>
             <DashboardBoys />
           </Tab>
