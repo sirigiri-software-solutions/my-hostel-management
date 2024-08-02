@@ -201,3 +201,35 @@
   }
 
   
+.addHostelTextBtn{
+  margin-right:15px;
+  margin-top:5px;
+}
+.hostelTypeDropDown{
+  display:flex;
+  gap:10px;
+}
+.settingsHeading{
+  font-family:'Roboto';
+  font-size:30px;
+  font-weight:bold;
+}
+.selectTypeText{
+  font-family:'Roboto';
+  font-size:18px;
+}
+.selectTypeDropDown{
+  height:30px;
+  margin-right:10px;
+}
+.reportsButton{
+  border:none;
+  outline:none;
+  padding:10px;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:500;
+  background-color:#FF8A00;
+  color:#fff;
+  margin-right:8px;
+}

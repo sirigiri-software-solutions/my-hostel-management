@@ -62,6 +62,7 @@
 .rentFilter{
   border-radius: 5px;
   height: 34px;
+  margin-left: 7px;
 }
 
 /* men and women buttons=== */
@@ -74,3 +75,11 @@
   color: blue !important; /* Active tab color */
 }
 
+@media screen and (max-width:768px){
+  #rentPagefilterbtn{
+    margin-top:13px;
+    display:flex;
+    justify-content:space-between;
+
+  }
+}

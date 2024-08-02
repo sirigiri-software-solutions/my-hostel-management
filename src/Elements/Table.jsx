@@ -78,8 +78,7 @@ const Table = ({ columns, rows, onClickTentantRow }) => {
               {item.edit && <td className='hosteltable' data-label={t('mobileTable.edit')}>{item.edit}</td>}
               {item.delete && <td className='hosteltable' data-label={t('mobileTable.delete')}>{item.delete}</td>}
               {item.rent && <td className='allhosteldata' data-label={t('mobileTable.rent')}>{item.rent}</td>}
-              {/* {item.address && <td className='allhosteldata' data-label={t('mobileTable.address')}>{item.address}</td>} */}
-              {/* {item.rent && <td className='allhosteldata' data-label={t('mobileTable.rent')}>{item.rent}</td>} */}
+
             </tr>)
           }
         </tbody>

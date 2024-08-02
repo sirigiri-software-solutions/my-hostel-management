@@ -19,6 +19,7 @@ import { Camera, CameraResultType } from '@capacitor/camera';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '../../Elements/Spinner'
+import { jsPDF } from "jspdf";
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
@@ -52,6 +53,7 @@ const TenantsBoys = () => {
   const [singleTenantProofId, setSingleTenantProofId] = useState("");
   const [fileName, setFileName] = useState('');
   const [singleTenantAddress, setSingleTenantAddress] = useState('');
+  const [singleTenanantBikeNum,setSingleTenantBikeNum] = useState('');
 
   const [boysRooms, setBoysRooms] = useState([]);
   const [exTenants, setExTenants] = useState([]);
@@ -625,6 +627,10 @@ const TenantsBoys = () => {
       eachTenant.bedNo === bedNo
     );
 
+    if(singleUserDueDate && singleUserDueDate.bikeNumber){
+      setSingleTenantBikeNum(singleUserDueDate.bikeNumber)
+    }
+
     if (singleUserDueDate && singleUserDueDate.rents) {
       const dataWithDueDate = Object.values(singleUserDueDate.rents);
       const dueDate = dataWithDueDate[0].dueDate;
@@ -805,6 +811,332 @@ const TenantsBoys = () => {
       [name]: '',
     }));
   };
+
+  const calculateFitDimensions = (imageWidth, imageHeight, maxWidth, maxHeight) => {
+    let width = imageWidth;
+    let height = imageHeight;
+  
+    if (width > maxWidth) {
+      height = (maxWidth / width) * height;
+      width = maxWidth;
+    }
+  
+    if (height > maxHeight) {
+      width = (maxHeight / height) * width;
+      height = maxHeight;
+    }
+  
+    return { width, height };
+  };
+
+  // download single separate pdf's
+  // const handleTenantDownload=() => {
+
+ 
+  //   const doc = new jsPDF();
+  //   // title
+  //   doc.setFontSize(18);
+  //   doc.setFont('helvetica','bold')
+  //   doc.text("Tenant Details", 80, 10);
+
+
+  //   if (singleTenantDetails.image) {
+  //     doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
+  //   }
+
+  //   // tenant details
+  //  doc.setFontSize(12);
+  // doc.setFont("helvetica", "bold");
+  // doc.text("Name: ", 20, 25);
+
+  // doc.setFont("helvetica", "normal");
+  // doc.text(singleTenantDetails.name,34, 25);
+
+  // doc.setFont("helvetica", "bold");
+  // doc.text("Mobile No: ", 20, 35);
+
+  // doc.setFont("helvetica", "normal");
+  // doc.text(singleTenantDetails.mobile_no,43, 35);
+
+
+  // doc.setFont("helvetica", "bold");
+  // doc.text("Proof ID :" , 20, 45);
+
+  // doc.setFont("helvetica", "normal");
+  // doc.text(singleTenantDetails.id,40, 45);
+
+  // doc.setFont("helvetica", "bold");
+  // doc.text("Room/Bed No:" , 20, 55);
+ 
+  // doc.setFont("helvetica", "normal");
+  // doc.text(singleTenantDetails.room_bed_no,50, 55);
+
+  // doc.setFont("helvetica", "bold");
+  // doc.text("Joining Date:" , 20, 65);
+ 
+  // doc.setFont("helvetica", "normal");
+  // doc.text(singleTenantDetails.joining_date,48, 65);
+
+
+  // if(dueDateOfTenant){
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Due Date:" , 20, 75);
+   
+  //   doc.setFont("helvetica", "normal");
+  //   doc.text(dueDateOfTenant,40, 75);
+
+  // }
+
+  // if(bikeNumber){
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Bike Number:" , 20, 85);
+   
+  //   doc.setFont("helvetica", "normal");
+  //   doc.text(singleTenanantBikeNum,48, 85);
+  // }
+
+  // if(tenantAddress){
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Address:" , 20, 95);
+   
+  //   doc.setFont("helvetica", "normal");
+  //   doc.text(tenantAddress,39, 95);
+  // }
+
+  
+
+
+
+  // // Save the generated PDF
+  // doc.save(`${singleTenantDetails.name}_Details.pdf`);
+
+  //   // Second PDF: ID Proof Image
+  //   if (singleTenantProofId) {
+  //     const proofDoc = new jsPDF();
+  
+  //     const img = new Image();
+  //     img.src = singleTenantProofId;
+  
+  //     img.onload = () => {
+  //       const imgWidth = img.width;
+  //       const imgHeight = img.height;
+  //       const maxWidth = proofDoc.internal.pageSize.width - 40; // Max width for the image on the PDF
+  //       const maxHeight = proofDoc.internal.pageSize.height - 40; // Max height for the image on the PDF
+  
+  //       // Calculate fit dimensions
+  //       const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
+  
+  //       // Add image to PDF
+  //       proofDoc.addImage(singleTenantProofId, 'JPEG', 20, 20, width, height);
+  
+  //       // Save the second PDF
+  //       proofDoc.save(`${singleTenantDetails.name}_ID_Proof.pdf`);
+  //     };
+  //   }
+
+  //   // Third PDF: Bike Image
+  //    if (bikeImageField) {
+  //     const proofDoc = new jsPDF();
+  
+  //     const img = new Image();
+  //     img.src = bikeImageField;
+  
+  //     img.onload = () => {
+  //       const imgWidth = img.width;
+  //       const imgHeight = img.height;
+  //       const maxWidth = proofDoc.internal.pageSize.width - 40; // Max width for the image on the PDF
+  //       const maxHeight = proofDoc.internal.pageSize.height - 40; // Max height for the image on the PDF
+  
+  //       // Calculate fit dimensions
+  //       const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
+  
+  //       // Add image to PDF
+  //       proofDoc.addImage(bikeImageField, 'JPEG', 20, 20, width, height);
+  
+  //       // Save the second PDF
+  //       proofDoc.save(`${singleTenantDetails.name}_BikeImage.pdf`);
+  //     };
+  //   }
+
+
+  //   //Fourth PDF : Bike rc
+
+  //   if (bikeRcImageField) {
+  //     const proofDoc = new jsPDF();
+  
+  //     const img = new Image();
+  //     img.src = bikeRcImageField;
+  
+  //     img.onload = () => {
+  //       const imgWidth = img.width;
+  //       const imgHeight = img.height;
+  //       const maxWidth = proofDoc.internal.pageSize.width - 40; // Max width for the image on the PDF
+  //       const maxHeight = proofDoc.internal.pageSize.height - 40; // Max height for the image on the PDF
+  
+  //       // Calculate fit dimensions
+  //       const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
+  
+  //       // Add image to PDF
+  //       proofDoc.addImage(bikeRcImageField, 'JPEG', 20, 20, width, height);
+  
+  //       // Save the second PDF
+  //       proofDoc.save(`${singleTenantDetails.name}_BikeRC.pdf`);
+  //     };
+  //   }
+
+
+  // }
+
+
+    // single separate pdf's
+
+    const handleTenantDownload = () => {
+      const doc = new jsPDF();
+    
+      // Page 1: Tenant Details
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text("Tenant Details", 80, 10);
+    
+      if (singleTenantDetails.image) {
+        doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
+      }
+    
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Name: ", 20, 25);
+    
+      doc.setFont("helvetica", "normal");
+      doc.text(singleTenantDetails.name, 34, 25);
+    
+      doc.setFont("helvetica", "bold");
+      doc.text("Mobile No: ", 20, 35);
+    
+      doc.setFont("helvetica", "normal");
+      doc.text(singleTenantDetails.mobile_no, 43, 35);
+    
+      doc.setFont("helvetica", "bold");
+      doc.text("Proof ID: ", 20, 45);
+    
+      doc.setFont("helvetica", "normal");
+      doc.text(singleTenantDetails.id, 40, 45);
+    
+      doc.setFont("helvetica", "bold");
+      doc.text("Room/Bed No: ", 20, 55);
+    
+      doc.setFont("helvetica", "normal");
+      doc.text(singleTenantDetails.room_bed_no, 50, 55);
+    
+      doc.setFont("helvetica", "bold");
+      doc.text("Joining Date: ", 20, 65);
+    
+      doc.setFont("helvetica", "normal");
+      doc.text(singleTenantDetails.joining_date, 48, 65);
+    
+      if (dueDateOfTenant) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Due Date: ", 20, 75);
+    
+        doc.setFont("helvetica", "normal");
+        doc.text(dueDateOfTenant, 40, 75);
+      }
+    
+      if (bikeNumber) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Bike Number: ", 20, 85);
+    
+        doc.setFont("helvetica", "normal");
+        doc.text(singleTenanantBikeNum, 48, 85);
+      }
+    
+      if (tenantAddress) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Address: ", 20, 95);
+    
+        doc.setFont("helvetica", "normal");
+        doc.text(tenantAddress, 39, 95);
+      }
+    
+      // Add a new page
+      doc.addPage();
+    
+      // Page 2: ID Proof Image
+      if (singleTenantProofId) {
+        const img = new Image();
+        img.src = singleTenantProofId;
+    
+        img.onload = () => {
+          const imgWidth = img.width;
+          const imgHeight = img.height;
+          const maxWidth = doc.internal.pageSize.width - 40;
+          const maxHeight = doc.internal.pageSize.height - 40;
+    
+          const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
+    
+          doc.addImage(singleTenantProofId, 'JPEG', 20, 20, width, height);
+    
+          // Add a new page
+          doc.addPage();
+    
+          // Page 3: Bike Image
+          if (bikeImageField) {
+            const bikeImg = new Image();
+            bikeImg.src = bikeImageField;
+    
+            bikeImg.onload = () => {
+              const bikeImgWidth = bikeImg.width;
+              const bikeImgHeight = bikeImg.height;
+              const bikeMaxWidth = doc.internal.pageSize.width - 40;
+              const bikeMaxHeight = doc.internal.pageSize.height - 40;
+    
+              const { width, height } = calculateFitDimensions(bikeImgWidth, bikeImgHeight, bikeMaxWidth, bikeMaxHeight);
+    
+              doc.addImage(bikeImageField, 'JPEG', 20, 20, width, height);
+    
+              // Add a new page
+              doc.addPage();
+    
+              // Page 4: Bike RC
+              if (bikeRcImageField) {
+                const bikeRcImg = new Image();
+                bikeRcImg.src = bikeRcImageField;
+    
+                bikeRcImg.onload = () => {
+                  const bikeRcImgWidth = bikeRcImg.width;
+                  const bikeRcImgHeight = bikeRcImg.height;
+                  const bikeRcMaxWidth = doc.internal.pageSize.width - 40;
+                  const bikeRcMaxHeight = doc.internal.pageSize.height - 40;
+    
+                  const { width, height } = calculateFitDimensions(bikeRcImgWidth, bikeRcImgHeight, bikeRcMaxWidth, bikeRcMaxHeight);
+    
+                  doc.addImage(bikeRcImageField, 'JPEG', 20, 20, width, height);
+    
+                  // Save the PDF
+                  doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+                };
+              } else {
+                // Save the PDF if there's no bike RC image
+                doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+              }
+            };
+          } else {
+            // Save the PDF if there's no bike image
+            doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+          }
+        };
+      } else {
+        // Save the PDF if there's no ID proof image
+        doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+      }
+    };
+    
+
+    
+
+  
+
+
+  
 
 
 
@@ -1094,7 +1426,7 @@ const TenantsBoys = () => {
                 <p><strong>{t('tenantsPage.dueDate')} :</strong> {dueDateOfTenant}</p>
                 <p><strong>{t('tenantsPage.idProof')} :</strong>
                   {singleTenantProofId ? (
-                    <a className='downloadPdfText' href={singleTenantProofId} download> <FaDownload /> {t('tenantsPage.downloadPdf')}</a>
+                    <a className='downloadPdfText' href={singleTenantProofId} download> <FaDownload /> {t('tenantsPage.downloadId')}</a>
                   ) : (
                     <span className='NotUploadedText'>{t('tenantsPage.notUploaded')}</span>
                   )}
@@ -1119,6 +1451,7 @@ const TenantsBoys = () => {
             </div>
             <div className='popup-tenants-closeBtn'>
               <button className='btn btn-warning' onClick={tenantPopupClose}>{t('tenantsPage.close')}</button>
+              <button id="downloadPdfBtn" className='btn btn-warning' onClick={handleTenantDownload}><FaDownload /> {t('tenantsPage.downloadPdf')}</button>
             </div>
           </div>
         </div>

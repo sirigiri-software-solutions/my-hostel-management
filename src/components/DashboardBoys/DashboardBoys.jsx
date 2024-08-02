@@ -853,8 +853,8 @@ const DashboardBoys = () => {
     setShowModal(false);
     resetForm();
     setLoading(false);
-
-
+    imageInputRef.current.value = "";
+    idInputRef.current.value = "";
   };
 
 
@@ -985,8 +985,6 @@ const DashboardBoys = () => {
     setErrors({});
     setTenantImage(null);
     setTenantId(null);
-    // setTenantImageUrl('');
-    // setTenantIdUrl('');
     setFloorNumber('');
     setRoomNumber('');
     setNumberOfBeds('');
@@ -1628,14 +1626,6 @@ const DashboardBoys = () => {
               <input type="text" className="form-control" name="expenseAmount" value={formData.expenseAmount} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} onChange={handleInputChange} onFocus={handleExpensesFocus} />
               {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
             </div>
-            {/* <div className="col-md-6"> */}
-            {/* <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label> */}
-            {/* <select className="form-select" id="inputRole" name="createdBy" value={formData.createdBy} onChange={handleInputChange}>
-                <option value="admin">{t('dashboard.admin')}</option>
-                <option value="sub-admin">{t('dashboard.subAdmin')}</option>
-              </select> */}
-            {/* <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} /> */}
-            {/* </div> */}
             <div className="col-md-6">
               <label htmlFor="inputDate" className="form-label">{t('dashboard.expenseDate')}</label>
               <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
