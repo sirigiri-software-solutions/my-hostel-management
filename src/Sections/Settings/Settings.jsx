@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -9,13 +9,14 @@ import { push, ref, set } from 'firebase/database';
 import { toast } from 'react-toastify';
 import { useData } from '../../ApiData/ContextProvider';
 import { Button, Modal } from 'react-bootstrap';
+import Reports from './Reports';
 
 
 const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons } = useData();
+  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData , girlsTenantsData, boysTenantsData} = useData();
   const { database } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
@@ -27,7 +28,9 @@ const Settings = () => {
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
   const [isBoysModalOpen, setIsBoysModalOpen] = useState(false);
   const [isGirlsModalOpen, setIsGirlsModalOpen] = useState(false);
+  const [tenantsData, setTenantsData] = useState()
 
+console.log(hostelData, "dataaa") 
 
   const capitalizeFirstLetter = (string) => {
     return string.replace(/\b\w/g, char => char.toUpperCase());
@@ -147,6 +150,8 @@ const Settings = () => {
       setIsGirlsModalOpen(false);
     }
   };
+
+
   return (
     <div className="settings">
       <h1 className='settingsPageHeading'>{t('menuItems.settings')}</h1>
@@ -155,6 +160,9 @@ const Settings = () => {
           <label className="languageLabel" htmlFor="language-selector">{t("settings.languages")} </label>
           <LanguageSwitch id="language-selector" />
         </div>
+        <div>
+        <Reports/>
+      </div>
       </div>
       <div className='mt-4'>
         {
@@ -252,6 +260,7 @@ const Settings = () => {
           </Modal.Body>
         </Modal>
       </div>
+     
     </div>
   );
 };
