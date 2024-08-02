@@ -24,6 +24,10 @@ const DataProvider = ({ children }) => {
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
   const [userarea, setUserArea] = useState();
   const [userUid, setUserUid] = useState(localStorage.getItem('userUid' || ''));
+  const [ boysTenantsData, setBoysTenantsData] = useState([])
+  const [girlsTenantsData, setGirlsTenantsData] = useState([]);
+  const [ boysExTenantsData, setBoysExTenantsData] = useState([])
+  const [girlsExTenantsData, setGirlsExTenantsData] = useState([]);
 
   // new code to implement multiple configuration
   const [area, setArea] = useState(localStorage.getItem('userarea') || 'hyderabad');
@@ -127,9 +131,67 @@ const DataProvider = ({ children }) => {
   console.log(activeBoysHostelButtons.length > 0, "activeBoysHostelButtons flag"); // ===> true or false
 
 
+  useEffect(() => {
+    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+    onValue(tenantsRef, snapshot => {
+      const data = snapshot.val() || {};
+      console.log(data, "dtat")
+      const loadedTenants = Object.entries(data).map(([key, value]) => ({
+        id: key,
+        ...value,
+      }));
+      console.log(loadedTenants, "dta")
+      setBoysTenantsData(loadedTenants);
+    });
+  }, [userUid, activeBoysHostel]);
 
+  useEffect(() => {
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+    onValue(tenantsRef, snapshot => {
+      const data = snapshot.val() || {};
+      console.log(data, "dtat")
+      const loadedTenants = Object.entries(data).map(([key, value]) => ({
+        id: key,
+        ...value,
+      }));
+      console.log(loadedTenants, "dta")
+      setGirlsTenantsData(loadedTenants);
+    });
+  }, [userUid, activeGirlsHostel]);
+
+  
+  useEffect(() => {
+    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
+    onValue(tenantsRef, snapshot => {
+      const data = snapshot.val() || {};
+      console.log(data, "dtat")
+      const loadedTenants = Object.entries(data).map(([key, value]) => ({
+        id: key,
+        ...value,
+      }));
+      console.log(loadedTenants, "dta")
+      setBoysExTenantsData(loadedTenants);
+    });
+  }, [userUid, activeBoysHostel]);
+  
+  useEffect(() => {
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
+    onValue(tenantsRef, snapshot => {
+      const data = snapshot.val() || {};
+      console.log(data, "dtat")
+      const loadedTenants = Object.entries(data).map(([key, value]) => ({
+        id: key,
+        ...value,
+      }));
+      console.log(loadedTenants, "dta")
+      setGirlsExTenantsData(loadedTenants);
+    });
+  }, [userUid, activeGirlsHostel]);
+
+  console.log(boysExTenantsData, "exx")
+  console.log(girlsExTenantsData, "exx")
   return (
-    <DataContext.Provider value={{  activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag}}>
+    <DataContext.Provider value={{  activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag, girlsTenantsData, boysTenantsData, girlsExTenantsData, boysExTenantsData}}>
       {children}
     </DataContext.Provider>
   );

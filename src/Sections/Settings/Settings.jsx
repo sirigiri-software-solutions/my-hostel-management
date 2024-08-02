@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -11,14 +11,15 @@ import { useData } from '../../ApiData/ContextProvider';
 import { Button, Modal } from 'react-bootstrap';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
-
+import * as XLSX from 'xlsx';
+// import Reports from './Reports';
 
 
 const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons,activeBoysHostel,activeGirlsHostel } = useData();
+  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData , girlsTenantsData, boysTenantsData,activeBoysHostel,activeGirlsHostel,boysExTenantsData, girlsExTenantsData } = useData();
   const { database } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
@@ -163,7 +164,9 @@ const Settings = () => {
 
   
 
+  const [tenantsData, setTenantsData] = useState()
 
+console.log(hostelData, "dataaa") 
 
   const capitalizeFirstLetter = (string) => {
     return string.replace(/\b\w/g, char => char.toUpperCase());
@@ -678,6 +681,90 @@ const handleExpensesGenerateBtn = () => {
 
 
 
+// excel code 
+
+const handleTenantBtnExcel = () => {
+
+  const dataTouse = selectedHostelType === "mens"? boysTenantsData :girlsTenantsData
+
+
+  const flatData = dataTouse.map(item => {
+    const flatRents = Object.entries(item.rents || {NA:{}}).map(([rentId, rent]) => ({
+      PaidAmount: rent.paidAmount || "NA",
+      Due:  rent.due || "NA",
+      DueDate:  rent.dueDate || "NA",
+      PaidDate:  rent.paidDate || "NA",
+      Status:  rent.status || "NA",
+      TotalFee: rent.totalFee || "NA",
+    }));
+
+    return flatRents.map(flatRent => ({
+      Room: item.roomNo || "NA",
+      Bed: item.bedNo || "NA",
+      Name: item.name || "NA",
+      Address: item.permnentAddress || "NA",
+      bikeNumber: item.bikeNumber || "NA",
+      DateOfJoin: item.dateOfJoin || "NA",
+      Emergency: item.emergencyContact || "NA",
+      Id: item.idNumber || "NA",
+      Mobile: item.mobileNo || "NA",
+      Status: item.status || "NA",
+      ...flatRent // Spread the flattened rent information
+    }));
+  }).flat();
+
+  // Create a new workbook and a worksheet
+const workbook = XLSX.utils.book_new();
+const worksheet = XLSX.utils.json_to_sheet(flatData);
+
+// Add the worksheet to the workbook
+XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
+
+// Generate a binary Excel file
+XLSX.writeFile(workbook, 'tenants_data.xlsx');
+}
+
+const handleVacatedBtnExcel = () => {
+
+  const dataTouse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData
+
+
+  const flatData = dataTouse.map(item => {
+    const flatRents = Object.entries(item.rents || {NA:{}}).map(([rentId, rent]) => ({
+      PaidAmount: rent.paidAmount || "NA",
+      Due:  rent.due || "NA",
+      DueDate:  rent.dueDate || "NA",
+      PaidDate:  rent.paidDate || "NA",
+      Status:  rent.status || "NA",
+      TotalFee: rent.totalFee || "NA",
+    }));
+
+    return flatRents.map(flatRent => ({
+      Room: item.roomNo || "NA",
+      Bed: item.bedNo || "NA",
+      Name: item.name || "NA",
+      Address: item.permnentAddress || "NA",
+      bikeNumber: item.bikeNumber || "NA",
+      DateOfJoin: item.dateOfJoin || "NA",
+      Emergency: item.emergencyContact || "NA",
+      Id: item.idNumber || "NA",
+      Mobile: item.mobileNo || "NA",
+      Status: item.status || "NA",
+      ...flatRent // Spread the flattened rent information
+    }));
+  }).flat();
+
+  // Create a new workbook and a worksheet
+const workbook = XLSX.utils.book_new();
+const worksheet = XLSX.utils.json_to_sheet(flatData);
+
+// Add the worksheet to the workbook
+XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
+
+// Generate a binary Excel file
+XLSX.writeFile(workbook, 'tenants_data.xlsx');
+}
+
 
 
 
@@ -704,6 +791,7 @@ const handleExpensesGenerateBtn = () => {
           <label className="languageLabel" htmlFor="language-selector">{t("settings.languages")} </label>
           <LanguageSwitch id="language-selector" />
         </div>
+        
       </div>
       <div className='mt-4'>
         {
@@ -812,10 +900,10 @@ const handleExpensesGenerateBtn = () => {
       <h2 className='settingsHeading'>Tenants Report</h2>
      
       <button className='reportsButton' onClick={handleReportBtn}>Generate PDF</button>
-
+      <button className='reportsButton' onClick={handleTenantBtnExcel}>Generate Excel</button>
       <h2 className='settingsHeading'>Vacated Tenants Report</h2>
       <button className='reportsButton' onClick={handleVacatedReportBtn}>Generate PDF</button>
-
+      <button className='reportsButton' onClick={handleVacatedBtnExcel}>Generate Excel</button>
 
       <h2 className='settingsHeading'>Expenses Report</h2>
       <select className='selectTypeDropDown' value={year} onChange={e => setYear(e.target.value)}>
