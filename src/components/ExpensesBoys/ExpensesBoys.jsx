@@ -551,10 +551,9 @@ const ExpensesBoys = () => {
             </div>
           </div>
         </div>
-
       </>
     </div>
   )
 }
 
-export default ExpensesBoys
+export default ExpensesBoys;
