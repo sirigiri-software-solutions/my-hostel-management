@@ -28,14 +28,10 @@ import { useTranslation } from 'react-i18next'
 import { useData } from '../../ApiData/ContextProvider';
 import Hostels from '../../Sections/Hostels/Hostels'
 import LanguageSwitch from '../../LanguageSwitch'
-<<<<<<< HEAD
-// import Onboarding from '../../Onboarding'
-=======
 import { toast } from 'react-toastify'
 import { Database, push, ref, set } from 'firebase/database'
 import { Modal, Button, Tab, Tabs, Form } from 'react-bootstrap';
 import DefaultModal from './DefaultModal'
->>>>>>> 653a13643eba17bde376521ca72906c6ae4b9d8d
 const MainPage = () => {
   const { t } = useTranslation()
   const [isHostels, setIsHostels] = useState(true)

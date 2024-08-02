@@ -1699,8 +1699,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   return (
     <div className="dashboardgirls">
-      <h1 className="heading1">{t('dashboard.womens')}</h1>
-      <br />
+     
       {activeGirlsHostelButtons.length > 0 ? (
         <div>
           <h1 className="heading1">{t('dashboard.womens')}</h1>
