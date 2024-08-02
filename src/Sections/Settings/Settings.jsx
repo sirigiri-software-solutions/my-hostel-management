@@ -788,7 +788,7 @@ XLSX.writeFile(workbook, 'tenants_data.xlsx');
       <h1 className='settingsPageHeading'>{t('menuItems.settings')}</h1>
       <div className="settings-top">
         <div className="language-switch-section">
-          <label className="languageLabel" htmlFor="language-selector">{t("settings.languages")} </label>
+          <label className='settingsHeading' htmlFor="language-selector">{t("settings.languages")} </label>
           <LanguageSwitch id="language-selector" />
         </div>
         
@@ -892,21 +892,21 @@ XLSX.writeFile(workbook, 'tenants_data.xlsx');
       <h1 className='settingsHeading'>Generate Reports</h1>
       <div className="hostelTypeDropDown">
       <p className='selectTypeText'>Select HostelType</p>
-      <select className='selectTypeDropDown' value={selectedHostelType} onChange={handleChangeHostelType}>
+      <select className='languageDropdown' value={selectedHostelType} onChange={handleChangeHostelType}>
         <option value="mens" >Mens</option>
         <option value="girls">Womens</option>
       </select>
       </div>
-      <h2 className='settingsHeading'>Tenants Report</h2>
+      <h1 className='settingsSideHeading'>Tenants Report</h1>
      
       <button className='reportsButton' onClick={handleReportBtn}>Generate PDF</button>
       <button className='reportsButton' onClick={handleTenantBtnExcel}>Generate Excel</button>
-      <h2 className='settingsHeading'>Vacated Tenants Report</h2>
+      <h2  className='settingsSideHeading'>Vacated Tenants Report</h2>
       <button className='reportsButton' onClick={handleVacatedReportBtn}>Generate PDF</button>
       <button className='reportsButton' onClick={handleVacatedBtnExcel}>Generate Excel</button>
 
-      <h2 className='settingsHeading'>Expenses Report</h2>
-      <select className='selectTypeDropDown' value={year} onChange={e => setYear(e.target.value)}>
+      <h2  className='settingsSideHeading'>Expenses Report</h2>
+      <select className='languageDropdown dropDownMbl' value={year} onChange={e => setYear(e.target.value)}>
               
                 <option value="2024">2024</option>
                 <option value="2025">2025</option>
@@ -916,7 +916,7 @@ XLSX.writeFile(workbook, 'tenants_data.xlsx');
                
               </select>
 
-              <select className='selectTypeDropDown'  value={month} onChange={e => { setMonth(e.target.value) }}>
+              <select className='languageDropdown dropDownMblMonth' value={month} onChange={e => { setMonth(e.target.value) }}>
                 <option value="">None</option>
                 <option value="jan">{t('months.jan')}</option>
                 <option value="feb">{t('months.feb')}</option>
@@ -931,7 +931,8 @@ XLSX.writeFile(workbook, 'tenants_data.xlsx');
                 <option value="nov">{t('months.nov')}</option>
                 <option value="dec">{t('months.dec')}</option>
               </select>
-     <button className='reportsButton' onClick={handleExpensesGenerateBtn}>Generate PDF</button>
+              <br />
+     <button className='reportsButton expensesBtn' onClick={handleExpensesGenerateBtn}>Generate PDF</button>
     </div>
   );
 };

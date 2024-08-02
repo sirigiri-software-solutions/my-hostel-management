@@ -101,12 +101,19 @@
     font-size:24px;
     font-weight: 600;
   }
-  .languageDropdown{
+
+  /* .languageDropdown{
     width:100px;
     margin-left:18px;
     height:35px;
     border-radius:8px;
   }
+  .dropDownMbl{
+    margin-left:0px;
+  }
+  .dropDownMblMonth{
+    margin-left:10px;
+  } */
   
   /* .settingPageHostelSection {
     display: flex;
@@ -214,6 +221,13 @@
   font-size:30px;
   font-weight:bold;
 }
+.settingsSideHeading{
+  font-family:'Roboto';
+  font-size:22px;
+  font-weight:bold;
+  margin-top:8px;
+}
+
 .selectTypeText{
   font-family:'Roboto';
   font-size:18px;
@@ -232,4 +246,41 @@
   background-color:#FF8A00;
   color:#fff;
   margin-right:8px;
+}
+@media screen and (max-width:578px){
+  .settingsHeading{
+    font-size:17px;
+  }
+  .settingsSideHeading{
+    font-size:13px;
+  }
+  .reportsButton{
+    font-size:10px;
+    margin-bottom:10px;
+  }
+  .selectTypeText{
+    font-size:15px;
+  }
+  .selectTypeDropDown{
+    width:80px;
+  }
+}
+
+
+
+.expensesBtn{
+  margin-top:10px;
+}
+
+.languageDropdown{
+  width:100px;
+  margin-left:14px;
+  height:35px;
+  border-radius:8px;
+}
+.dropDownMbl{
+  margin-left:0px;
+}
+.dropDownMblMonth{
+  margin-left:10px;
 }
