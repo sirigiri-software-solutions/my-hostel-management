@@ -149,6 +149,7 @@ const MainPage = () => {
       name: t("menuItems.settings"),
       icon: SettingsImage,
     },
+    
   ];
 
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -21,11 +21,11 @@ const Dashboard = ({ onTabSelect, activeTab }) => {
   return (
     <div className='container_main'>
       <div className='mobile-layout'>
-        <Tabs activeKey={activeFlag} onSelect={handleTabSelect} className="mb-3">
-          <Tab eventKey="boys" title={t('dashboard.mens')}>
+        <Tabs activeKey={activeFlag} onSelect={handleTabSelect} className="mb-3 custom-tabs">
+          <Tab eventKey="boys" title={t('dashboard.mens')} className={activeFlag === 'boys' ? 'active-tab' : ''}>
             <DashboardBoys />
           </Tab>
-          <Tab eventKey="girls" title={t('dashboard.womens')}>
+          <Tab eventKey="girls" title={t('dashboard.womens')} className={activeFlag === 'girls' ? 'active-tab' : ''}>
             <DashboardGirls />
           </Tab>
         </Tabs>
