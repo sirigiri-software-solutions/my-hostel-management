@@ -5,18 +5,21 @@ import 'react-toastify/dist/ReactToastify.css';
 import LanguageSwitch from '../../LanguageSwitch';
 import { useTranslation } from 'react-i18next';
 import './settings.css';
-import { push, ref, set } from 'firebase/database';
+import { push, ref, set,onValue} from 'firebase/database';
 import { toast } from 'react-toastify';
 import { useData } from '../../ApiData/ContextProvider';
 import { Button, Modal } from 'react-bootstrap';
-import Reports from './Reports';
+import { jsPDF } from "jspdf";
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+// import Reports from './Reports';
 
 
 const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData , girlsTenantsData, boysTenantsData} = useData();
+  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData , girlsTenantsData, boysTenantsData,activeBoysHostel,activeGirlsHostel,boysExTenantsData, girlsExTenantsData } = useData();
   const { database } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
@@ -28,6 +31,139 @@ const Settings = () => {
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
   const [isBoysModalOpen, setIsBoysModalOpen] = useState(false);
   const [isGirlsModalOpen, setIsGirlsModalOpen] = useState(false);
+  const [entireBoysData,setEntireBoysData] = useState([]);
+  const [entireGirlsData,setEntireGirlsData] = useState([]);
+  const [selectedHostelType,setSelectedHostelType] = useState("mens");
+  const [vacatedEntireBoysData,setVacatedEntireBoysData] = useState([]);
+  const [vacatedEntireGirlsData,setVacatedEnitreGirlsData] = useState([]);
+
+  const [entireBoysYearExpensesData,setEntireBoysYearExpensesData] = useState([])
+  const [entireGirlsYearExpensesData,setEntireGirlsYearExpensesData] = useState([])
+
+  const getCurrentMonth = () => {
+    const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    const currentMonth = new Date().getMonth();
+    return monthNames[currentMonth];
+  };
+
+  const getCurrentYear = () => {
+    return new Date().getFullYear().toString();
+  };
+  const [year,setYear] = useState(getCurrentYear());
+  const [month,setMonth] = useState(getCurrentMonth())
+
+
+
+  useEffect(()=>{
+    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+    onValue(tenantsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedTenants = data ? Object.keys(data).map(key => ({
+        id: key,
+        ...data[key],
+      })) : [];
+      setEntireBoysData(loadedTenants)
+    });
+  },[selectedHostelType,activeBoysHostel])
+
+  useEffect(()=>{
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+    onValue(tenantsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedTenants = data ? Object.keys(data).map(key => ({
+        id: key,
+        ...data[key],
+      })) : [];
+      setEntireGirlsData(loadedTenants)
+    });
+  },[selectedHostelType,activeGirlsHostel])
+
+
+  useEffect(()=>{
+    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
+    onValue(tenantsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedTenants = data ? Object.keys(data).map(key => ({
+        id: key,
+        ...data[key],
+      })) : [];
+      setVacatedEntireBoysData(loadedTenants)
+    });
+  },[selectedHostelType,activeBoysHostel])
+
+  useEffect(()=>{
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
+    onValue(tenantsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedTenants = data ? Object.keys(data).map(key => ({
+        id: key,
+        ...data[key],
+      })) : [];
+      setVacatedEnitreGirlsData(loadedTenants)
+    });
+  },[selectedHostelType,activeGirlsHostel])
+
+
+
+
+  useEffect(() => {
+    const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    let total = 0;
+
+    const fetchExpenses = async () => {
+      const promises = monthNames.map(month => {
+        const monthRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${month}`);
+        return new Promise((resolve) => {
+          onValue(monthRef, (snapshot) => {
+            const expenses = snapshot.val();
+            if (expenses) {
+              resolve(expenses);
+            } else {
+              resolve(0);
+            }
+          }, {
+            onlyOnce: true
+          });
+        });
+      });
+
+      const monthlyTotals = await Promise.all(promises);
+      setEntireBoysYearExpensesData(monthlyTotals)
+    };
+
+    fetchExpenses();
+  }, [selectedHostelType,activeBoysHostel]);
+
+  useEffect(() => {
+    const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    let total = 0;
+
+    const fetchExpenses = async () => {
+      const promises = monthNames.map(month => {
+        const monthRef = ref(database, `Hostel/${userUid}/boys/${activeGirlsHostel}/expenses/${year}-${month}`);
+        return new Promise((resolve) => {
+          onValue(monthRef, (snapshot) => {
+            const expenses = snapshot.val();
+            if (expenses) {
+              resolve(expenses);
+            } else {
+              resolve(0);
+            }
+          }, {
+            onlyOnce: true
+          });
+        });
+      });
+
+      const monthlyTotals = await Promise.all(promises);
+      setEntireGirlsYearExpensesData(monthlyTotals)
+    };
+
+    fetchExpenses();
+  }, [selectedHostelType,activeGirlsHostel]);
+
+  
+
   const [tenantsData, setTenantsData] = useState()
 
 console.log(hostelData, "dataaa") 
@@ -151,6 +287,501 @@ console.log(hostelData, "dataaa")
     }
   };
 
+  const handleReportBtn = () => {
+    const doc = new jsPDF();
+
+    // Define columns for tenants with bikes
+    const columnsWithBike = [
+        { header: 'S.No', dataKey: 'sNo' },
+        { header: 'Name', dataKey: 'name' },
+        { header: 'Mobile Number', dataKey: 'mobileNo' },
+        { header: 'Room/Bed No', dataKey: 'bedNo' },
+        { header: 'Join Date', dataKey: 'dateOfJoin' },
+        { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
+        { header: 'Due Date', dataKey: 'dueDate' },
+        { header: 'Rent', dataKey: 'rents' },
+        { header: 'Unpaid Amount', dataKey: 'unpaidAmount' },
+        { header: 'Bike Number', dataKey: 'bikeNumber' }
+    ];
+
+    // Define columns for tenants without bikes
+    const columnsWithoutBike = [
+        { header: 'S.No', dataKey: 'sNo' },
+        { header: 'Name', dataKey: 'name' },
+        { header: 'Mobile Number', dataKey: 'mobileNo' },
+        { header: 'Room/Bed No', dataKey: 'bedNo' },
+        { header: 'Join Date', dataKey: 'dateOfJoin' },
+        { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
+        { header: 'Due Date', dataKey: 'dueDate' },
+        { header: 'Rent', dataKey: 'rents' },
+        { header: 'Unpaid Amount', dataKey: 'unpaidAmount' }
+    ];
+
+    // Determine the data source based on the selected hostel type
+    const dataToUse = selectedHostelType === "mens" ? entireBoysData : entireGirlsData;
+
+    // Filter and map data
+    const dataWithBike = dataToUse.filter(tenant => tenant.bikeNumber && tenant.bikeNumber !== 'NA').map((tenant, index) => {
+        const rents = tenant.rents || {}; 
+        const rentsData = Object.values(rents)[0] || {}; 
+
+        return {
+            sNo: index + 1,
+            name: tenant.name || 'N/A',
+            mobileNo: tenant.mobileNo || 'N/A',
+            bedNo: tenant.bedNo || 'N/A',
+            dateOfJoin: tenant.dateOfJoin || 'N/A',
+            lastFeeDate: rentsData.paidDate || 'N/A',
+            dueDate: rentsData.dueDate || 'N/A',
+            rents: rentsData.totalFee || '0',
+            unpaidAmount: rentsData.due || '0',
+            bikeNumber: tenant.bikeNumber || 'N/A'
+        };
+    });
+
+    const dataWithoutBike = dataToUse.filter(tenant => tenant.bikeNumber === 'NA').map((tenant, index) => {
+        const rents = tenant.rents || {}; 
+        const rentsData = Object.values(rents)[0] || {}; 
+
+        return {
+            sNo: index + 1,
+            name: tenant.name || 'N/A',
+            mobileNo: tenant.mobileNo || 'N/A',
+            bedNo: tenant.bedNo || 'N/A',
+            dateOfJoin: tenant.dateOfJoin || 'N/A',
+            lastFeeDate: rentsData.paidDate || 'N/A',
+            dueDate: rentsData.dueDate || 'N/A',
+            rents: rentsData.totalFee || '0',
+            unpaidAmount: rentsData.due || '0'
+        };
+    });
+
+    // Add title for the report
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Tenants Report', doc.internal.pageSize.width / 2, 10, { align: 'center' });
+
+    // Add title for tenants with bikes
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Tenants with Bike', 14, 25);
+
+    // Generate the table for tenants with bikes
+    doc.autoTable({
+        startY: 30,
+        margin: { top: 20 },
+        theme: 'striped',
+        styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
+        columns: columnsWithBike,
+        body: dataWithBike,
+    });
+
+    // Add a space between the tables
+    const lastY = doc.lastAutoTable.finalY;
+    doc.text('Tenants without Bike', 14, lastY + 10);
+
+    // Generate the table for tenants without bikes
+    doc.autoTable({
+        startY: lastY + 15,
+        margin: { top: 20 },
+        theme: 'striped',
+        styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
+        columns: columnsWithoutBike,
+        body: dataWithoutBike,
+    });
+
+    // Save the PDF
+    doc.save('Tenants_Report.pdf');
+};
+
+  const handleVacatedReportBtn =() => {
+    const doc = new jsPDF();
+
+    // Define columns for tenants with bikes
+    const columnsWithBike = [
+        { header: 'S.No', dataKey: 'sNo' },
+        { header: 'Name', dataKey: 'name' },
+        { header: 'Mobile Number', dataKey: 'mobileNo' },
+        { header: 'Room/Bed No', dataKey: 'bedNo' },
+        { header: 'Join Date', dataKey: 'dateOfJoin' },
+        { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
+        { header: 'Due Date', dataKey: 'dueDate' },
+        { header: 'Rent', dataKey: 'rents' },
+        { header: 'Unpaid Amount', dataKey: 'unpaidAmount' },
+        { header: 'Bike Number', dataKey: 'bikeNumber' }
+    ];
+
+    // Define columns for tenants without bikes
+    const columnsWithoutBike = [
+        { header: 'S.No', dataKey: 'sNo' },
+        { header: 'Name', dataKey: 'name' },
+        { header: 'Mobile Number', dataKey: 'mobileNo' },
+        { header: 'Room/Bed No', dataKey: 'bedNo' },
+        { header: 'Join Date', dataKey: 'dateOfJoin' },
+        { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
+        { header: 'Due Date', dataKey: 'dueDate' },
+        { header: 'Rent', dataKey: 'rents' },
+        { header: 'Unpaid Amount', dataKey: 'unpaidAmount' }
+    ];
+
+    // Determine the data source based on the selected hostel type
+    const dataToUse = selectedHostelType === "mens" ? vacatedEntireBoysData : vacatedEntireGirlsData;
+
+    // Filter and map data
+    const dataWithBike = dataToUse.filter(tenant => tenant.bikeNumber && tenant.bikeNumber !== 'NA').map((tenant, index) => {
+        const rents = tenant.rents || {}; 
+        const rentsData = Object.values(rents)[0] || {}; 
+
+        return {
+            sNo: index + 1,
+            name: tenant.name || 'N/A',
+            mobileNo: tenant.mobileNo || 'N/A',
+            bedNo: tenant.bedNo || 'N/A',
+            dateOfJoin: tenant.dateOfJoin || 'N/A',
+            lastFeeDate: rentsData.paidDate || 'N/A',
+            dueDate: rentsData.dueDate || 'N/A',
+            rents: rentsData.totalFee || '0',
+            unpaidAmount: rentsData.due || '0',
+            bikeNumber: tenant.bikeNumber || 'N/A'
+        };
+    });
+
+    const dataWithoutBike = dataToUse.filter(tenant => tenant.bikeNumber === 'NA').map((tenant, index) => {
+        const rents = tenant.rents || {}; 
+        const rentsData = Object.values(rents)[0] || {}; 
+
+        return {
+            sNo: index + 1,
+            name: tenant.name || 'N/A',
+            mobileNo: tenant.mobileNo || 'N/A',
+            bedNo: tenant.bedNo || 'N/A',
+            dateOfJoin: tenant.dateOfJoin || 'N/A',
+            lastFeeDate: rentsData.paidDate || 'N/A',
+            dueDate: rentsData.dueDate || 'N/A',
+            rents: rentsData.totalFee || '0',
+            unpaidAmount: rentsData.due || '0'
+        };
+    });
+
+    // Add title for the report
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Vacated Tenants Report', doc.internal.pageSize.width / 2, 10, { align: 'center' });
+
+    // Add title for tenants with bikes
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Tenants with Bike', 14, 25);
+
+    // Generate the table for tenants with bikes
+    doc.autoTable({
+        startY: 30,
+        margin: { top: 20 },
+        theme: 'striped',
+        styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
+        columns: columnsWithBike,
+        body: dataWithBike,
+    });
+
+    // Add a space between the tables
+    const lastY = doc.lastAutoTable.finalY;
+    doc.text('Tenants without Bike', 14, lastY + 10);
+
+    // Generate the table for tenants without bikes
+    doc.autoTable({
+        startY: lastY + 15,
+        margin: { top: 20 },
+        theme: 'striped',
+        styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
+        columns: columnsWithoutBike,
+        body: dataWithoutBike,
+    });
+
+    // Save the PDF
+    doc.save('VacatedTenants_Report.pdf');
+
+  }
+
+
+
+
+const monthMapping = {
+  'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+  'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11
+};
+
+const handleExpensesGenerateBtn = () => {
+  const doc = new jsPDF();
+
+  // Define columns for monthly and yearly views
+  const monthlyColumns = [
+      { header: 'S.No', dataKey: 'sNo' },
+      { header: 'Expense Name', dataKey: 'expensename' },
+      { header: 'Expense Amount', dataKey: 'expenseamount' },
+      { header: 'Date', dataKey: 'date' }
+  ];
+
+  const yearlyColumns = [
+      { header: 'S.No', dataKey: 'sNo' },
+      { header: 'Expense Name', dataKey: 'expensename' },
+      { header: 'Expense Amount', dataKey: 'expenseamount' },
+      { header: 'Date', dataKey: 'date' }
+  ];
+
+  // Determine the data source based on the selected hostel type
+  const dataToUse = selectedHostelType === "mens" ? entireBoysYearExpensesData : entireGirlsYearExpensesData;
+
+  // Convert month name to number
+  const newMonth = monthMapping[month.toLowerCase()];
+
+  if (month !== "" && year) {
+      // Monthly Report
+      const filteredData = [];
+      dataToUse.forEach(item => {
+          if (typeof(item) === 'object' && item !== null) {
+              Object.keys(item).forEach(key => {
+                  const expenseData = item[key];
+                  if (expenseData && expenseData.expenseDate) {
+                      const expenseDate = new Date(expenseData.expenseDate);
+                      if (expenseDate.getFullYear() === parseInt(year) && expenseDate.getMonth() === newMonth) {
+                          filteredData.push({
+                              expensename: expenseData.expenseName,
+                              expenseamount: expenseData.expenseAmount,
+                              date: expenseDate.toLocaleDateString()
+                          });
+                      }
+                  }
+              });
+          }
+      });
+
+      console.log("Filtered Data:", filteredData); // Check the filtered data
+
+      if (filteredData.length > 0) {
+          // Add heading for monthly report
+          const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
+          doc.setFontSize(16);
+          doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
+
+          // Create table for specific month
+          doc.autoTable({
+              startY: 30, // Adjust starting Y position to leave space for heading
+              head: [monthlyColumns.map(col => col.header)],
+              body: filteredData.map((row, index) => ([
+                  index + 1,
+                  row.expensename,
+                  row.expenseamount,
+                  row.date
+              ])),
+              theme: 'grid'
+          });
+
+          const totalAmount = filteredData.reduce((acc, item) => acc + item.expenseamount, 0);
+          doc.text(`Total Expenses: ${totalAmount}`, 10, doc.lastAutoTable.finalY + 10);
+
+          // Save file with month in filename
+          doc.save(`${monthName}_expenses.pdf`);
+      } else {
+          doc.setFontSize(16);
+          const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
+          doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
+
+          // Create an empty table
+          doc.autoTable({
+              startY: 30, // Adjust starting Y position to leave space for heading
+              head: [monthlyColumns.map(col => col.header)],
+              body: [['', '', '', '']],
+              theme: 'grid'
+          });
+
+          doc.text('No expenses found for the selected month and year.', 10, doc.lastAutoTable.finalY + 10);
+          doc.save(`${monthName}_expenses.pdf`);
+      }
+  } else if (year) {
+      // Yearly Report
+      const expensesByMonth = {};
+      const months = Object.keys(monthMapping);
+
+      dataToUse.forEach(item => {
+          if (typeof(item) === 'object' && item !== null) {
+              Object.keys(item).forEach(key => {
+                  const expenseData = item[key];
+                  if (expenseData && expenseData.expenseDate) {
+                      const expenseDate = new Date(expenseData.expenseDate);
+                      if (expenseDate.getFullYear() === parseInt(year)) {
+                          const month = months[expenseDate.getMonth()];
+                          if (!expensesByMonth[month]) {
+                              expensesByMonth[month] = [];
+                          }
+                          expensesByMonth[month].push({
+                              expenseName: expenseData.expenseName,
+                              expenseAmount: expenseData.expenseAmount,
+                              date: expenseDate.toLocaleDateString()
+                          });
+                      }
+                  }
+              });
+          }
+      });
+
+      // Add heading for yearly report
+      doc.setFontSize(16);
+      doc.text('Yearly Expenses', 105, 20, { align: 'center' });
+
+      let grandTotal = 0;
+      let startY = 30;
+
+      months.forEach((month, index) => {
+          let monthTotal = 0;
+
+          // Add heading for each month's table
+          doc.setFontSize(14);
+          doc.text(`${month.charAt(0).toUpperCase() + month.slice(1)} Expenses`, 10, startY);
+
+          if (expensesByMonth[month] && expensesByMonth[month].length > 0) {
+              // Create table for each month with expenses
+              doc.autoTable({
+                  startY: startY + 10,
+                  head: [yearlyColumns.map(col => col.header)],
+                  body: expensesByMonth[month].map((item, itemIndex) => ([
+                      itemIndex + 1,
+                      item.expenseName,
+                      item.expenseAmount,
+                      item.date
+                  ])),
+                  theme: 'grid'
+              });
+
+              monthTotal = expensesByMonth[month].reduce((acc, item) => acc + item.expenseAmount, 0);
+              doc.text(`Total for ${month}: ${monthTotal}`, 10, doc.lastAutoTable.finalY + 10);
+              grandTotal += monthTotal;
+              startY = doc.lastAutoTable.finalY + 20;
+          } else {
+              // Create an empty table for months with no expenses
+              doc.autoTable({
+                  startY: startY + 10,
+                  head: [yearlyColumns.map(col => col.header)],
+                  body: [['', '', '', '']],
+                  theme: 'grid'
+              });
+              doc.setFontSize(8);
+              doc.text('No expenses found for this month.', 10, doc.lastAutoTable.finalY + 10);
+              startY = doc.lastAutoTable.finalY + 20;
+          }
+      });
+
+      // Add grand total
+      doc.setFontSize(14);
+      doc.text(`Grand Total: ${grandTotal}`, 10, startY + 2);
+
+      // Save file with year in filename
+      doc.save(`${year}_expenses.pdf`);
+  }
+};
+
+
+
+// excel code 
+
+const handleTenantBtnExcel = () => {
+
+  const dataTouse = selectedHostelType === "mens"? boysTenantsData :girlsTenantsData
+
+
+  const flatData = dataTouse.map(item => {
+    const flatRents = Object.entries(item.rents || {NA:{}}).map(([rentId, rent]) => ({
+      PaidAmount: rent.paidAmount || "NA",
+      Due:  rent.due || "NA",
+      DueDate:  rent.dueDate || "NA",
+      PaidDate:  rent.paidDate || "NA",
+      Status:  rent.status || "NA",
+      TotalFee: rent.totalFee || "NA",
+    }));
+
+    return flatRents.map(flatRent => ({
+      Room: item.roomNo || "NA",
+      Bed: item.bedNo || "NA",
+      Name: item.name || "NA",
+      Address: item.permnentAddress || "NA",
+      bikeNumber: item.bikeNumber || "NA",
+      DateOfJoin: item.dateOfJoin || "NA",
+      Emergency: item.emergencyContact || "NA",
+      Id: item.idNumber || "NA",
+      Mobile: item.mobileNo || "NA",
+      Status: item.status || "NA",
+      ...flatRent // Spread the flattened rent information
+    }));
+  }).flat();
+
+  // Create a new workbook and a worksheet
+const workbook = XLSX.utils.book_new();
+const worksheet = XLSX.utils.json_to_sheet(flatData);
+
+// Add the worksheet to the workbook
+XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
+
+// Generate a binary Excel file
+XLSX.writeFile(workbook, 'tenants_data.xlsx');
+}
+
+const handleVacatedBtnExcel = () => {
+
+  const dataTouse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData
+
+
+  const flatData = dataTouse.map(item => {
+    const flatRents = Object.entries(item.rents || {NA:{}}).map(([rentId, rent]) => ({
+      PaidAmount: rent.paidAmount || "NA",
+      Due:  rent.due || "NA",
+      DueDate:  rent.dueDate || "NA",
+      PaidDate:  rent.paidDate || "NA",
+      Status:  rent.status || "NA",
+      TotalFee: rent.totalFee || "NA",
+    }));
+
+    return flatRents.map(flatRent => ({
+      Room: item.roomNo || "NA",
+      Bed: item.bedNo || "NA",
+      Name: item.name || "NA",
+      Address: item.permnentAddress || "NA",
+      bikeNumber: item.bikeNumber || "NA",
+      DateOfJoin: item.dateOfJoin || "NA",
+      Emergency: item.emergencyContact || "NA",
+      Id: item.idNumber || "NA",
+      Mobile: item.mobileNo || "NA",
+      Status: item.status || "NA",
+      ...flatRent // Spread the flattened rent information
+    }));
+  }).flat();
+
+  // Create a new workbook and a worksheet
+const workbook = XLSX.utils.book_new();
+const worksheet = XLSX.utils.json_to_sheet(flatData);
+
+// Add the worksheet to the workbook
+XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
+
+// Generate a binary Excel file
+XLSX.writeFile(workbook, 'tenants_data.xlsx');
+}
+
+
+
+
+
+
+
+
+
+
+
+  const handleChangeHostelType =(e)=>{
+    setSelectedHostelType(e.target.value);
+  }
+
+
+ 
+
 
   return (
     <div className="settings">
@@ -160,9 +791,7 @@ console.log(hostelData, "dataaa")
           <label className="languageLabel" htmlFor="language-selector">{t("settings.languages")} </label>
           <LanguageSwitch id="language-selector" />
         </div>
-        <div>
-        <Reports/>
-      </div>
+        
       </div>
       <div className='mt-4'>
         {
@@ -260,7 +889,49 @@ console.log(hostelData, "dataaa")
           </Modal.Body>
         </Modal>
       </div>
+      <h1 className='settingsHeading'>Generate Reports</h1>
+      <div className="hostelTypeDropDown">
+      <p className='selectTypeText'>Select HostelType</p>
+      <select className='selectTypeDropDown' value={selectedHostelType} onChange={handleChangeHostelType}>
+        <option value="mens" >Mens</option>
+        <option value="girls">Womens</option>
+      </select>
+      </div>
+      <h2 className='settingsHeading'>Tenants Report</h2>
      
+      <button className='reportsButton' onClick={handleReportBtn}>Generate PDF</button>
+      <button className='reportsButton' onClick={handleTenantBtnExcel}>Generate Excel</button>
+      <h2 className='settingsHeading'>Vacated Tenants Report</h2>
+      <button className='reportsButton' onClick={handleVacatedReportBtn}>Generate PDF</button>
+      <button className='reportsButton' onClick={handleVacatedBtnExcel}>Generate Excel</button>
+
+      <h2 className='settingsHeading'>Expenses Report</h2>
+      <select className='selectTypeDropDown' value={year} onChange={e => setYear(e.target.value)}>
+              
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2022">2026</option>
+                <option value="2023">2027</option>
+                <option value="2022">2028</option>
+               
+              </select>
+
+              <select className='selectTypeDropDown'  value={month} onChange={e => { setMonth(e.target.value) }}>
+                <option value="">None</option>
+                <option value="jan">{t('months.jan')}</option>
+                <option value="feb">{t('months.feb')}</option>
+                <option value="mar">{t('months.mar')}</option>
+                <option value="apr">{t('months.apr')}</option>
+                <option value="may">{t('months.may')}</option>
+                <option value="jun">{t('months.jun')}</option>
+                <option value="jul">{t('months.jul')}</option>
+                <option value="aug">{t('months.aug')}</option>
+                <option value="sep">{t('months.sep')}</option>
+                <option value="oct">{t('months.oct')}</option>
+                <option value="nov">{t('months.nov')}</option>
+                <option value="dec">{t('months.dec')}</option>
+              </select>
+     <button className='reportsButton' onClick={handleExpensesGenerateBtn}>Generate PDF</button>
     </div>
   );
 };

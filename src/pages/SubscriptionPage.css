@@ -46,11 +46,17 @@
   .subscription-card button:hover {
     background-color: #ea7e03; /* Darker shade on hover */
   }
-  .backBtnContainer{
+  /* .backBtnContainer{
     display:flex;
     justify-content:end;
-    width:861px;
   }
+  @media screen and (min-width:978px){
+    .backBtnContainer{
+      width:90%;
+    }
+  } */
+
+
   .backBtn{
     border:none;
     outline:none;
