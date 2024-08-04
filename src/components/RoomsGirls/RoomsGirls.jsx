@@ -174,15 +174,28 @@ const RoomsGirls = () => {
     setShowModal(false);
   };
 
+  const roomExists = (data, targetRoomNo) => {
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        const entry = data[key];
+        if (entry.roomNo === targetRoomNo) {
+          return true; // Room found, exit loop
+        }
+      }
+    }
+    return false; // No room found
+  };
+
   const confirmDeleteYes =async  () => {
 
     try {
-      const path = `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`;
+      const path = `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`;
       const dbRef = ref(database, path);
       const snapshot = await get(dbRef);
       if (snapshot.exists()) {
         const data = snapshot.val();
-        if(data === null || data === undefined){
+        const exists = roomExists(data, roomNumber);
+        if(!exists){
           const roomRef =  ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`);
               remove(roomRef).then(() => {
                 toast.success("Room deleted successfully.", {
@@ -234,6 +247,7 @@ const RoomsGirls = () => {
 
    
   }
+
 
   const confirmDeleteNo = () => {
     setShowConfirmationPopUp(false);
