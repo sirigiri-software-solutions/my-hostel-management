@@ -231,18 +231,18 @@
         "floor": "Floor"
     },
     "months": {
-        "jan": "January",
-        "feb": "February",
-        "mar": "March",
-        "apr": "April",
+        "jan": "Jan",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Apr",
         "may": "May",
-        "jun": "June",
-        "jul": "July",
-        "aug": "August",
-        "sep": "September",
-        "oct": "October",
-        "nov": "November",
-        "dec": "December"
+        "jun": "Jun",
+        "jul": "Jul",
+        "aug": "Aug",
+        "sep": "Sept",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "Dec"
     },
     "errors": {
         "floorNumberRequired": "Floor number is required",
@@ -367,6 +367,14 @@
         "close":"Close",
         "enterhostelName":"Enter new Hostel name",
         "enterhostelAddress":"Enter Hostel address",
-        "hostelImage":"Hostel Image"
+        "hostelImage":"Hostel Image",
+        "generateReport":"Generate Report",
+        "selectHostelType":"Select Hostel Type",
+        "tenantsReport":"Tenants Report",
+        "vacatedTenantsReport":"Vacated Tenants Report",
+        "expensesReport":"Expenses Report",
+        "generatePdf":  "Generate PDF",
+        "generateExcel":"Generate Excel"
+
     }
   }

@@ -363,7 +363,16 @@
   "hostelAddress": "हॉस्टल का पता",
   "close": "बंद करें",
   "enterhostelName": "हॉस्टल का नया नाम दर्ज करें",
-  "enterhostelAddress": "हॉस्टल का पता दर्ज करें"
+  "enterhostelAddress": "हॉस्टल का पता दर्ज करें",
+  "generateReport":"रिपोर्ट तैयार करें",
+  "selectHostelType":"हॉस्टल प्रकार चुनें",
+  "tenantsReport":"किरायेदार रिपोर्ट",
+  "vacatedTenantsReport":"खाली किए गए किरायेदारों की रिपोर्ट",
+  "expensesReport":"खर्च रिपोर्ट",
+  "generatePdf": "PDF उत्पन्न करें",
+  "generateExcel":"Excel उत्पन्न करें"
+
+
 }
   
     

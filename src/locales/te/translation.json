@@ -358,7 +358,15 @@
   "hostelAddress": "హాస్టల్ చిరునామా",
   "close": "మూసివేయి",
   "enterhostelName": "హాస్టల్ పేరు నమోదు చేయండి",
-  "enterhostelAddress": "హాస్టల్ చిరునామా నమోదు చేయండి"
+  "enterhostelAddress": "హాస్టల్ చిరునామా నమోదు చేయండి",
+   "generateReport":"సంగ్రహం తయారుచేయండి",
+    "selectHostelType":"హాస్టల్ రకం ఎంచుకోండి",
+     "tenantsReport":"నివాసుల నివేదిక",
+      "vacatedTenantsReport":"ఖాళీ చేసిన నివాసుల నివేదిక",
+      "expensesReport":"ఖర్చుల నివేదిక",
+       "generatePdf": "PDF రూపొందించు",
+  "generateExcel":"Excel రూపొందించు"
+
 
 }
 

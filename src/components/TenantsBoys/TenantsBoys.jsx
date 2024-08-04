@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react'
+import * as pdfjsLib from 'pdfjs-dist/webpack';
 import TenantsIcon from '../../images/Icons (4).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
@@ -14,12 +15,14 @@ import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useTranslation } from 'react-i18next'
+
 import { useData } from '../../ApiData/ContextProvider';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '../../Elements/Spinner'
 import { jsPDF } from "jspdf";
+import { PDFDocument } from 'pdf-lib';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
@@ -842,19 +845,19 @@ const handleAddNew = (event) => {
     }));
   };
 
-  const calculateFitDimensions = (imageWidth, imageHeight, maxWidth, maxHeight) => {
-    let width = imageWidth;
-    let height = imageHeight;
+  // const calculateFitDimensions = (imageWidth, imageHeight, maxWidth, maxHeight) => {
+  //   let width = imageWidth;
+  //   let height = imageHeight;
   
-    if (width > maxWidth) {
-      height = (maxWidth / width) * height;
-      width = maxWidth;
-    }
+  //   if (width > maxWidth) {
+  //     height = (maxWidth / width) * height;
+  //     width = maxWidth;
+  //   }
   
-    if (height > maxHeight) {
-      width = (maxHeight / height) * width;
-      height = maxHeight;
-    }
+  //   if (height > maxHeight) {
+  //     width = (maxHeight / height) * width;
+  //     height = maxHeight;
+  //   }
   
     return { width, height };
   };
@@ -1344,6 +1347,5 @@ const handleAddNew = (event) => {
     </>
   );
 
-}
 
 export default TenantsBoys;
