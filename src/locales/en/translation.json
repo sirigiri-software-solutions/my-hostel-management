@@ -366,6 +366,14 @@
         "close":"Close",
         "enterhostelName":"Enter new Hostel name",
         "enterhostelAddress":"Enter Hostel address",
-        "hostelImage":"Hostel Image"
+        "hostelImage":"Hostel Image",
+        "generateReport":"Generate Report",
+        "selectHostelType":"Select Hostel Type",
+        "tenantsReport":"Tenants Report",
+        "vacatedTenantsReport":"Vacated Tenants Report",
+        "expensesReport":"Expenses Report",
+        "generatePdf":  "Generate PDF",
+        "generateExcel":"Generate Excel"
+
     }
   }
