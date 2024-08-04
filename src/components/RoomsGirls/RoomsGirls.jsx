@@ -405,7 +405,7 @@ const RoomsGirls = () => {
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputRent" className="form-label">{t('roomsPage.roomNumber')}</label>
-                      <input type="text" className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+                      <input type="text" placeholder='like F1, 102, ...etc' className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
 
                       {errors.roomNumber && <div style={{ color: 'red' }}>{errors.roomNumber}</div>}
                     </div>

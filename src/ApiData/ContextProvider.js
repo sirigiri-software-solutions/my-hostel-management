@@ -30,7 +30,7 @@ const DataProvider = ({ children }) => {
   const [girlsExTenantsData, setGirlsExTenantsData] = useState([]);
 
   // new code to implement multiple configuration
-  const [area, setArea] = useState(localStorage.getItem('userarea') || 'hyderabad');
+  const [area, setArea] = useState(localStorage.getItem('userarea') || 'default');
   const [firebase, setFirebase] = useState(firebaseInstances[area]);
   const [activeFlag, setActiveFlag] = useState();
 
@@ -47,10 +47,22 @@ const DataProvider = ({ children }) => {
 
   }, [area]);
 
+  console.log(firebase, "fire")
 
   const areaToApiEndpoint = {
-    hyderabad: "https://ameerpet-588ee-default-rtdb.firebaseio.com/register.json",
+    // hyderabad: "https://ameerpet-588ee-default-rtdb.firebaseio.com/register.json",
+    ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
+    srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
     secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
+    default:"https://defaulthostel-default-rtdb.firebaseio.com/register.json",
+    kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
+    gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
+    ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
+    dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
+    himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
+    madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
+    madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
+    lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
   };
 
   useEffect(() => {

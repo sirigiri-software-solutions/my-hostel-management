@@ -132,7 +132,7 @@ const SignUp = () => {
     };
 
 
-    const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
+    const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || " ";
 
 
     axios
