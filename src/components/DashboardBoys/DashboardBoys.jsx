@@ -769,7 +769,7 @@ const DashboardBoys = () => {
     }
   };
 
-  const handleTenantSubmit = async (e) => {
+const handleTenantSubmit = async (e) => {
     e.preventDefault();
     if (!isEditing) {
       e.target.querySelector('button[type="submit"]').disabled = true;
@@ -780,6 +780,7 @@ const DashboardBoys = () => {
     } else {
       if (!validate()) return;
     }
+
 
 
     const tenantData = {
@@ -855,6 +856,9 @@ const DashboardBoys = () => {
     setLoading(false);
     imageInputRef.current.value = "";
     idInputRef.current.value = "";
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
   };
 
 
@@ -1539,7 +1543,16 @@ const DashboardBoys = () => {
                 </object>
               )}
               <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef} multiple />
-
+              {isMobile && (
+                    <div>
+                    <p>{t('tenantsPage.or')}</p>
+                    <div style={{display:'flex',flexDirection:'row'}}>
+                    <p>{t('tenantsPage.takePhoto')}</p>
+                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
+                    {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
+                    </div>
+                    </div>
+                    )}
             </div>
             <div className='col-md-12'>
               <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>

@@ -76,6 +76,7 @@ const TenantsBoys = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [photoUrl, setPhotoUrl] = useState(null);
   const [idUrl,setIdUrl]=useState(null);
+  
   useEffect(() => {
     // Check if the user agent is a mobile device
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -114,6 +115,16 @@ const TenantsBoys = () => {
       toast.error(t('toastMessages.Image not Uploaded'));
     }
   };
+  // const handleAddTenant = (event) => {
+  //   event.preventDefault();
+  //   // Logic for adding a tenant
+
+  //   // After successfully adding a tenant, reset the photoUrl and idUrl
+  //   setPhotoUrl(null);
+  //   setIdUrl(null);
+  //   setTenantImage(null);
+  // };
+
 
   const takeidPicture = async () => {
 
@@ -414,7 +425,10 @@ const TenantsBoys = () => {
           draggable: true,
           progress: undefined,
         });
-
+        setPhotoUrl(null);
+        setIdUrl(null);
+        setTenantImage(null);
+        
       }).catch(error => {
         toast.error(t('toastMessages.errorUpdatingTenant') + error.message, {
           position: "top-center",
@@ -488,7 +502,7 @@ const TenantsBoys = () => {
 
   };
 
-  const handleAddNew = () => {
+const handleAddNew = (event) => {
     if (activeBoysHostelButtons.length == 0) {
       toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
@@ -499,7 +513,7 @@ const TenantsBoys = () => {
         draggable: true,
         progress: undefined,
       })
-    } else {
+    } else  {
 
       resetForm();
       setIsEditing(false);
@@ -508,6 +522,15 @@ const TenantsBoys = () => {
 
       setHasBike(false);
     }
+    
+      // event.preventDefault();
+    // Logic for adding a tenant
+
+    // After successfully adding a tenant, reset the photoUrl and idUrl
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+    
   };
 
   const resetForm = () => {
@@ -609,6 +632,10 @@ const TenantsBoys = () => {
     setHasBike(false);
     setBikeNumber('');
     setFileName('');
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+
   }
 
 
@@ -671,6 +698,9 @@ const TenantsBoys = () => {
     setUserDetailsTenantsPopup(false);
     setDueDateOfTenant("")
     setSingleTenantProofId("");
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
   }
 
   const handleVacate = async (id) => {
@@ -828,164 +858,6 @@ const TenantsBoys = () => {
   
     return { width, height };
   };
-
-  // download single separate pdf's
-  // const handleTenantDownload=() => {
-
- 
-  //   const doc = new jsPDF();
-  //   // title
-  //   doc.setFontSize(18);
-  //   doc.setFont('helvetica','bold')
-  //   doc.text("Tenant Details", 80, 10);
-
-
-  //   if (singleTenantDetails.image) {
-  //     doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
-  //   }
-
-  //   // tenant details
-  //  doc.setFontSize(12);
-  // doc.setFont("helvetica", "bold");
-  // doc.text("Name: ", 20, 25);
-
-  // doc.setFont("helvetica", "normal");
-  // doc.text(singleTenantDetails.name,34, 25);
-
-  // doc.setFont("helvetica", "bold");
-  // doc.text("Mobile No: ", 20, 35);
-
-  // doc.setFont("helvetica", "normal");
-  // doc.text(singleTenantDetails.mobile_no,43, 35);
-
-
-  // doc.setFont("helvetica", "bold");
-  // doc.text("Proof ID :" , 20, 45);
-
-  // doc.setFont("helvetica", "normal");
-  // doc.text(singleTenantDetails.id,40, 45);
-
-  // doc.setFont("helvetica", "bold");
-  // doc.text("Room/Bed No:" , 20, 55);
- 
-  // doc.setFont("helvetica", "normal");
-  // doc.text(singleTenantDetails.room_bed_no,50, 55);
-
-  // doc.setFont("helvetica", "bold");
-  // doc.text("Joining Date:" , 20, 65);
- 
-  // doc.setFont("helvetica", "normal");
-  // doc.text(singleTenantDetails.joining_date,48, 65);
-
-
-  // if(dueDateOfTenant){
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Due Date:" , 20, 75);
-   
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(dueDateOfTenant,40, 75);
-
-  // }
-
-  // if(bikeNumber){
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Bike Number:" , 20, 85);
-   
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(singleTenanantBikeNum,48, 85);
-  // }
-
-  // if(tenantAddress){
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Address:" , 20, 95);
-   
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(tenantAddress,39, 95);
-  // }
-
-  
-
-
-
-  // // Save the generated PDF
-  // doc.save(`${singleTenantDetails.name}_Details.pdf`);
-
-  //   // Second PDF: ID Proof Image
-  //   if (singleTenantProofId) {
-  //     const proofDoc = new jsPDF();
-  
-  //     const img = new Image();
-  //     img.src = singleTenantProofId;
-  
-  //     img.onload = () => {
-  //       const imgWidth = img.width;
-  //       const imgHeight = img.height;
-  //       const maxWidth = proofDoc.internal.pageSize.width - 40; // Max width for the image on the PDF
-  //       const maxHeight = proofDoc.internal.pageSize.height - 40; // Max height for the image on the PDF
-  
-  //       // Calculate fit dimensions
-  //       const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
-  
-  //       // Add image to PDF
-  //       proofDoc.addImage(singleTenantProofId, 'JPEG', 20, 20, width, height);
-  
-  //       // Save the second PDF
-  //       proofDoc.save(`${singleTenantDetails.name}_ID_Proof.pdf`);
-  //     };
-  //   }
-
-  //   // Third PDF: Bike Image
-  //    if (bikeImageField) {
-  //     const proofDoc = new jsPDF();
-  
-  //     const img = new Image();
-  //     img.src = bikeImageField;
-  
-  //     img.onload = () => {
-  //       const imgWidth = img.width;
-  //       const imgHeight = img.height;
-  //       const maxWidth = proofDoc.internal.pageSize.width - 40; // Max width for the image on the PDF
-  //       const maxHeight = proofDoc.internal.pageSize.height - 40; // Max height for the image on the PDF
-  
-  //       // Calculate fit dimensions
-  //       const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
-  
-  //       // Add image to PDF
-  //       proofDoc.addImage(bikeImageField, 'JPEG', 20, 20, width, height);
-  
-  //       // Save the second PDF
-  //       proofDoc.save(`${singleTenantDetails.name}_BikeImage.pdf`);
-  //     };
-  //   }
-
-
-  //   //Fourth PDF : Bike rc
-
-  //   if (bikeRcImageField) {
-  //     const proofDoc = new jsPDF();
-  
-  //     const img = new Image();
-  //     img.src = bikeRcImageField;
-  
-  //     img.onload = () => {
-  //       const imgWidth = img.width;
-  //       const imgHeight = img.height;
-  //       const maxWidth = proofDoc.internal.pageSize.width - 40; // Max width for the image on the PDF
-  //       const maxHeight = proofDoc.internal.pageSize.height - 40; // Max height for the image on the PDF
-  
-  //       // Calculate fit dimensions
-  //       const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
-  
-  //       // Add image to PDF
-  //       proofDoc.addImage(bikeRcImageField, 'JPEG', 20, 20, width, height);
-  
-  //       // Save the second PDF
-  //       proofDoc.save(`${singleTenantDetails.name}_BikeRC.pdf`);
-  //     };
-  //   }
-
-
-  // }
 
 
     // single separate pdf's
@@ -1396,7 +1268,7 @@ const TenantsBoys = () => {
 
                       </div>
                     ) : (
-                      <button id="tenantAddBtn" className="btn btn-warning" type="submit">{t('dashboard.addTenants')}</button>
+                      <button id="tenantAddBtn" className="btn btn-warning" type="submit" onClick={handleAddNew}>{t('dashboard.addTenants')}</button>
                     )}
                   </div>
                 </form>

@@ -389,6 +389,10 @@ const TenantsGirls = () => {
           draggable: true,
           progress: undefined,
         });
+        setPhotoUrl(null);
+        setIdUrl(null);
+       setTenantImage(null);
+    
       }).catch(error => {
         toast.error(t('toastMessages.errorUpdatingTenant') + error.message, {
           position: "top-center",
@@ -479,6 +483,10 @@ const TenantsGirls = () => {
       setUserDetailsTenantsPopup(false);
       setHasBike(false);
     }
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+    
   };
 
 
@@ -585,6 +593,10 @@ const TenantsGirls = () => {
     setHasBike(false);
     setBikeNumber("");
     setFileName('');
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+    
   }
 
   const handleTentantRow = (tenant) => {
@@ -641,6 +653,10 @@ const TenantsGirls = () => {
     setUserDetailsTenantsPopup(false);
     setDueDateOfTenant("")
     setSingleTenantProofId("")
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+    
   }
 
   const handleVacate = async (id) => {
