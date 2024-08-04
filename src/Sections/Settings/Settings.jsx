@@ -797,13 +797,13 @@ XLSX.writeFile(workbook, 'tenants_data.xlsx');
         {
           activeBoysHostelButtons.length > 0 ? '' :
             <div className='d-flex  align-items-center'>
-              <h5 className="addHostelTextBtn">Add Your Boys Hostel</h5><button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button>
+              <h5 className="addHostelTextBtn">{t('settings.addboysHostel')}</h5><button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button>
             </div>
         }
         {
           activeGirlsHostelButtons.length > 0 ? '' :
             <div className='d-flex  align-items-center'>
-              <h5 className="addHostelTextBtn">Add Your Girls Hostel</h5><button className="addHostelBtn" onClick={() => setIsGirlsModalOpen(true)}>{t("settings.addHostel")}</button>
+              <h5 className="addHostelTextBtn">{t('settings.addGirlsHostel')}</h5><button className="addHostelBtn" onClick={() => setIsGirlsModalOpen(true)}>{t("settings.addHostel")}</button>
             </div>
         }
 
@@ -889,23 +889,23 @@ XLSX.writeFile(workbook, 'tenants_data.xlsx');
           </Modal.Body>
         </Modal>
       </div>
-      <h1 className='settingsHeading'>Generate Reports</h1>
+      <h1 className='settingsHeading'>{t('settings.generateReport')}</h1>
       <div className="hostelTypeDropDown">
-      <p className='selectTypeText'>Select HostelType</p>
+      <p className='selectTypeText'>{t('settings.selectHostelType')}</p>
       <select className='languageDropdown' value={selectedHostelType} onChange={handleChangeHostelType}>
-        <option value="mens" >Mens</option>
-        <option value="girls">Womens</option>
+        <option value="mens" >{t('dashboard.mens')}</option>
+        <option value="girls">{t('dashboard.womens')}</option>
       </select>
       </div>
-      <h1 className='settingsSideHeading'>Tenants Report</h1>
+      <h1 className='settingsSideHeading'>{t('settings.tenantsReport')}</h1>
      
-      <button className='reportsButton' onClick={handleReportBtn}>Generate PDF</button>
-      <button className='reportsButton' onClick={handleTenantBtnExcel}>Generate Excel</button>
-      <h2  className='settingsSideHeading'>Vacated Tenants Report</h2>
-      <button className='reportsButton' onClick={handleVacatedReportBtn}>Generate PDF</button>
-      <button className='reportsButton' onClick={handleVacatedBtnExcel}>Generate Excel</button>
+      <button className='reportsButton' onClick={handleReportBtn}>{t('settings.generatePdf')}</button>
+      <button className='reportsButton' onClick={handleTenantBtnExcel}>{t('settings.generateExcel')}</button>
+      <h2  className='settingsSideHeading'>{t('settings.vacatedTenantsReport')}</h2>
+      <button className='reportsButton' onClick={handleVacatedReportBtn}>{t('settings.generatePdf')}</button>
+      <button className='reportsButton' onClick={handleVacatedBtnExcel}>{t('settings.generateExcel')}</button>
 
-      <h2  className='settingsSideHeading'>Expenses Report</h2>
+      <h2  className='settingsSideHeading'>{t('settings.expensesReport')}</h2>
       <select className='languageDropdown dropDownMbl' value={year} onChange={e => setYear(e.target.value)}>
               
                 <option value="2024">2024</option>
@@ -932,7 +932,7 @@ XLSX.writeFile(workbook, 'tenants_data.xlsx');
                 <option value="dec">{t('months.dec')}</option>
               </select>
               <br />
-     <button className='reportsButton expensesBtn' onClick={handleExpensesGenerateBtn}>Generate PDF</button>
+     <button className='reportsButton expensesBtn' onClick={handleExpensesGenerateBtn}>{t('settings.generatePdf')}</button>
     </div>
   );
 };
