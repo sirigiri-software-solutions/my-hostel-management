@@ -467,3 +467,21 @@
  #downloadPdfBtn{
   margin-left:10px;
  }
+ .photo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  padding: 20px;
+}
+
+.photo-wrapper {
+  text-align: center;
+}
+.responsive-image {
+  max-width: 100%;
+  height: auto;
+  margin-top: 20px;
+  border: 1px solid #ddd; /* Optional border for visibility */
+  border-radius: 8px; /* Optional rounded corners */
+}

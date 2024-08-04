@@ -21,8 +21,13 @@ import { Camera, CameraResultType } from '@capacitor/camera';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '../../Elements/Spinner'
-import { jsPDF } from "jspdf";
+
 import { PDFDocument } from 'pdf-lib';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, FilesystemDirectory } from '@capacitor/filesystem';
+import { FileOpener } from '@capacitor-community/file-opener';
+import jsPDF from 'jspdf';
+// import * as pdfjsLib from 'pdfjs-dist';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
@@ -76,6 +81,7 @@ const TenantsBoys = () => {
   const [bikeRcImageField,setBikeRcImageField]=useState('');
   
   // for camera icon
+  
   const [isMobile, setIsMobile] = useState(false);
   const [photoUrl, setPhotoUrl] = useState(null);
   const [idUrl,setIdUrl]=useState(null);
@@ -104,31 +110,11 @@ const TenantsBoys = () => {
         setTenantImage(reader.result);
       };
       fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
-      //  const response = await fetch(photo.webPath);
-      //  const blob = await response.blob();
-      // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-      // const snapshot = await uploadBytes(imageRef, blob);
-      //  const url = await getDownloadURL(snapshot.ref);
-      
-      // setPhotoUrl(url); // Display in UI
-      // setTenantImageUrl(url); // Use in form submission
-      //  setPhotoUrl(photo.webPath);
-    } catch (error) {
-      console.error("Error accessing the camera", error);
-      toast.error(t('toastMessages.Image not Uploaded'));
+    }catch (error) {
+        console.error("Error accessing the camera", error);
+        toast.error(t('toastMessages.Id not Uploaded'));
+      }
     }
-  };
-  // const handleAddTenant = (event) => {
-  //   event.preventDefault();
-  //   // Logic for adding a tenant
-
-  //   // After successfully adding a tenant, reset the photoUrl and idUrl
-  //   setPhotoUrl(null);
-  //   setIdUrl(null);
-  //   setTenantImage(null);
-  // };
-
-
   const takeidPicture = async () => {
 
     if (!isMobile) {
@@ -844,177 +830,434 @@ const handleAddNew = (event) => {
       [name]: '',
     }));
   };
-
-  // const calculateFitDimensions = (imageWidth, imageHeight, maxWidth, maxHeight) => {
-  //   let width = imageWidth;
-  //   let height = imageHeight;
+  const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
+  const isImage = (fileData) => fileData.startsWith('data:image/');
   
-  //   if (width > maxWidth) {
-  //     height = (maxWidth / width) * height;
-  //     width = maxWidth;
-  //   }
+  const pdfToImages = async (pdfUrl) => {
+    const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
+    const numPages = pdf.numPages;
+    const images = [];
   
-  //   if (height > maxHeight) {
-  //     width = (maxHeight / height) * width;
-  //     height = maxHeight;
-  //   }
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 2 });
   
-    return { width, height };
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+  
+      await page.render({
+        canvasContext: context,
+        viewport: viewport
+      }).promise;
+  
+      const imgData = canvas.toDataURL('image/png');
+      images.push({ imgData, width: viewport.width, height: viewport.height });
+    }
+  
+    return images;
+  };
+  
+  const calculateFitDimensions = (imgWidth, imgHeight, maxWidth, maxHeight) => {
+    const widthRatio = maxWidth / imgWidth;
+    const heightRatio = maxHeight / imgHeight;
+    const ratio = Math.min(widthRatio, heightRatio);
+    return {
+      width: imgWidth * ratio,
+      height: imgHeight * ratio
+    };
+  };
+  
+  const loadImage = (src) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  };
+  
+  const handleTenantDownload = async () => {
+    const doc = new jsPDF();
+  
+    // Page 1: Tenant Details
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text("Tenant Details", 80, 10);
+  
+    if (singleTenantDetails.image) {
+      doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
+    }
+  
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Name: ", 20, 25);
+  
+    doc.setFont("helvetica", "normal");
+    doc.text(singleTenantDetails.name, 34, 25);
+  
+    doc.setFont("helvetica", "bold");
+    doc.text("Mobile No: ", 20, 35);
+  
+    doc.setFont("helvetica", "normal");
+    doc.text(singleTenantDetails.mobile_no, 43, 35);
+  
+    doc.setFont("helvetica", "bold");
+    doc.text("Proof ID: ", 20, 45);
+  
+    doc.setFont("helvetica", "normal");
+    doc.text(singleTenantDetails.id, 40, 45);
+  
+    doc.setFont("helvetica", "bold");
+    doc.text("Room/Bed No: ", 20, 55);
+  
+    doc.setFont("helvetica", "normal");
+    doc.text(singleTenantDetails.room_bed_no, 50, 55);
+  
+    doc.setFont("helvetica", "bold");
+    doc.text("Joining Date: ", 20, 65);
+  
+    doc.setFont("helvetica", "normal");
+    doc.text(singleTenantDetails.joining_date, 48, 65);
+  
+    if (dueDateOfTenant) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Due Date: ", 20, 75);
+  
+      doc.setFont("helvetica", "normal");
+      doc.text(dueDateOfTenant, 40, 75);
+    }
+  
+    if (bikeNumber) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Bike Number: ", 20, 85);
+  
+      doc.setFont("helvetica", "normal");
+      doc.text(singleTenanantBikeNum, 48, 85);
+    }
+  
+    if (tenantAddress) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Address: ", 20, 95);
+  
+      doc.setFont("helvetica", "normal");
+      doc.text(tenantAddress, 39, 95);
+    }
+  
+    // Add a new page
+    doc.addPage();
+  
+    // Page 2: ID Proof Image or PDF
+    if (singleTenantProofId) {
+      if (isImage(singleTenantProofId)) {
+        try {
+          const img = await loadImage(singleTenantProofId);
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+        } catch (error) {
+          console.error('Error loading image:', error);
+        }
+        doc.addPage();
+      } else if (isPDF(singleTenantProofId)) {
+        const images = await pdfToImages(singleTenantProofId);
+        images.forEach((img, index) => {
+          if (index > 0) doc.addPage();
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+        });
+        doc.addPage();
+      }
+    }
+  
+    // Page 3: Bike Image or PDF
+    if (bikeImageField) {
+      if (isImage(bikeImageField)) {
+        try {
+          const img = await loadImage(bikeImageField);
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+        } catch (error) {
+          console.error('Error loading image:', error);
+        }
+        doc.addPage();
+      } else if (isPDF(bikeImageField)) {
+        const images = await pdfToImages(bikeImageField);
+        images.forEach((img, index) => {
+          if (index > 0) doc.addPage();
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+        });
+        doc.addPage();
+      }
+    }
+  
+    // Page 4: Bike RC Image or PDF
+    if (bikeRcImageField) {
+      if (isImage(bikeRcImageField)) {
+        try {
+          const img = await loadImage(bikeRcImageField);
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+        } catch (error) {
+          console.error('Error loading image:', error);
+        }
+      } else if (isPDF(bikeRcImageField)) {
+        const images = await pdfToImages(bikeRcImageField);
+        images.forEach((img, index) => {
+          if (index > 0) doc.addPage();
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+        });
+      }
+    }
+  
+    // Convert PDF to Blob
+    const pdfOutput = doc.output('blob');
+  
+    if (Capacitor.isNativePlatform()) {
+      // Save the PDF file to the mobile device
+      const fileName = `${singleTenantDetails.name}_Complete_Details.pdf`;
+      const filePath = `pdf/${fileName}`;
+  
+      try {
+        const reader = new FileReader();
+        reader.readAsDataURL(pdfOutput);
+        reader.onloadend = async () => {
+          const base64Data = reader.result.split(',')[1];
+  
+          await Filesystem.writeFile({
+            path: filePath,
+            data: base64Data,
+            directory: FilesystemDirectory.Documents,
+            recursive: true,
+          });
+  
+          const result = await Filesystem.getUri({
+            directory: FilesystemDirectory.Documents,
+            path: filePath,
+          });
+  
+          // Optionally open the file using the FileOpener plugin
+          await FileOpener.open({
+            filePath: result.uri,
+            fileMimeType: 'application/pdf',
+          });
+        };
+        reader.onerror = (error) => {
+          console.error('Error converting PDF to base64:', error);
+        };
+      } catch (error) {
+        console.error('Error saving file:', error);
+      }
+    } else {
+      // Save the PDF file for web
+      const url = URL.createObjectURL(pdfOutput);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `${singleTenantDetails.name}_Complete_Details.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
-
-    // single separate pdf's
-
-    const handleTenantDownload = () => {
-      const doc = new jsPDF();
-    
-      // Page 1: Tenant Details
-      doc.setFontSize(18);
-      doc.setFont('helvetica', 'bold');
-      doc.text("Tenant Details", 80, 10);
-    
-      if (singleTenantDetails.image) {
-        doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
-      }
-    
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.text("Name: ", 20, 25);
-    
-      doc.setFont("helvetica", "normal");
-      doc.text(singleTenantDetails.name, 34, 25);
-    
-      doc.setFont("helvetica", "bold");
-      doc.text("Mobile No: ", 20, 35);
-    
-      doc.setFont("helvetica", "normal");
-      doc.text(singleTenantDetails.mobile_no, 43, 35);
-    
-      doc.setFont("helvetica", "bold");
-      doc.text("Proof ID: ", 20, 45);
-    
-      doc.setFont("helvetica", "normal");
-      doc.text(singleTenantDetails.id, 40, 45);
-    
-      doc.setFont("helvetica", "bold");
-      doc.text("Room/Bed No: ", 20, 55);
-    
-      doc.setFont("helvetica", "normal");
-      doc.text(singleTenantDetails.room_bed_no, 50, 55);
-    
-      doc.setFont("helvetica", "bold");
-      doc.text("Joining Date: ", 20, 65);
-    
-      doc.setFont("helvetica", "normal");
-      doc.text(singleTenantDetails.joining_date, 48, 65);
-    
-      if (dueDateOfTenant) {
-        doc.setFont("helvetica", "bold");
-        doc.text("Due Date: ", 20, 75);
-    
-        doc.setFont("helvetica", "normal");
-        doc.text(dueDateOfTenant, 40, 75);
-      }
-    
-      if (bikeNumber) {
-        doc.setFont("helvetica", "bold");
-        doc.text("Bike Number: ", 20, 85);
-    
-        doc.setFont("helvetica", "normal");
-        doc.text(singleTenanantBikeNum, 48, 85);
-      }
-    
-      if (tenantAddress) {
-        doc.setFont("helvetica", "bold");
-        doc.text("Address: ", 20, 95);
-    
-        doc.setFont("helvetica", "normal");
-        doc.text(tenantAddress, 39, 95);
-      }
-    
-      // Add a new page
-      doc.addPage();
-    
-      // Page 2: ID Proof Image
-      if (singleTenantProofId) {
-        const img = new Image();
-        img.src = singleTenantProofId;
-    
-        img.onload = () => {
-          const imgWidth = img.width;
-          const imgHeight = img.height;
-          const maxWidth = doc.internal.pageSize.width - 40;
-          const maxHeight = doc.internal.pageSize.height - 40;
-    
-          const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
-    
-          doc.addImage(singleTenantProofId, 'JPEG', 20, 20, width, height);
-    
-          // Add a new page
-          doc.addPage();
-    
-          // Page 3: Bike Image
-          if (bikeImageField) {
-            const bikeImg = new Image();
-            bikeImg.src = bikeImageField;
-    
-            bikeImg.onload = () => {
-              const bikeImgWidth = bikeImg.width;
-              const bikeImgHeight = bikeImg.height;
-              const bikeMaxWidth = doc.internal.pageSize.width - 40;
-              const bikeMaxHeight = doc.internal.pageSize.height - 40;
-    
-              const { width, height } = calculateFitDimensions(bikeImgWidth, bikeImgHeight, bikeMaxWidth, bikeMaxHeight);
-    
-              doc.addImage(bikeImageField, 'JPEG', 20, 20, width, height);
-    
-              // Add a new page
-              doc.addPage();
-    
-              // Page 4: Bike RC
-              if (bikeRcImageField) {
-                const bikeRcImg = new Image();
-                bikeRcImg.src = bikeRcImageField;
-    
-                bikeRcImg.onload = () => {
-                  const bikeRcImgWidth = bikeRcImg.width;
-                  const bikeRcImgHeight = bikeRcImg.height;
-                  const bikeRcMaxWidth = doc.internal.pageSize.width - 40;
-                  const bikeRcMaxHeight = doc.internal.pageSize.height - 40;
-    
-                  const { width, height } = calculateFitDimensions(bikeRcImgWidth, bikeRcImgHeight, bikeRcMaxWidth, bikeRcMaxHeight);
-    
-                  doc.addImage(bikeRcImageField, 'JPEG', 20, 20, width, height);
-    
-                  // Save the PDF
-                  doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-                };
-              } else {
-                // Save the PDF if there's no bike RC image
-                doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-              }
-            };
-          } else {
-            // Save the PDF if there's no bike image
-            doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-          }
-        };
-      } else {
-        // Save the PDF if there's no ID proof image
-        doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-      }
-    };
-    
-
-    
-
+// Helper function to check file type
+// const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
+// const isImage = (fileData) => fileData.startsWith('data:image/');
+ 
+// const pdfToImages = async (pdfUrl) => {
+//   const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
+//   const numPages = pdf.numPages;
+//   const images = [];
+ 
+//   for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+//     const page = await pdf.getPage(pageNum);
+//     const viewport = page.getViewport({ scale: 2 });
+ 
+//     const canvas = document.createElement('canvas');
+//     const context = canvas.getContext('2d');
+//     canvas.height = viewport.height;
+//     canvas.width = viewport.width;
+ 
+//     await page.render({
+//       canvasContext: context,
+//       viewport: viewport
+//     }).promise;
+ 
+//     const imgData = canvas.toDataURL('image/png');
+//     images.push({ imgData, width: viewport.width, height: viewport.height });
+//   }
+ 
+//   return images;
+// };
+ 
+// const calculateFitDimensions = (imgWidth, imgHeight, maxWidth, maxHeight) => {
+//   const widthRatio = maxWidth / imgWidth;
+//   const heightRatio = maxHeight / imgHeight;
+//   const ratio = Math.min(widthRatio, heightRatio);
+//   return {
+//     width: imgWidth * ratio,
+//     height: imgHeight * ratio
+//   };
+// };
+ 
+// const loadImage = (src) => {
+//   return new Promise((resolve, reject) => {
+//     const img = new Image();
+//     img.onload = () => resolve(img);
+//     img.onerror = reject;
+//     img.src = src;
+//   });
+// };
+ 
+// const handleTenantDownload = async () => {
+//   const doc = new jsPDF();
+ 
+//   // Page 1: Tenant Details
+//   doc.setFontSize(18);
+//   doc.setFont('helvetica', 'bold');
+//   doc.text("Tenant Details", 80, 10);
+ 
+//   if (singleTenantDetails.image) {
+//     doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
+//   }
+ 
+//   doc.setFontSize(12);
+//   doc.setFont("helvetica", "bold");
+//   doc.text("Name: ", 20, 25);
+ 
+//   doc.setFont("helvetica", "normal");
+//   doc.text(singleTenantDetails.name, 34, 25);
+ 
+//   doc.setFont("helvetica", "bold");
+//   doc.text("Mobile No: ", 20, 35);
+ 
+//   doc.setFont("helvetica", "normal");
+//   doc.text(singleTenantDetails.mobile_no, 43, 35);
+ 
+//   doc.setFont("helvetica", "bold");
+//   doc.text("Proof ID: ", 20, 45);
+ 
+//   doc.setFont("helvetica", "normal");
+//   doc.text(singleTenantDetails.id, 40, 45);
+ 
+//   doc.setFont("helvetica", "bold");
+//   doc.text("Room/Bed No: ", 20, 55);
+ 
+//   doc.setFont("helvetica", "normal");
+//   doc.text(singleTenantDetails.room_bed_no, 50, 55);
+ 
+//   doc.setFont("helvetica", "bold");
+//   doc.text("Joining Date: ", 20, 65);
+ 
+//   doc.setFont("helvetica", "normal");
+//   doc.text(singleTenantDetails.joining_date, 48, 65);
+ 
+//   if (dueDateOfTenant) {
+//     doc.setFont("helvetica", "bold");
+//     doc.text("Due Date: ", 20, 75);
+ 
+//     doc.setFont("helvetica", "normal");
+//     doc.text(dueDateOfTenant, 40, 75);
+//   }
+ 
+//   if (bikeNumber) {
+//     doc.setFont("helvetica", "bold");
+//     doc.text("Bike Number: ", 20, 85);
+ 
+//     doc.setFont("helvetica", "normal");
+//     doc.text(singleTenanantBikeNum, 48, 85);
+//   }
+ 
+//   if (tenantAddress) {
+//     doc.setFont("helvetica", "bold");
+//     doc.text("Address: ", 20, 95);
+ 
+//     doc.setFont("helvetica", "normal");
+//     doc.text(tenantAddress, 39, 95);
+//   }
+ 
+//   // Add a new page
+//   doc.addPage();
+ 
+//   // Page 2: ID Proof Image or PDF
+//   if (singleTenantProofId) {
+//     if (isImage(singleTenantProofId)) {
+//       try {
+//         const img = await loadImage(singleTenantProofId);
+//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+//         doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+//       } catch (error) {
+//         console.error('Error loading image:', error);
+//       }
+//       doc.addPage();
+//     } else if (isPDF(singleTenantProofId)) {
+//       const images = await pdfToImages(singleTenantProofId);
+//       images.forEach((img, index) => {
+//         if (index > 0) doc.addPage();
+//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+//         doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+//       });
+//       doc.addPage();
+//     }
+//   }
+ 
+//   // Page 3: Bike Image or PDF
+//   if (bikeImageField) {
+//     if (isImage(bikeImageField)) {
+//       try {
+//         const img = await loadImage(bikeImageField);
+//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+//         doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+//       } catch (error) {
+//         console.error('Error loading image:', error);
+//       }
+//       doc.addPage();
+//     } else if (isPDF(bikeImageField)) {
+//       const images = await pdfToImages(bikeImageField);
+//       images.forEach((img, index) => {
+//         if (index > 0) doc.addPage();
+//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+//         doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+//       });
+//       doc.addPage();
+//     }
+//   }
+ 
+//   // Page 4: Bike RC Image or PDF
+//   if (bikeRcImageField) {
+//     if (isImage(bikeRcImageField)) {
+//       try {
+//         const img = await loadImage(bikeRcImageField);
+//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+//         doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+//       } catch (error) {
+//         console.error('Error loading image:', error);
+//       }
+//     } else if (isPDF(bikeRcImageField)) {
+//       const images = await pdfToImages(bikeRcImageField);
+//       images.forEach((img, index) => {
+//         if (index > 0) doc.addPage();
+//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+//         doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+//       });
+//     }
+//   }
+ 
+//   // Save the PDF
+//   doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+// };
+ 
+ 
+  
   
 
 
-  
+   
 
-
-
+    
   return (
     <>
       <div className="row d-flex flex-wrap align-items-center justify-content-between">
@@ -1166,16 +1409,18 @@ const handleAddNew = (event) => {
                       </div>
                     )}
                     <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} required />
+                    <div className="photo-container">
                     {isMobile && (
-                    <div>
+                    <div className="photo-wrapper"> 
                     <p>{t('tenantsPage.or')}</p>
                     <div style={{display:'flex',flexDirection:'row'}}>
                     <p>{t('tenantsPage.takePhoto')}</p>
                     <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
-                    {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
+                    {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} className="responsive-image" />}
                     </div>
                     </div>
                     )}
+                    </div>
 
                     {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
                   </div>
@@ -1191,17 +1436,18 @@ const handleAddNew = (event) => {
 
 
                     <input ref={tenantProofIdRef} id="tenantUploadId" className="form-control" type="file" onChange={handleTenantIdChange} />
+                    <div className="photo-container">
                     {isMobile && (
-                    <div>
+                    <div className="photo-wrapper">
                     <p>{t('tenantsPage.or')}</p>
                     <div style={{display:'flex',flexDirection:'row'}}>
                     <p>{t('tenantsPage.takePhoto')}</p>
-                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeidPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
+                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeidPicture} style={{marginTop:'-7px',paddingLeft:'30px'}} className="camera-button"/>
                     {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
                     </div>
                     </div>
                     )}
-
+                    </div>
 
                   </div>
                   <div className='col-md-12'>
@@ -1347,5 +1593,5 @@ const handleAddNew = (event) => {
     </>
   );
 
-
+};
 export default TenantsBoys;
