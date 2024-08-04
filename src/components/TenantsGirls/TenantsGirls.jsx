@@ -807,7 +807,7 @@ const TenantsGirls = () => {
                     <label htmlFor='tenantMobileNo' class="form-label">
                       {t('dashboard.mobileNo')}
                     </label>
-                    <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} name="mobileNo" onFocus={handleTenantFocus} />
+                    <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
 
                     {errors.mobileNo && <p style={{ color: 'red' }}>{errors.mobileNo}</p>}
                   </div>
@@ -815,7 +815,7 @@ const TenantsGirls = () => {
                     <label htmlFor='tenantIdNum' class="form-label">
                       {t('dashboard.idNumber')}
                     </label>
-                    <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} name="idNumber" onFocus={handleTenantFocus} />
+                    <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')} name="idNumber" onFocus={handleTenantFocus} />
 
                     {errors.idNumber && <p style={{ color: 'red' }}>{errors.idNumber}</p>}
                   </div>
@@ -823,7 +823,7 @@ const TenantsGirls = () => {
                     <label htmlFor='tenantEmergency' class="form-label">
                       {t('dashboard.emergencyContact')}
                     </label>
-                    <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} name="emergencyContact" onFocus={handleTenantFocus} />
+                    <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="emergencyContact" onFocus={handleTenantFocus} />
 
                     {errors.emergencyContact && <p style={{ color: 'red' }}>{errors.emergencyContact}</p>}
                   </div>
@@ -903,6 +903,7 @@ const TenantsGirls = () => {
                         placeholder="Enter number plate ID"
                         value={bikeNumber}
                         onChange={(event) => setBikeNumber(event.target.value)}
+                        onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')}
                         style={{ borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px' }}
                       />
                       {errors.bikeNumber && <p style={{ color: 'red' }}>{errors.bikeNumber}</p>}

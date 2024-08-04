@@ -1449,6 +1449,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                   placeholder="Enter number plate ID"
                   value={bikeNumber}
                   onChange={(event) => setBikeNumber(event.target.value)}
+                  onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')}
                   style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px' }}
                 />
               </div>
@@ -1485,7 +1486,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           <form className="row lg-10" onSubmit={expensesHandleSubmit}>
             <div className="col-md-6">
               <label htmlFor="inputExpenseName" className="form-label">{t('dashboard.expenseName')}</label>
-              <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+              <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onChange={handleInputChange} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} onFocus={handleExpensesFocus} />
               {formErrors.expenseName && <div className="text-danger">{formErrors.expenseName}</div>}
             </div>
             <div className="col-md-6">

@@ -435,6 +435,7 @@ const Hostels = () => {
                 type="text"
                 value={isEditing.name}
                 onChange={(e) => handleEditChange('name', e.target.value)}
+                onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')}
                 className="edit-hostel-input"
               /><br />
               <p>{t("hostels.editAddress")}</p>
@@ -496,6 +497,7 @@ const Hostels = () => {
                 placeholder={t("settings.hostelName")}
                 value={newBoysHostelName}
                 onChange={(e) => handleHostelNameChange(e, true)}
+                onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')}
               />
             </div>
             <div className="form-group">
@@ -536,6 +538,7 @@ const Hostels = () => {
                 placeholder={t("settings.hostelName")}
                 value={newGirlsHostelName}
                 onChange={(e) => handleHostelNameChange(e, false)}
+                onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')}
               />
             </div>
             <div className="form-group">

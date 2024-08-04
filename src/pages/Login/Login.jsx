@@ -62,7 +62,7 @@ const Login = () => {
 
   const [uniqueforgotUserId, setUniqueForgotUserId] = useState(null);
 
-  const areaOptions = ["hyderabad", "secunderabad"];
+  const areaOptions = [ "default", "ameerpet", "srnagar", "secunderabad", "kukatpally", "gachibouli", "ashoknagar", "dhilshuknagar", "himayathnagar", "madhuranagar", "madhapur", "lbnagar"];
 
 
   const [signUpEmail, setSignUpEmail] = useState("");
