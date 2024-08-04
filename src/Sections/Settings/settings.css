@@ -214,23 +214,22 @@
 }
 .hostelTypeDropDown{
   display:flex;
+  align-items: center;
   gap:10px;
 }
 .settingsHeading{
-  font-family:'Roboto';
-  font-size:30px;
+  font-size:22px;
   font-weight:bold;
 }
 .settingsSideHeading{
-  font-family:'Roboto';
-  font-size:22px;
-  font-weight:bold;
+  font-size:18px;
+  /* font-weight:bold; */
   margin-top:8px;
 }
 
 .selectTypeText{
-  font-family:'Roboto';
   font-size:18px;
+  font-weight: 500;
 }
 .selectTypeDropDown{
   height:30px;
@@ -265,8 +264,6 @@
     width:80px;
   }
 }
-
-
 
 .expensesBtn{
   margin-top:10px;

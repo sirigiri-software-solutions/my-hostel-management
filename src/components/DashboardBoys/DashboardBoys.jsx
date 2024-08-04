@@ -1217,7 +1217,7 @@ const handleTenantSubmit = async (e) => {
             </div>
             <div className="col-md-6">
               <label htmlFor="inputRent" className="form-label">{t('dashboard.roomNumber')}</label>
-              <input type="text" className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+              <input type="text" placeholder='like F1, 102, ..etc' className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
               {errors.roomNumber && <div style={{ color: 'red' }}>{errors.roomNumber}</div>}
             </div>
             <div className="col-md-6">
@@ -1631,7 +1631,7 @@ const handleTenantSubmit = async (e) => {
           <form className="row 1g-10" onSubmit={expensesHandleSubmit}>
             <div className="col-md-6">
               <label htmlFor="inputExpenseName" className="form-label">{t('dashboard.expenseName')}</label>
-              <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+              <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onChange={handleInputChange} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} onFocus={handleExpensesFocus} />
               {formErrors.expenseName && <div className="text-danger">{formErrors.expenseName}</div>}
             </div>
             <div className="col-md-6">

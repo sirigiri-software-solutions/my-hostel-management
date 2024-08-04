@@ -5,7 +5,7 @@ import './RoomsGirls.css';
 import Table from '../../Elements/Table';
 import { push, ref } from "../../firebase/firebase";
 import { DataContext } from '../../ApiData/ContextProvider';
-import { onValue, remove, update } from 'firebase/database';
+import { onValue, remove, update,get } from 'firebase/database';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from 'react-i18next';
@@ -174,31 +174,65 @@ const RoomsGirls = () => {
     setShowModal(false);
   };
 
-  const confirmDeleteYes = () => {
-    const roomRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`);
-    remove(roomRef).then(() => {
-      toast.success("Room deleted successfully.", {
-        position: "top-center",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    }).catch(error => {
-      toast.error("Error deleting room: " + error.message, {
-        position: "top-center",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    });
-    setShowConfirmationPopUp(false);
+  const confirmDeleteYes =async  () => {
 
+    try {
+      const path = `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`;
+      const dbRef = ref(database, path);
+      const snapshot = await get(dbRef);
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        if(data === null || data === undefined){
+          const roomRef =  ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`);
+              remove(roomRef).then(() => {
+                toast.success("Room deleted successfully.", {
+                  position: "top-center",
+                  autoClose: 2000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                });
+              }).catch(error => {
+                toast.error("Error deleting room: " + error.message, {
+                  position: "top-center",
+                  autoClose: 2000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                });
+              });
+              setShowConfirmationPopUp(false);
+        }else{
+          toast.error("Tenants are there you can't delete room until those are trasfered to other room", {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          setShowConfirmationPopUp(false);
+
+        }
+       
+      } else {
+        console.log('No data available');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+   
+
+
+
+
+
+   
   }
 
   const confirmDeleteNo = () => {
@@ -371,7 +405,7 @@ const RoomsGirls = () => {
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputRent" className="form-label">{t('roomsPage.roomNumber')}</label>
-                      <input type="text" className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+                      <input type="text" placeholder='like F1, 102, ...etc' className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
 
                       {errors.roomNumber && <div style={{ color: 'red' }}>{errors.roomNumber}</div>}
                     </div>

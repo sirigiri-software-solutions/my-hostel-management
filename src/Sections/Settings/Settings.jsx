@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import LanguageSwitch from '../../LanguageSwitch';
 import { useTranslation } from 'react-i18next';
 import './settings.css';
-import { push, ref, set,onValue} from 'firebase/database';
+import { push, ref, set, onValue } from 'firebase/database';
 import { toast } from 'react-toastify';
 import { useData } from '../../ApiData/ContextProvider';
 import { Button, Modal } from 'react-bootstrap';
@@ -26,7 +26,7 @@ const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData , girlsTenantsData, boysTenantsData,activeBoysHostel,activeGirlsHostel,boysExTenantsData, girlsExTenantsData } = useData();
+  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData } = useData();
   const { database } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
@@ -38,14 +38,14 @@ const Settings = () => {
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
   const [isBoysModalOpen, setIsBoysModalOpen] = useState(false);
   const [isGirlsModalOpen, setIsGirlsModalOpen] = useState(false);
-  const [entireBoysData,setEntireBoysData] = useState([]);
-  const [entireGirlsData,setEntireGirlsData] = useState([]);
-  const [selectedHostelType,setSelectedHostelType] = useState("mens");
-  const [vacatedEntireBoysData,setVacatedEntireBoysData] = useState([]);
-  const [vacatedEntireGirlsData,setVacatedEnitreGirlsData] = useState([]);
+  const [entireBoysData, setEntireBoysData] = useState([]);
+  const [entireGirlsData, setEntireGirlsData] = useState([]);
+  const [selectedHostelType, setSelectedHostelType] = useState("mens");
+  const [vacatedEntireBoysData, setVacatedEntireBoysData] = useState([]);
+  const [vacatedEntireGirlsData, setVacatedEnitreGirlsData] = useState([]);
 
-  const [entireBoysYearExpensesData,setEntireBoysYearExpensesData] = useState([])
-  const [entireGirlsYearExpensesData,setEntireGirlsYearExpensesData] = useState([])
+  const [entireBoysYearExpensesData, setEntireBoysYearExpensesData] = useState([])
+  const [entireGirlsYearExpensesData, setEntireGirlsYearExpensesData] = useState([])
 
   const getCurrentMonth = () => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
@@ -56,12 +56,12 @@ const Settings = () => {
   const getCurrentYear = () => {
     return new Date().getFullYear().toString();
   };
-  const [year,setYear] = useState(getCurrentYear());
-  const [month,setMonth] = useState(getCurrentMonth())
+  const [year, setYear] = useState(getCurrentYear());
+  const [month, setMonth] = useState(getCurrentMonth())
 
 
 
-  useEffect(()=>{
+  useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
     onValue(tenantsRef, (snapshot) => {
       const data = snapshot.val();
@@ -71,9 +71,9 @@ const Settings = () => {
       })) : [];
       setEntireBoysData(loadedTenants)
     });
-  },[selectedHostelType,activeBoysHostel])
+  }, [selectedHostelType, activeBoysHostel])
 
-  useEffect(()=>{
+  useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
     onValue(tenantsRef, (snapshot) => {
       const data = snapshot.val();
@@ -83,10 +83,10 @@ const Settings = () => {
       })) : [];
       setEntireGirlsData(loadedTenants)
     });
-  },[selectedHostelType,activeGirlsHostel])
+  }, [selectedHostelType, activeGirlsHostel])
 
 
-  useEffect(()=>{
+  useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
     onValue(tenantsRef, (snapshot) => {
       const data = snapshot.val();
@@ -96,9 +96,9 @@ const Settings = () => {
       })) : [];
       setVacatedEntireBoysData(loadedTenants)
     });
-  },[selectedHostelType,activeBoysHostel])
+  }, [selectedHostelType, activeBoysHostel])
 
-  useEffect(()=>{
+  useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
     onValue(tenantsRef, (snapshot) => {
       const data = snapshot.val();
@@ -108,7 +108,7 @@ const Settings = () => {
       })) : [];
       setVacatedEnitreGirlsData(loadedTenants)
     });
-  },[selectedHostelType,activeGirlsHostel])
+  }, [selectedHostelType, activeGirlsHostel])
 
 
 
@@ -139,7 +139,7 @@ const Settings = () => {
     };
 
     fetchExpenses();
-  }, [selectedHostelType,activeBoysHostel]);
+  }, [selectedHostelType, activeBoysHostel]);
 
   useEffect(() => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
@@ -167,13 +167,13 @@ const Settings = () => {
     };
 
     fetchExpenses();
-  }, [selectedHostelType,activeGirlsHostel]);
+  }, [selectedHostelType, activeGirlsHostel]);
 
-  
+
 
   const [tenantsData, setTenantsData] = useState()
 
-console.log(hostelData, "dataaa") 
+  console.log(hostelData, "dataaa")
 
   const capitalizeFirstLetter = (string) => {
     return string.replace(/\b\w/g, char => char.toUpperCase());
@@ -299,29 +299,29 @@ const handleReportBtn = async () => {
 
     // Define columns for tenants with bikes
     const columnsWithBike = [
-        { header: 'S.No', dataKey: 'sNo' },
-        { header: 'Name', dataKey: 'name' },
-        { header: 'Mobile Number', dataKey: 'mobileNo' },
-        { header: 'Room/Bed No', dataKey: 'bedNo' },
-        { header: 'Join Date', dataKey: 'dateOfJoin' },
-        { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
-        { header: 'Due Date', dataKey: 'dueDate' },
-        { header: 'Rent', dataKey: 'rents' },
-        { header: 'Unpaid Amount', dataKey: 'unpaidAmount' },
-        { header: 'Bike Number', dataKey: 'bikeNumber' }
+      { header: 'S.No', dataKey: 'sNo' },
+      { header: 'Name', dataKey: 'name' },
+      { header: 'Mobile Number', dataKey: 'mobileNo' },
+      { header: 'Room/Bed No', dataKey: 'bedNo' },
+      { header: 'Join Date', dataKey: 'dateOfJoin' },
+      { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
+      { header: 'Due Date', dataKey: 'dueDate' },
+      { header: 'Rent', dataKey: 'rents' },
+      { header: 'Unpaid Amount', dataKey: 'unpaidAmount' },
+      { header: 'Bike Number', dataKey: 'bikeNumber' }
     ];
 
     // Define columns for tenants without bikes
     const columnsWithoutBike = [
-        { header: 'S.No', dataKey: 'sNo' },
-        { header: 'Name', dataKey: 'name' },
-        { header: 'Mobile Number', dataKey: 'mobileNo' },
-        { header: 'Room/Bed No', dataKey: 'bedNo' },
-        { header: 'Join Date', dataKey: 'dateOfJoin' },
-        { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
-        { header: 'Due Date', dataKey: 'dueDate' },
-        { header: 'Rent', dataKey: 'rents' },
-        { header: 'Unpaid Amount', dataKey: 'unpaidAmount' }
+      { header: 'S.No', dataKey: 'sNo' },
+      { header: 'Name', dataKey: 'name' },
+      { header: 'Mobile Number', dataKey: 'mobileNo' },
+      { header: 'Room/Bed No', dataKey: 'bedNo' },
+      { header: 'Join Date', dataKey: 'dateOfJoin' },
+      { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
+      { header: 'Due Date', dataKey: 'dueDate' },
+      { header: 'Rent', dataKey: 'rents' },
+      { header: 'Unpaid Amount', dataKey: 'unpaidAmount' }
     ];
 
     // Determine the data source based on the selected hostel type
@@ -329,38 +329,38 @@ const handleReportBtn = async () => {
 
     // Filter and map data
     const dataWithBike = dataToUse.filter(tenant => tenant.bikeNumber && tenant.bikeNumber !== 'NA').map((tenant, index) => {
-        const rents = tenant.rents || {}; 
-        const rentsData = Object.values(rents)[0] || {}; 
+      const rents = tenant.rents || {};
+      const rentsData = Object.values(rents)[0] || {};
 
-        return {
-            sNo: index + 1,
-            name: tenant.name || 'N/A',
-            mobileNo: tenant.mobileNo || 'N/A',
-            bedNo: tenant.bedNo || 'N/A',
-            dateOfJoin: tenant.dateOfJoin || 'N/A',
-            lastFeeDate: rentsData.paidDate || 'N/A',
-            dueDate: rentsData.dueDate || 'N/A',
-            rents: rentsData.totalFee || '0',
-            unpaidAmount: rentsData.due || '0',
-            bikeNumber: tenant.bikeNumber || 'N/A'
-        };
+      return {
+        sNo: index + 1,
+        name: tenant.name || 'N/A',
+        mobileNo: tenant.mobileNo || 'N/A',
+        bedNo: tenant.bedNo || 'N/A',
+        dateOfJoin: tenant.dateOfJoin || 'N/A',
+        lastFeeDate: rentsData.paidDate || 'N/A',
+        dueDate: rentsData.dueDate || 'N/A',
+        rents: rentsData.totalFee || '0',
+        unpaidAmount: rentsData.due || '0',
+        bikeNumber: tenant.bikeNumber || 'N/A'
+      };
     });
 
     const dataWithoutBike = dataToUse.filter(tenant => tenant.bikeNumber === 'NA').map((tenant, index) => {
-        const rents = tenant.rents || {}; 
-        const rentsData = Object.values(rents)[0] || {}; 
+      const rents = tenant.rents || {};
+      const rentsData = Object.values(rents)[0] || {};
 
-        return {
-            sNo: index + 1,
-            name: tenant.name || 'N/A',
-            mobileNo: tenant.mobileNo || 'N/A',
-            bedNo: tenant.bedNo || 'N/A',
-            dateOfJoin: tenant.dateOfJoin || 'N/A',
-            lastFeeDate: rentsData.paidDate || 'N/A',
-            dueDate: rentsData.dueDate || 'N/A',
-            rents: rentsData.totalFee || '0',
-            unpaidAmount: rentsData.due || '0'
-        };
+      return {
+        sNo: index + 1,
+        name: tenant.name || 'N/A',
+        mobileNo: tenant.mobileNo || 'N/A',
+        bedNo: tenant.bedNo || 'N/A',
+        dateOfJoin: tenant.dateOfJoin || 'N/A',
+        lastFeeDate: rentsData.paidDate || 'N/A',
+        dueDate: rentsData.dueDate || 'N/A',
+        rents: rentsData.totalFee || '0',
+        unpaidAmount: rentsData.due || '0'
+      };
     });
 
     // Add title for the report
@@ -375,12 +375,12 @@ const handleReportBtn = async () => {
 
     // Generate the table for tenants with bikes
     doc.autoTable({
-        startY: 30,
-        margin: { top: 20 },
-        theme: 'striped',
-        styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
-        columns: columnsWithBike,
-        body: dataWithBike,
+      startY: 30,
+      margin: { top: 20 },
+      theme: 'striped',
+      styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
+      columns: columnsWithBike,
+      body: dataWithBike,
     });
 
     // Add a space between the tables
@@ -389,12 +389,12 @@ const handleReportBtn = async () => {
 
     // Generate the table for tenants without bikes
     doc.autoTable({
-        startY: lastY + 15,
-        margin: { top: 20 },
-        theme: 'striped',
-        styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
-        columns: columnsWithoutBike,
-        body: dataWithoutBike,
+      startY: lastY + 15,
+      margin: { top: 20 },
+      theme: 'striped',
+      styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
+      columns: columnsWithoutBike,
+      body: dataWithoutBike,
     });
 
     // Convert the PDF to a Blob
@@ -555,29 +555,29 @@ const handleVacatedReportBtn = async () => {
 
     // Define columns for tenants with bikes
     const columnsWithBike = [
-        { header: 'S.No', dataKey: 'sNo' },
-        { header: 'Name', dataKey: 'name' },
-        { header: 'Mobile Number', dataKey: 'mobileNo' },
-        { header: 'Room/Bed No', dataKey: 'bedNo' },
-        { header: 'Join Date', dataKey: 'dateOfJoin' },
-        { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
-        { header: 'Due Date', dataKey: 'dueDate' },
-        { header: 'Rent', dataKey: 'rents' },
-        { header: 'Unpaid Amount', dataKey: 'unpaidAmount' },
-        { header: 'Bike Number', dataKey: 'bikeNumber' }
+      { header: 'S.No', dataKey: 'sNo' },
+      { header: 'Name', dataKey: 'name' },
+      { header: 'Mobile Number', dataKey: 'mobileNo' },
+      { header: 'Room/Bed No', dataKey: 'bedNo' },
+      { header: 'Join Date', dataKey: 'dateOfJoin' },
+      { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
+      { header: 'Due Date', dataKey: 'dueDate' },
+      { header: 'Rent', dataKey: 'rents' },
+      { header: 'Unpaid Amount', dataKey: 'unpaidAmount' },
+      { header: 'Bike Number', dataKey: 'bikeNumber' }
     ];
 
     // Define columns for tenants without bikes
     const columnsWithoutBike = [
-        { header: 'S.No', dataKey: 'sNo' },
-        { header: 'Name', dataKey: 'name' },
-        { header: 'Mobile Number', dataKey: 'mobileNo' },
-        { header: 'Room/Bed No', dataKey: 'bedNo' },
-        { header: 'Join Date', dataKey: 'dateOfJoin' },
-        { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
-        { header: 'Due Date', dataKey: 'dueDate' },
-        { header: 'Rent', dataKey: 'rents' },
-        { header: 'Unpaid Amount', dataKey: 'unpaidAmount' }
+      { header: 'S.No', dataKey: 'sNo' },
+      { header: 'Name', dataKey: 'name' },
+      { header: 'Mobile Number', dataKey: 'mobileNo' },
+      { header: 'Room/Bed No', dataKey: 'bedNo' },
+      { header: 'Join Date', dataKey: 'dateOfJoin' },
+      { header: 'Last Fee Date', dataKey: 'lastFeeDate' },
+      { header: 'Due Date', dataKey: 'dueDate' },
+      { header: 'Rent', dataKey: 'rents' },
+      { header: 'Unpaid Amount', dataKey: 'unpaidAmount' }
     ];
 
     // Determine the data source based on the selected hostel type
@@ -585,38 +585,38 @@ const handleVacatedReportBtn = async () => {
 
     // Filter and map data
     const dataWithBike = dataToUse.filter(tenant => tenant.bikeNumber && tenant.bikeNumber !== 'NA').map((tenant, index) => {
-        const rents = tenant.rents || {}; 
-        const rentsData = Object.values(rents)[0] || {}; 
+      const rents = tenant.rents || {};
+      const rentsData = Object.values(rents)[0] || {};
 
-        return {
-            sNo: index + 1,
-            name: tenant.name || 'N/A',
-            mobileNo: tenant.mobileNo || 'N/A',
-            bedNo: tenant.bedNo || 'N/A',
-            dateOfJoin: tenant.dateOfJoin || 'N/A',
-            lastFeeDate: rentsData.paidDate || 'N/A',
-            dueDate: rentsData.dueDate || 'N/A',
-            rents: rentsData.totalFee || '0',
-            unpaidAmount: rentsData.due || '0',
-            bikeNumber: tenant.bikeNumber || 'N/A'
-        };
+      return {
+        sNo: index + 1,
+        name: tenant.name || 'N/A',
+        mobileNo: tenant.mobileNo || 'N/A',
+        bedNo: tenant.bedNo || 'N/A',
+        dateOfJoin: tenant.dateOfJoin || 'N/A',
+        lastFeeDate: rentsData.paidDate || 'N/A',
+        dueDate: rentsData.dueDate || 'N/A',
+        rents: rentsData.totalFee || '0',
+        unpaidAmount: rentsData.due || '0',
+        bikeNumber: tenant.bikeNumber || 'N/A'
+      };
     });
 
     const dataWithoutBike = dataToUse.filter(tenant => tenant.bikeNumber === 'NA').map((tenant, index) => {
-        const rents = tenant.rents || {}; 
-        const rentsData = Object.values(rents)[0] || {}; 
+      const rents = tenant.rents || {};
+      const rentsData = Object.values(rents)[0] || {};
 
-        return {
-            sNo: index + 1,
-            name: tenant.name || 'N/A',
-            mobileNo: tenant.mobileNo || 'N/A',
-            bedNo: tenant.bedNo || 'N/A',
-            dateOfJoin: tenant.dateOfJoin || 'N/A',
-            lastFeeDate: rentsData.paidDate || 'N/A',
-            dueDate: rentsData.dueDate || 'N/A',
-            rents: rentsData.totalFee || '0',
-            unpaidAmount: rentsData.due || '0'
-        };
+      return {
+        sNo: index + 1,
+        name: tenant.name || 'N/A',
+        mobileNo: tenant.mobileNo || 'N/A',
+        bedNo: tenant.bedNo || 'N/A',
+        dateOfJoin: tenant.dateOfJoin || 'N/A',
+        lastFeeDate: rentsData.paidDate || 'N/A',
+        dueDate: rentsData.dueDate || 'N/A',
+        rents: rentsData.totalFee || '0',
+        unpaidAmount: rentsData.due || '0'
+      };
     });
 
     // Add title for the report
@@ -631,12 +631,12 @@ const handleVacatedReportBtn = async () => {
 
     // Generate the table for tenants with bikes
     doc.autoTable({
-        startY: 30,
-        margin: { top: 20 },
-        theme: 'striped',
-        styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
-        columns: columnsWithBike,
-        body: dataWithBike,
+      startY: 30,
+      margin: { top: 20 },
+      theme: 'striped',
+      styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
+      columns: columnsWithBike,
+      body: dataWithBike,
     });
 
     // Add a space between the tables
@@ -645,12 +645,12 @@ const handleVacatedReportBtn = async () => {
 
     // Generate the table for tenants without bikes
     doc.autoTable({
-        startY: lastY + 15,
-        margin: { top: 20 },
-        theme: 'striped',
-        styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
-        columns: columnsWithoutBike,
-        body: dataWithoutBike,
+      startY: lastY + 15,
+      margin: { top: 20 },
+      theme: 'striped',
+      styles: { fontSize: 8, textAlign: 'center', cellPadding: 1, halign: 'center' },
+      columns: columnsWithoutBike,
+      body: dataWithoutBike,
     });
 
     // Convert the PDF to a Blob
@@ -702,10 +702,10 @@ const handleVacatedReportBtn = async () => {
 
 
 
-const monthMapping = {
-  'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
-  'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11
-};
+  const monthMapping = {
+    'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+    'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11
+  };
 
 // const handleExpensesGenerateBtn = () => {
 //   const doc = new jsPDF();
@@ -888,15 +888,15 @@ const handleExpensesGenerateBtn = async () => {
       { header: 'Expense Name', dataKey: 'expensename' },
       { header: 'Expense Amount', dataKey: 'expenseamount' },
       { header: 'Date', dataKey: 'date' }
-  ];
+    ];
 
-  // Determine the data source based on the selected hostel type
-  const dataToUse = selectedHostelType === "mens" ? entireBoysYearExpensesData : entireGirlsYearExpensesData;
+    // Determine the data source based on the selected hostel type
+    const dataToUse = selectedHostelType === "mens" ? entireBoysYearExpensesData : entireGirlsYearExpensesData;
 
-  // Convert month name to number
-  const newMonth = monthMapping[month.toLowerCase()];
+    // Convert month name to number
+    const newMonth = monthMapping[month.toLowerCase()];
 
-  if (month !== "" && year) {
+    if (month !== "" && year) {
       // Monthly Report
       const filteredData = [];
       dataToUse.forEach(item => {
@@ -918,10 +918,10 @@ const handleExpensesGenerateBtn = async () => {
       });
 
       if (filteredData.length > 0) {
-          // Add heading for monthly report
-          const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-          doc.setFontSize(16);
-          doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
+        // Add heading for monthly report
+        const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
+        doc.setFontSize(16);
+        doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
 
           // Create table for specific month
           doc.autoTable({
@@ -942,9 +942,9 @@ const handleExpensesGenerateBtn = async () => {
           // Save file with month in filename
           await savePDF(doc, `${monthName}_expenses.pdf`);
       } else {
-          doc.setFontSize(16);
-          const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-          doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
+        doc.setFontSize(16);
+        const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
+        doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
 
           // Create an empty table
           doc.autoTable({
@@ -957,7 +957,7 @@ const handleExpensesGenerateBtn = async () => {
           doc.text('No expenses found for the selected month and year.', 10, doc.lastAutoTable.finalY + 10);
           await savePDF(doc, `${monthName}_expenses.pdf`);
       }
-  } else if (year) {
+    } else if (year) {
       // Yearly Report
       const expensesByMonth = {};
       const months = Object.keys(monthMapping);
@@ -992,11 +992,11 @@ const handleExpensesGenerateBtn = async () => {
       let startY = 30;
 
       months.forEach((month, index) => {
-          let monthTotal = 0;
+        let monthTotal = 0;
 
-          // Add heading for each month's table
-          doc.setFontSize(14);
-          doc.text(`${month.charAt(0).toUpperCase() + month.slice(1)} Expenses`, 10, startY);
+        // Add heading for each month's table
+        doc.setFontSize(14);
+        doc.text(`${month.charAt(0).toUpperCase() + month.slice(1)} Expenses`, 10, startY);
 
           if (expensesByMonth[month] && expensesByMonth[month].length > 0) {
               // Create table for each month with expenses
@@ -1082,7 +1082,7 @@ const savePDF = async (doc, filename) => {
 
 
 
-// excel code 
+  // excel code 
 
 
 
@@ -1117,7 +1117,12 @@ const handleTenantBtnExcel = async () => {
     // Create a new workbook and a worksheet
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(flatData);
+    // Create a new workbook and a worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(flatData);
 
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
     // Add the worksheet to the workbook
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
 
@@ -1249,7 +1254,12 @@ const handleVacatedBtnExcel = async () => {
     // Create a new workbook and a worksheet
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(flatData);
+    // Create a new workbook and a worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(flatData);
 
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
     // Add the worksheet to the workbook
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
 
@@ -1315,7 +1325,7 @@ const handleChangeHostelType =(e)=>{
   }
 
 
- 
+
 
 
   return (
@@ -1326,9 +1336,9 @@ const handleChangeHostelType =(e)=>{
           <label className='settingsHeading' htmlFor="language-selector">{t("settings.languages")} </label>
           <LanguageSwitch id="language-selector" />
         </div>
-        
+
       </div>
-      <div className='mt-4'>
+      <div className='mt-4 mb-4'>
         {
           activeBoysHostelButtons.length > 0 ? '' :
             <div className='d-flex  align-items-center'>
@@ -1359,6 +1369,7 @@ const handleChangeHostelType =(e)=>{
                   placeholder={t("settings.hostelName")}
                   value={newBoysHostelName}
                   onChange={(e) => handleHostelNameChange(e, true)}
+                  onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')}
                 />
               </div>
               <div className="form-group">
@@ -1399,6 +1410,7 @@ const handleChangeHostelType =(e)=>{
                   placeholder={t("settings.hostelName")}
                   value={newGirlsHostelName}
                   onChange={(e) => handleHostelNameChange(e, false)}
+                  onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')}
                 />
               </div>
               <div className="form-group">
@@ -1426,48 +1438,52 @@ const handleChangeHostelType =(e)=>{
       </div>
       <h1 className='settingsHeading'>{t('settings.generateReport')}</h1>
       <div className="hostelTypeDropDown">
-      <p className='selectTypeText'>{t('settings.selectHostelType')}</p>
-      <select className='languageDropdown' value={selectedHostelType} onChange={handleChangeHostelType}>
-        <option value="mens" >{t('dashboard.mens')}</option>
-        <option value="girls">{t('dashboard.womens')}</option>
-      </select>
+        <div className='mt-2'>
+          <p className='selectTypeText'>{t('settings.selectHostelType')}</p>
+        </div>
+        <div>
+          <select className='languageDropdown' value={selectedHostelType} onChange={handleChangeHostelType}>
+            <option value="mens" >{t('dashboard.mens')}</option>
+            <option value="girls">{t('dashboard.womens')}</option>
+          </select>
+        </div>
       </div>
       <h1 className='settingsSideHeading'>{t('settings.tenantsReport')}</h1>
-     
+
       <button className='reportsButton' onClick={handleReportBtn}>{t('settings.generatePdf')}</button>
       <button className='reportsButton' onClick={handleTenantBtnExcel}>{t('settings.generateExcel')}</button>
-      <h2  className='settingsSideHeading'>{t('settings.vacatedTenantsReport')}</h2>
+      <h2 className='settingsSideHeading'>{t('settings.vacatedTenantsReport')}</h2>
       <button className='reportsButton' onClick={handleVacatedReportBtn}>{t('settings.generatePdf')}</button>
       <button className='reportsButton' onClick={handleVacatedBtnExcel}>{t('settings.generateExcel')}</button>
 
-      <h2  className='settingsSideHeading'>{t('settings.expensesReport')}</h2>
+      <h2 className='settingsSideHeading'>{t('settings.expensesReport')}</h2>
       <select className='languageDropdown dropDownMbl' value={year} onChange={e => setYear(e.target.value)}>
-              
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="2022">2026</option>
-                <option value="2023">2027</option>
-                <option value="2022">2028</option>
-               
-              </select>
 
-              <select className='languageDropdown dropDownMblMonth' value={month} onChange={e => { setMonth(e.target.value) }}>
-                <option value="">None</option>
-                <option value="jan">{t('months.jan')}</option>
-                <option value="feb">{t('months.feb')}</option>
-                <option value="mar">{t('months.mar')}</option>
-                <option value="apr">{t('months.apr')}</option>
-                <option value="may">{t('months.may')}</option>
-                <option value="jun">{t('months.jun')}</option>
-                <option value="jul">{t('months.jul')}</option>
-                <option value="aug">{t('months.aug')}</option>
-                <option value="sep">{t('months.sep')}</option>
-                <option value="oct">{t('months.oct')}</option>
-                <option value="nov">{t('months.nov')}</option>
-                <option value="dec">{t('months.dec')}</option>
-              </select>
-              <br />
-     <button className='reportsButton expensesBtn' onClick={handleExpensesGenerateBtn}>{t('settings.generatePdf')}</button>
+        <option value="2024">2024</option>
+        <option value="2025">2025</option>
+        <option value="2022">2026</option>
+        <option value="2023">2027</option>
+        <option value="2022">2028</option>
+
+      </select>
+
+      <select className='languageDropdown dropDownMblMonth' value={month} onChange={e => { setMonth(e.target.value) }}>
+        <option value="">None</option>
+        <option value="jan">{t('months.jan')}</option>
+        <option value="feb">{t('months.feb')}</option>
+        <option value="mar">{t('months.mar')}</option>
+        <option value="apr">{t('months.apr')}</option>
+        <option value="may">{t('months.may')}</option>
+        <option value="jun">{t('months.jun')}</option>
+        <option value="jul">{t('months.jul')}</option>
+        <option value="aug">{t('months.aug')}</option>
+        <option value="sep">{t('months.sep')}</option>
+        <option value="oct">{t('months.oct')}</option>
+        <option value="nov">{t('months.nov')}</option>
+        <option value="dec">{t('months.dec')}</option>
+      </select>
+      <br />
+      <button className='reportsButton expensesBtn' onClick={handleExpensesGenerateBtn}>{t('settings.generatePdf')}</button>
     </div>
   );
 };
