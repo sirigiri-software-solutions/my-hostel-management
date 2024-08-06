@@ -13,7 +13,7 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const ExpensesGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel , userUid, activeGirlsHostelButtons,firebase} = useData();
+  const { activeGirlsHostel , userUid, activeGirlsHostelButtons,firebase,setExpensesInteracted,expensesInteracted} = useData();
   const {database} = firebase;
 
   const  role = localStorage.getItem('role');
@@ -99,6 +99,8 @@ window.addEventListener('keydown',handleOutsideClick);
 
     let errors = {};
     let formIsValid = true;
+
+    setExpensesInteracted(!expensesInteracted)
 
     if (!formData.expenseName.match(/^[a-zA-Z\s]+$/)) {
       errors.expenseName = t('errors.expenseNameAlphabetsAndSpaces');
@@ -322,6 +324,7 @@ window.addEventListener('keydown',handleOutsideClick);
 
   const handleDelete = () => {
     if (!editingExpense) return;
+    setExpensesInteracted(!expensesInteracted)
     const monthYear = getMonthYearKey(formData.expenseDate);
     const expenseRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}/${editingExpense.id}`);
     remove(expenseRef).then(() => {

@@ -34,6 +34,11 @@ const DataProvider = ({ children }) => {
   const [firebase, setFirebase] = useState(firebaseInstances[area]);
   const [activeFlag, setActiveFlag] = useState("");
 
+
+  // expenses data to get in settings 
+
+  const [expensesInteracted,setExpensesInteracted] = useState(false);
+
   const { database } = firebase;
   // const [activeFlag, setActiveFlag] = useState(
   //   activeBoysHostelButtons.length > 0 && activeGirlsHostelButtons.length > 0 ? 'boys' : activeGirlsHostelButtons.length > 0 ? 'girls': activeBoysHostelButtons.length > 0 ? 'boys':'hhh'
@@ -180,6 +185,9 @@ const DataProvider = ({ children }) => {
     });
   }, [userUid, activeGirlsHostel]);
 
+
+ 
+
   
   useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
@@ -212,7 +220,7 @@ const DataProvider = ({ children }) => {
   console.log(boysExTenantsData, "exx")
   console.log(girlsExTenantsData, "exx")
   return (
-    <DataContext.Provider value={{  activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag, girlsTenantsData, boysTenantsData, girlsExTenantsData, boysExTenantsData}}>
+    <DataContext.Provider value={{  activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag, girlsTenantsData, boysTenantsData, girlsExTenantsData, boysExTenantsData,expensesInteracted,setExpensesInteracted}}>
       {children}
     </DataContext.Provider>
   );
