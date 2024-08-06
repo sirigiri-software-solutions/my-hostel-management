@@ -160,7 +160,7 @@ const Settings = () => {
     };
 
     fetchExpenses();
-  }, [selectedHostelType, activeGirlsHostel]);
+  }, [selectedHostelType, activeGirlsHostel, ]);
 
 
 

@@ -519,7 +519,7 @@ const ExpensesBoys = () => {
                   <form className="row g-3" onSubmit={handleSubmit}>
                     <div className="col-md-6">
                       <label htmlFor="inputExpenseName" className="form-label">{t('expensesPage.expenseName')} :</label>
-                      <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+                      <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} onChange={handleInputChange} onFocus={handleExpensesFocus} />
                       {formErrors.expenseName && <div className="text-danger">{formErrors.expenseName}</div>}
                     </div>
                     <div className="col-md-6">
@@ -547,7 +547,6 @@ const ExpensesBoys = () => {
                   </form>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
