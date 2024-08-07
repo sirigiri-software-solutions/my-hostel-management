@@ -26,7 +26,7 @@ const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData } = useData();
+  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData,expensesInteracted } = useData();
   const { database } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
@@ -44,6 +44,8 @@ const Settings = () => {
   const [vacatedEntireBoysData, setVacatedEntireBoysData] = useState([]);
   const [vacatedEntireGirlsData, setVacatedEnitreGirlsData] = useState([]);
 
+
+  const [expensesDataTrigger,setExpensesDataTrigger] = useState(false);
   const [entireBoysYearExpensesData, setEntireBoysYearExpensesData] = useState([])
   const [entireGirlsYearExpensesData, setEntireGirlsYearExpensesData] = useState([])
 
@@ -113,67 +115,104 @@ const Settings = () => {
 
 
 
-  useEffect(() => {
-    const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-    let total = 0;
+  // useEffect(() => {
+  //   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  //   let total = 0;
 
-    const fetchExpenses = async () => {
-      const promises = monthNames.map(month => {
-        const monthRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${month}`);
-        return new Promise((resolve) => {
-          onValue(monthRef, (snapshot) => {
-            const expenses = snapshot.val();
-            if (expenses) {
-              resolve(expenses);
-            } else {
-              resolve(0);
-            }
-          }, {
-            onlyOnce: true
-          });
+  //   const fetchExpenses = async () => {
+  //     const promises = monthNames.map(month => {
+  //       const monthRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${month}`);
+  //       return new Promise((resolve) => {
+  //         onValue(monthRef, (snapshot) => {
+  //           const expenses = snapshot.val();
+  //           if (expenses) {
+  //             resolve(expenses);
+  //           } else {
+  //             resolve(0);
+  //           }
+  //         }, {
+  //           onlyOnce: true
+  //         });
+  //       });
+  //     });
+
+  //     const monthlyTotals = await Promise.all(promises);
+  //     setEntireBoysYearExpensesData(monthlyTotals)
+  //   };
+
+  //   fetchExpenses();
+  // }, [selectedHostelType, activeBoysHostel,expensesDataTrigger]);
+
+  // useEffect(() => {
+  //   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  //   let total = 0;
+
+  //   const fetchExpenses = async () => {
+  //     const promises = monthNames.map(month => {
+  //       const monthRef = ref(database, `Hostel/${userUid}/boys/${activeGirlsHostel}/expenses/${year}-${month}`);
+  //       return new Promise((resolve) => {
+  //         onValue(monthRef, (snapshot) => {
+  //           const expenses = snapshot.val();
+  //           if (expenses) {
+  //             resolve(expenses);
+  //           } else {
+  //             resolve(0);
+  //           }
+  //         }, {
+  //           onlyOnce: true
+  //         });
+  //       });
+  //     });
+
+  //     const monthlyTotals = await Promise.all(promises);
+  //     setEntireGirlsYearExpensesData(monthlyTotals)
+  //   };
+
+  //   fetchExpenses();
+  // }, [selectedHostelType, activeGirlsHostel,expensesDataTrigger]);
+
+
+
+  const fetchExpensesData = async (hostelType, hostel) => {
+    const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  
+    const promises = monthNames.map(month => {
+      const monthRef = ref(database, `Hostel/${userUid}/${hostelType}/${hostel}/expenses/${year}-${month}`);
+      return new Promise((resolve) => {
+        onValue(monthRef, (snapshot) => {
+          const expenses = snapshot.val();
+          resolve(expenses || 0);
+          console.log(expenses)
+        }, {
+          onlyOnce: true
         });
       });
-
-      const monthlyTotals = await Promise.all(promises);
-      setEntireBoysYearExpensesData(monthlyTotals)
-    };
-
-    fetchExpenses();
-  }, [selectedHostelType, activeBoysHostel]);
-
+    });
+  
+    return await Promise.all(promises);
+  };
+  
+  // Usage in useEffect
   useEffect(() => {
-    const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-    let total = 0;
-
     const fetchExpenses = async () => {
-      const promises = monthNames.map(month => {
-        const monthRef = ref(database, `Hostel/${userUid}/boys/${activeGirlsHostel}/expenses/${year}-${month}`);
-        return new Promise((resolve) => {
-          onValue(monthRef, (snapshot) => {
-            const expenses = snapshot.val();
-            if (expenses) {
-              resolve(expenses);
-            } else {
-              resolve(0);
-            }
-          }, {
-            onlyOnce: true
-          });
-        });
-      });
-
-      const monthlyTotals = await Promise.all(promises);
-      setEntireGirlsYearExpensesData(monthlyTotals)
+      const data = await fetchExpensesData(selectedHostelType === 'mens' ? 'boys' : 'girls', selectedHostelType === 'mens' ? activeBoysHostel : activeGirlsHostel);
+      if (selectedHostelType === 'mens') {
+        console.log(data,"expensesData");
+        setEntireBoysYearExpensesData(data);
+      } else {
+        setEntireGirlsYearExpensesData(data);
+      }
     };
-
+  
     fetchExpenses();
-  }, [selectedHostelType, activeGirlsHostel]);
+  }, [selectedHostelType, activeBoysHostel, activeGirlsHostel, expensesInteracted]);
+  
 
 
 
   const [tenantsData, setTenantsData] = useState()
 
-  console.log(hostelData, "dataaa")
+  // console.log(hostelData, "dataaa")
 
   const capitalizeFirstLetter = (string) => {
     return string.replace(/\b\w/g, char => char.toUpperCase());
@@ -881,6 +920,7 @@ const { Filesystem,FilesystemDirectory } = Plugins;
 
 const handleExpensesGenerateBtn = async () => {
   const doc = new jsPDF();
+    setExpensesDataTrigger(true)
 
   // Define columns for monthly and yearly views
   const columns = [
@@ -1036,6 +1076,7 @@ const handleExpensesGenerateBtn = async () => {
 
       // Save file with year in filename
       await savePDF(doc, `${year}_expenses.pdf`);
+      setExpensesDataTrigger(false)
   }
 };
 

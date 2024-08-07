@@ -32,7 +32,12 @@ const DataProvider = ({ children }) => {
   // new code to implement multiple configuration
   const [area, setArea] = useState(localStorage.getItem('userarea') || 'default');
   const [firebase, setFirebase] = useState(firebaseInstances[area]);
-  const [activeFlag, setActiveFlag] = useState();
+  const [activeFlag, setActiveFlag] = useState("");
+
+
+  // expenses data to get in settings 
+
+  const [expensesInteracted,setExpensesInteracted] = useState(false);
 
   const { database } = firebase;
   // const [activeFlag, setActiveFlag] = useState(
@@ -126,21 +131,30 @@ const DataProvider = ({ children }) => {
    // Determine the initial active flag
    useEffect(() => {
     let initialActiveFlag = '';
-    if (activeBoysHostelButtons.length > 0) {
-      initialActiveFlag = 'boys';
-    } else if (activeGirlsHostelButtons.length > 0) {
-      initialActiveFlag = 'girls';
+    if (activeBoysHostelButtons.length > 0 || activeGirlsHostelButtons.length == 0) {
+          initialActiveFlag = 'boys';
+        } else if (activeGirlsHostelButtons.length > 0) {
+          initialActiveFlag = 'girls';
+        }
+        setActiveFlag(initialActiveFlag);
+      
+    if(activeFlag === 'boys' &&  activeBoysHostelButtons.length > 0){
+      setActiveFlag('boys')
     }
-    setActiveFlag(initialActiveFlag);
-  }, [activeBoysHostelButtons, activeGirlsHostelButtons]);
+    if(activeFlag === "girls" && activeGirlsHostelButtons.length > 0){
+      setActiveFlag('girls')
+    } 
+  }
+
+  , [activeBoysHostelButtons, activeGirlsHostelButtons]);
 
 
   // Function to update activeFlag
   const changeActiveFlag = (newFlag) => {
     setActiveFlag(newFlag);
   };
-  console.log(activeFlag, "flaggg"); // ===> 'boys', 'girls', or 'hhh' based on conditions
-  console.log(activeBoysHostelButtons.length > 0, "activeBoysHostelButtons flag"); // ===> true or false
+  // console.log(activeFlag, "flaggg"); // ===> 'boys', 'girls', or 'hhh' based on conditions
+  // console.log(activeBoysHostelButtons.length > 0, "activeBoysHostelButtons flag"); // ===> true or false
 
 
   useEffect(() => {
@@ -170,6 +184,9 @@ const DataProvider = ({ children }) => {
       setGirlsTenantsData(loadedTenants);
     });
   }, [userUid, activeGirlsHostel]);
+
+
+ 
 
   
   useEffect(() => {
@@ -203,7 +220,7 @@ const DataProvider = ({ children }) => {
   console.log(boysExTenantsData, "exx")
   console.log(girlsExTenantsData, "exx")
   return (
-    <DataContext.Provider value={{  activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag, girlsTenantsData, boysTenantsData, girlsExTenantsData, boysExTenantsData}}>
+    <DataContext.Provider value={{  activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag, girlsTenantsData, boysTenantsData, girlsExTenantsData, boysExTenantsData,expensesInteracted,setExpensesInteracted}}>
       {children}
     </DataContext.Provider>
   );

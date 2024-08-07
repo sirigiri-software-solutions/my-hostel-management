@@ -22,7 +22,7 @@ const ExpensesBoys = () => {
   }
 
   const isUneditable = role === 'admin' || role === 'subAdmin';
-  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase } = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase,setExpensesInteracted,expensesInteracted} = useData();
   const { database } = firebase;
   const [searchTerm, setSearchTerm] = useState('');
   const [initialRows, setInitialRows] = useState([]);
@@ -94,6 +94,8 @@ const ExpensesBoys = () => {
     let errors = {};
     let formIsValid = true;
 
+    setExpensesInteracted(!expensesInteracted)
+
     if (!formData.expenseName.match(/^[a-zA-Z\s]+$/)) {
       errors.expenseName = t('errors.expenseNameAlphabetsAndSpaces');
       formIsValid = false;
@@ -120,7 +122,7 @@ const ExpensesBoys = () => {
       errors.expenseDate = t('errors.expenseDateRequired');
       formIsValid = false;
     }
-
+    
 
     if (formIsValid) {
       const monthYear = getMonthYearKey(formData.expenseDate);
@@ -221,6 +223,7 @@ const ExpensesBoys = () => {
   }, [expenses]);
 
   const handleEdit = (expense) => {
+
     setEditingExpense(expense);
     const [day, month, year] = expense.expenseDate.split('-');
     const formattedDate = `${year}-${month}-${day}`;
@@ -321,6 +324,7 @@ const ExpensesBoys = () => {
 
 
   const handleDelete = () => {
+    setExpensesInteracted(!expensesInteracted);
     if (!editingExpense) return;
     const monthYear = getMonthYearKey(formData.expenseDate);
     const expenseRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${monthYear}/${editingExpense.id}`);
@@ -519,7 +523,7 @@ const ExpensesBoys = () => {
                   <form className="row g-3" onSubmit={handleSubmit}>
                     <div className="col-md-6">
                       <label htmlFor="inputExpenseName" className="form-label">{t('expensesPage.expenseName')} :</label>
-                      <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+                      <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} onChange={handleInputChange} onFocus={handleExpensesFocus} />
                       {formErrors.expenseName && <div className="text-danger">{formErrors.expenseName}</div>}
                     </div>
                     <div className="col-md-6">
@@ -547,7 +551,6 @@ const ExpensesBoys = () => {
                   </form>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
