@@ -199,7 +199,8 @@
   "DownloadPic": "चित्र डाउनलोड करें",
   "DownloadRc": "आरसी डाउनलोड करें",
   "NotUploaded": "अपलोड नहीं हुआ",
-  "or":"या"
+  "or":"या",
+  "takePhoto": "फोटो लें"
         
     },
     "expensesPage": {
