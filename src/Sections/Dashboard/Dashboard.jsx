@@ -9,7 +9,7 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const Dashboard = ({ onTabSelect, activeTab }) => {
   const { t } = useTranslation()
-  const { activeBoysHostel , activeFlag,  changeActiveFlag} = useData();
+  const { activeBoysHostel, activeFlag, changeActiveFlag, activeBoysHostelButtons, activeGirlsHostelButtons, } = useData();
   const name = localStorage.getItem("username");
 
   const handleTabSelect = (tab) => {
@@ -22,12 +22,19 @@ const Dashboard = ({ onTabSelect, activeTab }) => {
     <div className='container_main'>
       <div className='mobile-layout'>
         <Tabs activeKey={activeFlag} onSelect={handleTabSelect} className="mb-3 custom-tabs">
-          <Tab eventKey="boys" title={t('dashboard.mens')} className={activeFlag === 'boys' ? 'active-tab' : ''}>
-            <DashboardBoys />
-          </Tab>
-          <Tab eventKey="girls" title={t('dashboard.womens')} className={activeFlag === 'girls' ? 'active-tab' : ''}>
-            <DashboardGirls />
-          </Tab>
+          {
+            activeBoysHostelButtons.length > 0 ?
+              <Tab eventKey="boys" title={t('dashboard.mens')} className={activeFlag === 'boys' ? 'active-tab' : ''}>
+                <DashboardBoys />
+              </Tab> : ""
+          }
+          {
+            activeGirlsHostelButtons.length > 0 ?
+              <Tab eventKey="girls" title={t('dashboard.womens')} className={activeFlag === 'girls' ? 'active-tab' : ''}>
+                <DashboardGirls />
+              </Tab> : ""
+          }
+
         </Tabs>
       </div>
       <div className='desktop-layout' >
