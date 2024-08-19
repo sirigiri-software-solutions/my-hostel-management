@@ -392,7 +392,6 @@ const MainPage = () => {
         {loading ? '': 
           isHostels ? (
             <div>
-              {/* <Button onClick={handleOpenModal}>Open Modal</Button> */}
               <DefaultModal show={isModalOpen1} handleClose={handleCloseModal} />
             </div>
           ) : (
