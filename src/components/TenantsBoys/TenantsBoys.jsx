@@ -25,7 +25,7 @@ const TenantsBoys = () => {
   const { t } = useTranslation();
   const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase } = useData();
   const role = localStorage.getItem('role');
-  const { database } = firebase;
+  const { database,storage } = firebase;
 
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
@@ -41,7 +41,9 @@ const TenantsBoys = () => {
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
+  const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantId, setTenantId] = useState(null);
+  const [tenantIdUrl, setTenantIdUrl] = useState('');
 
 
   const [showModal, setShowModal] = useState(false);
@@ -67,30 +69,30 @@ const TenantsBoys = () => {
   const tenantImageInputRef = useRef(null);
   const tenantProofIdRef = useRef(null);
   const [bikeImage, setBikeImage] = useState(null);
+  const [bikeImageUrl, setBikeImageUrl] = useState('');
   const [bikeImageField, setBikeImageField] = useState('');
   const [bikeRcImage, setBikeRcImage] = useState('');
+  const [bikeRcImageUrl, setBikeRcImageUrl] = useState('');
   const [bikeRcImageField, setBikeRcImageField] = useState('');
-
   const [loading, setLoading] = useState(false);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      setBikeImage(reader.result);
-    };
-    reader.readAsDataURL(file);
-  };
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   const reader = new FileReader();
+  //   reader.onload = () => {
+  //     setBikeImage(reader.result);
+  //   };
+  //   reader.readAsDataURL(file);
+  // };
 
-  const handleRcChange = (e) => {
-    const file1 = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      setBikeRcImage(reader.result);
-    }
-    reader.readAsDataURL(file1);
-
-  }
+  // const handleRcChange = (e) => {
+  //   const file1 = e.target.files[0];
+  //   const reader = new FileReader();
+  //   reader.onload = () => {
+  //     setBikeRcImage(reader.result);
+  //   }
+  //   reader.readAsDataURL(file1);
+  // }
 
 
   const handleCheckboxChange = (e) => {
@@ -99,7 +101,6 @@ const TenantsBoys = () => {
       setHasBike(false);
       setBikeNumber('NA');
     }
-
     else {
       setBikeNumber('');
     }
@@ -182,30 +183,6 @@ const TenantsBoys = () => {
   }, [activeBoysHostel]);
 
 
-  // useEffect(() => {
-  //   const fetchDataFromAPI = async () => {
-  //     try {
-  //       if (data) {
-  //         const boysTenantsData = Object.values(data.boys.tenants);
-  //         setBoysTenants(boysTenantsData);
-  //       } else {
-  //         const apiData = await FetchData();
-  //         if (apiData) { // Ensure apiData is not null or undefined
-  //           const boysTenantsData = Object.values(apiData.boys.tenants);
-  //           setBoysTenants(boysTenantsData);
-  //         } else {
-  //           console.error('API returned null or undefined data.');
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching tenants data:', error);
-  //     }
-  //   };
-
-  //   fetchDataFromAPI();
-  // }, [data]);
-
-
   const validate = () => {
     let tempErrors = {};
     tempErrors.selectedRoom = selectedRoom ? "" : t('errors.roomNumberRequired');
@@ -248,7 +225,7 @@ const TenantsBoys = () => {
     if (isBedOccupied) {
       tempErrors.selectedBed = t('errors.bedAlreadyOccupied');
     }
-    if (!tenantImage) {
+    if (!tenantImage && !tenantImageUrl) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
     if (hasBike) {
@@ -268,28 +245,50 @@ const TenantsBoys = () => {
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
-
   const handleTenantImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setTenantImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (e.target.files[0]) {
+      setTenantImage(e.target.files[0]);
+    }
+  };
+  // const handleTenantImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setTenantImage(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
+  const handleTenantIdChange = (e) => {
+    if (e.target.files[0]) {
+      const file = e.target.files[0]
+      setFileName(file.name)
+      setTenantId(e.target.files[0]);
     }
   };
 
-  const handleTenantIdChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setTenantId(reader.result);
-      };
-      reader.readAsDataURL(file);
+  const handleTenantBikeChange = (e) => {
+    if (e.target.files[0]) {
+      setBikeImage(e.target.files[0]);
     }
   };
+  const handleTenantBikeRcChange = (e) => {
+    if (e.target.files[0]) {
+      setBikeRcImage(e.target.files[0]);
+    }
+  };
+
+  // const handleTenantIdChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setTenantId(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -303,7 +302,56 @@ const TenantsBoys = () => {
       if (!validate()) return;
     }
 
+    let imageUrlToUpdate = tenantImageUrl;
+    if (tenantImage) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, tenantImage);
+        imageUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(imageUrlToUpdate, "imageUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
 
+      }
+    }
+    
+    let idUrlToUpdate = tenantIdUrl;
+    if (tenantId) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, tenantId);
+        idUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(idUrlToUpdate, "idUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
+      }
+    }
+
+    let bikeUrlToUpdate = bikeImageUrl;
+    if (bikeImage) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${bikeImage.name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, bikeImage);
+        bikeUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(bikeUrlToUpdate, "bikeUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
+
+      }
+    }
+
+    let bikeRcUrlToUpdate = bikeRcImageUrl;
+    if (bikeRcImage) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, bikeRcImage);
+        bikeRcUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(bikeRcUrlToUpdate, "bikeRcUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
+
+      }
+    }
     const tenantData = {
       roomNo: selectedRoom,
       bedNo: selectedBed,
@@ -313,14 +361,15 @@ const TenantsBoys = () => {
       idNumber,
       emergencyContact,
       status,
-      tenantImage,
-      tenantId,
+      // tenantImage,
+      tenantImageUrl: imageUrlToUpdate,
+      // tenantId,
+      tenantIdUrl: idUrlToUpdate,
       bikeNumber,
       permnentAddress,
-      bikeImage,
-      bikeRcImage
+      bikeImageUrl:bikeUrlToUpdate,
+      bikeRcImageUrl:bikeRcUrlToUpdate,
     };
-
 
 
     if (isEditing) {
@@ -390,8 +439,8 @@ const TenantsBoys = () => {
     setStatus(tenant.status);
     setIsEditing(true);
     setCurrentId(tenant.id);
-    setTenantImage(tenant.tenantImage)
-    setTenantId(tenant.tenantId || '');
+    setTenantImage(tenant.tenantImageUrl)
+    setTenantId(tenant.tenantIdUrl || '');
     setBikeNumber("");
     setHasBike(false);
     setFileName(tenant.fileName || '');
@@ -422,12 +471,10 @@ const TenantsBoys = () => {
         progress: undefined,
       })
     } else {
-
       resetForm();
       setIsEditing(false);
       setShowModal(true);
       setUserDetailsTenantsPopup(false);
-
       setHasBike(false);
     }
   };
@@ -494,7 +541,7 @@ const TenantsBoys = () => {
 
   const rows = tenants.map((tenant, index) => ({
     s_no: index + 1,
-    image: tenant.tenantImage,
+    image: tenant.tenantImageUrl,
     name: tenant.name,
     id: tenant.idNumber,
     mobile_no: tenant.mobileNo,
@@ -734,377 +781,7 @@ const TenantsBoys = () => {
     }));
   };
 
-  // const calculateFitDimensions = (imageWidth, imageHeight, maxWidth, maxHeight) => {
-  //   let width = imageWidth;
-  //   let height = imageHeight;
-  
-  //   if (width > maxWidth) {
-  //     height = (maxWidth / width) * height;
-  //     width = maxWidth;
-  //   }
-  
-  //   if (height > maxHeight) {
-  //     width = (maxHeight / height) * width;
-  //     height = maxHeight;
-  //   }
-  
-  //   return { width, height };
-  // };
-
-  // download single separate pdf's
-  // const handleTenantDownload=() => {
-
- 
-  //   const doc = new jsPDF();
-  //   // title
-  //   doc.setFontSize(18);
-  //   doc.setFont('helvetica','bold')
-  //   doc.text("Tenant Details", 80, 10);
-
-
-  //   if (singleTenantDetails.image) {
-  //     doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
-  //   }
-
-  //   // tenant details
-  //  doc.setFontSize(12);
-  // doc.setFont("helvetica", "bold");
-  // doc.text("Name: ", 20, 25);
-
-  // doc.setFont("helvetica", "normal");
-  // doc.text(singleTenantDetails.name,34, 25);
-
-  // doc.setFont("helvetica", "bold");
-  // doc.text("Mobile No: ", 20, 35);
-
-  // doc.setFont("helvetica", "normal");
-  // doc.text(singleTenantDetails.mobile_no,43, 35);
-
-
-  // doc.setFont("helvetica", "bold");
-  // doc.text("Proof ID :" , 20, 45);
-
-  // doc.setFont("helvetica", "normal");
-  // doc.text(singleTenantDetails.id,40, 45);
-
-  // doc.setFont("helvetica", "bold");
-  // doc.text("Room/Bed No:" , 20, 55);
- 
-  // doc.setFont("helvetica", "normal");
-  // doc.text(singleTenantDetails.room_bed_no,50, 55);
-
-  // doc.setFont("helvetica", "bold");
-  // doc.text("Joining Date:" , 20, 65);
- 
-  // doc.setFont("helvetica", "normal");
-  // doc.text(singleTenantDetails.joining_date,48, 65);
-
-
-  // if(dueDateOfTenant){
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Due Date:" , 20, 75);
-   
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(dueDateOfTenant,40, 75);
-
-  // }
-
-  // if(bikeNumber){
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Bike Number:" , 20, 85);
-   
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(singleTenanantBikeNum,48, 85);
-  // }
-
-  // if(tenantAddress){
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Address:" , 20, 95);
-   
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(tenantAddress,39, 95);
-  // }
-
-  
-
-
-
-  // // Save the generated PDF
-  // doc.save(`${singleTenantDetails.name}_Details.pdf`);
-
-  //   // Second PDF: ID Proof Image
-  //   if (singleTenantProofId) {
-  //     const proofDoc = new jsPDF();
-  
-  //     const img = new Image();
-  //     img.src = singleTenantProofId;
-  
-  //     img.onload = () => {
-  //       const imgWidth = img.width;
-  //       const imgHeight = img.height;
-  //       const maxWidth = proofDoc.internal.pageSize.width - 40; // Max width for the image on the PDF
-  //       const maxHeight = proofDoc.internal.pageSize.height - 40; // Max height for the image on the PDF
-  
-  //       // Calculate fit dimensions
-  //       const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
-  
-  //       // Add image to PDF
-  //       proofDoc.addImage(singleTenantProofId, 'JPEG', 20, 20, width, height);
-  
-  //       // Save the second PDF
-  //       proofDoc.save(`${singleTenantDetails.name}_ID_Proof.pdf`);
-  //     };
-  //   }
-
-  //   // Third PDF: Bike Image
-  //    if (bikeImageField) {
-  //     const proofDoc = new jsPDF();
-  
-  //     const img = new Image();
-  //     img.src = bikeImageField;
-  
-  //     img.onload = () => {
-  //       const imgWidth = img.width;
-  //       const imgHeight = img.height;
-  //       const maxWidth = proofDoc.internal.pageSize.width - 40; // Max width for the image on the PDF
-  //       const maxHeight = proofDoc.internal.pageSize.height - 40; // Max height for the image on the PDF
-  
-  //       // Calculate fit dimensions
-  //       const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
-  
-  //       // Add image to PDF
-  //       proofDoc.addImage(bikeImageField, 'JPEG', 20, 20, width, height);
-  
-  //       // Save the second PDF
-  //       proofDoc.save(`${singleTenantDetails.name}_BikeImage.pdf`);
-  //     };
-  //   }
-
-
-  //   //Fourth PDF : Bike rc
-
-  //   if (bikeRcImageField) {
-  //     const proofDoc = new jsPDF();
-  
-  //     const img = new Image();
-  //     img.src = bikeRcImageField;
-  
-  //     img.onload = () => {
-  //       const imgWidth = img.width;
-  //       const imgHeight = img.height;
-  //       const maxWidth = proofDoc.internal.pageSize.width - 40; // Max width for the image on the PDF
-  //       const maxHeight = proofDoc.internal.pageSize.height - 40; // Max height for the image on the PDF
-  
-  //       // Calculate fit dimensions
-  //       const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
-  
-  //       // Add image to PDF
-  //       proofDoc.addImage(bikeRcImageField, 'JPEG', 20, 20, width, height);
-  
-  //       // Save the second PDF
-  //       proofDoc.save(`${singleTenantDetails.name}_BikeRC.pdf`);
-  //     };
-  //   }
-
-
-  // }
-
-
-  
-  // const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
-  // const isImage = (fileData) => fileData.startsWith('data:image/png');
-  
-  // const pdfToImages = async (pdfUrl) => {
-  //   const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
-  //   const numPages = pdf.numPages;
-  //   const images = [];
-  
-  //   for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-  //     const page = await pdf.getPage(pageNum);
-  //     const viewport = page.getViewport({ scale: 2 });
-  
-  //     const canvas = document.createElement('canvas');
-  //     const context = canvas.getContext('2d');
-  //     canvas.height = viewport.height;
-  //     canvas.width = viewport.width;
-  
-  //     await page.render({
-  //       canvasContext: context,
-  //       viewport: viewport
-  //     }).promise;
-  
-  //     const imgData = canvas.toDataURL('image/png');
-  //     images.push({ imgData, width: viewport.width, height: viewport.height });
-  //   }
-  
-  //   return images;
-  // };
-  
-  // const calculateFitDimensions = (imgWidth, imgHeight, maxWidth, maxHeight) => {
-  //   const widthRatio = maxWidth / imgWidth;
-  //   const heightRatio = maxHeight / imgHeight;
-  //   const ratio = Math.min(widthRatio, heightRatio);
-  //   return {
-  //     width: imgWidth * ratio,
-  //     height: imgHeight * ratio
-  //   };
-  // };
-  
-  // const addImageToPDF = async (doc, imageUrl) => {
-  //   return new Promise((resolve) => {
-  //     const img = new Image();
-  //     img.src = imageUrl;
-  
-  //     img.onload = () => {
-  //       const imgWidth = img.width;
-  //       const imgHeight = img.height;
-  //       const maxWidth = doc.internal.pageSize.width - 40;
-  //       const maxHeight = doc.internal.pageSize.height - 40;
-  
-  //       const { width, height } = calculateFitDimensions(imgWidth, imgHeight, maxWidth, maxHeight);
-  //       doc.addImage(imageUrl, 'PNG', 20, 20, width, height);
-  //       resolve();
-  //     };
-  
-  //     img.onerror = () => {
-  //       console.error(`Failed to load image: ${imageUrl}`);
-  //       resolve(); // Resolve the promise to ensure the process continues
-  //     };
-  //   });
-  // };
-  
-  // const handleTenantDownload = async () => {
-  //   const doc = new jsPDF();
-    
-  //   // Page 1: Tenant Details
-  //   doc.setFontSize(18);
-  //   doc.setFont('helvetica', 'bold');
-  //   doc.text("Tenant Details", 80, 10);
-    
-  //   if (singleTenantDetails.image) {
-  //     doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
-  //   }
-  //   doc.setFontSize(12);
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Name: ", 20, 25);
-    
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(singleTenantDetails.name, 34, 25);
-    
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Mobile No: ", 20, 35);
-    
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(singleTenantDetails.mobile_no, 43, 35);
-    
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Proof ID: ", 20, 45);
-    
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(singleTenantDetails.id, 40, 45);
-    
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Room/Bed No: ", 20, 55);
-    
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(singleTenantDetails.room_bed_no, 50, 55);
-    
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Joining Date: ", 20, 65);
-    
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(singleTenantDetails.joining_date, 48, 65);
-    
-  //   if (dueDateOfTenant) {
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Due Date: ", 20, 75);
-    
-  //     doc.setFont("helvetica", "normal");
-  //     doc.text(dueDateOfTenant, 40, 75);
-  //   }
-    
-  //   if (bikeNumber) {
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Bike Number: ", 20, 85);
-    
-  //     doc.setFont("helvetica", "normal");
-  //     doc.text(singleTenanantBikeNum, 48, 85);
-  //   }
-    
-  //   if (tenantAddress) {
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Address: ", 20, 95);
-    
-  //     doc.setFont("helvetica", "normal");
-  //     doc.text(tenantAddress, 39, 95);
-  //   }
-    
-  //   // Add a new page
-  //   doc.addPage();
-    
-  //   // Page 2: ID Proof Image or PDF
-  //   if (singleTenantProofId) {
-  //     if (isImage(singleTenantProofId)) {
-  //       await addImageToPDF(doc, singleTenantProofId);
-  //     } else if (isPDF(singleTenantProofId)) {
-  //       const images = await pdfToImages(singleTenantProofId);
-  //       images.forEach((img, index) => {
-  //         if (index > 0) doc.addPage();
-  //         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-  //         doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-  //       });
-  //       doc.addPage();
-  //     }
-  //   }
-  
-  //   // Page 3: Bike Image or PDF
-  //   if (bikeImageField) {
-  //     if (isImage(bikeImageField)) {
-  //       await addImageToPDF(doc, bikeImageField);
-  //     } else if (isPDF(bikeImageField)) {
-  //       const images = await pdfToImages(bikeImageField);
-  //       images.forEach((img, index) => {
-  //         if (index > 0) doc.addPage();
-  //         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-  //         doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-  //       });
-  //       doc.addPage();
-  //     }
-  //   }
-  
-  //   // Page 4: Bike RC Image or PDF
-  //   if (bikeRcImageField) {
-  //     if (isImage(bikeRcImageField)) {
-  //       await addImageToPDF(doc, bikeRcImageField);
-  //     } else if (isPDF(bikeRcImageField)) {
-  //       const images = await pdfToImages(bikeRcImageField);
-  //       images.forEach((img, index) => {
-  //         if (index > 0) doc.addPage();
-  //         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-  //         doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-  //       });
-  //     }
-  //   }
-  
-  //   // Save the PDF
-  //   doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-  // };
-  
-
-
-
-
-
-
-
-
-
-  // experimenting 
-
-
-
-// Helper function to check file type
-const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
+  const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
 const isImage = (fileData) => fileData.startsWith('data:image/');
 
 const pdfToImages = async (pdfUrl) => {
@@ -1511,11 +1188,11 @@ const handleTenantDownload = async () => {
                     <>
                       <div className="col-md-6">
                         <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-                        <input type="file" className="form-control" onChange={handleImageChange} />
+                        <input type="file" className="form-control" onChange={handleTenantBikeChange} />
                       </div>
                       <div className="col-md-6">
                         <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-                        <input type="file" className="form-control" onChange={handleRcChange} />
+                        <input type="file" className="form-control" onChange={handleTenantBikeRcChange} />
                       </div>
                     </>
                   )}

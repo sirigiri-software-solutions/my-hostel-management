@@ -175,6 +175,15 @@ const lbnagarConfig = {
   messagingSenderId: "679870345296",
   appId: "1:679870345296:web:958361af2e22af1c86a155"
 };
+const nanakramgudaConfig = {
+  apiKey: "AIzaSyAGMdtiuco4LjIK-oQM0fu6-wmVwx38AoM",
+  authDomain: "nanakramguda-ebe50.firebaseapp.com",
+  databaseURL: "https://nanakramguda-ebe50-default-rtdb.firebaseio.com",
+  projectId: "nanakramguda-ebe50",
+  storageBucket: "nanakramguda-ebe50.appspot.com",
+  messagingSenderId: "871608526932",
+  appId: "1:871608526932:web:c04eb9db871ce9eae1e5c1"
+};
 
 // Initialize Firebase apps
 const appAmeerpet = initializeApp(ameerpetConfig, "appAmeerpet");
@@ -191,6 +200,7 @@ const appHimayathnagar = initializeApp(himayathnagarConfig , "appHimayathnagar")
 const appMadhuranagar = initializeApp(madhuranagarConfig, "appMadhuranagar");
 const appMadhapur = initializeApp(madhapurConfig, "appMadhapur");
 const appLbnagar = initializeApp(lbnagarConfig, "appLbnagar");
+const appNanakramguda = initializeApp(nanakramgudaConfig, "appNanakramguda")
 
 // Firebase instances
 const firebaseInstances = {
@@ -266,7 +276,13 @@ const firebaseInstances = {
     storage: getStorage(appLbnagar),
     auth: getAuth(appLbnagar),
   },
+  nanakramguda: {
+    app: appNanakramguda,
+    database: getDatabase(appNanakramguda),
+    storage: getStorage(appNanakramguda),
+    auth: getAuth(appNanakramguda),
+  },
   
 };
 
-export { firebaseInstances,ref,push };
+export { firebaseInstances,ref,push};

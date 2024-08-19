@@ -9,11 +9,12 @@ import { useTranslation } from 'react-i18next';
 import RoomsIcon from '../../images/Icons (2).png';
 import Table from '../../Elements/Table';
 import './Hostels.css'
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const Hostels = () => {
   const { t } = useTranslation();
   const { userUid, firebase, activeFlag,  changeActiveFlag, activeBoysHostelButtons, activeGirlsHostelButtons, } = useData();
-  const { database } = firebase;
+  const { database, storage } = firebase;
   const [isEditing, setIsEditing] = useState(null);
   const [hostels, setHostels] = useState({ boys: [], girls: [] });
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
@@ -31,6 +32,7 @@ const Hostels = () => {
   const [girlsHostels, setGirlsHostels] = useState([]);
   const [boysHostelImage, setBoysHostelImage] = useState('');
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
+  const [hostelImageUrl, setHostelImageUrl] = useState('');
   
 
   useEffect(() => {
@@ -269,42 +271,61 @@ const Hostels = () => {
     }
   };
 
+  // const handleHostelChange = (e, isBoys) => {
+  //   const file = e.target.files[0];
+  //   if (!file) {
+  //     toast.error("Please select a file.", {
+  //       position: "top-center",
+  //       autoClose: 3000,
+  //     });
+  //     return;
+  //   }
+
+  //   const reader = new FileReader();
+  //   reader.onload = () => {
+  //     const dataUrl = reader.result;
+  //     if (isBoys) {
+  //       setBoysHostelImage(dataUrl);
+  //     } else {
+  //       setGirlsHostelImage(dataUrl);
+  //     }
+  //   };
+  //   reader.onerror = () => {
+  //     toast.error("Failed to read file.", {
+  //       position: "top-center",
+  //       autoClose: 3000,
+  //     });
+  //   };
+  //   reader.readAsDataURL(file);
+  // };
+
   const handleHostelChange = (e, isBoys) => {
     const file = e.target.files[0];
     if (!file) {
-      toast.error("Please select a file.", {
-        position: "top-center",
-        autoClose: 3000,
-      });
-      return;
+        toast.error("Please select a file.", {
+            position: "top-center",
+            autoClose: 3000,
+        });
+        return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result;
-      if (isBoys) {
-        setBoysHostelImage(dataUrl);
-      } else {
-        setGirlsHostelImage(dataUrl);
-      }
-    };
-    reader.onerror = () => {
-      toast.error("Failed to read file.", {
-        position: "top-center",
-        autoClose: 3000,
-      });
-    };
-    reader.readAsDataURL(file);
-  };
+    if (isBoys) {
+        setBoysHostelImage(file); // Store file directly
+    } else {
+        setGirlsHostelImage(file); // Store file directly
+    }
+};
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const addNewHostel = (e, isBoys) => {
+
+  const addNewHostel = async (e, isBoys) => {
     e.preventDefault();
     setIsSubmitting(true);
     const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
     const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
-    const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
+    // const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
 
-    if (name.trim() === '' || address.trim() === '' || hostelImage.trim() === '') {
+    if (name.trim() === '' || address.trim() === '') {
       toast.error("Hostel name, address and image cannot be empty.", {
         position: "top-center",
         autoClose: 3000,
@@ -312,13 +333,28 @@ const Hostels = () => {
       return;
     }
 
+    let hostelImageUrlToUpdate = hostelImageUrl;
+    // console.log(isBoys ? boysHostelImage : girlsHostelImage, "kkk")
+    const hostelImageFile = isBoys ? boysHostelImage : girlsHostelImage;
+    if (hostelImageFile) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, hostelImageFile);
+        hostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(hostelImageUrlToUpdate, "hostelImageUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
+      }
+    }
+    
+
     // Create a new reference with a unique ID
     const newHostelRef = push(ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`));
     const hostelDetails = {
       id: newHostelRef.key, // Store the unique key if needed
       name,
       address,
-      hostelImage
+      hostelImage: hostelImageUrlToUpdate
     };
 
     set(newHostelRef, hostelDetails)

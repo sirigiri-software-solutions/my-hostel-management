@@ -22,7 +22,7 @@ const TenantsGirls = () => {
   const { t } = useTranslation();
   const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase } = useData();
   const role = localStorage.getItem('role');
-  const { database } = firebase;
+  const { database, storage } = firebase;
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -40,8 +40,9 @@ const TenantsGirls = () => {
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
+  const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantId, setTenantId] = useState(null);
-
+  const [tenantIdUrl, setTenantIdUrl] = useState('');
   const [girlsRoomsData, setGirlsRoomsData] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
@@ -64,8 +65,10 @@ const TenantsGirls = () => {
   const tenantProofIdRef = useRef(null);
   const [permnentAddress, setPermnentAddress] = useState("");
   const [bikeImage, setBikeImage] = useState(null);
+  const [bikeImageUrl, setBikeImageUrl] = useState('');
   const [bikeImageField, setBikeImageField] = useState('');
   const [bikeRcImage, setBikeRcImage] = useState('');
+  const [bikeRcImageUrl, setBikeRcImageUrl] = useState('');
   const [bikeRcImageField, setBikeRcImageField] = useState('');
   const [tenantAddress, setTenantAddress] = useState('');
   const [loading, setLoading] = useState(false);
@@ -74,27 +77,27 @@ const TenantsGirls = () => {
 
    
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0];
 
-    const reader = new FileReader();
+  //   const reader = new FileReader();
 
-    reader.onload = () => {
-      setBikeImage(reader.result);
-    };
-    reader.readAsDataURL(file);
-  };
+  //   reader.onload = () => {
+  //     setBikeImage(reader.result);
+  //   };
+  //   reader.readAsDataURL(file);
+  // };
 
 
-  const handleRcChange = (e) => {
-    const file1 = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      setBikeRcImage(reader.result);
-    }
-    reader.readAsDataURL(file1);
+  // const handleRcChange = (e) => {
+  //   const file1 = e.target.files[0];
+  //   const reader = new FileReader();
+  //   reader.onload = () => {
+  //     setBikeRcImage(reader.result);
+  //   }
+  //   reader.readAsDataURL(file1);
 
-  }
+  // }
 
   const handleCheckboxChange = (e) => {
     setHasBike(e.target.value == 'yes');
@@ -219,7 +222,7 @@ const TenantsGirls = () => {
     if (isBedOccupied) {
       tempErrors.selectedBed = t('errors.bedAlreadyOccupied');
     }
-    if (!tenantImage) {
+    if (!tenantImage && !tenantImageUrl) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
     if (hasBike) {
@@ -238,28 +241,51 @@ const TenantsGirls = () => {
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
-
   const handleTenantImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setTenantImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (e.target.files[0]) {
+      setTenantImage(e.target.files[0]);
     }
   };
+
+  // const handleTenantImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setTenantImage(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   const handleTenantIdChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setTenantId(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (e.target.files[0]) {
+      const file = e.target.files[0]
+      setFileName(file.name)
+      setTenantId(e.target.files[0]);
     }
   };
+
+  const handleTenantBikeChange = (e) => {
+    if (e.target.files[0]) {
+      setBikeImage(e.target.files[0]);
+    }
+  };
+  const handleTenantBikeRcChange = (e) => {
+    if (e.target.files[0]) {
+      setBikeRcImage(e.target.files[0]);
+    }
+  };
+  // const handleTenantIdChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setTenantId(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
 
   const handleSubmit = async (e) => {
@@ -275,6 +301,56 @@ const TenantsGirls = () => {
       if (!validate()) return;
     }
 
+    let imageUrlToUpdate = tenantImageUrl;
+    if (tenantImage) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, tenantImage);
+        imageUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(imageUrlToUpdate, "imageUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
+
+      }
+    }
+    
+    let idUrlToUpdate = tenantIdUrl;
+    if (tenantId) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, tenantId);
+        idUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(idUrlToUpdate, "idUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
+      }
+    }
+
+    let bikeUrlToUpdate = bikeImageUrl;
+    if (bikeImage) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeImage/${bikeImage.name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, bikeImage);
+        bikeUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(bikeUrlToUpdate, "bikeUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
+
+      }
+    }
+
+    let bikeRcUrlToUpdate = bikeRcImageUrl;
+    if (bikeRcImage) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, bikeRcImage);
+        bikeRcUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(bikeRcUrlToUpdate, "bikeRcUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
+
+      }
+    }
 
 
     const tenantData = {
@@ -286,12 +362,16 @@ const TenantsGirls = () => {
       idNumber,
       emergencyContact,
       status,
-      tenantImage,
-      tenantId,
+      // tenantImage,
+      tenantImageUrl: imageUrlToUpdate,
+      // tenantId,
+      tenantIdUrl: idUrlToUpdate,
       bikeNumber,
       permnentAddress,
-      bikeImage,
-      bikeRcImage
+      // bikeImage,
+      // bikeRcImage
+      bikeImageUrl:bikeUrlToUpdate,
+      bikeRcImageUrl:bikeRcUrlToUpdate,
     };
 
     if (isEditing) {
@@ -456,7 +536,7 @@ const TenantsGirls = () => {
 
   const rows = tenants.map((tenant, index) => ({
     s_no: index + 1,
-    image: tenant.tenantImage,
+    image: tenant.tenantImageUrl,
     name: capitalizeFirstLetter(tenant.name),
     id: tenant.idNumber,
     mobile_no: tenant.mobileNo,
@@ -1118,11 +1198,11 @@ const TenantsGirls = () => {
                     <>
                       <div className="col-md-6">
                         <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-                        <input type="file" className="form-control" onChange={handleImageChange} />
+                        <input type="file" className="form-control" onChange={handleTenantBikeChange} />
                       </div>
                       <div className="col-md-6">
                         <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-                        <input type="file" className="form-control" onChange={handleRcChange} />
+                        <input type="file" className="form-control" onChange={handleTenantBikeRcChange} />
                       </div>
                     </>
                   )}

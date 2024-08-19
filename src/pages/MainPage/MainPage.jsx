@@ -275,9 +275,10 @@ const MainPage = () => {
 
 
   const renderWelcomeext = index => {
-    if (index === Components.length) {
-      return null;
-    }
+    console.log(Components.length, "index")
+    // if (index === Components.length) {
+    //   return null;
+    // }
     return (
       <>
         {activeFlag === 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeBoysHostelName}&nbsp;{t('dashboard.boysHostel')}</p>}
@@ -285,9 +286,7 @@ const MainPage = () => {
       </>
     )
   }
-
-
-  const handleOpenModal = () => {
+ const handleOpenModal = () => {
     setIsModalOpen1(true);
   };
 
@@ -310,7 +309,6 @@ const MainPage = () => {
           <div className='logoutButton' onClick={toggleModal}>
             <RiLogoutCircleRLine />
           </div>
-
         </div>
 
         <div style={sidebarItems}>
@@ -343,7 +341,6 @@ const MainPage = () => {
                       <label className='link-text'>{item.name}</label>
                     </div>
                   ))
-
                 }
               </div>
               <AiOutlineClose
@@ -395,7 +392,6 @@ const MainPage = () => {
         {loading ? '': 
           isHostels ? (
             <div>
-              {/* <Button onClick={handleOpenModal}>Open Modal</Button> */}
               <DefaultModal show={isModalOpen1} handleClose={handleCloseModal} />
             </div>
           ) : (

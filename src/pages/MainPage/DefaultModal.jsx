@@ -4,6 +4,7 @@ import { Modal, Button, Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { useData } from '../../ApiData/ContextProvider';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import './MainPage.css'
 const DefaultModal = ({ show, handleClose }) => {
     const { firebase, userUid } = useData();
@@ -14,6 +15,7 @@ const DefaultModal = ({ show, handleClose }) => {
     });
     const [currentForm, setCurrentForm] = useState('');
     const [mensFormData, setMensFormData] = useState(null);
+    
 
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
@@ -29,12 +31,24 @@ const DefaultModal = ({ show, handleClose }) => {
         }
     };
 
-    const handleMenFormSubmit = (e) => {
+    const handleMenFormSubmit = async (e) => {
         e.preventDefault();
+
+        let boysHostelImageUrlToUpdate = boysHostelImageUrl;
+    if (boysHostelImage) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${newBoysHostelName}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, boysHostelImage);
+        boysHostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(boysHostelImageUrlToUpdate, "boysHostelImageUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
+      }
+    }
         const mensData = {
             name: newBoysHostelName,
             address: newBoysHostelAddress,
-            hostelImage: boysHostelImage,
+            hostelImage: boysHostelImageUrlToUpdate,
         };
         setMensFormData(mensData);
         if (selectedForms.women) {
@@ -44,12 +58,24 @@ const DefaultModal = ({ show, handleClose }) => {
         }
     };
 
-    const handleWomenFormSubmit = (e) => {
+    const handleWomenFormSubmit = async(e) => {
         e.preventDefault();
+        let girlsHostelImageUrlToUpdate = girlsHostelImageUrl;
+        if (girlsHostelImage) {
+          const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${newGirlsHostelName}`);
+          try {
+            const snapshot = await uploadBytes(imageRef, girlsHostelImage);
+            girlsHostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
+            console.log(girlsHostelImageUrlToUpdate, "girlsHostelImageUrlToUpdate")
+          } catch (error) {
+            console.error("Error uploading tenant image:", error);
+          }
+        }
+
         const womensData = {
             name: newGirlsHostelName,
             address: newGirlsHostelAddress,
-            hostelImage: girlsHostelImage,
+            hostelImage: girlsHostelImageUrlToUpdate,
         };
 
         if (mensFormData) {
@@ -63,9 +89,11 @@ const DefaultModal = ({ show, handleClose }) => {
     const [newGirlsHostelName, setNewGirlsHostelName] = useState('');
     const [newGirlsHostelAddress, setNewGirlsHostelAddress] = useState('');
     const [boysHostelImage, setBoysHostelImage] = useState('');
+    const [boysHostelImageUrl, setBoysHostelImageUrl] = useState('');
     const [girlsHostelImage, setGirlsHostelImage] = useState('');
+    const [girlsHostelImageUrl, setGirlsHostelImageUrl] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { database } = firebase;
+    const { database, storage } = firebase;
 
     const validateAlphanumeric = (input) => {
         const regex = /^[A-Za-z\s]*$/;
@@ -88,6 +116,33 @@ const DefaultModal = ({ show, handleClose }) => {
         }
     };
 
+    // const handleHostelChange = (e, isBoys) => {
+    //     const file = e.target.files[0];
+    //     if (!file) {
+    //         toast.error("Please select a file.", {
+    //             position: "top-center",
+    //             autoClose: 3000,
+    //         });
+    //         return;
+    //     }
+    //     const reader = new FileReader();
+    //     reader.onload = () => {
+    //         const dataUrl = reader.result;
+    //         if (isBoys) {
+    //             setBoysHostelImage(dataUrl);
+    //         } else {
+    //             setGirlsHostelImage(dataUrl);
+    //         }
+    //     };
+    //     reader.onerror = () => {
+    //         toast.error("Failed to read file.", {
+    //             position: "top-center",
+    //             autoClose: 3000,
+    //         });
+    //     };
+    //     reader.readAsDataURL(file);
+    // };
+
     const handleHostelChange = (e, isBoys) => {
         const file = e.target.files[0];
         if (!file) {
@@ -98,29 +153,18 @@ const DefaultModal = ({ show, handleClose }) => {
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            const dataUrl = reader.result;
-            if (isBoys) {
-                setBoysHostelImage(dataUrl);
-            } else {
-                setGirlsHostelImage(dataUrl);
-            }
-        };
-        reader.onerror = () => {
-            toast.error("Failed to read file.", {
-                position: "top-center",
-                autoClose: 3000,
-            });
-        };
-        reader.readAsDataURL(file);
+        if (isBoys) {
+            setBoysHostelImage(file); // Store file directly
+        } else {
+            setGirlsHostelImage(file); // Store file directly
+        }
     };
 
     const capitalizeFirstLetter = (string) => {
         return string.replace(/\b\w/g, char => char.toUpperCase());
     };
 
-    const submitHostelData = (hostelData, isBoys) => {
+    const submitHostelData = async (hostelData, isBoys) => {
         setIsSubmitting(true);
         const name = capitalizeFirstLetter(hostelData.name);
         const address = capitalizeFirstLetter(hostelData.address);
@@ -135,7 +179,9 @@ const DefaultModal = ({ show, handleClose }) => {
             return;
         }
 
+        
         const newHostelRef = push(ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`));
+
         const hostelDetails = {
             id: newHostelRef.key,
             name,
@@ -319,7 +365,6 @@ const DefaultModal = ({ show, handleClose }) => {
                                 >
                                     {isSubmitting ? 'Adding...' : t("settings.addHostel")}
                                 </button>
-
                             </div>
                         </Form>
                     </div>
