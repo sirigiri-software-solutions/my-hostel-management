@@ -25,7 +25,6 @@ import { Filesystem, FilesystemDirectory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 import jsPDF from 'jspdf';
 
-
 const TenantsGirls = () => {
   const { t } = useTranslation();
   const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase } = useData();
@@ -95,12 +94,45 @@ const TenantsGirls = () => {
     setIsMobile(/iPhone|iPod|iPad|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent));
 }, []);
 
-  const takePicture = async () => {
+  // const takePicture = async () => {
 
+  //   if (!isMobile) {
+  //     console.error("Camera access is not supported on your device.");
+  //     return;
+  // }
+  //   try {
+  //     const photo = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri
+  //     });
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setPhotoUrl(reader.result);
+  //       setTenantImage(reader.result);
+  //     };
+  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
+      
+      // const response = await fetch(photo.webPath);
+      // const blob = await response.blob();
+      // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
+      // const snapshot = await uploadBytes(imageRef, blob);
+      // const url = await getDownloadURL(snapshot.ref);
+      
+      // setPhotoUrl(url); // Display in UI
+      // setTenantImageUrl(url); // Use in form submission
+      // setPhotoUrl(photo.webPath);
+  //   } catch (error) {
+  //     console.error("Error accessing the camera", error);
+  //     toast.error(t('toastMessages.Image not Uploaded'));
+  //   }
+  // };
+
+  const takePicture = async () => {
     if (!isMobile) {
       console.error("Camera access is not supported on your device.");
       return;
-  }
+    }
     try {
       const photo = await Camera.getPhoto({
         quality: 90,
@@ -112,23 +144,14 @@ const TenantsGirls = () => {
         setPhotoUrl(reader.result);
         setTenantImage(reader.result);
       };
-      fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
-      
-      // const response = await fetch(photo.webPath);
-      // const blob = await response.blob();
-      // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-      // const snapshot = await uploadBytes(imageRef, blob);
-      // const url = await getDownloadURL(snapshot.ref);
-      
-      // setPhotoUrl(url); // Display in UI
-      // setTenantImageUrl(url); // Use in form submission
-      // setPhotoUrl(photo.webPath);
+      fetch(photo.webPath)
+        .then(response => response.blob())
+        .then(blob => reader.readAsDataURL(blob));
     } catch (error) {
       console.error("Error accessing the camera", error);
-      toast.error(t('toastMessages.Image not Uploaded'));
+      toast.error(t('toastMessages.imageNotUploaded'));
     }
-  };
-
+  }
   const takeidPicture = async () => {
 
     if (!isMobile) {
@@ -159,9 +182,11 @@ const TenantsGirls = () => {
       // setPhotoUrl(photo.webPath);
     } catch (error) {
       console.error("Error accessing the camera", error);
-      toast.error(t('toastMessages.Id not Uploaded'));
+      toast.error(t('toastMessages.idNotUploaded'));
     }
   };
+
+
 
 
 
@@ -1228,6 +1253,42 @@ const handleTenantDownload = async () => {
   }
 };
 
+const handleImageDownload = async (e, imageUrl, fileName) => {
+  if (Capacitor.isNativePlatform()) {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
+
+      reader.onloadend = async () => {
+        const base64data = reader.result.split(',')[1];
+
+        try {
+          const savedFile = await Filesystem.writeFile({
+            path: `${fileName}.jpg`,
+            data: base64data,
+            directory: FilesystemDirectory.Documents
+          });
+          
+          await FileOpener.open({
+            filePath: savedFile.uri,
+            fileMimeType: 'image/jpeg',
+          });
+
+        } catch (error) {
+          console.error('Error saving file:', error);
+        }
+      };
+
+      reader.readAsDataURL(blob);
+
+    } catch (error) {
+      console.error('Error fetching image:', error);
+    }
+  }
+};
 
 
 
@@ -1389,14 +1450,14 @@ const handleTenantDownload = async () => {
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
-                    <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} required />
+                    <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange}  />
                     {isMobile && (
                     <div>
                     <p>{t('tenantsPage.or')}</p>
                     <div style={{display:'flex',flexDirection:'row'}}>
                     <p>{t('tenantsPage.takePhoto')}</p>
                     <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
-                    {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
+                    {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, maxWidth: '100px', height: '100px' }} />}
                     </div>
                     </div>
                     )}
@@ -1419,7 +1480,7 @@ const handleTenantDownload = async () => {
                     <div style={{display:'flex',flexDirection:'row'}}>
                     <p>{t('tenantsPage.takePhoto')}</p>
                     <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeidPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
-                    {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
+                    {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, maxWidth: '100px', height: '100px' }} />}
                     </div>
                     </div>
                     )}
@@ -1525,28 +1586,50 @@ const handleTenantDownload = async () => {
                 <p><strong>{t('tenantsPage.idProof')} :</strong>
 
 
-                  {singleTenantProofId ? (
-                    <a className='downloadPdfText' href={singleTenantProofId} download> <FaDownload /> {t('tenantsPage.downloadPdf')}</a>
-                  ) : (
-                    <span className='NotUploadedText'>{t('tenantsPage.notUploaded')}</span>
-                  )}
-                </p>
-                <p><strong>{t('tenantsPage.PermanentAddress')}</strong>{tenantAddress}</p>
+            {singleTenantProofId ? (
+             <a
+             className="downloadPdfText"
+             href={singleTenantProofId}
+            download
+            onClick={(e) => handleImageDownload(e, singleTenantProofId, 'Tenant_Proof_Id')}
+    >
+            <FaDownload /> {t('tenantsPage.downloadId')}
+           </a>
+          ) : (
+        <span className="NotUploadedText">{t('tenantsPage.notUploaded')}</span>
+      )}
+    </p>
 
-                <p><strong>{t('tenantsPage.BikePic')}</strong>
-                  {bikeImageField ? (
-                    <a className="downloadPdfText" href={bikeImageField} download> <FaDownload />{t('tenantsPage.DownloadPic')}</a>
-                  ) : (
-                    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
-                  )}
-                </p>
-                <p><strong>{t('tenantsPage.BikeRc')}</strong>
-                  {bikeRcImageField ? (
-                    <a className="downloadPdfText" href={bikeRcImageField} download> <FaDownload />{t('tenantsPage.DownloadRc')}</a>
-                  ) : (
-                    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
-                  )}
-                </p>
+<p><strong>{t('tenantsPage.BikePic')}</strong>
+  {bikeImageField ? (
+    <a
+      className="downloadPdfText"
+      href={bikeImageField}
+      download
+      onClick={(e) => handleImageDownload(e, bikeImageField, 'Bike_Image')}
+    >
+      <FaDownload /> {t('tenantsPage.DownloadPic')}
+    </a>
+  ) : (
+    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
+  )}
+</p>
+
+<p><strong>{t('tenantsPage.BikeRc')}</strong>
+  {bikeRcImageField ? (
+    <a
+      className="downloadPdfText"
+      href={bikeRcImageField}
+      download
+      onClick={(e) => handleImageDownload(e, bikeRcImageField, 'Bike_RC')}
+    >
+      <FaDownload /> {t('tenantsPage.DownloadRc')}
+    </a>
+  ) : (
+    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
+  )}
+</p>
+
               </div>
             </div>
             <div className='popup-tenants-closeBtn'>
@@ -1570,7 +1653,8 @@ const handleTenantDownload = async () => {
         </div>
       )}
     </>
-  )
-}
+  );
+};
 
-export default TenantsGirls
+
+export default TenantsGirls; 

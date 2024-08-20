@@ -766,7 +766,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     } else {
       if (!validate()) return;
     }
-
+    
     const tenantData = {
       roomNo: selectedRoom,
       bedNo: selectedBed,
@@ -1012,6 +1012,9 @@ Please note that you made your last payment on ${paidDate}.\n`
     setBikeNumber('NA')
     setBikeImage(null);
     setBikeRcImage(null);
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
   };
 
   const menu = [
@@ -1504,14 +1507,14 @@ Please note that you made your last payment on ${paidDate}.\n`
                   <p>{t('dashboard.currentImage')}</p>
                 </div>
               )}
-              <input id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} ref={imageInputRef} required />
+              <input id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} ref={imageInputRef}  />
               {isMobile && (
                   <div>
                   <p>{t('tenantsPage.or')}</p>
                   <div style={{display:'flex',flexDirection:'row'}}>
                   <p>{t('tenantsPage.takePhoto')}</p>
-                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeIdPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
-                  {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
+                  {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
                   </div>
                   </div>
                     )}
@@ -1533,14 +1536,14 @@ Please note that you made your last payment on ${paidDate}.\n`
                   <a href={tenantId}>{t('dashboard.downloadPdf')}</a>
                 </object>
               )}
-              <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef} multiple />
+              <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef}  />
               {isMobile && (
                   <div>
                   <p>{t('tenantsPage.or')}</p>
                   <div style={{display:'flex',flexDirection:'row'}}>
                   <p>{t('tenantsPage.takePhoto')}</p>
                   <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeIdPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
-                  {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50, maxWidth: '100%', height: 'auto' }} />}
+                  {idUrl && <img src={idUrl} alt="Captured" style={{  marginTop: 50,marginRight:40, Width: '100px', height: '100px'}}/>}
                   </div>
                   </div>
                     )}

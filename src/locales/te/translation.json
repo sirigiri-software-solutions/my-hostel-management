@@ -286,7 +286,10 @@
     "expensesUpdatedSuccessfully": "ఖర్చు విజయవంతంగా నవీకరించబడింది.",
     "errorUpdatinExpense": "ఖర్చు నవీకరించడంలో లోపం.",
     "expenseDeteledSuccessfully": "ఖర్చు విజయవంతంగా తొలగించబడింది.",
-    "errorDeletingExpense": "ఖర్చు తొలగించడంలో లోపం."
+    "errorDeletingExpense": "ఖర్చు తొలగించడంలో లోపం.",
+    "imageNotUploaded":"చిత్రం అప్లోడ్ కాలేదు",
+    "idNotUploaded":"ఐడీ అప్లోడ్ కాలేదు"
+
   },
   "mobileTable":{
     "serialNumber": "క్ర.సూ.",

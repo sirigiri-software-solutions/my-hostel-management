@@ -224,7 +224,10 @@
         "total": "Total",
         "sNo":"S.No",
         "date":"Date",
-        "actions":"Actions"
+        "actions":"Actions",
+        "imageNotUploaded":"Image not uploaded",
+        "idNotUploaded":"ID not uploaded"
+
 
     },
     "table":{

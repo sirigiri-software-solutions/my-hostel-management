@@ -223,6 +223,8 @@
         "sNo": "क्रमिक संख्या",
         "date": "तारीख",
         "actions": "क्रियाएँ"
+        
+
     },
     "months": {
         "jan": "जनवरी",
@@ -290,7 +292,9 @@
         "expensesUpdatedSuccessfully": "खर्च सफलतापूर्वक अपडेट किया गया।",
         "errorUpdatinExpense": "खर्च अपडेट करने में त्रुटि।",
         "expenseDeteledSuccessfully": "खर्च सफलतापूर्वक हटा दिया गया।",
-    "errorDeletingExpense": "खर्च हटाने में त्रुटि।"
+    "errorDeletingExpense": "खर्च हटाने में त्रुटि।",
+    "imageNotUploaded":"छवि अपलोड नहीं हुई",
+    "idNotUploaded":"आईडी अपलोड नहीं हुई"
       },
       "mobileTable":{
         "serialNumber": "क्रमांक",
