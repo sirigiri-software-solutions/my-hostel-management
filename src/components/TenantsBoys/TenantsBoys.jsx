@@ -245,11 +245,7 @@ const TenantsBoys = () => {
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
-  const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
-    }
-  };
+ 
   // const handleTenantImageChange = (e) => {
   //   const file = e.target.files[0];
   //   if (file) {
@@ -260,6 +256,11 @@ const TenantsBoys = () => {
   //     reader.readAsDataURL(file);
   //   }
   // };
+  const handleTenantImageChange = (e) => {
+    if (e.target.files[0]) {
+      setTenantImage(e.target.files[0]);
+    }
+  };
   const handleTenantIdChange = (e) => {
     if (e.target.files[0]) {
       const file = e.target.files[0]
@@ -303,6 +304,10 @@ const TenantsBoys = () => {
     }
 
     let imageUrlToUpdate = tenantImageUrl;
+    let idUrlToUpdate = tenantIdUrl;
+    let bikeUrlToUpdate = bikeImageUrl;
+    let bikeRcUrlToUpdate = bikeRcImageUrl;
+    
     if (tenantImage) {
       const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
       try {
@@ -315,7 +320,6 @@ const TenantsBoys = () => {
       }
     }
     
-    let idUrlToUpdate = tenantIdUrl;
     if (tenantId) {
       const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
       try {
@@ -326,8 +330,7 @@ const TenantsBoys = () => {
         console.error("Error uploading tenant image:", error);
       }
     }
-
-    let bikeUrlToUpdate = bikeImageUrl;
+    
     if (bikeImage) {
       const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${bikeImage.name}`);
       try {
@@ -340,7 +343,7 @@ const TenantsBoys = () => {
       }
     }
 
-    let bikeRcUrlToUpdate = bikeRcImageUrl;
+    
     if (bikeRcImage) {
       const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
       try {
@@ -349,7 +352,6 @@ const TenantsBoys = () => {
         console.log(bikeRcUrlToUpdate, "bikeRcUrlToUpdate")
       } catch (error) {
         console.error("Error uploading tenant image:", error);
-
       }
     }
     const tenantData = {
@@ -429,6 +431,7 @@ const TenantsBoys = () => {
   };
 
   const handleEdit = (tenant) => {
+    console.log(tenant, "tttT")
     setSelectedRoom(tenant.roomNo);
     setSelectedBed(tenant.bedNo);
     setDateOfJoin(tenant.dateOfJoin);
@@ -439,14 +442,34 @@ const TenantsBoys = () => {
     setStatus(tenant.status);
     setIsEditing(true);
     setCurrentId(tenant.id);
-    setTenantImage(tenant.tenantImageUrl)
-    setTenantId(tenant.tenantIdUrl || '');
+
+    if(tenantImage){
+      setTenantImage(tenant.tenantImageUrl)
+    } else {
+      setTenantImageUrl(tenant.tenantImageUrl)
+    }
+    if(tenantId){
+      setTenantId(tenant.tenantIdUrl || '');
+    } else {
+      setTenantIdUrl(tenant.tenantIdUrl)
+    }
+    if(bikeImage){
+      setBikeImage(tenant.bikeImageUrl || '')
+    } else {
+      setBikeImageUrl(tenant.bikeImageUrl || '')
+    }
+    if(bikeRcImage){
+      setBikeRcImage(tenant.bikeRcImageUrl || '')
+    } else {
+      setBikeRcImageUrl(tenant.bikeRcImageUrl || '')
+    }
+
+    
     setBikeNumber("");
     setHasBike(false);
     setFileName(tenant.fileName || '');
     setShowModal(true);
     setBikeNumber(tenant.bikeNumber);
-
     setPermnentAddress(tenant.permnentAddress);
     if (tenant.bikeNumber === 'NA') {
       setHasBike(false);
@@ -491,17 +514,20 @@ const TenantsBoys = () => {
     setIsEditing(false);
     setCurrentId('');
     setErrors({});
+
     setTenantImage(null);
+    setTenantImageUrl('');
     setTenantId(null);
-    // setTenantImageUrl('');
-    setTenantImage('')
-    // setTenantIdUrl('');
+    setTenantIdUrl('');
+    setBikeImage(null)
+    setBikeImageUrl('')
+    setBikeRcImage(null)
+    setBikeRcImageUrl('')
     setTenantId('')
     setBikeNumber('NA');
     setPermnentAddress('')
     tenantImageInputRef.current.value = null;
     tenantProofIdRef.current.value = null;
-
   };
 
   const handleSearchChange = (e) => {
@@ -736,7 +762,7 @@ const TenantsBoys = () => {
 
   const exTenantRows = exTenants.map((tenant, index) => ({
     s_no: index + 1,
-    image: tenant.tenantImage,
+    image: tenant.tenantImageUrl,
     name: tenant.name,
     id: tenant.idNumber,
     mobile_no: tenant.mobileNo,
@@ -1114,9 +1140,9 @@ const handleTenantDownload = async () => {
                     <label htmlFor='tenantUpload' class="form-label">
                       {t('dashboard.uploadImage')}
                     </label>
-                    {isEditing && tenantImage && (
+                    {isEditing && tenantImageUrl && (
                       <div>
-                        <img src={tenantImage} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
+                        <img src={tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
@@ -1132,7 +1158,6 @@ const handleTenantDownload = async () => {
                         <p>{fileName}</p>
                       </div>
                     )}
-
 
                     <input ref={tenantProofIdRef} id="tenantUploadId" className="form-control" type="file" onChange={handleTenantIdChange} />
 

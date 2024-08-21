@@ -241,11 +241,7 @@ const TenantsGirls = () => {
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
-  const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
-    }
-  };
+  
 
   // const handleTenantImageChange = (e) => {
   //   const file = e.target.files[0];
@@ -257,7 +253,11 @@ const TenantsGirls = () => {
   //     reader.readAsDataURL(file);
   //   }
   // };
-
+  const handleTenantImageChange = (e) => {
+    if (e.target.files[0]) {
+      setTenantImage(e.target.files[0]);
+    }
+  };
   const handleTenantIdChange = (e) => {
     if (e.target.files[0]) {
       const file = e.target.files[0]
@@ -302,6 +302,9 @@ const TenantsGirls = () => {
     }
 
     let imageUrlToUpdate = tenantImageUrl;
+    let idUrlToUpdate = tenantIdUrl;
+    let bikeUrlToUpdate = bikeImageUrl;
+    let bikeRcUrlToUpdate = bikeRcImageUrl;
     if (tenantImage) {
       const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
       try {
@@ -314,7 +317,7 @@ const TenantsGirls = () => {
       }
     }
     
-    let idUrlToUpdate = tenantIdUrl;
+    
     if (tenantId) {
       const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
       try {
@@ -326,7 +329,7 @@ const TenantsGirls = () => {
       }
     }
 
-    let bikeUrlToUpdate = bikeImageUrl;
+    
     if (bikeImage) {
       const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeImage/${bikeImage.name}`);
       try {
@@ -339,7 +342,7 @@ const TenantsGirls = () => {
       }
     }
 
-    let bikeRcUrlToUpdate = bikeRcImageUrl;
+    
     if (bikeRcImage) {
       const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
       try {
@@ -431,6 +434,7 @@ const TenantsGirls = () => {
   };
 
   const handleEdit = (tenant) => {
+    console.log(tenant, "ttt")
     setSelectedRoom(tenant.roomNo);
     setSelectedBed(tenant.bedNo);
     setDateOfJoin(tenant.dateOfJoin);
@@ -441,8 +445,28 @@ const TenantsGirls = () => {
     setStatus(tenant.status);
     setIsEditing(true);
     setCurrentId(tenant.id);
-    setTenantImage(tenant.tenantImage)
-    setTenantId(tenant.tenantId || '');
+
+    if(tenantImage){
+      setTenantImage(tenant.tenantImageUrl)
+    } else {
+      setTenantImageUrl(tenant.tenantImageUrl)
+    }
+    if(tenantId){
+      setTenantId(tenant.tenantIdUrl || '');
+    } else {
+      setTenantIdUrl(tenant.tenantIdUrl)
+    }
+    if(bikeImage){
+      setBikeImage(tenant.bikeImageUrl || '')
+    } else {
+      setBikeImageUrl(tenant.bikeImageUrl || '')
+    }
+    if(bikeRcImage){
+      setBikeRcImage(tenant.bikeRcImageUrl || '')
+    } else {
+      setBikeRcImageUrl(tenant.bikeRcImageUrl || '')
+    }
+
     setFileName(tenant.fileName || '');
     setHasBike(false);
     setShowModal(true);
@@ -493,8 +517,13 @@ const TenantsGirls = () => {
     setCurrentId('');
     setErrors({});
     setTenantImage(null);
+    setTenantImageUrl('');
     setTenantId(null);
-    setTenantImage('')
+    setTenantIdUrl('');
+    setBikeImage(null)
+    setBikeImageUrl('')
+    setBikeRcImage(null)
+    setBikeRcImageUrl('')    
     setTenantId('')
     setBikeNumber('NA');
     setPermnentAddress('')
@@ -741,7 +770,7 @@ const TenantsGirls = () => {
 
   const exTenantRows = exTenants.map((tenant, index) => ({
     s_no: index + 1,
-    image: tenant.tenantImage,
+    image: tenant.tenantImageUrl,
     name: capitalizeFirstLetter(tenant.name),
     id: tenant.idNumber,
     mobile_no: tenant.mobileNo,
@@ -1125,9 +1154,9 @@ const TenantsGirls = () => {
                     <label htmlFor='tenantUpload' class="form-label">
                       {t('dashboard.uploadImage')}
                     </label>
-                    {isEditing && tenantImage && (
+                    {isEditing && tenantImageUrl && (
                       <div>
-                        <img src={tenantImage} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
+                        <img src={ tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
