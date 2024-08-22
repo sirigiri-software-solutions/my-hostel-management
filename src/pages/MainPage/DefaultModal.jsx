@@ -93,14 +93,21 @@ const DefaultModal = ({ show, handleClose }) => {
         e.preventDefault();
         let girlsHostelImageUrlToUpdate = girlsHostelImageUrl;
         if (girlsHostelImage) {
-          const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${newGirlsHostelName}`);
-          try {
-            const snapshot = await uploadBytes(imageRef, girlsHostelImage);
+
+            try {
+                const compressedImage = await compressImage(girlsHostelImage); // Renamed to avoid conflict
+                 
+                if (compressedImage) {
+                    const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${newGirlsHostelName}`);
+                    const snapshot = await uploadBytes(imageRef, compressedImage);
             girlsHostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
-            console.log(girlsHostelImageUrlToUpdate, "girlsHostelImageUrlToUpdate")
-          } catch (error) {
-            console.error("Error uploading tenant image:", error);
-          }
+                    console.log(girlsHostelImageUrlToUpdate, "girlsHostelImageUrlToUpdate");
+                }
+            } catch (error) {
+                console.error("Error uploading boys hostel image:", error);
+            }
+
+           
         }
 
         const womensData = {

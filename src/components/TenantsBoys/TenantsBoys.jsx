@@ -9,7 +9,7 @@ import { push, ref, storage } from "../../firebase/firebase";
 import '../TenantsGirls/TenantsGirls.css';
 import './TenantsBoys.css'
 import { DataContext } from '../../ApiData/ContextProvider'
-import { FetchData } from '../../ApiData/FetchData'
+
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { FaDownload } from "react-icons/fa";
@@ -155,70 +155,70 @@ const TenantsBoys = () => {
   const [boysTenants, setBoysTenants] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    if (entireHMAdata && typeof entireHMAdata === 'object') {
-      let boysAndGirlsData = Object.values(entireHMAdata);
-      console.log(boysAndGirlsData, "EntireHMAData");
-  
-      if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
-        let boysData = Object.values(boysAndGirlsData[0].boys);
-  
-        if (boysData.length > 0) {
-          let tenantsData = boysData[0].tenants || {};
-          let roomsData = boysData[0].rooms || {};
-          let extenantsData = boysData[0].extenants || {};
-  
-          const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
-            id: key,
-            ...value,
-          }));
-  
-          const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
-            id: key,
-            ...value,
-          }));
-  
-          const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
-            id: key,
-            ...value,
-          }));
-  
-          setTenants(loadedTenants); 
-          setBoysRooms(loadedRooms);
-          setExTenants(loadedExTenants);
-        }
-      }
-    }
-  }, []);
-  
-
-
   // useEffect(() => {
-  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-  //   onValue(tenantsRef, snapshot => {
-  //     const data = snapshot.val() || {};
-  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
-  //       id: key,
-  //       ...value,
-  //     }));
-  //     setTenants(loadedTenants);
-  //   });
-  // }, [activeBoysHostel]);
-
-  // useEffect(() => {
-  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-  //   onValue(roomsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedRooms = [];
-  //     for (const key in data) {
-  //       loadedRooms.push({
-  //         id: key,
-  //         ...data[key]
-  //       });
+  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
+  //     let boysAndGirlsData = Object.values(entireHMAdata);
+  //     console.log(boysAndGirlsData, "EntireHMAData");
+  
+  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+  //       let boysData = Object.values(boysAndGirlsData[0].boys);
+  
+  //       if (boysData.length > 0) {
+  //         let tenantsData = boysData[0].tenants || {};
+  //         let roomsData = boysData[0].rooms || {};
+  //         let extenantsData = boysData[0].extenants || {};
+  
+  //         const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         setTenants(loadedTenants); 
+  //         setBoysRooms(loadedRooms);
+  //         setExTenants(loadedExTenants);
+  //       }
   //     }
-  //     setBoysRooms(loadedRooms);
-  //   });
-  // }, [activeBoysHostel]);
+  //   }
+  // }, []);
+  
+
+
+  useEffect(() => {
+    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+    onValue(tenantsRef, snapshot => {
+      const data = snapshot.val() || {};
+      const loadedTenants = Object.entries(data).map(([key, value]) => ({
+        id: key,
+        ...value,
+      }));
+      setTenants(loadedTenants);
+    });
+  }, [activeBoysHostel]);
+
+  useEffect(() => {
+    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+    onValue(roomsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedRooms = [];
+      for (const key in data) {
+        loadedRooms.push({
+          id: key,
+          ...data[key]
+        });
+      }
+      setBoysRooms(loadedRooms);
+    });
+  }, [activeBoysHostel]);
 
 
   const validate = () => {
@@ -510,7 +510,7 @@ const TenantsBoys = () => {
         setLoading(false);
         resetForm();
         setErrors({});
-        fetchData()
+        // fetchData()
     }
 };
 
@@ -966,15 +966,15 @@ console.log(tenants, "tenants")
     resetForm();
     setErrors({});
   };
-  // const fetchExTenants = () => {
-  //   const exTenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
-  //   onValue(exTenantsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
-  //     setExTenants(loadedExTenants);
-  //   });
-  // };
-  // useEffect(() => { fetchExTenants() }, []);
+  const fetchExTenants = () => {
+    const exTenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
+    onValue(exTenantsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
+      setExTenants(loadedExTenants);
+    });
+  };
+  useEffect(() => { fetchExTenants() }, []);
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [tenantIdToDelete, setTenantIdToDelete] = useState(null);
@@ -1117,7 +1117,7 @@ const loadImage = (src) => {
 
 const handleTenantDownload = async () => {
   const doc = new jsPDF();
-
+  console.log(singleTenantDetails,"singletenantDetals")
   // Page 1: Tenant Details
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
