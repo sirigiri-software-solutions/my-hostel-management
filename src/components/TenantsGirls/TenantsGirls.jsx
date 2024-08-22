@@ -6,7 +6,7 @@ import Table from '../../Elements/Table'
 import ImageIcon from '../../images/Icons (10).png'
 import { useState, useEffect } from 'react'
 import { push, ref, storage } from "../../firebase/firebase";
-import { FetchData } from '../../ApiData/FetchData'
+
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { FaDownload } from "react-icons/fa";
@@ -137,75 +137,75 @@ const TenantsGirls = () => {
     document.addEventListener("keydown", handleClickOutside)
   }, []);
 
-  useEffect(() => {
-    if (entireHMAdata && typeof entireHMAdata === 'object') {
-      // Extract the values from the data object
-      const boysAndGirlsData = Object.values(entireHMAdata);
-  
-      // Ensure we have data and that it contains 'boys'
-      if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
-        const boysData = Object.values(boysAndGirlsData[0].girls);
-  
-        // Check if there's data in boysData
-        if (boysData.length > 0) {
-          const tenantsData = boysData[0].tenants || {};
-          const roomsData = boysData[0].rooms || {};
-          const extenantsData = boysData[0].extenants || {};
-  
-          // Map the data to the required format
-          const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
-            id: key,
-            ...value,
-          }));
-  
-          const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
-            id: key,
-            ...value,
-          }));
-  
-          const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
-            id: key,
-            ...value,
-          }));
-  
-          // Update the state with the processed data
-          setTenants(loadedTenants); 
-          setGirlsRooms(loadedRooms);
-          setExTenants(loadedExTenants);
-        }
-      }
-    }
-  }, []);
-  
-
-
   // useEffect(() => {
-  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-  //   onValue(tenantsRef, snapshot => {
-  //     const data = snapshot.val() || {};
-  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
-  //       id: key,
-  //       ...value,
-  //     }));
-  //     setTenants(loadedTenants);
-  //   });
-  // }, [activeGirlsHostel]);
+  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
+  //     // Extract the values from the data object
+  //     const boysAndGirlsData = Object.values(entireHMAdata);
+  
+  //     // Ensure we have data and that it contains 'boys'
+  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+  //       const boysData = Object.values(boysAndGirlsData[0].girls);
+  
+  //       // Check if there's data in boysData
+  //       if (boysData.length > 0) {
+  //         const tenantsData = boysData[0].tenants || {};
+  //         const roomsData = boysData[0].rooms || {};
+  //         const extenantsData = boysData[0].extenants || {};
+  
+  //         // Map the data to the required format
+  //         const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         // Update the state with the processed data
+  //         setTenants(loadedTenants); 
+  //         setGirlsRooms(loadedRooms);
+  //         setExTenants(loadedExTenants);
+  //       }
+  //     }
+  //   }
+  // }, []);
+  
+
+
+  useEffect(() => {
+    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+    onValue(tenantsRef, snapshot => {
+      const data = snapshot.val() || {};
+      const loadedTenants = Object.entries(data).map(([key, value]) => ({
+        id: key,
+        ...value,
+      }));
+      setTenants(loadedTenants);
+    });
+  }, [activeGirlsHostel]);
 
   const [girlsRooms, setGirlsRooms] = useState([]);
-  // useEffect(() => {
-  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-  //   onValue(roomsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedRooms = [];
-  //     for (const key in data) {
-  //       loadedRooms.push({
-  //         id: key,
-  //         ...data[key]
-  //       });
-  //     }
-  //     setGirlsRooms(loadedRooms);
-  //   });
-  // }, [activeGirlsHostel]);
+  useEffect(() => {
+    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+    onValue(roomsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedRooms = [];
+      for (const key in data) {
+        loadedRooms.push({
+          id: key,
+          ...data[key]
+        });
+      }
+      setGirlsRooms(loadedRooms);
+    });
+  }, [activeGirlsHostel]);
 
 
 
@@ -799,15 +799,15 @@ const TenantsGirls = () => {
     setErrors({});
 
   };
-  // const fetchExTenants = () => {
-  //   const exTenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
-  //   onValue(exTenantsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
-  //     setExTenants(loadedExTenants);
-  //   });
-  // };
-  // useEffect(() => { fetchExTenants() }, []);
+  const fetchExTenants = () => {
+    const exTenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
+    onValue(exTenantsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
+      setExTenants(loadedExTenants);
+    });
+  };
+  useEffect(() => { fetchExTenants() }, []);
 
 
   const [showConfirmation, setShowConfirmation] = useState(false);

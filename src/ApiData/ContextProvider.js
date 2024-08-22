@@ -39,53 +39,51 @@ const DataProvider = ({ children }) => {
   const { database } = firebase;
 
 
-  // trying to fetch entire data from context 
-  const [defaultArea,setDefaultArea] = useState(localStorage.getItem('userarea') || 'default')
-  const [entireHMAdata,setEntireHMAdata] = useState([]);
-
-  const areaToApiEndPointEntireData = {
-    ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
-    srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
-    secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
-    default:"https://defaulthostel-default-rtdb.firebaseio.com/register.json",
-    kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
-    gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
-    ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
-    dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
-    himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
-    madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
-    madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
-    lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
-    nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/Hostel.json",
-  }
-
-  const fetchData = async () => {
-    const api = areaToApiEndPointEntireData[defaultArea];
-    const options = {
-      method: "GET",
-    };
-
-    try {
-      const response = await fetch(api, options);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log(data, "EntireDataOfHMA");
-      // Handle the data (e.g., set it to state)
-      setEntireHMAdata(data);
-    } catch (error) {
-      console.error("Error fetching data:", error.message); // Improved error logging
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-}, []);
-
+  // trying to fetch entire data from context
   
-
   
+//   const [defaultArea,setDefaultArea] = useState(localStorage.getItem('userarea') || 'default')
+//   const [entireHMAdata,setEntireHMAdata] = useState([]);
+
+//   const areaToApiEndPointEntireData = {
+//     ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
+//     srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
+//     secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
+//     default:"https://defaulthostel-default-rtdb.firebaseio.com/register.json",
+//     kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
+//     gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
+//     ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
+//     dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
+//     himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
+//     madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
+//     madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
+//     lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
+//     nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/Hostel.json",
+//   }
+
+//   const fetchData = async () => {
+//     const api = areaToApiEndPointEntireData[defaultArea];
+//     const options = {
+//       method: "GET",
+//     };
+
+//     try {
+//       const response = await fetch(api, options);
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! Status: ${response.status}`);
+//       }
+//       const data = await response.json();
+//       console.log(data, "EntireDataOfHMA");
+//       // Handle the data (e.g., set it to state)
+//       setEntireHMAdata(data);
+//     } catch (error) {
+//       console.error("Error fetching data:", error.message); // Improved error logging
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchData();
+// }, []);
 
 
   // end to get entireData
@@ -267,7 +265,7 @@ const DataProvider = ({ children }) => {
   console.log(boysExTenantsData, "exx")
   console.log(girlsExTenantsData, "exx")
   return (
-    <DataContext.Provider value={{entireHMAdata,fetchData,  activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea,setDefaultArea, setUserUid, activeFlag,  changeActiveFlag, girlsTenantsData, boysTenantsData, girlsExTenantsData, boysExTenantsData,expensesInteracted,setExpensesInteracted,}}>
+    <DataContext.Provider value={{ activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag, girlsTenantsData, boysTenantsData, girlsExTenantsData, boysExTenantsData,expensesInteracted,setExpensesInteracted,}}>
       {children}
     </DataContext.Provider>
   );
