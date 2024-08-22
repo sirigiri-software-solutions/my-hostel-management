@@ -75,6 +75,63 @@ const Hostels = () => {
     };
   }, [userUid, database]);
 
+  // const submitHostelEdit = async (e) => {
+  //   e.preventDefault();
+  //   const { id, name, address, hostelImage, isBoys } = isEditing;
+  //   const basePath = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
+  //   let updatedImageUrl = hostelImage;
+
+  //   if (selectedImage) {
+      
+  //     const reader = new FileReader();
+  //     reader.onloadend = async () => {
+  //       updatedImageUrl = reader.result;
+  //       const updateData = {
+  //         name, 
+  //         address, 
+  //         hostelImage: updatedImageUrl, 
+  //       };
+  //       const hostelRef = ref(database, basePath);
+  //       update(hostelRef, updateData)
+  //         .then(() => {
+  //           toast.success("Hostel updated successfully.", {
+  //             position: "top-center",
+  //             autoClose: 3000,
+  //           });
+  //           cancelEdit();
+  //         })
+  //         .catch(error => {
+  //           toast.error("Failed to update hostel: " + error.message, {
+  //             position: "top-center",
+  //             autoClose: 3000,
+  //           });
+  //         });
+  //     };
+  //     reader.readAsDataURL(selectedImage);
+  //   } else {
+  //     const updateData = {
+  //       name, 
+  //       address, 
+  //     };
+
+  //     const hostelRef = ref(database, basePath);
+  //     update(hostelRef, updateData)
+  //       .then(() => {
+  //         toast.success("Hostel updated successfully.", {
+  //           position: "top-center",
+  //           autoClose: 3000,
+  //         });
+  //         cancelEdit();
+  //       })
+  //       .catch(error => {
+  //         toast.error("Failed to update hostel: " + error.message, {
+  //           position: "top-center",
+  //           autoClose: 3000,
+  //         });
+  //       });
+  //   }
+  // };
+
   const submitHostelEdit = async (e) => {
     e.preventDefault();
     const { id, name, address, hostelImage, isBoys } = isEditing;
@@ -82,55 +139,37 @@ const Hostels = () => {
     let updatedImageUrl = hostelImage;
 
     if (selectedImage) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        updatedImageUrl = reader.result;
-        const updateData = {
-          name, 
-          address, 
-          hostelImage: updatedImageUrl, 
-        };
-        const hostelRef = ref(database, basePath);
-        update(hostelRef, updateData)
-          .then(() => {
-            toast.success("Hostel updated successfully.", {
-              position: "top-center",
-              autoClose: 3000,
-            });
-            cancelEdit();
-          })
-          .catch(error => {
-            toast.error("Failed to update hostel: " + error.message, {
-              position: "top-center",
-              autoClose: 3000,
-            });
-          });
-      };
-      reader.readAsDataURL(selectedImage);
-    } else {
-      const updateData = {
-        name, 
-        address, 
-      };
-
-      const hostelRef = ref(database, basePath);
-      update(hostelRef, updateData)
-        .then(() => {
-          toast.success("Hostel updated successfully.", {
-            position: "top-center",
-            autoClose: 3000,
-          });
-          cancelEdit();
-        })
-        .catch(error => {
-          toast.error("Failed to update hostel: " + error.message, {
-            position: "top-center",
-            autoClose: 3000,
-          });
+      const imageRef = storageRef(storage, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, selectedImage);
+        updatedImageUrl = await getDownloadURL(snapshot.ref);
+      } catch (error) {
+        toast.error("Error uploading image: " + error.message, {
+          position: "top-center",
+          autoClose: 3000,
         });
+        return;
+      }
     }
-  };
 
+    const updateData = { name, address, hostelImage: updatedImageUrl };
+    const hostelRef = ref(database, basePath);
+
+    update(hostelRef, updateData)
+      .then(() => {
+        toast.success("Hostel updated successfully.", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        cancelEdit();
+      })
+      .catch(error => {
+        toast.error("Failed to update hostel: " + error.message, {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      });
+  };
 
   const deleteHostel = (id) => {
     const isBoys = activeFlag === 'boys';
