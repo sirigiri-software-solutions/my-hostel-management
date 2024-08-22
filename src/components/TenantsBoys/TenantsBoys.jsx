@@ -564,7 +564,7 @@ const TenantsBoys = () => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-
+console.log(tenants, "tenants")
   const rows = tenants.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
