@@ -10,6 +10,7 @@ import RoomsIcon from '../../images/Icons (2).png';
 import Table from '../../Elements/Table';
 import './Hostels.css'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import imageCompression from 'browser-image-compression';
 
 const Hostels = () => {
   const { t } = useTranslation();
@@ -75,101 +76,63 @@ const Hostels = () => {
     };
   }, [userUid, database]);
 
-  // const submitHostelEdit = async (e) => {
-  //   e.preventDefault();
-  //   const { id, name, address, hostelImage, isBoys } = isEditing;
-  //   const basePath = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
-  //   let updatedImageUrl = hostelImage;
+  const compressImage = async (file) => {
+    const options = {
+        maxSizeMB: 0.6, // Compress to a maximum of 600 KB
+        maxWidthOrHeight: 1920,
+        useWebWorker: true, // Use a web worker for better performance
+        fileType: 'image/jpeg',
+    };
 
-  //   if (selectedImage) {
-      
-  //     const reader = new FileReader();
-  //     reader.onloadend = async () => {
-  //       updatedImageUrl = reader.result;
-  //       const updateData = {
-  //         name, 
-  //         address, 
-  //         hostelImage: updatedImageUrl, 
-  //       };
-  //       const hostelRef = ref(database, basePath);
-  //       update(hostelRef, updateData)
-  //         .then(() => {
-  //           toast.success("Hostel updated successfully.", {
-  //             position: "top-center",
-  //             autoClose: 3000,
-  //           });
-  //           cancelEdit();
-  //         })
-  //         .catch(error => {
-  //           toast.error("Failed to update hostel: " + error.message, {
-  //             position: "top-center",
-  //             autoClose: 3000,
-  //           });
-  //         });
-  //     };
-  //     reader.readAsDataURL(selectedImage);
-  //   } else {
-  //     const updateData = {
-  //       name, 
-  //       address, 
-  //     };
-
-  //     const hostelRef = ref(database, basePath);
-  //     update(hostelRef, updateData)
-  //       .then(() => {
-  //         toast.success("Hostel updated successfully.", {
-  //           position: "top-center",
-  //           autoClose: 3000,
-  //         });
-  //         cancelEdit();
-  //       })
-  //       .catch(error => {
-  //         toast.error("Failed to update hostel: " + error.message, {
-  //           position: "top-center",
-  //           autoClose: 3000,
-  //         });
-  //       });
-  //   }
-  // };
-
-  const submitHostelEdit = async (e) => {
-    e.preventDefault();
-    const { id, name, address, hostelImage, isBoys } = isEditing;
-    const basePath = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
-    let updatedImageUrl = hostelImage;
-
-    if (selectedImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, selectedImage);
-        updatedImageUrl = await getDownloadURL(snapshot.ref);
-      } catch (error) {
-        toast.error("Error uploading image: " + error.message, {
-          position: "top-center",
-          autoClose: 3000,
-        });
-        return;
-      }
+    try {
+        const compressedFile = await imageCompression(file, options);
+        return compressedFile;
+    } catch (error) {
+        console.error('Error compressing the image:', error);
+        return null;
     }
+};
 
-    const updateData = { name, address, hostelImage: updatedImageUrl };
-    const hostelRef = ref(database, basePath);
-
-    update(hostelRef, updateData)
-      .then(() => {
-        toast.success("Hostel updated successfully.", {
-          position: "top-center",
-          autoClose: 3000,
-        });
-        cancelEdit();
-      })
-      .catch(error => {
-        toast.error("Failed to update hostel: " + error.message, {
-          position: "top-center",
-          autoClose: 3000,
-        });
+const submitHostelEdit = async (e) => {
+  e.preventDefault();
+  const { id, name, address, hostelImage, isBoys } = isEditing;
+  const basePath = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
+  let updatedImageUrl = hostelImage;
+  let compressedImage = await compressImage(selectedImage)
+  if (compressedImage) {
+    const imageRef = storageRef(storage, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+    try {
+      const snapshot = await uploadBytes(imageRef, compressedImage);
+      updatedImageUrl = await getDownloadURL(snapshot.ref);
+    } catch (error) {
+      toast.error("Error uploading image: " + error.message, {
+        position: "top-center",
+        autoClose: 3000,
       });
-  };
+      return;
+    }
+  }
+
+  const updateData = { name, address, hostelImage: updatedImageUrl };
+  const hostelRef = ref(database, basePath);
+
+  update(hostelRef, updateData)
+    .then(() => {
+      toast.success("Hostel updated successfully.", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+      cancelEdit();
+    })
+    .catch(error => {
+      toast.error("Failed to update hostel: " + error.message, {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    });
+};
+
+
 
   const deleteHostel = (id) => {
     const isBoys = activeFlag === 'boys';
@@ -375,10 +338,11 @@ const Hostels = () => {
     let hostelImageUrlToUpdate = hostelImageUrl;
     // console.log(isBoys ? boysHostelImage : girlsHostelImage, "kkk")
     const hostelImageFile = isBoys ? boysHostelImage : girlsHostelImage;
-    if (hostelImageFile) {
+    let compressedHostelImageFile = await compressImage(hostelImageFile);
+    if (compressedHostelImageFile) {
       const imageRef = storageRef(storage, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
       try {
-        const snapshot = await uploadBytes(imageRef, hostelImageFile);
+        const snapshot = await uploadBytes(imageRef, compressedHostelImageFile);
         hostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
         console.log(hostelImageUrlToUpdate, "hostelImageUrlToUpdate")
       } catch (error) {

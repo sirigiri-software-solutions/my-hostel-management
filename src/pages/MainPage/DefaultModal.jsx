@@ -6,6 +6,11 @@ import { toast } from 'react-toastify';
 import { useData } from '../../ApiData/ContextProvider';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import './MainPage.css'
+import imageCompression from 'browser-image-compression';
+
+
+
+
 const DefaultModal = ({ show, handleClose }) => {
     const { firebase, userUid } = useData();
     const { t } = useTranslation();
@@ -31,32 +36,58 @@ const DefaultModal = ({ show, handleClose }) => {
         }
     };
 
+    const compressImage = async (file) => {
+        const options = {
+            maxSizeMB: 0.6, // Compress to a maximum of 600 KB
+            maxWidthOrHeight: 1920,
+            useWebWorker: true, // Use a web worker for better performance
+            fileType: 'image/jpeg',
+        };
+    
+        try {
+            const compressedFile = await imageCompression(file, options);
+            return compressedFile;
+        } catch (error) {
+            console.error('Error compressing the image:', error);
+            return null;
+        }
+    };
+    
     const handleMenFormSubmit = async (e) => {
         e.preventDefault();
-
+    
         let boysHostelImageUrlToUpdate = boysHostelImageUrl;
-    if (boysHostelImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${newBoysHostelName}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, boysHostelImage);
-        boysHostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
-        console.log(boysHostelImageUrlToUpdate, "boysHostelImageUrlToUpdate")
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-      }
-    }
+    
+        if (boysHostelImage) { // Ensure that boysHostelImage is defined before proceeding
+            try {
+                const compressedImage = await compressImage(boysHostelImage); // Renamed to avoid conflict
+                 
+                if (compressedImage) {
+                    const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${newBoysHostelName}`);
+                    const snapshot = await uploadBytes(imageRef, compressedImage);
+                    boysHostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
+                    console.log(boysHostelImageUrlToUpdate, "boysHostelImageUrlToUpdate");
+                }
+            } catch (error) {
+                console.error("Error uploading boys hostel image:", error);
+            }
+        }
+    
         const mensData = {
             name: newBoysHostelName,
             address: newBoysHostelAddress,
             hostelImage: boysHostelImageUrlToUpdate,
         };
+    
         setMensFormData(mensData);
+    
         if (selectedForms.women) {
             setCurrentForm('women');
         } else {
             submitHostelData(mensData, true);
         }
     };
+    
 
     const handleWomenFormSubmit = async(e) => {
         e.preventDefault();

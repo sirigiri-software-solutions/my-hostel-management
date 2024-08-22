@@ -26,7 +26,7 @@ export const loginContext = createContext();
 
 const Login = () => {
   const navigate = useNavigate();
-  const { areaToApiEndpoint, setUserArea, setUserUid, firebase, setArea,setIsSubscribed} = useData();
+  const { areaToApiEndpoint, setUserArea, setUserUid, firebase, setArea,setDefaultArea,setIsSubscribed} = useData();
 
   const initialState = { Id: "", email: "", area: "", password: "" };
   const [loginData, setLoginData] = useState(initialState);
@@ -108,6 +108,7 @@ const Login = () => {
     });
     if (event.target.name === "area") {
       setArea(event.target.value)
+      setDefaultArea(event.target.value)
     }
 
   };
@@ -263,6 +264,7 @@ const Login = () => {
     });
     if (event.target.name === "area") {
       setArea(event.target.value);
+      setDefaultArea(event.target.value);
     }
   };
 
@@ -426,6 +428,7 @@ const Login = () => {
     setSignupErrors({ ...signupErrors, [e.target.name]: "" });
     if (e.target.name === "area") {
       setArea(e.target.value)
+      setDefaultArea(e.target.value)
     }
   };
 
