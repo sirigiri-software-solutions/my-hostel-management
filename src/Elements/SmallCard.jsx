@@ -17,6 +17,7 @@ const SmallCard = (props) => {
             <div style={{display:'flex', flexDirection:'column',justifyContent:'center', padding:'5px 20px'}}>
             <label style={{ cursor: index === 2 || index === 3 ? 'pointer' : 'auto' }}>{item.heading}</label>
             <label style={{ fontSize: '25px', cursor: index === 2 || index === 3 ? 'pointer' : 'auto' }}>{item.number}</label>
+           
             </div>
             </div>
         

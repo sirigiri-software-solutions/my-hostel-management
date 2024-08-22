@@ -19,13 +19,14 @@ import { useTranslation } from 'react-i18next'
 import { useData } from '../../ApiData/ContextProvider';
 import Spinner from '../../Elements/Spinner'
 import { jsPDF } from "jspdf";
-import { PDFDocument } from 'pdf-lib';
+
+import imageCompression from 'browser-image-compression';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase } = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase,entireHMAdata,fetchData} = useData();
   const role = localStorage.getItem('role');
-  const { database } = firebase;
+  const { database,storage } = firebase;
 
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
@@ -41,7 +42,9 @@ const TenantsBoys = () => {
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
+  const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantId, setTenantId] = useState(null);
+  const [tenantIdUrl, setTenantIdUrl] = useState('');
 
 
   const [showModal, setShowModal] = useState(false);
@@ -67,30 +70,30 @@ const TenantsBoys = () => {
   const tenantImageInputRef = useRef(null);
   const tenantProofIdRef = useRef(null);
   const [bikeImage, setBikeImage] = useState(null);
+  const [bikeImageUrl, setBikeImageUrl] = useState('');
   const [bikeImageField, setBikeImageField] = useState('');
   const [bikeRcImage, setBikeRcImage] = useState('');
+  const [bikeRcImageUrl, setBikeRcImageUrl] = useState('');
   const [bikeRcImageField, setBikeRcImageField] = useState('');
-
   const [loading, setLoading] = useState(false);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      setBikeImage(reader.result);
-    };
-    reader.readAsDataURL(file);
-  };
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   const reader = new FileReader();
+  //   reader.onload = () => {
+  //     setBikeImage(reader.result);
+  //   };
+  //   reader.readAsDataURL(file);
+  // };
 
-  const handleRcChange = (e) => {
-    const file1 = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      setBikeRcImage(reader.result);
-    }
-    reader.readAsDataURL(file1);
-
-  }
+  // const handleRcChange = (e) => {
+  //   const file1 = e.target.files[0];
+  //   const reader = new FileReader();
+  //   reader.onload = () => {
+  //     setBikeRcImage(reader.result);
+  //   }
+  //   reader.readAsDataURL(file1);
+  // }
 
 
   const handleCheckboxChange = (e) => {
@@ -99,7 +102,6 @@ const TenantsBoys = () => {
       setHasBike(false);
       setBikeNumber('NA');
     }
-
     else {
       setBikeNumber('');
     }
@@ -133,20 +135,7 @@ const TenantsBoys = () => {
     document.addEventListener("keydown", handleClickOutside)
   }, []);
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setBoysRooms(loadedRooms);
-    });
-  }, [activeBoysHostel]);
+ 
 
   useEffect(() => {
     if (selectedRoom) {
@@ -165,45 +154,71 @@ const TenantsBoys = () => {
   const { data } = useContext(DataContext);
   const [boysTenants, setBoysTenants] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  if (data != null && data) {
-
-  }
 
   useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      setTenants(loadedTenants);
-    });
-  }, [activeBoysHostel]);
+    if (entireHMAdata && typeof entireHMAdata === 'object') {
+      let boysAndGirlsData = Object.values(entireHMAdata);
+      console.log(boysAndGirlsData, "EntireHMAData");
+  
+      if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+        let boysData = Object.values(boysAndGirlsData[0].boys);
+  
+        if (boysData.length > 0) {
+          let tenantsData = boysData[0].tenants || {};
+          let roomsData = boysData[0].rooms || {};
+          let extenantsData = boysData[0].extenants || {};
+  
+          const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+            id: key,
+            ...value,
+          }));
+  
+          const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+            id: key,
+            ...value,
+          }));
+  
+          const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+            id: key,
+            ...value,
+          }));
+  
+          setTenants(loadedTenants); 
+          setBoysRooms(loadedRooms);
+          setExTenants(loadedExTenants);
+        }
+      }
+    }
+  }, []);
+  
 
 
   // useEffect(() => {
-  //   const fetchDataFromAPI = async () => {
-  //     try {
-  //       if (data) {
-  //         const boysTenantsData = Object.values(data.boys.tenants);
-  //         setBoysTenants(boysTenantsData);
-  //       } else {
-  //         const apiData = await FetchData();
-  //         if (apiData) { // Ensure apiData is not null or undefined
-  //           const boysTenantsData = Object.values(apiData.boys.tenants);
-  //           setBoysTenants(boysTenantsData);
-  //         } else {
-  //           console.error('API returned null or undefined data.');
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching tenants data:', error);
-  //     }
-  //   };
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+  //   onValue(tenantsRef, snapshot => {
+  //     const data = snapshot.val() || {};
+  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
+  //       id: key,
+  //       ...value,
+  //     }));
+  //     setTenants(loadedTenants);
+  //   });
+  // }, [activeBoysHostel]);
 
-  //   fetchDataFromAPI();
-  // }, [data]);
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setBoysRooms(loadedRooms);
+  //   });
+  // }, [activeBoysHostel]);
 
 
   const validate = () => {
@@ -248,7 +263,7 @@ const TenantsBoys = () => {
     if (isBedOccupied) {
       tempErrors.selectedBed = t('errors.bedAlreadyOccupied');
     }
-    if (!tenantImage) {
+    if (!tenantImage && !tenantImageUrl) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
     if (hasBike) {
@@ -268,120 +283,410 @@ const TenantsBoys = () => {
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
-
   const handleTenantImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setTenantImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (e.target.files[0]) {
+      setTenantImage(e.target.files[0]);
     }
   };
-
- 
-
+  // const handleTenantImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setTenantImage(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
   const handleTenantIdChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setTenantId(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (e.target.files[0]) {
+      const file = e.target.files[0]
+      setFileName(file.name)
+      setTenantId(e.target.files[0]);
     }
   };
+
+  const handleTenantBikeChange = (e) => {
+    if (e.target.files[0]) {
+      setBikeImage(e.target.files[0]);
+    }
+  };
+  const handleTenantBikeRcChange = (e) => {
+    if (e.target.files[0]) {
+      setBikeRcImage(e.target.files[0]);
+    }
+  };
+
+  // const handleTenantIdChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setTenantId(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
+
+  const compressImage = async (file) => {
+    const options = {
+      maxSizeMB:0.6, // Compress to a maximum of 1 MB (adjust as needed)
+      maxWidthOrHeight: 1920, 
+      useWebWorker: true, // Use a web worker for better performance
+      fileType: 'image/jpeg',
+    };
+  
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error('Error compressing the image:', error);
+    }
+  };
+
+  const checkImage = (type) =>  {
+    return type === "image/jpeg"
+  }
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!isEditing) {
-      e.target.querySelector('button[type="submit"]').disabled = true;
-      if (!validate()) {
-        e.target.querySelector('button[type="submit"]').disabled = false;
-        return
-      };
+        e.target.querySelector('button[type="submit"]').disabled = true;
+        if (!validate()) {
+            e.target.querySelector('button[type="submit"]').disabled = false;
+            return;
+        }
     } else {
-      if (!validate()) return;
+        if (!validate()) return;
     }
 
+    setShowModal(false);
+    setLoading(true);
 
-    const tenantData = {
-      roomNo: selectedRoom,
-      bedNo: selectedBed,
-      dateOfJoin,
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      mobileNo,
-      idNumber,
-      emergencyContact,
-      status,
-      tenantImage,
-      tenantId,
-      bikeNumber,
-      permnentAddress,
-      bikeImage,
-      bikeRcImage
+    // Helper function to upload a file and return its URL
+    const uploadFile = async (file, path) => {
+        try {
+            const imageRef = storageRef(storage, path);
+            const snapshot = await uploadBytes(imageRef, file);
+            return await getDownloadURL(snapshot.ref);
+        } catch (error) {
+            console.error(`Error uploading file ${file.name}:`, error);
+            throw error;
+        }
     };
 
+    const tasks = [];
 
-
-    if (isEditing) {
-      setShowModal(false);
-      setLoading(true);
-      await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData).then(() => {
-        toast.success(t('toastMessages.tenantUpdated'), {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-
-      }).catch(error => {
-        toast.error(t('toastMessages.errorUpdatingTenant') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
-    } else {
-      setShowModal(false);
-      setLoading(true)
-      await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData).then(() => {
-        toast.success(t('toastMessages.tenantAddedSuccess'), {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        e.target.querySelector('button[type="submit"]').disabled = false;
-      }).catch(error => {
-        toast.error(t('toastMessages.errorAddingTenant') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
+    if (tenantImage) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = tenantImage;
+                console.log(tenantImage,"whatisComing")
+                if (checkImage(tenantImage.type)) {
+                    console.log("Executing compression for tenantImage");
+                    try {
+                        fileToUpload = await compressImage(tenantImage);
+                    } catch (error) {
+                        console.error("Error compressing tenant image:", error);
+                    }
+                }
+                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+            })()
+        );
     }
-    setLoading(false);
-    resetForm();
-    setErrors({});
-  };
+    if (tenantId) {
+      tasks.push(
+          (async () => {
+              let fileToUpload = tenantId;
+
+              if (checkImage(tenantId.type)) {
+                  console.log("Executing compression for tenantId");
+                  try {
+                      fileToUpload = await compressImage(tenantId);
+                  } catch (error) {
+                      console.error("Error compressing tenant ID image:", error);
+                  }
+              }
+
+              return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
+          })()
+      );
+  }
+
+    if (bikeImage) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = bikeImage;
+                if (checkImage(bikeImage.type)) {
+                    console.log("Executing compression for bikeImage");
+                    try {
+                        fileToUpload = await compressImage(bikeImage);
+                    } catch (error) {
+                        console.error("Error compressing bike image:", error);
+                    }
+                }
+                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${bikeImage.name}`);
+            })()
+        );
+    }
+
+    if (bikeRcImage) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = bikeRcImage;
+
+                if (checkImage(bikeRcImage.type)) {
+                    console.log("Executing compression for bikeRcImage");
+                    try {
+                        fileToUpload = await compressImage(bikeRcImage);
+                    } catch (error) {
+                        console.error("Error compressing bike RC image:", error);
+                    }
+                }
+                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
+            })()
+        );
+    }
+
+    try {
+        const [imageUrlToUpdate, idUrlToUpdate, bikeUrlToUpdate, bikeRcUrlToUpdate] = await Promise.all(tasks);
+
+        const tenantData = {
+            roomNo: selectedRoom,
+            bedNo: selectedBed,
+            dateOfJoin,
+            name: name.charAt(0).toUpperCase() + name.slice(1),
+            mobileNo,
+            idNumber,
+            emergencyContact,
+            status,
+            tenantImageUrl: imageUrlToUpdate || tenantImageUrl,
+            tenantIdUrl: idUrlToUpdate || tenantIdUrl,
+            bikeNumber,
+            permnentAddress,
+            bikeImageUrl: bikeUrlToUpdate || bikeImageUrl,
+            bikeRcImageUrl: bikeRcUrlToUpdate || bikeRcImageUrl,
+        };
+
+        if (isEditing) {
+            await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
+            toast.success(t('toastMessages.tenantUpdated'), {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+        } else {
+            await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData);
+            toast.success(t('toastMessages.tenantAddedSuccess'), {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            e.target.querySelector('button[type="submit"]').disabled = false;
+        }
+    } catch (error) {
+        console.error("Error submitting form:", error);
+        toast.error(t('toastMessages.errorSubmitting') + error.message, {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
+    } finally {
+        setLoading(false);
+        resetForm();
+        setErrors({});
+        fetchData()
+    }
+};
+
+
+
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+    
+  //   if (!isEditing) {
+  //     e.target.querySelector('button[type="submit"]').disabled = true;
+  //     if (!validate()) {
+  //       e.target.querySelector('button[type="submit"]').disabled = false;
+  //       return;
+  //     }
+  //   } else {
+  //     if (!validate()) return;
+  //   }
+  
+  //   setShowModal(false);
+  //   setLoading(true);
+  
+  //   let imageUrlToUpdate = tenantImageUrl;
+  //   let idUrlToUpdate = tenantIdUrl;
+  //   let bikeUrlToUpdate = bikeImageUrl;
+  //   let bikeRcUrlToUpdate = bikeRcImageUrl;
+  
+  //   // Handle tenantImage upload
+  //   if (tenantImage) {
+  //     let fileToUpload = tenantImage;
+  //     if (isImage(tenantImage.type)) {
+  //       console.log("Executing compression for tenantImage");
+  //       try {
+  //         fileToUpload = await compressImage(tenantImage); // Compress if it's an image
+  //       } catch (error) {
+  //         console.error("Error compressing tenant image:", error);
+  //       }
+  //     }
+  //     const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+  //     try {
+  //       const snapshot = await uploadBytes(imageRef, fileToUpload);
+  //       imageUrlToUpdate = await getDownloadURL(snapshot.ref);
+  //       console.log(imageUrlToUpdate, "imageUrlToUpdate");
+  //     } catch (error) {
+  //       console.error("Error uploading tenant image:", error);
+  //     }
+  //   }
+  
+  //   // Handle tenantId upload
+  //   if (tenantId) {
+  //     const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
+  //     try {
+  //       const snapshot = await uploadBytes(imageRef, tenantId);
+  //       idUrlToUpdate = await getDownloadURL(snapshot.ref);
+  //       console.log(idUrlToUpdate, "idUrlToUpdate");
+  //     } catch (error) {
+  //       console.error("Error uploading tenant ID:", error);
+  //     }
+  //   }
+  
+  //   // Handle bikeImage upload
+  //   if (bikeImage) {
+  //     let fileToUpload = bikeImage;
+  //     if (isImage(bikeImage.type)) {
+  //       console.log("Executing compression for bikeImage");
+  //       try {
+  //         fileToUpload = await compressImage(bikeImage); // Compress if it's an image
+  //       } catch (error) {
+  //         console.error("Error compressing bike image:", error);
+  //       }
+  //     }
+  //     const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${bikeImage.name}`);
+  //     try {
+  //       const snapshot = await uploadBytes(imageRef, fileToUpload);
+  //       bikeUrlToUpdate = await getDownloadURL(snapshot.ref);
+  //       console.log(bikeUrlToUpdate, "bikeUrlToUpdate");
+  //     } catch (error) {
+  //       console.error("Error uploading bike image:", error);
+  //     }
+  //   }
+  
+  //   // Handle bikeRcImage upload
+  //   if (bikeRcImage) {
+  //     let fileToUpload = bikeRcImage;
+  //     if (isImage(bikeRcImage.type)) {
+  //       console.log("Executing compression for bikeRcImage");
+  //       try {
+  //         fileToUpload = await compressImage(bikeRcImage); // Compress if it's an image
+  //       } catch (error) {
+  //         console.error("Error compressing bike RC image:", error);
+  //       }
+  //     }
+  //     const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
+  //     try {
+  //       const snapshot = await uploadBytes(imageRef, fileToUpload);
+  //       bikeRcUrlToUpdate = await getDownloadURL(snapshot.ref);
+  //       console.log(bikeRcUrlToUpdate, "bikeRcUrlToUpdate");
+  //     } catch (error) {
+  //       console.error("Error uploading bike RC image:", error);
+  //     }
+  //   }
+  
+  //   const tenantData = {
+  //     roomNo: selectedRoom,
+  //     bedNo: selectedBed,
+  //     dateOfJoin,
+  //     name: name.charAt(0).toUpperCase() + name.slice(1),
+  //     mobileNo,
+  //     idNumber,
+  //     emergencyContact,
+  //     status,
+  //     tenantImageUrl: imageUrlToUpdate,
+  //     tenantIdUrl: idUrlToUpdate,
+  //     bikeNumber,
+  //     permnentAddress,
+  //     bikeImageUrl: bikeUrlToUpdate,
+  //     bikeRcImageUrl: bikeRcUrlToUpdate,
+  //   };
+  
+  //   if (isEditing) {
+  //     try {
+  //       await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
+  //       toast.success(t('toastMessages.tenantUpdated'), {
+  //         position: "top-center",
+  //         autoClose: 2000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
+  //     } catch (error) {
+  //       toast.error(t('toastMessages.errorUpdatingTenant') + error.message, {
+  //         position: "top-center",
+  //         autoClose: 2000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
+  //     }
+  //   } else {
+  //     try {
+  //       await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData);
+  //       toast.success(t('toastMessages.tenantAddedSuccess'), {
+  //         position: "top-center",
+  //         autoClose: 2000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
+  //       e.target.querySelector('button[type="submit"]').disabled = false;
+  //     } catch (error) {
+  //       toast.error(t('toastMessages.errorAddingTenant') + error.message, {
+  //         position: "top-center",
+  //         autoClose: 2000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
+  //     }
+  //   }
+  
+  //   setLoading(false);
+  //   resetForm();
+  //   setErrors({});
+  // };
+  
 
   const handleEdit = (tenant) => {
+    console.log(tenant,"tenantWhileEditing")
+    console.log(tenant.tenantImageUrl,"tenantWhileEditing")
     setSelectedRoom(tenant.roomNo);
     setSelectedBed(tenant.bedNo);
     setDateOfJoin(tenant.dateOfJoin);
@@ -392,8 +697,9 @@ const TenantsBoys = () => {
     setStatus(tenant.status);
     setIsEditing(true);
     setCurrentId(tenant.id);
-    setTenantImage(tenant.tenantImage)
-    setTenantId(tenant.tenantId || '');
+    // setTenantImage(tenant.tenantImageUrl)
+    setTenantImageUrl(tenant.tenantImageUrl);
+    setTenantId(tenant.tenantIdUrl || '');
     setBikeNumber("");
     setHasBike(false);
     setFileName(tenant.fileName || '');
@@ -424,12 +730,10 @@ const TenantsBoys = () => {
         progress: undefined,
       })
     } else {
-
       resetForm();
       setIsEditing(false);
       setShowModal(true);
       setUserDetailsTenantsPopup(false);
-
       setHasBike(false);
     }
   };
@@ -448,8 +752,8 @@ const TenantsBoys = () => {
     setErrors({});
     setTenantImage(null);
     setTenantId(null);
-    // setTenantImageUrl('');
-    setTenantImage('')
+    setTenantImageUrl('');
+   
     // setTenantIdUrl('');
     setTenantId('')
     setBikeNumber('NA');
@@ -496,7 +800,7 @@ const TenantsBoys = () => {
 
   const rows = tenants.map((tenant, index) => ({
     s_no: index + 1,
-    image: tenant.tenantImage,
+    image: tenant.tenantImageUrl,
     name: tenant.name,
     id: tenant.idNumber,
     mobile_no: tenant.mobileNo,
@@ -543,6 +847,8 @@ const TenantsBoys = () => {
     setSingleTenantDetails(tenant);
 
 
+
+
     const [roomNo, bedNo] = tenant.room_bed_no.split('/');
     const singleUserDueDate = tenants.find(eachTenant =>
       eachTenant.name === tenant.name &&
@@ -550,6 +856,8 @@ const TenantsBoys = () => {
       eachTenant.roomNo === roomNo &&
       eachTenant.bedNo === bedNo
     );
+    console.log(tenant,"singleuserDataFr")
+    console.log(singleUserDueDate,"singleuserDataFr")
 
     if(singleUserDueDate && singleUserDueDate.bikeNumber){
       setSingleTenantBikeNum(singleUserDueDate.bikeNumber)
@@ -564,8 +872,8 @@ const TenantsBoys = () => {
       console.log("Tenant with due date not found or due date is missing");
     }
 
-    if (singleUserDueDate && singleUserDueDate.tenantId) {
-      setSingleTenantProofId(singleUserDueDate.tenantId)
+    if (singleUserDueDate && singleUserDueDate.tenantIdUrl) {
+      setSingleTenantProofId(singleUserDueDate.tenantIdUrl)
     }
 
     if (singleUserDueDate && singleUserDueDate.permnentAddress) {
@@ -574,15 +882,15 @@ const TenantsBoys = () => {
     else {
       setTenantAddress("");
     }
-    if (singleUserDueDate && singleUserDueDate.bikeImage) {
-      setBikeImageField(singleUserDueDate.bikeImage);
+    if (singleUserDueDate && singleUserDueDate.bikeImageUrl) {
+      setBikeImageField(singleUserDueDate.bikeImageUrl);
 
     }
     else {
       setBikeImageField("");
     }
-    if (singleUserDueDate && singleUserDueDate.bikeRcImage) {
-      setBikeRcImageField(singleUserDueDate.bikeRcImage);
+    if (singleUserDueDate && singleUserDueDate.bikeRcImageUrl) {
+      setBikeRcImageField(singleUserDueDate.bikeRcImageUrl);
 
     }
     else {
@@ -625,7 +933,7 @@ const TenantsBoys = () => {
             progress: undefined,
           });
         });
-        fetchExTenants()
+        
       }
     }, {
       onlyOnce: true
@@ -635,15 +943,15 @@ const TenantsBoys = () => {
     resetForm();
     setErrors({});
   };
-  const fetchExTenants = () => {
-    const exTenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
-    onValue(exTenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
-      setExTenants(loadedExTenants);
-    });
-  };
-  useEffect(() => { fetchExTenants() }, []);
+  // const fetchExTenants = () => {
+  //   const exTenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
+  //   onValue(exTenantsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
+  //     setExTenants(loadedExTenants);
+  //   });
+  // };
+  // useEffect(() => { fetchExTenants() }, []);
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [tenantIdToDelete, setTenantIdToDelete] = useState(null);
@@ -736,8 +1044,8 @@ const TenantsBoys = () => {
     }));
   };
 
-const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
-const isImage = (fileData) => fileData.startsWith('data:image/');
+  const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
+const isImage = (fileData) => fileData.startsWith('data:image/' || "image/jpeg");
 
 const pdfToImages = async (pdfUrl) => {
   const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
@@ -975,7 +1283,14 @@ const handleTenantDownload = async () => {
 
       </div>
       <div>
-        {showExTenants ? <Table columns={columnsEx} rows={exTenantRows} onClickTentantRow={handleTentantRow} /> : <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />}
+        {showExTenants ? <Table columns={columnsEx} rows={exTenantRows} onClickTentantRow={handleTentantRow} /> : 
+        <>
+       { console.log("beforeRendering")}
+         {console.log(filteredRows)}
+        <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />
+        {console.log("RenderingCompleted")}
+        </>
+        }
       </div>
       <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalTenantsBoys" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal}  >
         <div class="modal-dialog">
@@ -1071,7 +1386,7 @@ const handleTenantDownload = async () => {
                     </label>
                     {isEditing && tenantImage && (
                       <div>
-                        <img src={tenantImage} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
+                        <img src={tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
@@ -1143,11 +1458,11 @@ const handleTenantDownload = async () => {
                     <>
                       <div className="col-md-6">
                         <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-                        <input type="file" className="form-control" onChange={handleImageChange} />
+                        <input type="file" className="form-control" onChange={handleTenantBikeChange} />
                       </div>
                       <div className="col-md-6">
                         <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-                        <input type="file" className="form-control" onChange={handleRcChange} />
+                        <input type="file" className="form-control" onChange={handleTenantBikeRcChange} />
                       </div>
                     </>
                   )}
@@ -1190,7 +1505,7 @@ const handleTenantDownload = async () => {
                 <p><strong>{t('tenantsPage.dueDate')} :</strong> {dueDateOfTenant}</p>
                 <p><strong>{t('tenantsPage.idProof')} :</strong>
                   {singleTenantProofId ? (
-                    <a className='downloadPdfText' href={singleTenantProofId} download> <FaDownload /> {t('tenantsPage.downloadId')}</a>
+                    <a className='downloadPdfText' href={singleTenantProofId} target="_blank" download> <FaDownload /> {t('tenantsPage.downloadId')}</a>
                   ) : (
                     <span className='NotUploadedText'>{t('tenantsPage.notUploaded')}</span>
                   )}
@@ -1199,14 +1514,14 @@ const handleTenantDownload = async () => {
 
                 <p><strong>{t('tenantsPage.BikePic')}</strong>
                   {bikeImageField ? (
-                    <a className="downloadPdfText" href={bikeImageField} download> <FaDownload />{t('tenantsPage.DownloadPic')}</a>
+                    <a className="downloadPdfText" href={bikeImageField} target="_blank" download> <FaDownload />{t('tenantsPage.DownloadPic')}</a>
                   ) : (
                     <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
                   )}
                 </p>
                 <p><strong>{t('tenantsPage.BikeRc')}</strong>
                   {bikeRcImageField ? (
-                    <a className="downloadPdfText" href={bikeRcImageField} download> <FaDownload />{t('tenantsPage.DownloadRc')}</a>
+                    <a className="downloadPdfText" href={bikeRcImageField} target="_blank" download> <FaDownload />{t('tenantsPage.DownloadRc')}</a>
                   ) : (
                     <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
                   )}

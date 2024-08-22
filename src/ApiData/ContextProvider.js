@@ -12,7 +12,7 @@ function useDeepCompareEffect(callback, dependencies) {
     currentDependenciesRef.current = dependencies;
   }
   React.useEffect(callback, [currentDependenciesRef.current]);
-}
+} 
 
 
 const DataProvider = ({ children }) => {
@@ -32,12 +32,63 @@ const DataProvider = ({ children }) => {
   // new code to implement multiple configuration
   const [area, setArea] = useState(localStorage.getItem('userarea') || 'default');
   const [firebase, setFirebase] = useState(firebaseInstances[area]);
-  const [activeFlag, setActiveFlag] = useState();
+  const [activeFlag, setActiveFlag] = useState("");
 
   const [expensesInteracted,setExpensesInteracted] = useState(false);
 
   const { database } = firebase;
 
+
+  // trying to fetch entire data from context 
+  const [defaultArea,setDefaultArea] = useState(localStorage.getItem('userarea') || 'default')
+  const [entireHMAdata,setEntireHMAdata] = useState([]);
+
+  const areaToApiEndPointEntireData = {
+    ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
+    srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
+    secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
+    default:"https://defaulthostel-default-rtdb.firebaseio.com/register.json",
+    kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
+    gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
+    ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
+    dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
+    himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
+    madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
+    madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
+    lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
+    nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/Hostel.json",
+  }
+
+  const fetchData = async () => {
+    const api = areaToApiEndPointEntireData[defaultArea];
+    const options = {
+      method: "GET",
+    };
+
+    try {
+      const response = await fetch(api, options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(data, "EntireDataOfHMA");
+      // Handle the data (e.g., set it to state)
+      setEntireHMAdata(data);
+    } catch (error) {
+      console.error("Error fetching data:", error.message); // Improved error logging
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+}, []);
+
+  
+
+  
+
+
+  // end to get entireData
 
   
   useEffect(() => {
@@ -61,7 +112,10 @@ const DataProvider = ({ children }) => {
     madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
     madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
     lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
+    nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/register.json"
   };
+
+ 
 
   useEffect(() => {
     const userId = localStorage.getItem('userUid')
@@ -124,21 +178,30 @@ const DataProvider = ({ children }) => {
    // Determine the initial active flag
    useEffect(() => {
     let initialActiveFlag = '';
-    if (activeBoysHostelButtons.length > 0) {
-      initialActiveFlag = 'boys';
-    } else if (activeGirlsHostelButtons.length > 0) {
-      initialActiveFlag = 'girls';
+    if (activeBoysHostelButtons.length > 0 || activeGirlsHostelButtons.length == 0) {
+          initialActiveFlag = 'boys';
+        } else if (activeGirlsHostelButtons.length > 0) {
+          initialActiveFlag = 'girls';
+        }
+        setActiveFlag(initialActiveFlag);
+      
+    if(activeFlag === 'boys' &&  activeBoysHostelButtons.length > 0){
+      setActiveFlag('boys')
     }
-    setActiveFlag(initialActiveFlag);
-  }, [activeBoysHostelButtons, activeGirlsHostelButtons]);
+    if(activeFlag === "girls" && activeGirlsHostelButtons.length > 0){
+      setActiveFlag('girls')
+    } 
+  }
+
+  , [activeBoysHostelButtons, activeGirlsHostelButtons]);
 
 
   // Function to update activeFlag
   const changeActiveFlag = (newFlag) => {
     setActiveFlag(newFlag);
   };
-  console.log(activeFlag, "flaggg"); // ===> 'boys', 'girls', or 'hhh' based on conditions
-  console.log(activeBoysHostelButtons.length > 0, "activeBoysHostelButtons flag"); // ===> true or false
+  // console.log(activeFlag, "flaggg"); // ===> 'boys', 'girls', or 'hhh' based on conditions
+  // console.log(activeBoysHostelButtons.length > 0, "activeBoysHostelButtons flag"); // ===> true or false
 
 
   useEffect(() => {
@@ -204,7 +267,7 @@ const DataProvider = ({ children }) => {
   console.log(boysExTenantsData, "exx")
   console.log(girlsExTenantsData, "exx")
   return (
-    <DataContext.Provider value={{  activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag, girlsTenantsData, boysTenantsData, girlsExTenantsData, boysExTenantsData,expensesInteracted,setExpensesInteracted}}>
+    <DataContext.Provider value={{entireHMAdata,fetchData,  activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea,setDefaultArea, setUserUid, activeFlag,  changeActiveFlag, girlsTenantsData, boysTenantsData, girlsExTenantsData, boysExTenantsData,expensesInteracted,setExpensesInteracted,}}>
       {children}
     </DataContext.Provider>
   );

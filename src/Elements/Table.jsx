@@ -43,7 +43,7 @@ const Table = ({ columns, rows, onClickTentantRow }) => {
           {
             rows.map((item, index) => <tr>
               {item.s_no && <td data-label={t('mobileTable.serialNumber')} style={{ padding: "7px" }} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.s_no}</td>}
-              {item.image && <td data-label={t('mobileTable.image')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}><img className='personImage' src={item.image} alt='img' /></td>}
+              {item.image && <td  data-label={t('mobileTable.image')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}><img className='personImage' src={item.image} alt='img' /></td>}
               {/* {item.name && <td className='hosteltable' data-label={t('mobileTable.name')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.name}</td>} */}
               {item.name && <td className='hosteltable' data-label={t('mobileTable.name')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.name}</td>}
               {item.id && <td data-label={t('mobileTable.id')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{item.id}</td>}

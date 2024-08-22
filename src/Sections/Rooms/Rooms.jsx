@@ -11,7 +11,7 @@ const Rooms = () => {
 
     const handleTabSelect = (tab) => {
         // onTabSelect(tab);
-        changeActiveFlag(tab)    
+        changeActiveFlag(tab)  
     };
 
     return (
