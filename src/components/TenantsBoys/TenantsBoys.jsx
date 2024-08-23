@@ -9,7 +9,7 @@ import { push, ref, storage } from "../../firebase/firebase";
 import '../TenantsGirls/TenantsGirls.css';
 import './TenantsBoys.css'
 import { DataContext } from '../../ApiData/ContextProvider'
-import { FetchData } from '../../ApiData/FetchData'
+
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { FaDownload } from "react-icons/fa";
@@ -22,7 +22,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '../../Elements/Spinner'
 
-import { PDFDocument } from 'pdf-lib';
+
+import imageCompression from 'browser-image-compression';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, FilesystemDirectory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
@@ -31,7 +32,7 @@ import jsPDF from 'jspdf';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase } = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase,entireHMAdata,fetchData} = useData();
   const role = localStorage.getItem('role');
   const { database,storage } = firebase;
 
@@ -247,20 +248,7 @@ const TenantsBoys = () => {
     document.addEventListener("keydown", handleClickOutside)
   }, []);
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setBoysRooms(loadedRooms);
-    });
-  }, [activeBoysHostel]);
+ 
 
   useEffect(() => {
     if (selectedRoom) {
@@ -279,9 +267,44 @@ const TenantsBoys = () => {
   const { data } = useContext(DataContext);
   const [boysTenants, setBoysTenants] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  if (data != null && data) {
 
-  }
+  // useEffect(() => {
+  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
+  //     let boysAndGirlsData = Object.values(entireHMAdata);
+  //     console.log(boysAndGirlsData, "EntireHMAData");
+  
+  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+  //       let boysData = Object.values(boysAndGirlsData[0].boys);
+  
+  //       if (boysData.length > 0) {
+  //         let tenantsData = boysData[0].tenants || {};
+  //         let roomsData = boysData[0].rooms || {};
+  //         let extenantsData = boysData[0].extenants || {};
+  
+  //         const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         setTenants(loadedTenants); 
+  //         setBoysRooms(loadedRooms);
+  //         setExTenants(loadedExTenants);
+  //       }
+  //     }
+  //   }
+  // }, []);
+  
+
 
   useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
@@ -292,6 +315,21 @@ const TenantsBoys = () => {
         ...value,
       }));
       setTenants(loadedTenants);
+    });
+  }, [activeBoysHostel]);
+
+  useEffect(() => {
+    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+    onValue(roomsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedRooms = [];
+      for (const key in data) {
+        loadedRooms.push({
+          id: key,
+          ...data[key]
+        });
+      }
+      setBoysRooms(loadedRooms);
     });
   }, [activeBoysHostel]);
 
@@ -358,11 +396,7 @@ const TenantsBoys = () => {
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
-  const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
-    }
-  };
+ 
   // const handleTenantImageChange = (e) => {
   //   const file = e.target.files[0];
   //   if (file) {
@@ -373,6 +407,11 @@ const TenantsBoys = () => {
   //     reader.readAsDataURL(file);
   //   }
   // };
+  const handleTenantImageChange = (e) => {
+    if (e.target.files[0]) {
+      setTenantImage(e.target.files[0]);
+    }
+  };
   const handleTenantIdChange = (e) => {
     if (e.target.files[0]) {
       const file = e.target.files[0]
@@ -403,149 +442,360 @@ const TenantsBoys = () => {
   //   }
   // };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!isEditing) {
-      e.target.querySelector('button[type="submit"]').disabled = true;
-      if (!validate()) {
-        e.target.querySelector('button[type="submit"]').disabled = false;
-        return
-      };
-    } else {
-      if (!validate()) return;
-    }
-
-    let imageUrlToUpdate = tenantImageUrl;
-    if (tenantImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, tenantImage);
-        imageUrlToUpdate = await getDownloadURL(snapshot.ref);
-        console.log(imageUrlToUpdate, "imageUrlToUpdate")
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-
-      }
-    }
-    
-    let idUrlToUpdate = tenantIdUrl;
-    if (tenantId) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, tenantId);
-        idUrlToUpdate = await getDownloadURL(snapshot.ref);
-        console.log(idUrlToUpdate, "idUrlToUpdate")
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-      }
-    }
-
-    let bikeUrlToUpdate = bikeImageUrl;
-    if (bikeImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${bikeImage.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, bikeImage);
-        bikeUrlToUpdate = await getDownloadURL(snapshot.ref);
-        console.log(bikeUrlToUpdate, "bikeUrlToUpdate")
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-
-      }
-    }
-
-    let bikeRcUrlToUpdate = bikeRcImageUrl;
-    if (bikeRcImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, bikeRcImage);
-        bikeRcUrlToUpdate = await getDownloadURL(snapshot.ref);
-        console.log(bikeRcUrlToUpdate, "bikeRcUrlToUpdate")
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-
-      }
-    }
-    const tenantData = {
-      roomNo: selectedRoom,
-      bedNo: selectedBed,
-      dateOfJoin,
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      mobileNo,
-      idNumber,
-      emergencyContact,
-      status,
-      // tenantImage,
-      tenantImageUrl: imageUrlToUpdate,
-      // tenantId,
-      tenantIdUrl: idUrlToUpdate,
-      bikeNumber,
-      permnentAddress,
-      bikeImageUrl:bikeUrlToUpdate,
-      bikeRcImageUrl:bikeRcUrlToUpdate,
+  const compressImage = async (file) => {
+    const options = {
+      maxSizeMB:0.6, // Compress to a maximum of 1 MB (adjust as needed)
+      maxWidthOrHeight: 1920, 
+      useWebWorker: true, // Use a web worker for better performance
+      fileType: 'image/jpeg',
     };
-
-
-
-    if (isEditing) {
-      setShowModal(false);
-      setLoading(true);
-      await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData).then(() => {
-        toast.success(t('toastMessages.tenantUpdated'), {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        setPhotoUrl(null);
-        setIdUrl(null);
-        setTenantImage(null);
-        
-      }).catch(error => {
-        toast.error(t('toastMessages.errorUpdatingTenant') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
-    } else {
-      setShowModal(false);
-      setLoading(true)
-      await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData).then(() => {
-        toast.success(t('toastMessages.tenantAddedSuccess'), {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        e.target.querySelector('button[type="submit"]').disabled = false;
-      }).catch(error => {
-        toast.error(t('toastMessages.errorAddingTenant') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
+  
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error('Error compressing the image:', error);
     }
-    setLoading(false);
-    resetForm();
-    setErrors({});
   };
 
+  const checkImage = (type) =>  {
+    return type === "image/jpeg"
+  }
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!isEditing) {
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        if (!validate()) {
+            submitButton.disabled = false;
+            return;
+        }
+    } else {
+        if (!validate()) return;
+    }
+
+    setShowModal(false);
+    setLoading(true);
+
+    // Helper function to upload a file and return its URL
+    const uploadFile = async (file, path) => {
+        try {
+            const imageRef = storageRef(storage, path);
+            const snapshot = await uploadBytes(imageRef, file);
+            return await getDownloadURL(snapshot.ref);
+        } catch (error) {
+            console.error(`Error uploading file ${file.name}:`, error);
+            throw error;
+        }
+    };
+
+    const tasks = [];
+    let imageUrlToUpdate, idUrlToUpdate, bikeUrlToUpdate, bikeRcUrlToUpdate;
+
+    if (tenantImage) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = tenantImage;
+                console.log(tenantImage, "whatisComing");
+                if (checkImage(tenantImage.type)) {
+                    console.log("Executing compression for tenantImage");
+                    try {
+                        fileToUpload = await compressImage(tenantImage);
+                    } catch (error) {
+                        console.error("Error compressing tenant image:", error);
+                    }
+                }
+                imageUrlToUpdate = await uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+            })()
+        );
+    }
+
+    if (tenantId) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = tenantId;
+                if (checkImage(tenantId.type)) {
+                    console.log("Executing compression for tenantId");
+                    try {
+                        fileToUpload = await compressImage(tenantId);
+                    } catch (error) {
+                        console.error("Error compressing tenant ID image:", error);
+                    }
+                }
+                idUrlToUpdate = await uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
+            })()
+        );
+    }
+
+    if (bikeImage) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = bikeImage;
+                if (checkImage(bikeImage.type)) {
+                    console.log("Executing compression for bikeImage");
+                    try {
+                        fileToUpload = await compressImage(bikeImage);
+                    } catch (error) {
+                        console.error("Error compressing bike image:", error);
+                    }
+                }
+                bikeUrlToUpdate = await uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${bikeImage.name}`);
+            })()
+        );
+    }
+
+    if (bikeRcImage) {
+        try {
+            const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
+            const snapshot = await uploadBytes(imageRef, bikeRcImage);
+            bikeRcUrlToUpdate = await getDownloadURL(snapshot.ref);
+            console.log(bikeRcUrlToUpdate, "bikeRcUrlToUpdate");
+        } catch (error) {
+            console.error("Error uploading bike RC image:", error);
+        }
+    }
+
+    const tenantData = {
+        roomNo: selectedRoom,
+        bedNo: selectedBed,
+        dateOfJoin,
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        mobileNo,
+        idNumber,
+        emergencyContact,
+        status,
+        tenantImageUrl: imageUrlToUpdate,
+        tenantIdUrl: idUrlToUpdate,
+        bikeNumber,
+        permnentAddress,
+        bikeImageUrl: bikeUrlToUpdate,
+        bikeRcImageUrl: bikeRcUrlToUpdate,
+    };
+
+    try {
+        if (isEditing) {
+            await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
+            toast.success(t('toastMessages.tenantUpdated'), {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+        } else {
+            await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData);
+            toast.success(t('toastMessages.tenantAddedSuccess'), {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+        }
+    } catch (error) {
+        toast.error(t(isEditing ? 'toastMessages.errorUpdatingTenant' : 'toastMessages.errorAddingTenant') + error.message, {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
+    } finally {
+        setLoading(false);
+        resetForm();
+        setErrors({});
+        if (!isEditing) {
+            e.target.querySelector('button[type="submit"]').disabled = false;
+        }
+        // fetchData() // Uncomment if needed
+    }
+};
+
+
+
+
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+    
+  //   if (!isEditing) {
+  //     e.target.querySelector('button[type="submit"]').disabled = true;
+  //     if (!validate()) {
+  //       e.target.querySelector('button[type="submit"]').disabled = false;
+  //       return;
+  //     }
+  //   } else {
+  //     if (!validate()) return;
+  //   }
+  
+  //   setShowModal(false);
+  //   setLoading(true);
+  
+  //   let imageUrlToUpdate = tenantImageUrl;
+  //   let idUrlToUpdate = tenantIdUrl;
+  //   let bikeUrlToUpdate = bikeImageUrl;
+  //   let bikeRcUrlToUpdate = bikeRcImageUrl;
+  
+  //   // Handle tenantImage upload
+  //   if (tenantImage) {
+  //     let fileToUpload = tenantImage;
+  //     if (isImage(tenantImage.type)) {
+  //       console.log("Executing compression for tenantImage");
+  //       try {
+  //         fileToUpload = await compressImage(tenantImage); // Compress if it's an image
+  //       } catch (error) {
+  //         console.error("Error compressing tenant image:", error);
+  //       }
+  //     }
+  //     const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+  //     try {
+  //       const snapshot = await uploadBytes(imageRef, fileToUpload);
+  //       imageUrlToUpdate = await getDownloadURL(snapshot.ref);
+  //       console.log(imageUrlToUpdate, "imageUrlToUpdate");
+  //     } catch (error) {
+  //       console.error("Error uploading tenant image:", error);
+  //     }
+  //   }
+  
+  //   // Handle tenantId upload
+  //   if (tenantId) {
+  //     const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
+  //     try {
+  //       const snapshot = await uploadBytes(imageRef, tenantId);
+  //       idUrlToUpdate = await getDownloadURL(snapshot.ref);
+  //       console.log(idUrlToUpdate, "idUrlToUpdate");
+  //     } catch (error) {
+  //       console.error("Error uploading tenant ID:", error);
+  //     }
+  //   }
+  
+  //   // Handle bikeImage upload
+  //   if (bikeImage) {
+  //     let fileToUpload = bikeImage;
+  //     if (isImage(bikeImage.type)) {
+  //       console.log("Executing compression for bikeImage");
+  //       try {
+  //         fileToUpload = await compressImage(bikeImage); // Compress if it's an image
+  //       } catch (error) {
+  //         console.error("Error compressing bike image:", error);
+  //       }
+  //     }
+  //     const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${bikeImage.name}`);
+  //     try {
+  //       const snapshot = await uploadBytes(imageRef, fileToUpload);
+  //       bikeUrlToUpdate = await getDownloadURL(snapshot.ref);
+  //       console.log(bikeUrlToUpdate, "bikeUrlToUpdate");
+  //     } catch (error) {
+  //       console.error("Error uploading bike image:", error);
+  //     }
+  //   }
+  
+  //   // Handle bikeRcImage upload
+  //   if (bikeRcImage) {
+  //     let fileToUpload = bikeRcImage;
+  //     if (isImage(bikeRcImage.type)) {
+  //       console.log("Executing compression for bikeRcImage");
+  //       try {
+  //         fileToUpload = await compressImage(bikeRcImage); // Compress if it's an image
+  //       } catch (error) {
+  //         console.error("Error compressing bike RC image:", error);
+  //       }
+  //     }
+  //     const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
+  //     try {
+  //       const snapshot = await uploadBytes(imageRef, fileToUpload);
+  //       bikeRcUrlToUpdate = await getDownloadURL(snapshot.ref);
+  //       console.log(bikeRcUrlToUpdate, "bikeRcUrlToUpdate");
+  //     } catch (error) {
+  //       console.error("Error uploading bike RC image:", error);
+  //     }
+  //   }
+  
+  //   const tenantData = {
+  //     roomNo: selectedRoom,
+  //     bedNo: selectedBed,
+  //     dateOfJoin,
+  //     name: name.charAt(0).toUpperCase() + name.slice(1),
+  //     mobileNo,
+  //     idNumber,
+  //     emergencyContact,
+  //     status,
+  //     tenantImageUrl: imageUrlToUpdate,
+  //     tenantIdUrl: idUrlToUpdate,
+  //     bikeNumber,
+  //     permnentAddress,
+  //     bikeImageUrl: bikeUrlToUpdate,
+  //     bikeRcImageUrl: bikeRcUrlToUpdate,
+  //   };
+  
+  //   if (isEditing) {
+  //     try {
+  //       await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
+  //       toast.success(t('toastMessages.tenantUpdated'), {
+  //         position: "top-center",
+  //         autoClose: 2000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
+  //     } catch (error) {
+  //       toast.error(t('toastMessages.errorUpdatingTenant') + error.message, {
+  //         position: "top-center",
+  //         autoClose: 2000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
+  //     }
+  //   } else {
+  //     try {
+  //       await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData);
+  //       toast.success(t('toastMessages.tenantAddedSuccess'), {
+  //         position: "top-center",
+  //         autoClose: 2000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
+  //       e.target.querySelector('button[type="submit"]').disabled = false;
+  //     } catch (error) {
+  //       toast.error(t('toastMessages.errorAddingTenant') + error.message, {
+  //         position: "top-center",
+  //         autoClose: 2000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
+  //     }
+  //   }
+  
+  //   setLoading(false);
+  //   resetForm();
+  //   setErrors({});
+  // };
+  
+
   const handleEdit = (tenant) => {
+    console.log(tenant,"tenantWhileEditing")
+    console.log(tenant.tenantImageUrl,"tenantWhileEditing")
     setSelectedRoom(tenant.roomNo);
     setSelectedBed(tenant.bedNo);
     setDateOfJoin(tenant.dateOfJoin);
@@ -556,14 +806,34 @@ const TenantsBoys = () => {
     setStatus(tenant.status);
     setIsEditing(true);
     setCurrentId(tenant.id);
-    setTenantImage(tenant.tenantImageUrl)
-    setTenantId(tenant.tenantIdUrl || '');
+
+    if(tenantImage){
+      setTenantImage(tenant.tenantImageUrl)
+    } else {
+      setTenantImageUrl(tenant.tenantImageUrl)
+    }
+    if(tenantId){
+      setTenantId(tenant.tenantIdUrl || '');
+    } else {
+      setTenantIdUrl(tenant.tenantIdUrl)
+    }
+    if(bikeImage){
+      setBikeImage(tenant.bikeImageUrl || '')
+    } else {
+      setBikeImageUrl(tenant.bikeImageUrl || '')
+    }
+    if(bikeRcImage){
+      setBikeRcImage(tenant.bikeRcImageUrl || '')
+    } else {
+      setBikeRcImageUrl(tenant.bikeRcImageUrl || '')
+    }
+
+    
     setBikeNumber("");
     setHasBike(false);
     setFileName(tenant.fileName || '');
     setShowModal(true);
     setBikeNumber(tenant.bikeNumber);
-
     setPermnentAddress(tenant.permnentAddress);
     if (tenant.bikeNumber === 'NA') {
       setHasBike(false);
@@ -618,17 +888,20 @@ const handleAddNew = (event) => {
     setIsEditing(false);
     setCurrentId('');
     setErrors({});
+
     setTenantImage(null);
+    setTenantImageUrl('');
     setTenantId(null);
-    // setTenantImageUrl('');
-    setTenantImage('')
-    // setTenantIdUrl('');
+    setTenantIdUrl('');
+    setBikeImage(null)
+    setBikeImageUrl('')
+    setBikeRcImage(null)
+    setBikeRcImageUrl('')
     setTenantId('')
     setBikeNumber('NA');
     setPermnentAddress('')
     tenantImageInputRef.current.value = null;
     tenantProofIdRef.current.value = null;
-
   };
 
   const handleSearchChange = (e) => {
@@ -665,7 +938,7 @@ const handleAddNew = (event) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-
+console.log(tenants, "tenants")
   const rows = tenants.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
@@ -719,6 +992,8 @@ const handleAddNew = (event) => {
     setSingleTenantDetails(tenant);
 
 
+
+
     const [roomNo, bedNo] = tenant.room_bed_no.split('/');
     const singleUserDueDate = tenants.find(eachTenant =>
       eachTenant.name === tenant.name &&
@@ -726,6 +1001,8 @@ const handleAddNew = (event) => {
       eachTenant.roomNo === roomNo &&
       eachTenant.bedNo === bedNo
     );
+    console.log(tenant,"singleuserDataFr")
+    console.log(singleUserDueDate,"singleuserDataFr")
 
     if(singleUserDueDate && singleUserDueDate.bikeNumber){
       setSingleTenantBikeNum(singleUserDueDate.bikeNumber)
@@ -740,8 +1017,8 @@ const handleAddNew = (event) => {
       console.log("Tenant with due date not found or due date is missing");
     }
 
-    if (singleUserDueDate && singleUserDueDate.tenantId) {
-      setSingleTenantProofId(singleUserDueDate.tenantId)
+    if (singleUserDueDate && singleUserDueDate.tenantIdUrl) {
+      setSingleTenantProofId(singleUserDueDate.tenantIdUrl)
     }
 
     if (singleUserDueDate && singleUserDueDate.permnentAddress) {
@@ -750,15 +1027,15 @@ const handleAddNew = (event) => {
     else {
       setTenantAddress("");
     }
-    if (singleUserDueDate && singleUserDueDate.bikeImage) {
-      setBikeImageField(singleUserDueDate.bikeImage);
+    if (singleUserDueDate && singleUserDueDate.bikeImageUrl) {
+      setBikeImageField(singleUserDueDate.bikeImageUrl);
 
     }
     else {
       setBikeImageField("");
     }
-    if (singleUserDueDate && singleUserDueDate.bikeRcImage) {
-      setBikeRcImageField(singleUserDueDate.bikeRcImage);
+    if (singleUserDueDate && singleUserDueDate.bikeRcImageUrl) {
+      setBikeRcImageField(singleUserDueDate.bikeRcImageUrl);
 
     }
     else {
@@ -804,7 +1081,7 @@ const handleAddNew = (event) => {
             progress: undefined,
           });
         });
-        fetchExTenants()
+        
       }
     }, {
       onlyOnce: true
@@ -870,7 +1147,7 @@ const handleAddNew = (event) => {
 
   const exTenantRows = exTenants.map((tenant, index) => ({
     s_no: index + 1,
-    image: tenant.tenantImage,
+    image: tenant.tenantImageUrl,
     name: tenant.name,
     id: tenant.idNumber,
     mobile_no: tenant.mobileNo,
@@ -915,465 +1192,192 @@ const handleAddNew = (event) => {
     }));
   };
   const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
-  const isImage = (fileData) => fileData.startsWith('data:image/');
-  
-  const pdfToImages = async (pdfUrl) => {
-    const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
-    const numPages = pdf.numPages;
-    const images = [];
-  
-    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-      const page = await pdf.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 2 });
-  
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-  
-      await page.render({
-        canvasContext: context,
-        viewport: viewport
-      }).promise;
-  
-      const imgData = canvas.toDataURL('image/png');
-      images.push({ imgData, width: viewport.width, height: viewport.height });
-    }
-  
-    return images;
-  };
-  
-  const calculateFitDimensions = (imgWidth, imgHeight, maxWidth, maxHeight) => {
-    const widthRatio = maxWidth / imgWidth;
-    const heightRatio = maxHeight / imgHeight;
-    const ratio = Math.min(widthRatio, heightRatio);
-    return {
-      width: imgWidth * ratio,
-      height: imgHeight * ratio
-    };
-  };
-  
-  const loadImage = (src) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = src;
-    });
-  };
-  
-  const handleTenantDownload = async () => {
-    const doc = new jsPDF();
-  
-    // Page 1: Tenant Details
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text("Tenant Details", 80, 10);
-  
-    if (singleTenantDetails.image) {
-      doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
-    }
-  
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Name: ", 20, 25);
-  
-    doc.setFont("helvetica", "normal");
-    doc.text(singleTenantDetails.name, 34, 25);
-  
-    doc.setFont("helvetica", "bold");
-    doc.text("Mobile No: ", 20, 35);
-  
-    doc.setFont("helvetica", "normal");
-    doc.text(singleTenantDetails.mobile_no, 43, 35);
-  
-    doc.setFont("helvetica", "bold");
-    doc.text("Proof ID: ", 20, 45);
-  
-    doc.setFont("helvetica", "normal");
-    doc.text(singleTenantDetails.id, 40, 45);
-  
-    doc.setFont("helvetica", "bold");
-    doc.text("Room/Bed No: ", 20, 55);
-  
-    doc.setFont("helvetica", "normal");
-    doc.text(singleTenantDetails.room_bed_no, 50, 55);
-  
-    doc.setFont("helvetica", "bold");
-    doc.text("Joining Date: ", 20, 65);
-  
-    doc.setFont("helvetica", "normal");
-    doc.text(singleTenantDetails.joining_date, 48, 65);
-  
-    if (dueDateOfTenant) {
-      doc.setFont("helvetica", "bold");
-      doc.text("Due Date: ", 20, 75);
-  
-      doc.setFont("helvetica", "normal");
-      doc.text(dueDateOfTenant, 40, 75);
-    }
-  
-    if (bikeNumber) {
-      doc.setFont("helvetica", "bold");
-      doc.text("Bike Number: ", 20, 85);
-  
-      doc.setFont("helvetica", "normal");
-      doc.text(singleTenanantBikeNum, 48, 85);
-    }
-  
-    if (tenantAddress) {
-      doc.setFont("helvetica", "bold");
-      doc.text("Address: ", 20, 95);
-  
-      doc.setFont("helvetica", "normal");
-      doc.text(tenantAddress, 39, 95);
-    }
-  
-    // Add a new page
-    doc.addPage();
-  
-    // Page 2: ID Proof Image or PDF
-    if (singleTenantProofId) {
-      if (isImage(singleTenantProofId)) {
-        try {
-          const img = await loadImage(singleTenantProofId);
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-        } catch (error) {
-          console.error('Error loading image:', error);
-        }
-        doc.addPage();
-      } else if (isPDF(singleTenantProofId)) {
-        const images = await pdfToImages(singleTenantProofId);
-        images.forEach((img, index) => {
-          if (index > 0) doc.addPage();
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-        });
-        doc.addPage();
-      }
-    }
-  
-    // Page 3: Bike Image or PDF
-    if (bikeImageField) {
-      if (isImage(bikeImageField)) {
-        try {
-          const img = await loadImage(bikeImageField);
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-        } catch (error) {
-          console.error('Error loading image:', error);
-        }
-        doc.addPage();
-      } else if (isPDF(bikeImageField)) {
-        const images = await pdfToImages(bikeImageField);
-        images.forEach((img, index) => {
-          if (index > 0) doc.addPage();
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-        });
-        doc.addPage();
-      }
-    }
-  
-    // Page 4: Bike RC Image or PDF
-    if (bikeRcImageField) {
-      if (isImage(bikeRcImageField)) {
-        try {
-          const img = await loadImage(bikeRcImageField);
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-        } catch (error) {
-          console.error('Error loading image:', error);
-        }
-      } else if (isPDF(bikeRcImageField)) {
-        const images = await pdfToImages(bikeRcImageField);
-        images.forEach((img, index) => {
-          if (index > 0) doc.addPage();
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-        });
-      }
-    }
-  
-    // Convert PDF to Blob
-    const pdfOutput = doc.output('blob');
-  
-    if (Capacitor.isNativePlatform()) {
-      // Save the PDF file to the mobile device
-      const fileName = `${singleTenantDetails.name}_Complete_Details.pdf`;
-      const filePath = `pdf/${fileName}`;
-  
-      try {
-        const reader = new FileReader();
-        reader.readAsDataURL(pdfOutput);
-        reader.onloadend = async () => {
-          const base64Data = reader.result.split(',')[1];
-  
-          await Filesystem.writeFile({
-            path: filePath,
-            data: base64Data,
-            directory: FilesystemDirectory.Documents,
-            recursive: true,
-          });
-  
-          const result = await Filesystem.getUri({
-            directory: FilesystemDirectory.Documents,
-            path: filePath,
-          });
-  
-          // Optionally open the file using the FileOpener plugin
-          await FileOpener.open({
-            filePath: result.uri,
-            fileMimeType: 'application/pdf',
-          });
-        };
-        reader.onerror = (error) => {
-          console.error('Error converting PDF to base64:', error);
-        };
-      } catch (error) {
-        console.error('Error saving file:', error);
-      }
-    } else {
-      // Save the PDF file for web
-      const url = URL.createObjectURL(pdfOutput);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `${singleTenantDetails.name}_Complete_Details.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  };
+const isImage = (fileData) => fileData.startsWith('data:image/');
 
-// Helper function to check file type
-// const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
-// const isImage = (fileData) => fileData.startsWith('data:image/');
- 
-// const pdfToImages = async (pdfUrl) => {
-//   const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
-//   const numPages = pdf.numPages;
-//   const images = [];
- 
-//   for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-//     const page = await pdf.getPage(pageNum);
-//     const viewport = page.getViewport({ scale: 2 });
- 
-//     const canvas = document.createElement('canvas');
-//     const context = canvas.getContext('2d');
-//     canvas.height = viewport.height;
-//     canvas.width = viewport.width;
- 
-//     await page.render({
-//       canvasContext: context,
-//       viewport: viewport
-//     }).promise;
- 
-//     const imgData = canvas.toDataURL('image/png');
-//     images.push({ imgData, width: viewport.width, height: viewport.height });
-//   }
- 
-//   return images;
-// };
- 
-// const calculateFitDimensions = (imgWidth, imgHeight, maxWidth, maxHeight) => {
-//   const widthRatio = maxWidth / imgWidth;
-//   const heightRatio = maxHeight / imgHeight;
-//   const ratio = Math.min(widthRatio, heightRatio);
-//   return {
-//     width: imgWidth * ratio,
-//     height: imgHeight * ratio
-//   };
-// };
- 
-// const loadImage = (src) => {
-//   return new Promise((resolve, reject) => {
-//     const img = new Image();
-//     img.onload = () => resolve(img);
-//     img.onerror = reject;
-//     img.src = src;
-//   });
-// };
- 
-// const handleTenantDownload = async () => {
-//   const doc = new jsPDF();
- 
-//   // Page 1: Tenant Details
-//   doc.setFontSize(18);
-//   doc.setFont('helvetica', 'bold');
-//   doc.text("Tenant Details", 80, 10);
- 
-//   if (singleTenantDetails.image) {
-//     doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
-//   }
- 
-//   doc.setFontSize(12);
-//   doc.setFont("helvetica", "bold");
-//   doc.text("Name: ", 20, 25);
- 
-//   doc.setFont("helvetica", "normal");
-//   doc.text(singleTenantDetails.name, 34, 25);
- 
-//   doc.setFont("helvetica", "bold");
-//   doc.text("Mobile No: ", 20, 35);
- 
-//   doc.setFont("helvetica", "normal");
-//   doc.text(singleTenantDetails.mobile_no, 43, 35);
- 
-//   doc.setFont("helvetica", "bold");
-//   doc.text("Proof ID: ", 20, 45);
- 
-//   doc.setFont("helvetica", "normal");
-//   doc.text(singleTenantDetails.id, 40, 45);
- 
-//   doc.setFont("helvetica", "bold");
-//   doc.text("Room/Bed No: ", 20, 55);
- 
-//   doc.setFont("helvetica", "normal");
-//   doc.text(singleTenantDetails.room_bed_no, 50, 55);
- 
-//   doc.setFont("helvetica", "bold");
-//   doc.text("Joining Date: ", 20, 65);
- 
-//   doc.setFont("helvetica", "normal");
-//   doc.text(singleTenantDetails.joining_date, 48, 65);
- 
-//   if (dueDateOfTenant) {
-//     doc.setFont("helvetica", "bold");
-//     doc.text("Due Date: ", 20, 75);
- 
-//     doc.setFont("helvetica", "normal");
-//     doc.text(dueDateOfTenant, 40, 75);
-//   }
- 
-//   if (bikeNumber) {
-//     doc.setFont("helvetica", "bold");
-//     doc.text("Bike Number: ", 20, 85);
- 
-//     doc.setFont("helvetica", "normal");
-//     doc.text(singleTenanantBikeNum, 48, 85);
-//   }
- 
-//   if (tenantAddress) {
-//     doc.setFont("helvetica", "bold");
-//     doc.text("Address: ", 20, 95);
- 
-//     doc.setFont("helvetica", "normal");
-//     doc.text(tenantAddress, 39, 95);
-//   }
- 
-//   // Add a new page
-//   doc.addPage();
- 
-//   // Page 2: ID Proof Image or PDF
-//   if (singleTenantProofId) {
-//     if (isImage(singleTenantProofId)) {
-//       try {
-//         const img = await loadImage(singleTenantProofId);
-//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-//         doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-//       } catch (error) {
-//         console.error('Error loading image:', error);
-//       }
-//       doc.addPage();
-//     } else if (isPDF(singleTenantProofId)) {
-//       const images = await pdfToImages(singleTenantProofId);
-//       images.forEach((img, index) => {
-//         if (index > 0) doc.addPage();
-//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-//         doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-//       });
-//       doc.addPage();
-//     }
-//   }
- 
-//   // Page 3: Bike Image or PDF
-//   if (bikeImageField) {
-//     if (isImage(bikeImageField)) {
-//       try {
-//         const img = await loadImage(bikeImageField);
-//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-//         doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-//       } catch (error) {
-//         console.error('Error loading image:', error);
-//       }
-//       doc.addPage();
-//     } else if (isPDF(bikeImageField)) {
-//       const images = await pdfToImages(bikeImageField);
-//       images.forEach((img, index) => {
-//         if (index > 0) doc.addPage();
-//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-//         doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-//       });
-//       doc.addPage();
-//     }
-//   }
- 
-//   // Page 4: Bike RC Image or PDF
-//   if (bikeRcImageField) {
-//     if (isImage(bikeRcImageField)) {
-//       try {
-//         const img = await loadImage(bikeRcImageField);
-//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-//         doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-//       } catch (error) {
-//         console.error('Error loading image:', error);
-//       }
-//     } else if (isPDF(bikeRcImageField)) {
-//       const images = await pdfToImages(bikeRcImageField);
-//       images.forEach((img, index) => {
-//         if (index > 0) doc.addPage();
-//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-//         doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-//       });
-//     }
-//   }
- 
-//   // Save the PDF
-//   doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-// };
- 
-const handleImageDownload = async (e, imageUrl, fileName) => {
-  if (Capacitor.isNativePlatform()) {
-    e.preventDefault();
+const pdfToImages = async (pdfUrl) => {
+  const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
+  const numPages = pdf.numPages;
+  const images = [];
 
-    try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const reader = new FileReader();
+  for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const viewport = page.getViewport({ scale: 2 });
 
-      reader.onloadend = async () => {
-        const base64data = reader.result.split(',')[1];
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
 
-        try {
-          const savedFile = await Filesystem.writeFile({
-            path: `${fileName}.jpg`,
-            data: base64data,
-            directory: FilesystemDirectory.Documents
-          });
-          
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise;
 
-          await FileOpener.open({
-            filePath: savedFile.uri,
-            fileMimeType: 'image/jpeg',
-          });
-
-        } catch (error) {
-          console.error('Error saving file:', error);
-        }
-      };
-
-      reader.readAsDataURL(blob);
-
-    } catch (error) {
-      console.error('Error fetching image:', error);
-    }
+    const imgData = canvas.toDataURL('image/png');
+    images.push({ imgData, width: viewport.width, height: viewport.height });
   }
+
+  return images;
 };
 
-  
-  
+const calculateFitDimensions = (imgWidth, imgHeight, maxWidth, maxHeight) => {
+  const widthRatio = maxWidth / imgWidth;
+  const heightRatio = maxHeight / imgHeight;
+  const ratio = Math.min(widthRatio, heightRatio);
+  return {
+    width: imgWidth * ratio,
+    height: imgHeight * ratio
+  };
+};
+
+const loadImage = (src) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+};
+
+const handleTenantDownload = async () => {
+  const doc = new jsPDF();
+
+  // Page 1: Tenant Details
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text("Tenant Details", 80, 10);
+
+  if (singleTenantDetails.image) {
+    doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
+  }
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Name: ", 20, 25);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(singleTenantDetails.name, 34, 25);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Mobile No: ", 20, 35);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(singleTenantDetails.mobile_no, 43, 35);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Proof ID: ", 20, 45);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(singleTenantDetails.id, 40, 45);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Room/Bed No: ", 20, 55);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(singleTenantDetails.room_bed_no, 50, 55);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Joining Date: ", 20, 65);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(singleTenantDetails.joining_date, 48, 65);
+
+  if (dueDateOfTenant) {
+    doc.setFont("helvetica", "bold");
+    doc.text("Due Date: ", 20, 75);
+
+    doc.setFont("helvetica", "normal");
+    doc.text(dueDateOfTenant, 40, 75);
+  }
+
+  if (bikeNumber) {
+    doc.setFont("helvetica", "bold");
+    doc.text("Bike Number: ", 20, 85);
+
+    doc.setFont("helvetica", "normal");
+    doc.text(singleTenanantBikeNum, 48, 85);
+  }
+
+  if (tenantAddress) {
+    doc.setFont("helvetica", "bold");
+    doc.text("Address: ", 20, 95);
+
+    doc.setFont("helvetica", "normal");
+    doc.text(tenantAddress, 39, 95);
+  }
+
+  // Add a new page
+  doc.addPage();
+
+  // Page 2: ID Proof Image or PDF
+  if (singleTenantProofId) {
+    if (isImage(singleTenantProofId)) {
+      try {
+        const img = await loadImage(singleTenantProofId);
+        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+        doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+      } catch (error) {
+        console.error('Error loading image:', error);
+      }
+      doc.addPage();
+    } else if (isPDF(singleTenantProofId)) {
+      const images = await pdfToImages(singleTenantProofId);
+      images.forEach((img, index) => {
+        if (index > 0) doc.addPage();
+        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+        doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+      });
+      doc.addPage();
+    }
+  }
+
+  // Page 3: Bike Image or PDF
+  if (bikeImageField) {
+    if (isImage(bikeImageField)) {
+      try {
+        const img = await loadImage(bikeImageField);
+        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+        doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+      } catch (error) {
+        console.error('Error loading image:', error);
+      }
+      doc.addPage();
+    } else if (isPDF(bikeImageField)) {
+      const images = await pdfToImages(bikeImageField);
+      images.forEach((img, index) => {
+        if (index > 0) doc.addPage();
+        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+        doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+      });
+      doc.addPage();
+    }
+  }
+
+  // Page 4: Bike RC Image or PDF
+  if (bikeRcImageField) {
+    if (isImage(bikeRcImageField)) {
+      try {
+        const img = await loadImage(bikeRcImageField);
+        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+        doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+      } catch (error) {
+        console.error('Error loading image:', error);
+      }
+    } else if (isPDF(bikeRcImageField)) {
+      const images = await pdfToImages(bikeRcImageField);
+      images.forEach((img, index) => {
+        if (index > 0) doc.addPage();
+        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+        doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+      });
+    }
+  }
+
+  // Save the PDF
+  doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+};
+
+
 
     
   return (
@@ -1426,7 +1430,14 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
 
       </div>
       <div>
-        {showExTenants ? <Table columns={columnsEx} rows={exTenantRows} onClickTentantRow={handleTentantRow} /> : <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />}
+        {showExTenants ? <Table columns={columnsEx} rows={exTenantRows} onClickTentantRow={handleTentantRow} /> : 
+        <>
+       { console.log("beforeRendering")}
+         {console.log(filteredRows)}
+        <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />
+        {console.log("RenderingCompleted")}
+        </>
+        }
       </div>
       <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalTenantsBoys" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal}  >
         <div class="modal-dialog">
@@ -1520,9 +1531,9 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                     <label htmlFor='tenantUpload' class="form-label">
                       {t('dashboard.uploadImage')}
                     </label>
-                    {isEditing && tenantImage && (
+                    {isEditing && tenantImageUrl && (
                       <div>
-                        <img src={tenantImage} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
+                        <img src={tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
@@ -1551,7 +1562,6 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                         <p>{fileName}</p>
                       </div>
                     )}
-
 
                     <input ref={tenantProofIdRef} id="tenantUploadId" className="form-control" type="file" onChange={handleTenantIdChange} />
                     
@@ -1666,50 +1676,28 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                 <p><strong>{t('tenantsPage.joiningDate')} :</strong> {singleTenantDetails.joining_date}</p>
                 <p><strong>{t('tenantsPage.dueDate')} :</strong> {dueDateOfTenant}</p>
                 <p><strong>{t('tenantsPage.idProof')} :</strong>
-                {singleTenantProofId ? (
-    <a
-      className="downloadPdfText"
-      href={singleTenantProofId}
-      download
-      onClick={(e) => handleImageDownload(e, singleTenantProofId, 'Tenant_Proof_Id')}
-    >
-      <FaDownload /> {t('tenantsPage.downloadId')}
-    </a>
-  ) : (
-    <span className="NotUploadedText">{t('tenantsPage.notUploaded')}</span>
-  )}
-</p>
+                  {singleTenantProofId ? (
+                    <a className='downloadPdfText' href={singleTenantProofId} download> <FaDownload /> {t('tenantsPage.downloadId')}</a>
+                  ) : (
+                    <span className='NotUploadedText'>{t('tenantsPage.notUploaded')}</span>
+                  )}
+                </p>
+                <p><strong>{t('tenantsPage.PermanentAddress')}</strong>{tenantAddress}</p>
 
-<p><strong>{t('tenantsPage.BikePic')}</strong>
-  {bikeImageField ? (
-    <a
-      className="downloadPdfText"
-      href={bikeImageField}
-      download
-      onClick={(e) => handleImageDownload(e, bikeImageField, 'Bike_Image')}
-    >
-      <FaDownload /> {t('tenantsPage.DownloadPic')}
-    </a>
-  ) : (
-    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
-  )}
-</p>
-
-<p><strong>{t('tenantsPage.BikeRc')}</strong>
-  {bikeRcImageField ? (
-    <a
-      className="downloadPdfText"
-      href={bikeRcImageField}
-      download
-      onClick={(e) => handleImageDownload(e, bikeRcImageField, 'Bike_RC')}
-    >
-      <FaDownload /> {t('tenantsPage.DownloadRc')}
-    </a>
-  ) : (
-    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
-  )}
-</p>
-
+                <p><strong>{t('tenantsPage.BikePic')}</strong>
+                  {bikeImageField ? (
+                    <a className="downloadPdfText" href={bikeImageField} download> <FaDownload />{t('tenantsPage.DownloadPic')}</a>
+                  ) : (
+                    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
+                  )}
+                </p>
+                <p><strong>{t('tenantsPage.BikeRc')}</strong>
+                  {bikeRcImageField ? (
+                    <a className="downloadPdfText" href={bikeRcImageField} download> <FaDownload />{t('tenantsPage.DownloadRc')}</a>
+                  ) : (
+                    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
+                  )}
+                </p>
               </div>
             </div>
             <div className='popup-tenants-closeBtn'>
@@ -1736,4 +1724,5 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
   );
 
 };
+
 export default TenantsBoys;

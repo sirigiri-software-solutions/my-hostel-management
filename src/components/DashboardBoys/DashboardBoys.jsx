@@ -18,6 +18,9 @@ import { faCamera } from '@fortawesome/free-solid-svg-icons';
 import { FaWhatsapp } from "react-icons/fa";
 import { useData } from '../../ApiData/ContextProvider';
 import Spinner from '../../Elements/Spinner';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import imageCompression from 'browser-image-compression';
+
 
 const DashboardBoys = () => {
 
@@ -31,7 +34,7 @@ const DashboardBoys = () => {
   }
   const isUneditable = role === 'admin' || role === 'subAdmin';
   const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag } = useData();
-  const { database } = firebase;
+  const { database, storage } = firebase;
 
   const [loading,setLoading] = useState(false);
 
@@ -63,9 +66,9 @@ const DashboardBoys = () => {
   const [currentTenantId, setCurrentTenantId] = useState('');
   const [tenatErrors, setTenantErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
-   const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
+  const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantId, setTenantId] = useState(null);
-   const [tenantIdUrl, setTenantIdUrl] = useState('');
+  const [tenantIdUrl, setTenantIdUrl] = useState('');
   const imageInputRef = useRef(null);
   const idInputRef = useRef(null);
   const [showForm, setShowForm] = useState(true);
@@ -79,8 +82,10 @@ const DashboardBoys = () => {
   const tenantImageInputRef = useRef(null);
   const tenantProofIdRef = useRef(null);
   const [bikeImage, setBikeImage] = useState(null);
+  const [bikeImageUrl, setBikeImageUrl] = useState('');
   const [bikeImageField, setBikeImageField] = useState('');
   const [bikeRcImage, setBikeRcImage] = useState('');
+  const [bikeRcImageUrl, setBikeRcImageUrl] = useState('');
   const [bikeRcImageField, setBikeRcImageField] = useState('');
   const [hasBike, setHasBike] = useState(false);
   const [bikeNumber, setBikeNumber] = useState('NA');
@@ -369,27 +374,35 @@ const DashboardBoys = () => {
   }, [boysRooms, tenants]);
 
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      setBikeImage(reader.result);
-    };
-    reader.readAsDataURL(file);
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   const reader = new FileReader();
+  //   reader.onload = () => {
+  //     setBikeImage(reader.result);
+  //   };
+  //   reader.readAsDataURL(file);
+  // };
+  const handleTenantBikeChange = (e) => {
+    if (e.target.files[0]) {
+      setBikeImage(e.target.files[0]);
+    }
+  };
+  const handleTenantBikeRcChange = (e) => {
+    if (e.target.files[0]) {
+      setBikeRcImage(e.target.files[0]);
+    }
   };
 
 
+  // const handleRcChange = (e) => {
+  //   const file1 = e.target.files[0];
+  //   const reader = new FileReader();
+  //   reader.onload = () => {
+  //     setBikeRcImage(reader.result);
+  //   }
+  //   reader.readAsDataURL(file1);
 
-
-  const handleRcChange = (e) => {
-    const file1 = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      setBikeRcImage(reader.result);
-    }
-    reader.readAsDataURL(file1);
-
-  }
+  // }
 
 
 
@@ -746,118 +759,231 @@ const DashboardBoys = () => {
   };
 
 
+  // const handleTenantImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setTenantImage(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
   const handleTenantImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setTenantImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (e.target.files[0]) {
+      setTenantImage(e.target.files[0]);
     }
   };
 
+  // const handleTenantIdChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       // Once the file is loaded, set the image in state as a base64 URL
+  //       setTenantId(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
   const handleTenantIdChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        // Once the file is loaded, set the image in state as a base64 URL
-        setTenantId(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (e.target.files[0]) {
+      const file = e.target.files[0]
+      // setFileName(file.name)
+      setTenantId(e.target.files[0]);
     }
   };
 
-const handleTenantSubmit = async (e) => {
-    e.preventDefault();
-    if (!isEditing) {
-      e.target.querySelector('button[type="submit"]').disabled = true;
-      if (!validate()) {
-        e.target.querySelector('button[type="submit"]').disabled = false;
-        return
-      };
-    } else {
-      if (!validate()) return;
-    }
-    
-
-
-    const tenantData = {
-      roomNo: selectedRoom,
-      bedNo: selectedBed,
-      dateOfJoin,
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      mobileNo,
-      idNumber,
-      emergencyContact,
-      status,
-      tenantImage,
-      tenantId,
-      bikeNumber,
-      permnentAddress,
-      bikeImage,
-      bikeRcImage
+  const compressImage = async (file) => {
+    const options = {
+      maxSizeMB:0.6, // Compress to a maximum of 1 MB (adjust as needed)
+      maxWidthOrHeight: 1920, 
+      useWebWorker: true, // Use a web worker for better performance
+      fileType: 'image/jpeg',
     };
+  
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error('Error compressing the image:', error);
+    }
+  };
+
+  const checkImage = (type) =>  {
+    return type === "image/jpeg"
+  }
+
+
+  
+  const handleTenantSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!isEditing) {
+        e.target.querySelector('button[type="submit"]').disabled = true;
+        if (!validate()) {
+            e.target.querySelector('button[type="submit"]').disabled = false;
+            return;
+        }
+    } else {
+        if (!validate()) return;
+    }
     
 
-    if (isEditing) {
-      setShowModal(false);
-      setLoading(true);
-      await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentTenantId}`), tenantData).then(() => {
-        toast.success("Tenant updated successfully.", {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }).catch(error => {
-        toast.error(t('toastMessages.errorUpdatingTenant') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
-    } else {
-      setShowModal(false);
-      setLoading(true)
-      await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData).then(() => {
-        toast.success(t('toastMessages.tenantAddedSuccess'), {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        e.target.querySelector('button[type="submit"]').disabled = false;
-      }).catch(error => {
-        toast.error(t('toastMessages.errorAddingTenant') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
-    }
     setShowModal(false);
-    resetForm();
-    setLoading(false);
-    imageInputRef.current.value = "";
-    idInputRef.current.value = "";
-    
-  };
+    setLoading(true);
+
+    // Helper function to upload a file and return its URL
+    const uploadFile = async (file, path) => {
+        try {
+            const imageRef = storageRef(storage, path);
+            const snapshot = await uploadBytes(imageRef, file);
+            return await getDownloadURL(snapshot.ref);
+        } catch (error) {
+            console.error(`Error uploading file ${file.name}:`, error);
+            throw error;
+        }
+    };
+
+    const tasks = [];
+
+    if (tenantImage) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = tenantImage;
+                console.log(tenantImage,"whatisComing")
+                if (checkImage(tenantImage.type)) {
+                    console.log("Executing compression for tenantImage");
+                    try {
+                        fileToUpload = await compressImage(tenantImage);
+                    } catch (error) {
+                        console.error("Error compressing tenant image:", error);
+                    }
+                }
+                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+            })()
+        );
+    }
+    if (tenantId) {
+      tasks.push(
+          (async () => {
+              let fileToUpload = tenantId;
+
+              if (checkImage(tenantId.type)) {
+                  console.log("Executing compression for tenantId");
+                  try {
+                      fileToUpload = await compressImage(tenantId);
+                  } catch (error) {
+                      console.error("Error compressing tenant ID image:", error);
+                  }
+              }
+
+              return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
+          })()
+      );
+  }
+
+    if (bikeImage) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = bikeImage;
+                if (checkImage(bikeImage.type)) {
+                    console.log("Executing compression for bikeImage");
+                    try {
+                        fileToUpload = await compressImage(bikeImage);
+                    } catch (error) {
+                        console.error("Error compressing bike image:", error);
+                    }
+                }
+                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${bikeImage.name}`);
+            })()
+        );
+    }
+
+    if (bikeRcImage) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = bikeRcImage;
+
+                if (checkImage(bikeRcImage.type)) {
+                    console.log("Executing compression for bikeRcImage");
+                    try {
+                        fileToUpload = await compressImage(bikeRcImage);
+                    } catch (error) {
+                        console.error("Error compressing bike RC image:", error);
+                    }
+                }
+                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
+            })()
+        );
+    }
+
+    try {
+        const [imageUrlToUpdate, idUrlToUpdate, bikeUrlToUpdate, bikeRcUrlToUpdate] = await Promise.all(tasks);
+
+        const tenantData = {
+            roomNo: selectedRoom,
+            bedNo: selectedBed,
+            dateOfJoin,
+            name: name.charAt(0).toUpperCase() + name.slice(1),
+            mobileNo,
+            idNumber,
+            emergencyContact,
+            status,
+            tenantImageUrl: imageUrlToUpdate || tenantImageUrl,
+            tenantIdUrl: idUrlToUpdate || tenantIdUrl,
+            bikeNumber,
+            permnentAddress,
+            bikeImageUrl: bikeUrlToUpdate || bikeImageUrl,
+            bikeRcImageUrl: bikeRcUrlToUpdate || bikeRcImageUrl,
+        };
+
+        if (isEditing) {
+            await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
+            toast.success(t('toastMessages.tenantUpdated'), {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+        } else {
+            await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData);
+            toast.success(t('toastMessages.tenantAddedSuccess'), {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            e.target.querySelector('button[type="submit"]').disabled = false;
+        }
+    } catch (error) {
+        console.error("Error submitting form:", error);
+        toast.error(t('toastMessages.errorSubmitting') + error.message, {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
+    } finally {
+        setLoading(false);
+        resetForm();
+        setErrors({});
+        // fetchData()
+        imageInputRef.current.value = "";
+        idInputRef.current.value = "";
+    }
+};
+
+ 
 
 
   const validateRentForm = () => {
@@ -1608,11 +1734,11 @@ const handleTenantSubmit = async (e) => {
               <>
                 <div className="col-md-6">
                   <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-                  <input type="file" className="form-control" onChange={handleImageChange} />
+                  <input type="file" className="form-control" onChange={handleTenantBikeChange} />
                 </div>
                 <div className="col-md-6">
                   <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-                  <input type="file" className="form-control" onChange={handleRcChange} />
+                  <input type="file" className="form-control" onChange={handleTenantBikeRcChange} />
                 </div>
               </>
             )}

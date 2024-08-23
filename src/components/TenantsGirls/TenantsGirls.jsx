@@ -6,7 +6,7 @@ import Table from '../../Elements/Table'
 import ImageIcon from '../../images/Icons (10).png'
 import { useState, useEffect } from 'react'
 import { push, ref, storage } from "../../firebase/firebase";
-import { FetchData } from '../../ApiData/FetchData'
+
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { FaDownload } from "react-icons/fa";
@@ -25,9 +25,11 @@ import { Filesystem, FilesystemDirectory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 import jsPDF from 'jspdf';
 
+import imageCompression from 'browser-image-compression';
+
 const TenantsGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase } = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase,entireHMAdata } = useData();
   const role = localStorage.getItem('role');
   const { database, storage } = firebase;
 
@@ -249,6 +251,47 @@ const TenantsGirls = () => {
     document.addEventListener("keydown", handleClickOutside)
   }, []);
 
+  // useEffect(() => {
+  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
+  //     // Extract the values from the data object
+  //     const boysAndGirlsData = Object.values(entireHMAdata);
+  
+  //     // Ensure we have data and that it contains 'boys'
+  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+  //       const boysData = Object.values(boysAndGirlsData[0].girls);
+  
+  //       // Check if there's data in boysData
+  //       if (boysData.length > 0) {
+  //         const tenantsData = boysData[0].tenants || {};
+  //         const roomsData = boysData[0].rooms || {};
+  //         const extenantsData = boysData[0].extenants || {};
+  
+  //         // Map the data to the required format
+  //         const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+  //           id: key,
+  //           ...value,
+  //         }));
+  
+  //         // Update the state with the processed data
+  //         setTenants(loadedTenants); 
+  //         setGirlsRooms(loadedRooms);
+  //         setExTenants(loadedExTenants);
+  //       }
+  //     }
+  //   }
+  // }, []);
+  
+
 
   useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
@@ -355,11 +398,7 @@ const TenantsGirls = () => {
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
-  const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
-    }
-  };
+  
 
   // const handleTenantImageChange = (e) => {
   //   const file = e.target.files[0];
@@ -371,7 +410,11 @@ const TenantsGirls = () => {
   //     reader.readAsDataURL(file);
   //   }
   // };
-
+  const handleTenantImageChange = (e) => {
+    if (e.target.files[0]) {
+      setTenantImage(e.target.files[0]);
+    }
+  };
   const handleTenantIdChange = (e) => {
     if (e.target.files[0]) {
       const file = e.target.files[0]
@@ -401,154 +444,195 @@ const TenantsGirls = () => {
   //   }
   // };
 
+  const compressImage = async (file) => {
+    const options = {
+      maxSizeMB: 1, // Compress to a maximum of 1 MB (adjust as needed)
+      maxWidthOrHeight: 1920, 
+      useWebWorker: true, // Use a web worker for better performance
+      fileType: 'image/jpeg',
+    };
+  
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error('Error compressing the image:', error);
+    }
+  };
+
+  const checkImage = (type) =>  {
+    return type === "image/jpeg"
+  }
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!isEditing) {
-      e.target.querySelector('button[type="submit"]').disabled = true;
-      if (!validate()) {
-        e.target.querySelector('button[type="submit"]').disabled = false;
-        return
-      };
+        e.target.querySelector('button[type="submit"]').disabled = true;
+        if (!validate()) {
+            e.target.querySelector('button[type="submit"]').disabled = false;
+            return;
+        }
     } else {
-      if (!validate()) return;
+        if (!validate()) return;
     }
 
-    let imageUrlToUpdate = tenantImageUrl;
-    if (tenantImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, tenantImage);
-        imageUrlToUpdate = await getDownloadURL(snapshot.ref);
-        console.log(imageUrlToUpdate, "imageUrlToUpdate")
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
+    setShowModal(false);
+    setLoading(true);
 
-      }
-    }
-    
-    let idUrlToUpdate = tenantIdUrl;
-    if (tenantId) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, tenantId);
-        idUrlToUpdate = await getDownloadURL(snapshot.ref);
-        console.log(idUrlToUpdate, "idUrlToUpdate")
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-      }
-    }
-
-    let bikeUrlToUpdate = bikeImageUrl;
-    if (bikeImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeImage/${bikeImage.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, bikeImage);
-        bikeUrlToUpdate = await getDownloadURL(snapshot.ref);
-        console.log(bikeUrlToUpdate, "bikeUrlToUpdate")
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-
-      }
-    }
-
-    let bikeRcUrlToUpdate = bikeRcImageUrl;
-    if (bikeRcImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, bikeRcImage);
-        bikeRcUrlToUpdate = await getDownloadURL(snapshot.ref);
-        console.log(bikeRcUrlToUpdate, "bikeRcUrlToUpdate")
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-
-      }
-    }
-
-
-    const tenantData = {
-      roomNo: selectedRoom,
-      bedNo: selectedBed,
-      dateOfJoin,
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      mobileNo,
-      idNumber,
-      emergencyContact,
-      status,
-      // tenantImage,
-      tenantImageUrl: imageUrlToUpdate,
-      // tenantId,
-      tenantIdUrl: idUrlToUpdate,
-      bikeNumber,
-      permnentAddress,
-      // bikeImage,
-      // bikeRcImage
-      bikeImageUrl:bikeUrlToUpdate,
-      bikeRcImageUrl:bikeRcUrlToUpdate,
+    // Helper function to upload a file and return its URL
+    const uploadFile = async (file, path) => {
+        try {
+            const imageRef = storageRef(storage, path);
+            const snapshot = await uploadBytes(imageRef, file);
+            return await getDownloadURL(snapshot.ref);
+        } catch (error) {
+            console.error(`Error uploading file ${file.name}:`, error);
+            throw error;
+        }
     };
 
-    if (isEditing) {
-      setShowModal(false);
-      setLoading(true);
-      await update(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${currentId}`), tenantData).then(() => {
-        toast.success(t('toastMessages.tenantUpdated'), {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        setPhotoUrl(null);
-        setIdUrl(null);
-       setTenantImage(null);
-    
-      }).catch(error => {
-        toast.error(t('toastMessages.errorUpdatingTenant') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });;
-    } else {
-      setShowModal(false);
-      setLoading(true)
-      await push(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`), tenantData).then(() => {
-        toast.success(t('toastMessages.tenantAddedSuccess'), {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        e.target.querySelector('button[type="submit"]').disabled = false;
-      }).catch(error => {
-        toast.error(t('toastMessages.errorAddingTenant') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
-    }
-    setLoading(false);
-    resetForm();
-    setErrors({});
+    const tasks = [];
 
-  };
+    if (tenantImage) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = tenantImage;
+                console.log(tenantImage, "whatisComing");
+                if (checkImage(tenantImage.type)) {
+                    console.log("Executing compression for tenantImage");
+                    try {
+                        fileToUpload = await compressImage(tenantImage);
+                    } catch (error) {
+                        console.error("Error compressing tenant image:", error);
+                    }
+                }
+                return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+            })()
+        );
+    }
+    if (tenantId) {
+      tasks.push(
+          (async () => {
+              let fileToUpload = tenantId;
+
+              if (checkImage(tenantId.type)) {
+                  console.log("Executing compression for tenantId");
+                  try {
+                      fileToUpload = await compressImage(tenantId);
+                  } catch (error) {
+                      console.error("Error compressing tenant ID image:", error);
+                  }
+              }
+
+              return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
+          })()
+      );
+  }
+
+   
+
+    if (bikeImage) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = bikeImage;
+                if (checkImage(bikeImage.type)) {
+                    console.log("Executing compression for bikeImage");
+                    try {
+                        fileToUpload = await compressImage(bikeImage);
+                    } catch (error) {
+                        console.error("Error compressing bike image:", error);
+                    }
+                }
+                return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeImage/${bikeImage.name}`);
+            })()
+        );
+    }
+
+    if (bikeRcImage) {
+        tasks.push(
+            (async () => {
+                let fileToUpload = bikeRcImage;
+
+                if (checkImage(bikeRcImage.type)) {
+                    console.log("Executing compression for bikeRcImage");
+                    try {
+                        fileToUpload = await compressImage(bikeRcImage);
+                    } catch (error) {
+                        console.error("Error compressing bike RC image:", error);
+                    }
+                }
+                return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
+            })()
+        );
+    }
+
+    try {
+        const [imageUrlToUpdate, idUrlToUpdate, bikeUrlToUpdate, bikeRcUrlToUpdate] = await Promise.all(tasks);
+
+        const tenantData = {
+            roomNo: selectedRoom,
+            bedNo: selectedBed,
+            dateOfJoin,
+            name: name.charAt(0).toUpperCase() + name.slice(1),
+            mobileNo,
+            idNumber,
+            emergencyContact,
+            status,
+            tenantImageUrl: imageUrlToUpdate || tenantImageUrl,
+            tenantIdUrl: idUrlToUpdate || tenantIdUrl,
+            bikeNumber,
+            permnentAddress,
+            bikeImageUrl: bikeUrlToUpdate || bikeImageUrl,
+            bikeRcImageUrl: bikeRcUrlToUpdate || bikeRcImageUrl,
+        };
+
+        if (isEditing) {
+            await update(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${currentId}`), tenantData);
+            toast.success(t('toastMessages.tenantUpdated'), {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+        } else {
+            await push(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`), tenantData);
+            toast.success(t('toastMessages.tenantAddedSuccess'), {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            e.target.querySelector('button[type="submit"]').disabled = false;
+        }
+    } catch (error) {
+        console.error("Error submitting form:", error);
+        toast.error(t('toastMessages.errorSubmitting') + error.message, {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
+    } finally {
+        setLoading(false);
+        resetForm();
+        setErrors({});
+    }
+};
+
 
   const handleEdit = (tenant) => {
+    console.log(tenant, "ttt")
     setSelectedRoom(tenant.roomNo);
     setSelectedBed(tenant.bedNo);
     setDateOfJoin(tenant.dateOfJoin);
@@ -559,8 +643,28 @@ const TenantsGirls = () => {
     setStatus(tenant.status);
     setIsEditing(true);
     setCurrentId(tenant.id);
-    setTenantImage(tenant.tenantImage)
-    setTenantId(tenant.tenantId || '');
+
+    if(tenantImage){
+      setTenantImage(tenant.tenantImageUrl)
+    } else {
+      setTenantImageUrl(tenant.tenantImageUrl)
+    }
+    if(tenantId){
+      setTenantId(tenant.tenantIdUrl || '');
+    } else {
+      setTenantIdUrl(tenant.tenantIdUrl)
+    }
+    if(bikeImage){
+      setBikeImage(tenant.bikeImageUrl || '')
+    } else {
+      setBikeImageUrl(tenant.bikeImageUrl || '')
+    }
+    if(bikeRcImage){
+      setBikeRcImage(tenant.bikeRcImageUrl || '')
+    } else {
+      setBikeRcImageUrl(tenant.bikeRcImageUrl || '')
+    }
+
     setFileName(tenant.fileName || '');
     setHasBike(false);
     setShowModal(true);
@@ -615,8 +719,13 @@ const TenantsGirls = () => {
     setCurrentId('');
     setErrors({});
     setTenantImage(null);
+    setTenantImageUrl('');
     setTenantId(null);
-    setTenantImage('')
+    setTenantIdUrl('');
+    setBikeImage(null)
+    setBikeImageUrl('')
+    setBikeRcImage(null)
+    setBikeRcImageUrl('')    
     setTenantId('')
     setBikeNumber('NA');
     setPermnentAddress('')
@@ -740,8 +849,8 @@ const TenantsGirls = () => {
       console.log("Tenant with due date not found or due date is missing");
     }
 
-    if (singleUserDueDate && singleUserDueDate.tenantId) {
-      setSingleTenantProofId(singleUserDueDate.tenantId)
+    if (singleUserDueDate && singleUserDueDate.tenantIdUrl) {
+      setSingleTenantProofId(singleUserDueDate.tenantIdUrl)
     }
 
     if (singleUserDueDate && singleUserDueDate.permnentAddress) {
@@ -750,15 +859,15 @@ const TenantsGirls = () => {
     else {
       setTenantAddress("");
     }
-    if (singleUserDueDate && singleUserDueDate.bikeImage) {
-      setBikeImageField(singleUserDueDate.bikeImage);
+    if (singleUserDueDate && singleUserDueDate.bikeImageUrl) {
+      setBikeImageField(singleUserDueDate.bikeImageUrl);
 
     }
     else {
       setBikeImageField("");
     }
-    if (singleUserDueDate && singleUserDueDate.bikeRcImage) {
-      setBikeRcImageField(singleUserDueDate.bikeRcImage);
+    if (singleUserDueDate && singleUserDueDate.bikeRcImageUrl) {
+      setBikeRcImageField(singleUserDueDate.bikeRcImageUrl);
 
     }
     else {
@@ -805,7 +914,7 @@ const TenantsGirls = () => {
             progress: undefined,
           });
         });
-        fetchExTenants()
+        // fetchExTenants()
       }
     }, {
       onlyOnce: true
@@ -871,7 +980,7 @@ const TenantsGirls = () => {
 
   const exTenantRows = exTenants.map((tenant, index) => ({
     s_no: index + 1,
-    image: tenant.tenantImage,
+    image: tenant.tenantImageUrl,
     name: capitalizeFirstLetter(tenant.name),
     id: tenant.idNumber,
     mobile_no: tenant.mobileNo,
@@ -1522,9 +1631,9 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                     <label htmlFor='tenantUpload' class="form-label">
                       {t('dashboard.uploadImage')}
                     </label>
-                    {isEditing && tenantImage && (
+                    {isEditing && tenantImageUrl && (
                       <div>
-                        <img src={tenantImage} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
+                        <img src={ tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
