@@ -1275,7 +1275,7 @@ const handleTenantSubmit = async (e) => {
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                    <input id="PaidAmount" class="form-control" type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} name="paidAmount" onFocus={handleFocus} />
+                    <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="paidAmount" onFocus={handleFocus} />
                     {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
                   </div>
                   <div class="col-md-6 mb-3">
@@ -1363,7 +1363,7 @@ const handleTenantSubmit = async (e) => {
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}</label>
-                    <input id="PaidAmount" class="form-control" type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} name="paidAmount" onFocus={handleFocus} />
+                    <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="paidAmount" onFocus={handleFocus} />
                     {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
                   </div>
                   <div class="col-md-6 mb-3">

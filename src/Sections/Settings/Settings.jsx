@@ -26,7 +26,7 @@ const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData,expensesInteracted } = useData();
+  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag } = useData();
   const { database } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
@@ -45,7 +45,7 @@ const Settings = () => {
   const [vacatedEntireGirlsData, setVacatedEnitreGirlsData] = useState([]);
 
 
-  const [expensesDataTrigger,setExpensesDataTrigger] = useState(false);
+  const [expensesDataTrigger, setExpensesDataTrigger] = useState(false);
   const [entireBoysYearExpensesData, setEntireBoysYearExpensesData] = useState([])
   const [entireGirlsYearExpensesData, setEntireGirlsYearExpensesData] = useState([])
 
@@ -61,7 +61,7 @@ const Settings = () => {
   const [year, setYear] = useState(getCurrentYear());
   const [month, setMonth] = useState(getCurrentMonth())
 
-
+  console.log(activeFlag, "active")
 
   useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
@@ -175,7 +175,7 @@ const Settings = () => {
 
   const fetchExpensesData = async (hostelType, hostel) => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-  
+
     const promises = monthNames.map(month => {
       const monthRef = ref(database, `Hostel/${userUid}/${hostelType}/${hostel}/expenses/${year}-${month}`);
       return new Promise((resolve) => {
@@ -188,25 +188,25 @@ const Settings = () => {
         });
       });
     });
-  
+
     return await Promise.all(promises);
   };
-  
+
   // Usage in useEffect
   useEffect(() => {
     const fetchExpenses = async () => {
       const data = await fetchExpensesData(selectedHostelType === 'mens' ? 'boys' : 'girls', selectedHostelType === 'mens' ? activeBoysHostel : activeGirlsHostel);
       if (selectedHostelType === 'mens') {
-        console.log(data,"expensesData");
+        console.log(data, "expensesData");
         setEntireBoysYearExpensesData(data);
       } else {
         setEntireGirlsYearExpensesData(data);
       }
     };
-  
+
     fetchExpenses();
   }, [selectedHostelType, activeBoysHostel, activeGirlsHostel, expensesInteracted]);
-  
+
 
 
 
@@ -1696,6 +1696,13 @@ const handleVacatedBtnExcel = async () => {
     }
     // Generate a binary Excel file
     const fileData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+    // const handleChangeHostelType = (e) => {
+    //   console.log(e.target.value, "e.target")
+    //   if (e.target.value === "mens") {
+    //     changeActiveFlag("boys")
+    //   } else if (e.target.value === "girls") {
+    //     changeActiveFlag("girls")
+    //   }
 
     if (Capacitor.isNativePlatform()) {
         // Convert array buffer to base64
@@ -1741,22 +1748,15 @@ const handleVacatedBtnExcel = async () => {
 };
 
 
-
-
-
-
-
-
-
-
-
-
-const handleChangeHostelType =(e)=>{
+  const handleChangeHostelType = (e) => {
+    console.log(e.target.value, "e.target")
+    if (e.target.value === "mens") {
+      changeActiveFlag("boys")
+    } else if (e.target.value === "girls") {
+      changeActiveFlag("girls")
+    }
     setSelectedHostelType(e.target.value);
   }
-
-
-
 
 
   return (
@@ -1873,7 +1873,7 @@ const handleChangeHostelType =(e)=>{
           <p className='selectTypeText'>{t('settings.selectHostelType')}</p>
         </div>
         <div>
-          <select className='languageDropdown' value={selectedHostelType} onChange={handleChangeHostelType}>
+          <select className='languageDropdown' value={activeFlag} onChange={handleChangeHostelType}>
             <option value="mens" >{t('dashboard.mens')}</option>
             <option value="girls">{t('dashboard.womens')}</option>
           </select>

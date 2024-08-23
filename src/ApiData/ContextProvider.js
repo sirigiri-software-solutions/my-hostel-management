@@ -68,6 +68,7 @@ const DataProvider = ({ children }) => {
     madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
     madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
     lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
+    nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/register.json"
   };
 
   useEffect(() => {
