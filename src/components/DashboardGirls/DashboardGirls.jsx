@@ -1093,7 +1093,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     resetForm();
     setShowModal(false);
     setHasBike(false);
-    setBikeNumber("");
+    setBikeNumber("NA");
   };
 
 
