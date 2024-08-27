@@ -20,7 +20,7 @@ const DefaultModal = ({ show, handleClose }) => {
     });
     const [currentForm, setCurrentForm] = useState('');
     const [mensFormData, setMensFormData] = useState(null);
-    
+
 
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
@@ -43,7 +43,7 @@ const DefaultModal = ({ show, handleClose }) => {
             useWebWorker: true, // Use a web worker for better performance
             fileType: 'image/jpeg',
         };
-    
+
         try {
             const compressedFile = await imageCompression(file, options);
             return compressedFile;
@@ -52,16 +52,20 @@ const DefaultModal = ({ show, handleClose }) => {
             return null;
         }
     };
-    
+
     const handleMenFormSubmit = async (e) => {
         e.preventDefault();
-    
+        // Prevent multiple submissions
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+
         let boysHostelImageUrlToUpdate = boysHostelImageUrl;
-    
+
         if (boysHostelImage) { // Ensure that boysHostelImage is defined before proceeding
             try {
                 const compressedImage = await compressImage(boysHostelImage); // Renamed to avoid conflict
-                 
+
                 if (compressedImage) {
                     const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${newBoysHostelName}`);
                     const snapshot = await uploadBytes(imageRef, compressedImage);
@@ -72,42 +76,50 @@ const DefaultModal = ({ show, handleClose }) => {
                 console.error("Error uploading boys hostel image:", error);
             }
         }
-    
+
         const mensData = {
             name: newBoysHostelName,
             address: newBoysHostelAddress,
             hostelImage: boysHostelImageUrlToUpdate,
         };
-    
+
         setMensFormData(mensData);
-    
+
         if (selectedForms.women) {
             setCurrentForm('women');
         } else {
             submitHostelData(mensData, true);
         }
+        // Allow further submissions only after the process is completed
+        setIsSubmitting(false);
     };
-    
 
-    const handleWomenFormSubmit = async(e) => {
+
+    const handleWomenFormSubmit = async (e) => {
         e.preventDefault();
+
+        // Prevent multiple submissions
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
         let girlsHostelImageUrlToUpdate = girlsHostelImageUrl;
         if (girlsHostelImage) {
 
             try {
                 const compressedImage = await compressImage(girlsHostelImage); // Renamed to avoid conflict
-                 
+
                 if (compressedImage) {
                     const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${newGirlsHostelName}`);
                     const snapshot = await uploadBytes(imageRef, compressedImage);
-            girlsHostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
+                    girlsHostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
                     console.log(girlsHostelImageUrlToUpdate, "girlsHostelImageUrlToUpdate");
                 }
             } catch (error) {
                 console.error("Error uploading boys hostel image:", error);
             }
 
-           
+
         }
 
         const womensData = {
@@ -120,6 +132,8 @@ const DefaultModal = ({ show, handleClose }) => {
             submitHostelData(mensFormData, true);
         }
         submitHostelData(womensData, false);
+         // Allow further submissions only after the process is completed
+    setIsSubmitting(false);
     };
 
     const [newBoysHostelName, setNewBoysHostelName] = useState('');
@@ -217,7 +231,7 @@ const DefaultModal = ({ show, handleClose }) => {
             return;
         }
 
-        
+
         const newHostelRef = push(ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`));
 
         const hostelDetails = {

@@ -13,7 +13,7 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const ExpensesGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel , userUid, activeGirlsHostelButtons,firebase,setExpensesInteracted,expensesInteracted} = useData();
+  const { activeGirlsHostel , userUid, activeGirlsHostelButtons,firebase,setExpensesInteracted,expensesInteracted, entireHMAdata, fetchData} = useData();
   const {database} = firebase;
 
   const  role = localStorage.getItem('role');
@@ -145,6 +145,7 @@ window.addEventListener('keydown',handleOutsideClick);
           draggable: true,
           progress: undefined,
         });
+        fetchData();
       }).catch(error => {
         toast.error(t('toastMessages.errorAddingExpense') + error.message, {
           position: "top-center",
@@ -179,24 +180,43 @@ window.addEventListener('keydown',handleOutsideClick);
     return `${day}-${month}-${year}`;
   }
 
+  // useEffect(() => {
+  //   const formattedMonth = month.slice(0, 3);
+  //   const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
+  //   onValue(expensesRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedExpenses = [];
+  //     for (const key in data) {
+  //       loadedExpenses.push({
+  //         id: key,
+  //         ...data[key],
+  //         expenseDate: formatDate(data[key].expenseDate) 
+  //       });
+  //     }
+  //     setExpenses(loadedExpenses);
+  //     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
+  //     setTotal(totalExpenses);
+  //   });
+  // }, [month, year, activeGirlsHostel]);
+
   useEffect(() => {
+    if (!entireHMAdata || !activeGirlsHostel) return;
+
     const formattedMonth = month.slice(0, 3);
-    const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
-    onValue(expensesRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedExpenses = [];
-      for (const key in data) {
-        loadedExpenses.push({
-          id: key,
-          ...data[key],
-          expenseDate: formatDate(data[key].expenseDate) 
-        });
-      }
-      setExpenses(loadedExpenses);
-      const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
-      setTotal(totalExpenses);
-    });
-  }, [month, year, activeGirlsHostel]);
+    const expensesData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`] ; 
+    const loadedExpenses = [];
+    for (const key in expensesData) {
+      loadedExpenses.push({
+        id: key,
+        ...expensesData[key],
+        expenseDate: formatDate(expensesData[key].expenseDate),
+      });
+    }
+    setExpenses(loadedExpenses);
+
+    const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
+    setTotal(totalExpenses);
+  }, [entireHMAdata, activeGirlsHostel]);
 
   const columns = [
     t('expensesPage.sNo'),
@@ -298,6 +318,7 @@ window.addEventListener('keydown',handleOutsideClick);
             progress: undefined,
           });
           setEditingExpense(null);
+          fetchData();
         }).catch(error => {
           toast.error(t('toastMessages.errorUpdatinExpense')+ error.message, {
             position: "top-center",
@@ -337,6 +358,7 @@ window.addEventListener('keydown',handleOutsideClick);
         draggable: true,
         progress: undefined,
       });
+      fetchData();
       setEditingExpense(null);
     }).catch(error => {
       toast.error(t('toastMessages.errorDeletingExpense') + error.message, {
@@ -412,35 +434,55 @@ window.addEventListener('keydown',handleOutsideClick);
 
   
 const [totalAnnualExpenses, setTotalAnnualExpenses] = useState(0);
+
+// useEffect(() => {
+//   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+//   let total = 0;
+
+//   const fetchExpenses = async () => {
+//     const promises = monthNames.map(month => {
+//       const monthRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${month}`);
+//       return new Promise((resolve) => {
+//         onValue(monthRef, (snapshot) => {
+//           const expenses = snapshot.val();
+//           if (expenses) {
+//             const monthlyTotal = Object.values(expenses).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);
+//             resolve(monthlyTotal);
+//           } else {
+//             resolve(0);
+//           }
+//         }, {
+//           onlyOnce: true
+//         });
+//       });
+//     });
+
+//     const monthlyTotals = await Promise.all(promises);
+//     total = monthlyTotals.reduce((acc, curr) => acc + curr, 0);
+//     setTotalAnnualExpenses(total);
+//   };
+
+//   fetchExpenses();
+// }, [year, expenses, activeGirlsHostel]);
+
 useEffect(() => {
+  if (!entireHMAdata || !activeGirlsHostel) return;
+
   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-  let total = 0;
+  let totalAnnualExpenses = 0;
 
-  const fetchExpenses = async () => {
-    const promises = monthNames.map(month => {
-      const monthRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${month}`);
-      return new Promise((resolve) => {
-        onValue(monthRef, (snapshot) => {
-          const expenses = snapshot.val();
-          if (expenses) {
-            const monthlyTotal = Object.values(expenses).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);
-            resolve(monthlyTotal);
-          } else {
-            resolve(0);
-          }
-        }, {
-          onlyOnce: true
-        });
-      });
-    });
+  monthNames.forEach(month => {
+      const expensesData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${month}`];
+      
+      if (expensesData) {
+          const monthlyTotal = Object.values(expensesData).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);
+          totalAnnualExpenses += monthlyTotal;
+      }
+  });
 
-    const monthlyTotals = await Promise.all(promises);
-    total = monthlyTotals.reduce((acc, curr) => acc + curr, 0);
-    setTotalAnnualExpenses(total);
-  };
+  setTotalAnnualExpenses(totalAnnualExpenses);
+}, [entireHMAdata, activeGirlsHostel, year]);
 
-  fetchExpenses();
-}, [year, expenses, activeGirlsHostel]);
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);

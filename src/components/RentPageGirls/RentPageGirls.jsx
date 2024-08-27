@@ -16,18 +16,18 @@ import { useTranslation } from 'react-i18next';
 const RentPageGirls = () => {
   const { t } = useTranslation();
   const { data } = useContext(DataContext);
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase } = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, girlsRooms,  girlsTenants, girlsTenantsWithRents, fetchData} = useData();
   const { database } = firebase;
   const [searchQuery, setSearchQuery] = useState('');
-  const [tenants, setTenants] = useState([]);
-  const [rooms, setRooms] = useState({});
+  // const [tenants, setTenants] = useState([]);
+  // const [rooms, setRooms] = useState({});
   const [selectedTenant, setSelectedTenant] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [bedNumber, setBedNumber] = useState('');
   const [totalFee, setTotalFee] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
   const [due, setDue] = useState('');
-  const [tenantsWithRents, setTenantsWithRents] = useState([]);
+  // const [tenantsWithRents, setTenantsWithRents] = useState([]);
   const [paidDate, setPaidDate] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -100,29 +100,29 @@ Please note that you made your last payment on ${paidDate}.\n`
 
 
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-      })) : [];
-      setTenants(loadedTenants);
-    });
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+  //   onValue(tenantsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedTenants = data ? Object.keys(data).map(key => ({
+  //       id: key,
+  //       ...data[key],
+  //     })) : [];
+  //     setTenants(loadedTenants);
+  //   });
 
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setRooms(data);
-    });
-  }, [activeGirlsHostel]);
+  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val() || {};
+  //     setRooms(data);
+  //   });
+  // }, [activeGirlsHostel]);
 
 
   useEffect(() => {
     const updateTotalFeeFromRoom = () => {
 
-      const roomsArray = Object.values(rooms);
+      const roomsArray = Object.values(girlsRooms);
 
       const matchingRoom = roomsArray.find(room => room.roomNumber === roomNumber);
 
@@ -136,12 +136,12 @@ Please note that you made your last payment on ${paidDate}.\n`
     if (roomNumber) {
       updateTotalFeeFromRoom();
     }
-  }, [roomNumber, rooms]);
+  }, [roomNumber, girlsRooms]);
 
 
   useEffect(() => {
     if (selectedTenant) {
-      const tenant = tenants.find(t => t.id === selectedTenant);
+      const tenant = girlsTenants.find(t => t.id === selectedTenant);
       if (tenant) {
         setRoomNumber(tenant.roomNo || '');
         setBedNumber(tenant.bedNo || '');
@@ -156,19 +156,19 @@ Please note that you made your last payment on ${paidDate}.\n`
       setDateOfJoin('');
       setDueDate('');
     }
-  }, [selectedTenant, tenants]);
+  }, [selectedTenant, girlsTenants]);
 
   useEffect(() => {
-    const tenantIdsWithRents = tenantsWithRents.flatMap(tenant =>
+    const tenantIdsWithRents = girlsTenantsWithRents.flatMap(tenant =>
       tenant.rents.length > 0 ? [tenant.id] : []
     );
 
-    const availableTenants = tenants.filter(
+    const availableTenants = girlsTenants.filter(
       tenant => !tenantIdsWithRents.includes(tenant.id)
     );
 
     setAvailableTenants(availableTenants);
-  }, [tenants, tenantsWithRents, activeGirlsHostel]);
+  }, [girlsTenants, girlsTenantsWithRents, activeGirlsHostel]);
 
 
   useEffect(() => {
@@ -177,35 +177,35 @@ Please note that you made your last payment on ${paidDate}.\n`
     setDue(calculatedDue);
   }, [paidAmount, totalFee]);
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const tenantsData = snapshot.val();
-      const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+  //   onValue(tenantsRef, (snapshot) => {
+  //     const tenantsData = snapshot.val();
+  //     const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
 
-      const rentsPromises = tenantIds.map(tenantId => {
-        return new Promise((resolve) => {
-          const rentsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
-          onValue(rentsRef, (rentSnapshot) => {
-            const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
-              id: key,
-              ...rentSnapshot.val()[key],
-            })) : [];
-            resolve({ id: tenantId, ...tenantsData[tenantId], rents });
-          }, {
-            onlyOnce: true
-          });
-        });
-      });
+  //     const rentsPromises = tenantIds.map(tenantId => {
+  //       return new Promise((resolve) => {
+  //         const rentsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
+  //         onValue(rentsRef, (rentSnapshot) => {
+  //           const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
+  //             id: key,
+  //             ...rentSnapshot.val()[key],
+  //           })) : [];
+  //           resolve({ id: tenantId, ...tenantsData[tenantId], rents });
+  //         }, {
+  //           onlyOnce: true
+  //         });
+  //       });
+  //     });
 
-      Promise.all(rentsPromises).then(tenantsWithTheirRents => {
-        setTenantsWithRents(tenantsWithTheirRents);
-      });
-    });
-  }, [activeGirlsHostel]);
+  //     Promise.all(rentsPromises).then(tenantsWithTheirRents => {
+  //       setTenantsWithRents(tenantsWithTheirRents);
+  //     });
+  //   });
+  // }, [activeGirlsHostel]);
 
   const loadRentForEditing = (tenantId, rentId) => {
-    const tenant = tenantsWithRents.find(t => t.id === tenantId);
+    const tenant = girlsTenantsWithRents.find(t => t.id === tenantId);
     const rentRecord = tenant.rents.find(r => r.id === rentId);
 
     if (rentRecord) {
@@ -253,21 +253,19 @@ Please note that you made your last payment on ${paidDate}.\n`
   };
 
 
-  useEffect(() => {
-    if (selectedTenant) {
-      const tenant = tenants.find(t => t.id === selectedTenant);
-      if (tenant) {
+  // useEffect(() => {
+  //   if (selectedTenant) {
+  //     const tenant = girlsTenants.find(t => t.id === selectedTenant);
+  //     if (tenant) {
 
-        setDateOfJoin(tenant.dateOfJoin || '');
-
-
-        const currentDate = new Date(tenant.dateOfJoin);
-        const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1));
-        const formattedDueDate = dueDate.toISOString().split('T')[0];
-        setDueDate(formattedDueDate);
-      }
-    }
-  }, [selectedTenant, tenants]);
+  //       setDateOfJoin(tenant.dateOfJoin || '');
+  //       const currentDate = new Date(tenant.dateOfJoin);
+  //       const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1));
+  //       const formattedDueDate = dueDate.toISOString().split('T')[0];
+  //       setDueDate(formattedDueDate);
+  //     }
+  //   }
+  // }, [selectedTenant, girlsTenants]);
 
 
   const handleSubmit = async (e) => {
@@ -305,6 +303,7 @@ Please note that you made your last payment on ${paidDate}.\n`
         if (notify) {
           handleNotifyCheckbox(rentData);
         }
+        fetchData()
       }).catch(error => {
         toast.error(t('toastMessages.errorAddingRent') + error.message, {
           position: "top-center",
@@ -330,10 +329,10 @@ Please note that you made your last payment on ${paidDate}.\n`
           progress: undefined,
         });
         setIsEditing(false);
-        
         if (notify) {
           handleNotifyCheckbox(rentData);
         }
+        fetchData()
       }).catch(error => {
         toast.error(t('toastMessages.errorAddingRent') + error.message, {
           position: "top-center",
@@ -406,7 +405,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     t('rentsPage.update')
   ];
 
-  const rentsRows = tenantsWithRents.flatMap((tenant, index) => tenant.rents.map((rent) => ({
+  const rentsRows = girlsTenantsWithRents.flatMap((tenant, index) => tenant.rents.map((rent) => ({
     roomNumber: rent.roomNumber,
     name: tenant.name,
     mobileNo: tenant.mobileNo,
@@ -496,7 +495,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     setNotify(!notify)
 
     if (selectedTenant) {
-      const tenant = tenantsWithRents.find(t => t.id === selectedTenant);
+      const tenant = girlsTenantsWithRents.find(t => t.id === selectedTenant);
       
       const rentRecord = tenant.rents
       setNotifyUserInfo({ tenant, rentRecord });
@@ -580,7 +579,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
 
                             {isEditing ? (
-                              <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
+                              <option key={selectedTenant} value={selectedTenant}>{girlsTenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
                             ) : (
                               availableTenants.map(tenant => (
                                 <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
@@ -603,7 +602,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                         </div>
                         <div class="col-md-6 mb-3">
                           <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                          <input id="PaidAmount" class="form-control" type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} name="paidAmount" onFocus={handleFocus} />
+                          <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} name="paidAmount" onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} onFocus={handleFocus} />
                           {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
                         </div>
                         <div class="col-md-6 mb-3">
@@ -670,7 +669,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
 
                             {isEditing ? (
-                              <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
+                              <option key={selectedTenant} value={selectedTenant}>{girlsTenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
                             ) : (
                               availableTenants.map(tenant => (
                                 <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
@@ -695,7 +694,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                         </div>
                         <div class="col-md-6 mb-3">
                           <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                          <input id="PaidAmount" class="form-control" type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} name="paidAmount" onFocus={handleFocus} />
+                          <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)}  name="paidAmount" onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} onFocus={handleFocus} />
                           {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
                         </div>
                         <div class="col-md-6 mb-3">

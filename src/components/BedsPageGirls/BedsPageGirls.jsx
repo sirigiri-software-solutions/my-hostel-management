@@ -10,9 +10,9 @@ import { useTranslation } from 'react-i18next';
 
 const BedsPageGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel, userUid, firebase } = useData();
+  const { activeGirlsHostel, userUid, firebase, girlsRooms } = useData();
   const { database } = firebase;
-  const [girlsRooms, setGirlsRooms] = useState([])
+  // const [girlsRooms, setGirlsRooms] = useState([])
   const [bedsData, setBedsData] = useState([]);
   const [tenants, setTenants] = useState([]);
 
@@ -22,20 +22,21 @@ const BedsPageGirls = () => {
   const [roomNumbersToShow, setRoomNumbersToShow] = useState([]);
   const [floorNumbersToShow, setFloorNumbersToShow] = useState([]);
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setGirlsRooms(loadedRooms);
-    })
-  }, [activeGirlsHostel]);
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setGirlsRooms(loadedRooms);
+  //   })
+  // }, [activeGirlsHostel]);
+
   // Fetch tenants data
   useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);

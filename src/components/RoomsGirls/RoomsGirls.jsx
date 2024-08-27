@@ -20,13 +20,13 @@ const RoomsGirls = () => {
   } else if (role === "subAdmin") {
     adminRole = "Sub-admin"
   }
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase } = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, fetchData, girlsRooms } = useData();
   const { database } = firebase;
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
   const [bedRent, setBedRent] = useState('');
-  const [rooms, setRooms] = useState([]);
+  // const [rooms, setRooms] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState('');
   const [createdBy, setCreatedBy] = useState(adminRole);
@@ -87,7 +87,7 @@ const RoomsGirls = () => {
 
     if (!floorNumber.trim()) newErrors.floorNumber = 'Floor number is required';
     if (!roomNumber.trim()) newErrors.roomNumber = 'Room number is required';
-    else if (rooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
+    else if (girlsRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
       newErrors.roomNumber = 'Room number already exists';
     }
     if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
@@ -117,6 +117,7 @@ const RoomsGirls = () => {
           draggable: true,
           progress: undefined,
         });
+        fetchData()
         setIsEditing(false);
       }).catch(error => {
         toast.error("Error updating room: " + error.message, {
@@ -148,6 +149,7 @@ const RoomsGirls = () => {
           draggable: true,
           progress: undefined,
         });
+        fetchData()
       }).catch(error => {
         toast.error("Error adding room: " + error.message, {
           position: "top-center",
@@ -162,8 +164,7 @@ const RoomsGirls = () => {
     }
     setShowModal(false);
     resetForm();
-    setUpdateDate(now);
-
+    setUpdateDate(now); 
     setErrors({});
   };
   const [showConfirmationPopUp, setShowConfirmationPopUp] = useState(false);
@@ -207,6 +208,7 @@ const RoomsGirls = () => {
                   draggable: true,
                   progress: undefined,
                 });
+                fetchData()
               }).catch(error => {
                 toast.error("Error deleting room: " + error.message, {
                   position: "top-center",
@@ -239,12 +241,6 @@ const RoomsGirls = () => {
     } catch (error) {
       console.error('Error fetching data:', error);
     }
-   
-
-
-
-
-
    
   }
 
@@ -294,20 +290,20 @@ const RoomsGirls = () => {
     setErrors({});
   };
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setRooms(loadedRooms);
-    });
-  }, [activeGirlsHostel]);
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setRooms(loadedRooms);
+  //   });
+  // }, [activeGirlsHostel]);
 
   const columns = [
     t('roomsPage.S.No'),
@@ -335,7 +331,7 @@ const RoomsGirls = () => {
 
 
   useEffect(() => {
-    const rows = rooms.map((room, index) => ({
+    const rows = girlsRooms.map((room, index) => ({
       s_no: index + 1,
       room_no: room.roomNumber,
       floor: capitalizeFirstLetter(room.floorNumber),
@@ -351,7 +347,7 @@ const RoomsGirls = () => {
       </button>
     }));
     setInitialRows(rows);
-  }, [rooms, activeGirlsHostel]);
+  }, [girlsRooms, activeGirlsHostel]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [initialRows, setInitialRows] = useState([]);

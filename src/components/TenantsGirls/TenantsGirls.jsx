@@ -22,7 +22,7 @@ import imageCompression from 'browser-image-compression';
 
 const TenantsGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase,entireHMAdata } = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, entireHMAdata , fetchData, girlsTenants, girlsRooms} = useData();
   const role = localStorage.getItem('role');
   const { database, storage } = firebase;
 
@@ -37,7 +37,7 @@ const TenantsGirls = () => {
   const [idNumber, setIdNumber] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [status, setStatus] = useState('occupied');
-  const [tenants, setTenants] = useState([]);
+  // const [tenants, setTenants] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
@@ -45,7 +45,7 @@ const TenantsGirls = () => {
   const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantId, setTenantId] = useState(null);
   const [tenantIdUrl, setTenantIdUrl] = useState('');
-  const [girlsRoomsData, setGirlsRoomsData] = useState([]);
+  // const [girlsRoomsData, setGirlsRoomsData] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   const [userDetailsTenantPopup, setUserDetailsTenantsPopup] = useState(false);
@@ -179,33 +179,34 @@ const TenantsGirls = () => {
   
 
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      setTenants(loadedTenants);
-    });
-  }, [activeGirlsHostel]);
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+  //   onValue(tenantsRef, snapshot => {
+  //     const data = snapshot.val() || {};
+  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
+  //       id: key,
+  //       ...value,
+  //     }));
+  //     setTenants(loadedTenants);
+  //   });
+  // }, [activeGirlsHostel]);
 
-  const [girlsRooms, setGirlsRooms] = useState([]);
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setGirlsRooms(loadedRooms);
-    });
-  }, [activeGirlsHostel]);
+
+  // const [girlsRooms, setGirlsRooms] = useState([]);
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setGirlsRooms(loadedRooms);
+  //   });
+  // }, [activeGirlsHostel]);
 
 
 
@@ -258,7 +259,7 @@ const TenantsGirls = () => {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
 
-    const isBedOccupied = tenants.some(tenant => {
+    const isBedOccupied = girlsTenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentId;
     });
 
@@ -485,6 +486,7 @@ const TenantsGirls = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
         } else {
             await push(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`), tenantData);
             toast.success(t('toastMessages.tenantAddedSuccess'), {
@@ -496,6 +498,7 @@ const TenantsGirls = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
             e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
@@ -647,7 +650,7 @@ const TenantsGirls = () => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-  const rows = tenants.map((tenant, index) => ({
+  const rows = girlsTenants.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
     name: capitalizeFirstLetter(tenant.name),
@@ -707,7 +710,7 @@ const TenantsGirls = () => {
 
 
     const [roomNo, bedNo] = tenant.room_bed_no.split('/');
-    const singleUserDueDate = tenants.find(eachTenant =>
+    const singleUserDueDate = girlsTenants.find(eachTenant =>
       eachTenant.name === tenant.name &&
       eachTenant.mobileNo === tenant.mobile_no &&
       eachTenant.roomNo === roomNo &&
@@ -777,6 +780,7 @@ const TenantsGirls = () => {
             draggable: true,
             progress: undefined,
           });
+          fetchData();
         }).catch(error => {
           toast.error("Error Tenant Vacate " + error.message, {
             position: "top-center",
