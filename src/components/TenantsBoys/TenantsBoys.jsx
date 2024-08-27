@@ -24,7 +24,7 @@ import imageCompression from 'browser-image-compression';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase,entireHMAdata,fetchData} = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, entireHMAdata, fetchData, boysRooms, boysTenants} = useData();
   const role = localStorage.getItem('role');
   const { database,storage } = firebase;
 
@@ -37,7 +37,7 @@ const TenantsBoys = () => {
   const [idNumber, setIdNumber] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [status, setStatus] = useState('occupied');
-  const [tenants, setTenants] = useState([]);
+  // const [tenants, setTenants] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
@@ -57,7 +57,7 @@ const TenantsBoys = () => {
   const [singleTenantAddress, setSingleTenantAddress] = useState('');
   const [singleTenanantBikeNum,setSingleTenantBikeNum] = useState('');
 
-  const [boysRooms, setBoysRooms] = useState([]);
+  // const [boysRooms, setBoysRooms] = useState([]);
   const [exTenants, setExTenants] = useState([]);
   const [showExTenants, setShowExTenants] = useState(false);
   const [hasBike, setHasBike] = useState(false);
@@ -152,7 +152,7 @@ const TenantsBoys = () => {
 
 
   const { data } = useContext(DataContext);
-  const [boysTenants, setBoysTenants] = useState([]);
+  // const [boysTenants, setBoysTenants] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   // useEffect(() => {
@@ -193,32 +193,34 @@ const TenantsBoys = () => {
   
 
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      setTenants(loadedTenants);
-    });
-  }, [activeBoysHostel]);
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+  //   onValue(tenantsRef, snapshot => {
+  //     const data = snapshot.val() || {};
+  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
+  //       id: key,
+  //       ...value,
+  //     }));
+  //     setTenants(loadedTenants);
+  //   });
+  // }, [activeBoysHostel]);
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setBoysRooms(loadedRooms);
-    });
-  }, [activeBoysHostel]);
+  // console.log(tenants, "tttenants")
+
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setBoysRooms(loadedRooms);
+  //   });
+  // }, [activeBoysHostel]);
 
 
   const validate = () => {
@@ -256,7 +258,7 @@ const TenantsBoys = () => {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
 
-    const isBedOccupied = tenants.some(tenant => {
+    const isBedOccupied = boysTenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentId;
     });
 
@@ -482,6 +484,7 @@ const TenantsBoys = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
         } else {
             await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData);
             toast.success(t('toastMessages.tenantAddedSuccess'), {
@@ -493,6 +496,7 @@ const TenantsBoys = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
             e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
@@ -820,8 +824,8 @@ const TenantsBoys = () => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-console.log(tenants, "tenants")
-  const rows = tenants.map((tenant, index) => ({
+
+  const rows = boysTenants.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
     name: tenant.name,
@@ -873,7 +877,7 @@ console.log(tenants, "tenants")
 
 
     const [roomNo, bedNo] = tenant.room_bed_no.split('/');
-    const singleUserDueDate = tenants.find(eachTenant =>
+    const singleUserDueDate = boysTenants.find(eachTenant =>
       eachTenant.name === tenant.name &&
       eachTenant.mobileNo === tenant.mobile_no &&
       eachTenant.roomNo === roomNo &&
@@ -945,6 +949,7 @@ console.log(tenants, "tenants")
             draggable: true,
             progress: undefined,
           });
+          fetchData();
         }).catch(error => {
           toast.error("Error Tenant Vacate " + error.message, {
             position: "top-center",

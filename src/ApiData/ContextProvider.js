@@ -42,49 +42,149 @@ const DataProvider = ({ children }) => {
   // trying to fetch entire data from context
   
   
-//   const [defaultArea,setDefaultArea] = useState(localStorage.getItem('userarea') || 'default')
-//   const [entireHMAdata,setEntireHMAdata] = useState([]);
+  const [defaultArea, setDefaultArea] = useState(localStorage.getItem('userarea') || 'default')
+  const [entireHMAdata, setEntireHMAdata] = useState([]);
 
-//   const areaToApiEndPointEntireData = {
-//     ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
-//     srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
-//     secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
-//     default:"https://defaulthostel-default-rtdb.firebaseio.com/register.json",
-//     kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
-//     gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
-//     ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
-//     dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
-//     himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
-//     madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
-//     madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
-//     lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
-//     nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/Hostel.json",
-//   }
+  const areaToApiEndPointEntireData = {
+    ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
+    srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
+    secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
+    default:"https://defaulthostel-default-rtdb.firebaseio.com/register.json",
+    kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
+    gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
+    ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
+    dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
+    himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
+    madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
+    madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/Hostel.json",
+    lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
+    nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/Hostel.json",
+  }
 
-//   const fetchData = async () => {
-//     const api = areaToApiEndPointEntireData[defaultArea];
-//     const options = {
-//       method: "GET",
-//     };
+  const fetchData = async () => {
+    const api = areaToApiEndPointEntireData[defaultArea];
+    const options = {
+      method: "GET",
+    };
 
-//     try {
-//       const response = await fetch(api, options);
-//       if (!response.ok) {
-//         throw new Error(`HTTP error! Status: ${response.status}`);
-//       }
-//       const data = await response.json();
-//       console.log(data, "EntireDataOfHMA");
-//       // Handle the data (e.g., set it to state)
-//       setEntireHMAdata(data);
-//     } catch (error) {
-//       console.error("Error fetching data:", error.message); // Improved error logging
-//     }
-//   };
+    try {
+      const response = await fetch(api, options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(data, "EntireDataOfHMA");
+      // Handle the data (e.g., set it to state)
+      setEntireHMAdata(data);
+    } catch (error) {
+      console.error("Error fetching data:", error.message); // Improved error logging
+    }
+  };
 
-//   useEffect(() => {
-//     fetchData();
-// }, []);
+  useEffect(() => {
+    fetchData();
+}, []);
 
+console.log(entireHMAdata, "entireHMAdata")
+const [boysRooms, setBoysRooms] = useState()
+const [girlsRooms, setGirlsRooms] = useState()
+const [boysTenants, setBoysTenants] = useState([]);  // State to hold boys tenants data
+  const [girlsTenants, setGirlsTenants] = useState([]);
+  const [boysTenantsWithRents, setBoysTenantsWithRents] = useState([]);
+  const [girlsTenantsWithRents, setGirlsTenantsWithRents] = useState([]);
+ // Extract and assign rooms data from entireHMAdata
+ useEffect(() => {
+  if (entireHMAdata && userUid) {
+
+    const boysRoomsData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.rooms || {};
+    const loadedBoysRooms = [];
+    for (const key in boysRoomsData) {
+      loadedBoysRooms.push({
+        id: key,
+        ...boysRoomsData[key],
+      });
+    }
+    setBoysRooms(loadedBoysRooms);  
+
+    const girlsRoomsData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.rooms || {};
+    const loadedGirlsRooms = [];
+    for (const key in girlsRoomsData) {
+      loadedGirlsRooms.push({
+        id: key,
+        ...girlsRoomsData[key],
+      });
+    }
+    setGirlsRooms(loadedGirlsRooms);  
+
+
+      // Extract boys tenants
+      const boysTenantsData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.tenants || {};
+      const loadedBoysTenants = [];
+      for (const key in boysTenantsData) {
+        loadedBoysTenants.push({
+          id: key,
+          ...boysTenantsData[key],
+        });
+      }
+      setBoysTenants(loadedBoysTenants);  // Update the boysTenants state
+
+      if (!boysTenantsData) return;
+
+      // Process tenants to include rent data
+      const processedBoysTenants = Object.keys(boysTenantsData).map(tenantId => {
+        const tenant = boysTenantsData[tenantId];
+        const rents = tenant.rents ? Object.keys(tenant.rents).map(rentId => ({
+          id: rentId,
+          ...tenant.rents[rentId],
+        })) : [];
+        return {
+          id: tenantId,
+          ...tenant,
+          rents,
+        };
+      });
+      setBoysTenantsWithRents(processedBoysTenants)
+  
+
+      // Extract girls tenants
+      const girlsTenantsData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.tenants || {};
+      const loadedGirlsTenants = [];
+      for (const key in girlsTenantsData) {
+        loadedGirlsTenants.push({
+          id: key,
+          ...girlsTenantsData[key],
+        });
+      }
+      setGirlsTenants(loadedGirlsTenants);  // Update the girlsTenants state
+
+      if (!girlsTenantsData) return;
+
+      // Process tenants to include rent data
+      const processedGirlsTenants = Object.keys(girlsTenantsData).map(tenantId => {
+        const tenant = girlsTenantsData[tenantId];
+        const rents = tenant.rents ? Object.keys(tenant.rents).map(rentId => ({
+          id: rentId,
+          ...tenant.rents[rentId],
+        })) : [];
+        return {
+          id: tenantId,
+          ...tenant,
+          rents,
+        };
+      });
+      setGirlsTenantsWithRents(processedGirlsTenants)
+
+      const boysExpenses = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses
+      console.log(boysExpenses, "boysExpenses")
+  }
+}, [entireHMAdata, activeBoysHostel, activeGirlsHostel, userUid, ]);
+
+console.log(boysRooms, "tttboysRooms");
+console.log(girlsRooms, "tttgirlsRooms");
+console.log(boysTenants, "tttboysTenants");
+console.log(girlsTenants, "tttgirlsTenants");
+console.log(boysTenantsWithRents, "boysTenantsWithRents")
+console.log(girlsTenantsWithRents, "girlsTenantsWithRents")
 
   // end to get entireData
 
@@ -100,7 +200,7 @@ const DataProvider = ({ children }) => {
     // hyderabad: "https://ameerpet-588ee-default-rtdb.firebaseio.com/register.json",
     ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
     srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
-    secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
+    // secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
     default:"https://defaulthostel-default-rtdb.firebaseio.com/register.json",
     kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
     gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
@@ -265,7 +365,41 @@ const DataProvider = ({ children }) => {
   console.log(boysExTenantsData, "exx")
   console.log(girlsExTenantsData, "exx")
   return (
-    <DataContext.Provider value={{ activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelName, activeGirlsHostelName, setActiveGirlsHostelName, activeBoysHostelButtons, activeGirlsHostel, setActiveGirlsHostel, activeGirlsHostelButtons, areaToApiEndpoint, setUserArea, userUid, firebase, setArea, setUserUid, activeFlag,  changeActiveFlag, girlsTenantsData, boysTenantsData, girlsExTenantsData, boysExTenantsData,expensesInteracted,setExpensesInteracted,}}>
+    <DataContext.Provider
+     value={{ 
+      activeBoysHostel, 
+      setActiveBoysHostel, 
+      setActiveBoysHostelName, 
+      activeBoysHostelName, 
+      activeGirlsHostelName, 
+      setActiveGirlsHostelName, 
+      activeBoysHostelButtons, 
+      activeGirlsHostel, 
+      setActiveGirlsHostel, 
+      activeGirlsHostelButtons, 
+      areaToApiEndpoint, 
+      setUserArea, 
+      userUid, 
+      firebase, 
+      setArea, 
+      setUserUid, 
+      activeFlag,  
+      changeActiveFlag, 
+      girlsTenantsData, 
+      boysTenantsData, 
+      girlsExTenantsData, 
+      boysExTenantsData,
+      expensesInteracted,
+      setExpensesInteracted, 
+      fetchData, 
+      boysRooms, 
+      girlsRooms, 
+      boysTenants, 
+      girlsTenants,
+      boysTenantsWithRents,
+      girlsTenantsWithRents,
+      entireHMAdata,
+      }}>
       {children}
     </DataContext.Provider>
   );

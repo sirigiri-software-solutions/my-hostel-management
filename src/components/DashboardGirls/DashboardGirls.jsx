@@ -31,12 +31,10 @@ const DashboardGirls = () => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
 
 
-  const { activeGirlsHostel, setActiveGirlsHostel,setActiveGirlsHostelName, activeGirlsHostelButtons, userUid, firebase,  changeActiveFlag } = useData();
+  const { activeGirlsHostel, setActiveGirlsHostel,setActiveGirlsHostelName, activeGirlsHostelButtons, userUid, firebase,  changeActiveFlag, girlsRooms, fetchData, girlsTenants, girlsTenantsWithRents } = useData();
   const { database, storage } = firebase;
 
   const [loading, setLoading] = useState(false);
-
-
 
 
   const [modelText, setModelText] = useState('');
@@ -44,7 +42,7 @@ const DashboardGirls = () => {
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
-  const [rooms, setRooms] = useState([]);
+  // const [rooms, setRooms] = useState([]);
   const [bedRent, setBedRent] = useState('');
   const [currentId, setCurrentId] = useState('');
   const [createdBy, setCreatedBy] = useState(adminRole);
@@ -62,7 +60,7 @@ const DashboardGirls = () => {
   const [idNumber, setIdNumber] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [status, setStatus] = useState('occupied');
-  const [tenants, setTenants] = useState([]);
+  // const [tenants, setTenants] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentTenantId, setCurrentTenantId] = useState('');
   const [tenatErrors, setTenantErrors] = useState({});
@@ -103,12 +101,12 @@ const DashboardGirls = () => {
     rooms: '',
     status: ''
   });
-  const [girlsRooms, setGirlsRooms] = useState([]);
+  // const [girlsRooms, setGirlsRooms] = useState([]);
   const [bedNumber, setBedNumber] = useState('');
   const [totalFee, setTotalFee] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
   const [due, setDue] = useState('');
-  const [tenantsWithRents, setTenantsWithRents] = useState([]);
+  // const [tenantsWithRents, setTenantsWithRents] = useState([]);
   const [paidDate, setPaidDate] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [editingRentId, setEditingRentId] = useState(null);
@@ -178,20 +176,20 @@ const DashboardGirls = () => {
   }, [showModal]);
 
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setRooms(loadedRooms);
-    });
-  }, [activeGirlsHostel]);
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setRooms(loadedRooms);
+  //   });
+  // }, [activeGirlsHostel]);
 
   useEffect(() => {
     const formattedMonth = month.slice(0, 3).toLowerCase();
@@ -215,33 +213,35 @@ const DashboardGirls = () => {
   }, [activeGirlsHostel]);
 
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      setTenants(loadedTenants);
-    });
-  }, [activeGirlsHostel]);
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+  //   onValue(tenantsRef, snapshot => {
+  //     const data = snapshot.val() || {};
+  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
+  //       id: key,
+  //       ...value,
+  //     }));
+  //     setTenants(loadedTenants);
+  //   });
+  // }, [activeGirlsHostel]);
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setGirlsRooms(loadedRooms);
-    });
-    // Fetch tenants
-  }, [activeGirlsHostel]);
+
+
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setGirlsRooms(loadedRooms);
+  //   });
+  //   // Fetch tenants
+  // }, [activeGirlsHostel]);
 
 
 
@@ -259,7 +259,7 @@ const DashboardGirls = () => {
 
   useEffect(() => {
     const updateTotalFeeFromRoom = () => {
-      const roomsArray = Object.values(rooms);
+      const roomsArray = Object.values(girlsRooms);
       const matchingRoom = roomsArray.find(room => room.roomNumber === roomNumber);
 
       if (matchingRoom && matchingRoom.bedRent) {
@@ -272,12 +272,12 @@ const DashboardGirls = () => {
     if (roomNumber) {
       updateTotalFeeFromRoom();
     }
-  }, [roomNumber, rooms]);
+  }, [roomNumber, girlsRooms]);
 
 
   useEffect(() => {
     if (selectedTenant) {
-      const tenant = tenants.find(t => t.id === selectedTenant);
+      const tenant = girlsTenants.find(t => t.id === selectedTenant);
       if (tenant) {
         setRoomNumber(tenant.roomNo || '');
         setBedNumber(tenant.bedNo || '');
@@ -291,19 +291,19 @@ const DashboardGirls = () => {
       setDateOfJoin('');
       setDueDate('');
     }
-  }, [selectedTenant, tenants, activeGirlsHostel]);
+  }, [selectedTenant, girlsTenants, activeGirlsHostel]);
 
   useEffect(() => {
-    const tenantIdsWithRents = tenantsWithRents.flatMap(tenant =>
+    const tenantIdsWithRents = girlsTenantsWithRents.flatMap(tenant =>
       tenant.rents.length > 0 ? [tenant.id] : []
     );
 
-    const availableTenants = tenants.filter(
+    const availableTenants = girlsTenants.filter(
       tenant => !tenantIdsWithRents.includes(tenant.id)
     );
 
     setAvailableTenants(availableTenants);
-  }, [tenants, tenantsWithRents, activeGirlsHostel]);
+  }, [girlsTenants, girlsTenantsWithRents, activeGirlsHostel]);
 
 
   useEffect(() => {
@@ -311,32 +311,32 @@ const DashboardGirls = () => {
     setDue(calculatedDue);
   }, [paidAmount, totalFee]);
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const tenantsData = snapshot.val();
-      const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+  //   onValue(tenantsRef, (snapshot) => {
+  //     const tenantsData = snapshot.val();
+  //     const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
 
-      const rentsPromises = tenantIds.map(tenantId => {
-        return new Promise((resolve) => {
-          const rentsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
-          onValue(rentsRef, (rentSnapshot) => {
-            const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
-              id: key,
-              ...rentSnapshot.val()[key],
-            })) : [];
-            resolve({ id: tenantId, ...tenantsData[tenantId], rents });
-          }, {
-            onlyOnce: true
-          });
-        });
-      });
+  //     const rentsPromises = tenantIds.map(tenantId => {
+  //       return new Promise((resolve) => {
+  //         const rentsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
+  //         onValue(rentsRef, (rentSnapshot) => {
+  //           const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
+  //             id: key,
+  //             ...rentSnapshot.val()[key],
+  //           })) : [];
+  //           resolve({ id: tenantId, ...tenantsData[tenantId], rents });
+  //         }, {
+  //           onlyOnce: true
+  //         });
+  //       });
+  //     });
 
-      Promise.all(rentsPromises).then(tenantsWithTheirRents => {
-        setTenantsWithRents(tenantsWithTheirRents);
-      });
-    });
-  }, []);
+  //     Promise.all(rentsPromises).then(tenantsWithTheirRents => {
+  //       setTenantsWithRents(tenantsWithTheirRents);
+  //     });
+  //   });
+  // }, []);
 
 
   useEffect(() => {
@@ -359,7 +359,7 @@ const DashboardGirls = () => {
     const allBeds = girlsRooms.flatMap(room => {
       return Array.from({ length: room.numberOfBeds }, (_, i) => {
         const bedNumber = i + 1;
-        const tenant = tenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        const tenant = girlsTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
         return {
           floorNumber: room.floorNumber,
           roomNumber: room.roomNumber,
@@ -370,7 +370,7 @@ const DashboardGirls = () => {
       });
     });
     setBedsData(allBeds);
-  }, [girlsRooms, tenants]);
+  }, [girlsRooms, girlsTenants]);
 
 
   // const handleImageChange = (e) => {
@@ -505,7 +505,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     const newErrors = {};
     if (!floorNumber.trim()) newErrors.floorNumber = t('errors.floorNumberRequired');
     if (!roomNumber.trim()) newErrors.roomNumber = t('errors.roomNumberRequired');
-    else if (rooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
+    else if (girlsRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
       newErrors.roomNumber = t('errors.roomNumberExists');
     }
     if (!numberOfBeds) newErrors.numberOfBeds = t('errors.numberOfBedsRequired');
@@ -533,6 +533,7 @@ Please note that you made your last payment on ${paidDate}.\n`
         draggable: true,
         progress: undefined,
       });
+      fetchData()
     }).catch(error => {
       toast.error(t('toastMessages.errorAddingRoom') + error.message, {
         position: "top-center",
@@ -555,7 +556,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     setShowModal(false);
   };
 
-  const totalBeds = rooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
+  const totalBeds = girlsRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -608,7 +609,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
 
-    const isBedOccupied = tenants.some(tenant => {
+    const isBedOccupied = girlsTenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentTenantId;
     });
 
@@ -826,6 +827,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                 draggable: true,
                 progress: undefined,
             });
+            fetchData();
         } else {
             await push(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`), tenantData);
             toast.success(t('toastMessages.tenantAddedSuccess'), {
@@ -837,6 +839,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                 draggable: true,
                 progress: undefined,
             });
+            fetchData();
             e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
@@ -931,6 +934,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           draggable: true,
           progress: undefined,
         });
+        fetchData()
         setIsEditing(false);
         if (notify) {
           handleNotifyCheckbox(rentData);
@@ -960,6 +964,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           draggable: true,
           progress: undefined,
         });
+        fetchData();
         setIsEditing(false);
         if (notify) {
           handleNotifyCheckbox(rentData);
@@ -1036,20 +1041,20 @@ Please note that you made your last payment on ${paidDate}.\n`
     {
       image: Rooms,
       heading: t('dashboard.totalRooms'),
-      number: `${rooms.length}`,
+      number: `${girlsRooms.length}`,
       btntext: t('dashboard.addRooms'),
     },
 
     {
       image: Tenants,
       heading: t('dashboard.totalTenants'),
-      number: `${tenants.length}`,
+      number: `${girlsTenants.length}`,
       btntext: t('dashboard.addTenants'),
     },
     {
       image: Beds,
       heading: t('dashboard.totalBeds'),
-      number: `${totalBeds}/${totalBeds - tenants.length}`,
+      number: `${totalBeds}/${totalBeds - girlsTenants.length}`,
       btntext: t('dashboard.addRent'),
     },
     {
@@ -1147,6 +1152,7 @@ Please note that you made your last payment on ${paidDate}.\n`
           draggable: true,
           progress: undefined,
         });
+        fetchData();
       }).catch(error => {
         toast.error(t('toastMessages.errorAddingExpense') + error.message, {
           position: "top-center",
@@ -1346,7 +1352,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                     <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
                       <option value="">{t('dashboard.selectTenant')} *</option>
                       {isEditing ? (
-                        <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
+                        <option key={selectedTenant} value={selectedTenant}>{girlsTenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
                       ) : (
                         availableTenants.map(tenant => (
                           <option key={tenant.id} value={tenant.id}>{tenant.name}</option>

@@ -30,7 +30,7 @@ const DashboardBoys = () => {
     adminRole = "Sub-admin"
   }
   const isUneditable = role === 'admin' || role === 'subAdmin';
-  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag } = useData();
+  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag, boysRooms, fetchData, boysTenants, boysTenantsWithRents} = useData();
   const { database, storage } = firebase;
 
   const [loading,setLoading] = useState(false);
@@ -40,7 +40,7 @@ const DashboardBoys = () => {
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
-  const [rooms, setRooms] = useState([]);
+  // const [rooms, setRooms] = useState([]);
   const [bedRent, setBedRent] = useState('');
   const [currentId, setCurrentId] = useState('');
   const [createdBy, setCreatedBy] = useState(adminRole);
@@ -58,7 +58,7 @@ const DashboardBoys = () => {
   const [idNumber, setIdNumber] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [status, setStatus] = useState('occupied');
-  const [tenants, setTenants] = useState([]);
+  // const [tenants, setTenants] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentTenantId, setCurrentTenantId] = useState('');
   const [tenatErrors, setTenantErrors] = useState({});
@@ -105,7 +105,7 @@ const DashboardBoys = () => {
   const [totalFee, setTotalFee] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
   const [due, setDue] = useState('');
-  const [tenantsWithRents, setTenantsWithRents] = useState([]);
+  // const [tenantsWithRents, setTenantsWithRents] = useState([]);
   const [paidDate, setPaidDate] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [editingRentId, setEditingRentId] = useState(null);
@@ -175,20 +175,20 @@ const DashboardBoys = () => {
 
   }, [showModal]);
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setRooms(loadedRooms);
-    });
-  }, [activeBoysHostel]);
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setRooms(loadedRooms);
+  //   });
+  // }, [activeBoysHostel]);
 
   useEffect(() => {
     const formattedMonth = month.slice(0, 3).toLowerCase();
@@ -211,34 +211,34 @@ const DashboardBoys = () => {
     });
   }, [activeBoysHostel]);
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      setTenants(loadedTenants);
-    });
-  }, [activeBoysHostel]);
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+  //   onValue(tenantsRef, snapshot => {
+  //     const data = snapshot.val() || {};
+  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
+  //       id: key,
+  //       ...value,
+  //     }));
+  //     setTenants(loadedTenants);
+  //   });
+  // }, [activeBoysHostel]);
 
-  const [boysRooms, setBoysRooms] = useState([]);
+  // const [boysRooms, setBoysRooms] = useState([]);
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setBoysRooms(loadedRooms);
-    });
-  }, [activeBoysHostel]);
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setBoysRooms(loadedRooms);
+  //   });
+  // }, [activeBoysHostel]);
 
   useEffect(() => {
     if (selectedRoom) {
@@ -255,7 +255,7 @@ const DashboardBoys = () => {
 
   useEffect(() => {
     const updateTotalFeeFromRoom = () => {
-      const roomsArray = Object.values(rooms);
+      const roomsArray = Object.values(boysRooms);
       const matchingRoom = roomsArray.find(room => room.roomNumber === roomNumber);
 
       if (matchingRoom && matchingRoom.bedRent) {
@@ -267,12 +267,12 @@ const DashboardBoys = () => {
     if (roomNumber) {
       updateTotalFeeFromRoom();
     }
-  }, [roomNumber, rooms]);
+  }, [roomNumber, boysRooms]);
 
 
   useEffect(() => {
     if (selectedTenant) {
-      const tenant = tenants.find(t => t.id === selectedTenant);
+      const tenant = boysTenants.find(t => t.id === selectedTenant);
       if (tenant) {
         setRoomNumber(tenant.roomNo || '');
         setBedNumber(tenant.bedNo || '');
@@ -286,18 +286,18 @@ const DashboardBoys = () => {
       setDateOfJoin('');
       setDueDate('');
     }
-  }, [selectedTenant, tenants, activeBoysHostel]);
+  }, [selectedTenant, boysTenants, activeBoysHostel]);
 
   useEffect(() => {
-    const tenantIdsWithRents = tenantsWithRents.flatMap(tenant =>
+    const tenantIdsWithRents = boysTenantsWithRents.flatMap(tenant =>
       tenant.rents.length > 0 ? [tenant.id] : []
     );
 
-    const availableTenants = tenants.filter(
+    const availableTenants = boysTenants.filter(
       tenant => !tenantIdsWithRents.includes(tenant.id)
     );
     setAvailableTenants(availableTenants);
-  }, [tenants, tenantsWithRents, activeBoysHostel]);
+  }, [boysTenants, boysTenantsWithRents, activeBoysHostel]);
 
 
   useEffect(() => {
@@ -305,32 +305,32 @@ const DashboardBoys = () => {
     setDue(calculatedDue);
   }, [paidAmount, totalFee]);
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const tenantsData = snapshot.val();
-      const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+  //   onValue(tenantsRef, (snapshot) => {
+  //     const tenantsData = snapshot.val();
+  //     const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
 
-      const rentsPromises = tenantIds.map(tenantId => {
-        return new Promise((resolve) => {
-          const rentsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantId}/rents`);
-          onValue(rentsRef, (rentSnapshot) => {
-            const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
-              id: key,
-              ...rentSnapshot.val()[key],
-            })) : [];
-            resolve({ id: tenantId, ...tenantsData[tenantId], rents });
-          }, {
-            onlyOnce: true
-          });
-        });
-      });
+  //     const rentsPromises = tenantIds.map(tenantId => {
+  //       return new Promise((resolve) => {
+  //         const rentsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantId}/rents`);
+  //         onValue(rentsRef, (rentSnapshot) => {
+  //           const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
+  //             id: key,
+  //             ...rentSnapshot.val()[key],
+  //           })) : [];
+  //           resolve({ id: tenantId, ...tenantsData[tenantId], rents });
+  //         }, {
+  //           onlyOnce: true
+  //         });
+  //       });
+  //     });
 
-      Promise.all(rentsPromises).then(tenantsWithTheirRents => {
-        setTenantsWithRents(tenantsWithTheirRents);
-      });
-    });
-  }, []);
+  //     Promise.all(rentsPromises).then(tenantsWithTheirRents => {
+  //       setTenantsWithRents(tenantsWithTheirRents);
+  //     });
+  //   });
+  // }, []);
 
 
   useEffect(() => {
@@ -357,7 +357,7 @@ const DashboardBoys = () => {
       return Array.from({ length: room.numberOfBeds }, (_, i) => {
         const bedNumber = i + 1;
 
-        const tenant = tenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        const tenant = boysTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
         return {
           floorNumber: room.floorNumber,
           roomNumber: room.roomNumber,
@@ -368,7 +368,7 @@ const DashboardBoys = () => {
       });
     });
     setBedsData(allBeds);
-  }, [boysRooms, tenants]);
+  }, [boysRooms, boysTenants]);
 
 
   // const handleImageChange = (e) => {
@@ -496,7 +496,7 @@ const DashboardBoys = () => {
     const newErrors = {};
     if (!floorNumber.trim()) newErrors.floorNumber = t('errors.floorNumberRequired');
     if (!roomNumber.trim()) newErrors.roomNumber = t('errors.roomNumberRequired');
-    else if (rooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
+    else if (boysRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
       newErrors.roomNumber = t('errors.roomNumberExists');
     }
     if (!numberOfBeds) newErrors.numberOfBeds = t('errors.numberOfBedsRequired');
@@ -525,6 +525,7 @@ const DashboardBoys = () => {
         draggable: true,
         progress: undefined,
       });
+      fetchData()
     }).catch(error => {
       toast.error(t('toastMessages.errorAddingRoom') + error.message, {
         position: "top-center",
@@ -536,8 +537,6 @@ const DashboardBoys = () => {
         progress: undefined,
       });
     });
-
-
     setFloorNumber('');
     setRoomNumber('');
     setNumberOfBeds('');
@@ -546,10 +545,11 @@ const DashboardBoys = () => {
     setUpdateDate(now);
     setErrors({});
     setShowModal(false);
+    
   };
 
 
-  const totalBeds = rooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
+  const totalBeds = boysRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
 
 
 
@@ -601,7 +601,7 @@ const DashboardBoys = () => {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
 
-    const isBedOccupied = tenants.some(tenant => {
+    const isBedOccupied = boysTenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentTenantId;
     });
 
@@ -817,6 +817,7 @@ const DashboardBoys = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
         } else {
             await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData);
             toast.success(t('toastMessages.tenantAddedSuccess'), {
@@ -828,6 +829,7 @@ const DashboardBoys = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData();
             e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
@@ -915,6 +917,7 @@ const DashboardBoys = () => {
           draggable: true,
           progress: undefined,
         });
+        fetchData();
         setIsEditing(false);
         if (notify) {
           handleNotifyCheckbox(rentData);
@@ -943,6 +946,7 @@ const DashboardBoys = () => {
           draggable: true,
           progress: undefined,
         });
+        fetchData();
         setIsEditing(false);
         if (notify) {
           handleNotifyCheckbox(rentData);
@@ -961,7 +965,6 @@ const DashboardBoys = () => {
       });
     }
     setShowModal(false);
-
     resetForm();
 
   };
@@ -1020,20 +1023,20 @@ const DashboardBoys = () => {
     {
       image: Rooms,
       heading: t('dashboard.totalRooms'),
-      number: `${rooms.length}`,
+      number: `${boysRooms.length}`,
       btntext: t('dashboard.addRooms'),
     },
 
     {
       image: Tenants,
       heading: t('dashboard.totalTenants'),
-      number: `${tenants.length}`,
+      number: `${boysTenants.length}`,
       btntext: t('dashboard.addTenants'),
     },
     {
       image: Beds,
       heading: t('dashboard.totalBeds'),
-      number: `${totalBeds}/${totalBeds - tenants.length}`,
+      number: `${totalBeds}/${totalBeds - boysTenants.length}`,
       btntext: t('dashboard.addRent'),
     },
     {
@@ -1043,8 +1046,6 @@ const DashboardBoys = () => {
       btntext: t('dashboard.addExpenses'),
     },
   ];
-
-
 
   const Buttons = ['Add Rooms', 'Add Tenants', 'Add Rent', 'Add Expenses'];
 
@@ -1142,6 +1143,7 @@ const DashboardBoys = () => {
           draggable: true,
           progress: undefined,
         });
+        fetchData();
       }).catch(error => {
         toast.error(t('toastMessages.errorAddingExpense') + error.message, {
           position: "top-center",
@@ -1330,7 +1332,7 @@ const DashboardBoys = () => {
                     <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
                       <option value="">{t('dashboard.selectTenant')} *</option>
                       {isEditing ? (
-                        <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
+                        <option key={selectedTenant} value={selectedTenant}>{boysTenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
                       ) : (
                         availableTenants.map(tenant => (
                           <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
