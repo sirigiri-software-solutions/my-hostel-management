@@ -1,11 +1,10 @@
-import React, { useContext, useRef } from 'react'
+import React, { useRef } from 'react'
 import * as pdfjsLib from 'pdfjs-dist/webpack';
 import TenantsIcon from '../../images/Icons (4).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
-import ImageIcon from '../../images/Icons (10).png'
 import { useState, useEffect } from 'react'
-import { push, ref, storage } from "../../firebase/firebase";
+import { push, ref } from "../../firebase/firebase";
 
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -22,7 +21,7 @@ import imageCompression from 'browser-image-compression';
 
 const TenantsGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, entireHMAdata , fetchData, girlsTenants, girlsRooms} = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, fetchData, girlsTenants, girlsRooms, entireHMAdata} = useData();
   const role = localStorage.getItem('role');
   const { database, storage } = firebase;
 
@@ -102,8 +101,8 @@ const TenantsGirls = () => {
   // }
 
   const handleCheckboxChange = (e) => {
-    setHasBike(e.target.value == 'yes');
-    if (e.target.value == 'no') {
+    setHasBike(e.target.value === 'yes');
+    if (e.target.value === 'no') {
       setHasBike(false);
       setBikeNumber('NA');
     } else {
@@ -137,45 +136,45 @@ const TenantsGirls = () => {
     document.addEventListener("keydown", handleClickOutside)
   }, []);
 
-  // useEffect(() => {
-  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
-  //     // Extract the values from the data object
-  //     const boysAndGirlsData = Object.values(entireHMAdata);
+  useEffect(() => {
+    if (entireHMAdata && typeof entireHMAdata === 'object') {
+      // Extract the values from the data object
+      const boysAndGirlsData = Object.values(entireHMAdata);
   
-  //     // Ensure we have data and that it contains 'boys'
-  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
-  //       const boysData = Object.values(boysAndGirlsData[0].girls);
+      // Ensure we have data and that it contains 'boys'
+      if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+        const boysData = Object.values(boysAndGirlsData[0].girls);
   
-  //       // Check if there's data in boysData
-  //       if (boysData.length > 0) {
-  //         const tenantsData = boysData[0].tenants || {};
-  //         const roomsData = boysData[0].rooms || {};
-  //         const extenantsData = boysData[0].extenants || {};
+        // Check if there's data in boysData
+        if (boysData.length > 0) {
+          // const tenantsData = boysData[0].tenants || {};
+          // const roomsData = boysData[0].rooms || {};
+          const extenantsData = boysData[0].extenants || {};
   
-  //         // Map the data to the required format
-  //         const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
+          // Map the data to the required format
+          // const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
   
-  //         const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
+          // const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
   
-  //         const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
+          const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+            id: key,
+            ...value,
+          }));
   
-  //         // Update the state with the processed data
-  //         setTenants(loadedTenants); 
-  //         setGirlsRooms(loadedRooms);
-  //         setExTenants(loadedExTenants);
-  //       }
-  //     }
-  //   }
-  // }, []);
+          // Update the state with the processed data
+          // setTenants(loadedTenants); 
+          // setGirlsRooms(loadedRooms);
+          setExTenants(loadedExTenants);
+        }
+      }
+    }
+  }, [entireHMAdata]);
   
 
 
@@ -559,7 +558,7 @@ const TenantsGirls = () => {
     setShowModal(true);
     setBikeNumber(tenant.bikeNumber);
     setPermnentAddress(tenant.permnentAddress);
-    if (tenant.bikeNumber == 'NA') {
+    if (tenant.bikeNumber === 'NA') {
       setHasBike(false);
       setBikeNumber(tenant.bikeNumber);
     }
@@ -570,7 +569,7 @@ const TenantsGirls = () => {
   };
 
   const handleAddNew = () => {
-    if (activeGirlsHostelButtons.length == 0) {
+    if (activeGirlsHostelButtons.length === 0) {
       toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,

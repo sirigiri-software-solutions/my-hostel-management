@@ -36,6 +36,7 @@ const RoomsBoys = () => {
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
 
+  // console.log(fetchData, "fetchData")
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (showModal && (event.target.id === "exampleModalRoomsBoys" || event.key === "Escape")) {

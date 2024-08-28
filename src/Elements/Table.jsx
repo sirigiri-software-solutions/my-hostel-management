@@ -72,13 +72,12 @@ const Table = ({ columns, rows, onClickTentantRow }) => {
               {/* {item.created_by && <td data-label={t('mobileTable.createdBy')}>{getTranslationCreatedBy(item.created_by)}</td>} */}
               {item.last_updated_by && <td data-label={t('mobileTable.lastUpdatedDate')}>{item.last_updated_by}</td>}
               {item.payment_date && <td data-label={t('mobileTable.paymentDate')}>{item.payment_date}</td>}
+              {item.rent && <td className='allhosteldata' data-label={t('mobileTable.rent')}>{item.rent}</td>}
               {item.status && <td data-label={t('mobileTable.status')} onClick={onClickTentantRow ? () => onClickTentantRow(item) : null}>{getTranslationStatus(item.status)}</td>}
               {item.edit_room && <td data-label={t('mobileTable.edit')}>{item.edit_room}</td>}
               {item.actions && <td data-label={t('mobileTable.actions')}>{item.actions}</td>}
               {item.edit && <td className='hosteltable' data-label={t('mobileTable.edit')}>{item.edit}</td>}
               {item.delete && <td className='hosteltable' data-label={t('mobileTable.delete')}>{item.delete}</td>}
-              {item.rent && <td className='allhosteldata' data-label={t('mobileTable.rent')}>{item.rent}</td>}
-
             </tr>)
           }
         </tbody>

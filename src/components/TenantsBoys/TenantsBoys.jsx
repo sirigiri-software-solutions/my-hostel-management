@@ -3,12 +3,10 @@ import * as pdfjsLib from 'pdfjs-dist/webpack';
 import TenantsIcon from '../../images/Icons (4).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
-import ImageIcon from '../../images/Icons (10).png'
-import { useState, useContext } from 'react'
-import { push, ref, storage } from "../../firebase/firebase";
+import { useState } from 'react'
+import { push, ref } from "../../firebase/firebase";
 import '../TenantsGirls/TenantsGirls.css';
 import './TenantsBoys.css'
-import { DataContext } from '../../ApiData/ContextProvider'
 
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -24,7 +22,7 @@ import imageCompression from 'browser-image-compression';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, entireHMAdata, fetchData, boysRooms, boysTenants} = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms, boysTenants, entireHMAdata} = useData();
   const role = localStorage.getItem('role');
   const { database,storage } = firebase;
 
@@ -54,7 +52,6 @@ const TenantsBoys = () => {
   const [tenantAddress, setTenantAddress] = useState("");
   const [singleTenantProofId, setSingleTenantProofId] = useState("");
   const [fileName, setFileName] = useState('');
-  const [singleTenantAddress, setSingleTenantAddress] = useState('');
   const [singleTenanantBikeNum,setSingleTenantBikeNum] = useState('');
 
   // const [boysRooms, setBoysRooms] = useState([]);
@@ -97,8 +94,8 @@ const TenantsBoys = () => {
 
 
   const handleCheckboxChange = (e) => {
-    setHasBike(e.target.value == 'yes');
-    if (e.target.value == 'no') {
+    setHasBike(e.target.value === 'yes');
+    if (e.target.value === 'no') {
       setHasBike(false);
       setBikeNumber('NA');
     }
@@ -151,45 +148,44 @@ const TenantsBoys = () => {
   }, [selectedRoom, boysRooms]);
 
 
-  const { data } = useContext(DataContext);
   // const [boysTenants, setBoysTenants] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // useEffect(() => {
-  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
-  //     let boysAndGirlsData = Object.values(entireHMAdata);
-  //     console.log(boysAndGirlsData, "EntireHMAData");
+  useEffect(() => {
+    if (entireHMAdata && typeof entireHMAdata === 'object') {
+      let boysAndGirlsData = Object.values(entireHMAdata);
+      console.log(boysAndGirlsData, "EntireHMAData");
   
-  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
-  //       let boysData = Object.values(boysAndGirlsData[0].boys);
+      if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+        let boysData = Object.values(boysAndGirlsData[0].boys);
   
-  //       if (boysData.length > 0) {
-  //         let tenantsData = boysData[0].tenants || {};
-  //         let roomsData = boysData[0].rooms || {};
-  //         let extenantsData = boysData[0].extenants || {};
+        if (boysData.length > 0) {
+          // let tenantsData = boysData[0].tenants || {};
+          // let roomsData = boysData[0].rooms || {};
+          let extenantsData = boysData[0].extenants || {};
   
-  //         const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
+          // const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
   
-  //         const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
+          // const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
   
-  //         const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
+          const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+            id: key,
+            ...value,
+          }));
   
-  //         setTenants(loadedTenants); 
-  //         setBoysRooms(loadedRooms);
-  //         setExTenants(loadedExTenants);
-  //       }
-  //     }
-  //   }
-  // }, []);
+          // setTenants(loadedTenants); 
+          // setBoysRooms(loadedRooms);
+          setExTenants(loadedExTenants);
+        }
+      }
+    }
+  }, [entireHMAdata]);
   
 
 
@@ -743,7 +739,7 @@ const TenantsBoys = () => {
   };
 
   const handleAddNew = () => {
-    if (activeBoysHostelButtons.length == 0) {
+    if (activeBoysHostelButtons.length === 0) {
       toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,

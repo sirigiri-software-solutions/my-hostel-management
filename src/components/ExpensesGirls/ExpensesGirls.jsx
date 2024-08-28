@@ -4,8 +4,7 @@ import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
 import { push, ref } from "../../firebase/firebase";
 import "../RoomsBoys/RoomsBoys.css"
-import { onValue } from 'firebase/database';
-import { remove, update, set } from 'firebase/database';
+import { remove, set } from 'firebase/database';
 import { toast } from "react-toastify";
 import './ExpensesGirls.css';
 import { useTranslation } from 'react-i18next';
@@ -29,9 +28,6 @@ const ExpensesGirls = () => {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [initialRows, setInitialRows] = useState([]);
-
-
-
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -216,7 +212,7 @@ window.addEventListener('keydown',handleOutsideClick);
 
     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
     setTotal(totalExpenses);
-  }, [entireHMAdata, activeGirlsHostel]);
+  }, [entireHMAdata, activeGirlsHostel, month, year, userUid]);
 
   const columns = [
     t('expensesPage.sNo'),

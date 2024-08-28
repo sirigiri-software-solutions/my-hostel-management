@@ -30,7 +30,7 @@ const DashboardBoys = () => {
     adminRole = "Sub-admin"
   }
   const isUneditable = role === 'admin' || role === 'subAdmin';
-  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag, boysRooms, fetchData, boysTenants, boysTenantsWithRents} = useData();
+  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag, boysRooms, fetchData, boysTenants, boysTenantsWithRents, entireHMAdata} = useData();
   const { database, storage } = firebase;
 
   const [loading,setLoading] = useState(false);
@@ -190,26 +190,55 @@ const DashboardBoys = () => {
   //   });
   // }, [activeBoysHostel]);
 
+  // useEffect(() => {
+  //   const formattedMonth = month.slice(0, 3).toLowerCase();
+  //   const expensesRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${formattedMonth}`);
+  //   onValue(expensesRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     let total = 0;
+  //     const expensesArray = [];
+  //     for (const key in data) {
+  //       const expense = {
+  //         id: key,
+  //         ...data[key],
+  //         expenseDate: formatDate(data[key].expenseDate)
+  //       };
+  //       total += expense.expenseAmount;
+  //       expensesArray.push(expense);
+  //     }
+  //     setCurrentMonthExpenses(expensesArray);
+  //     setTotalExpenses(total);
+  //   });
+  // }, [activeBoysHostel]);
   useEffect(() => {
-    const formattedMonth = month.slice(0, 3).toLowerCase();
-    const expensesRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${formattedMonth}`);
-    onValue(expensesRef, (snapshot) => {
-      const data = snapshot.val();
-      let total = 0;
-      const expensesArray = [];
-      for (const key in data) {
-        const expense = {
-          id: key,
-          ...data[key],
-          expenseDate: formatDate(data[key].expenseDate)
-        };
-        total += expense.expenseAmount;
-        expensesArray.push(expense);
-      }
-      setCurrentMonthExpenses(expensesArray);
-      setTotalExpenses(total);
-    });
-  }, [activeBoysHostel]);
+    if (!entireHMAdata || !activeBoysHostel ) return;
+  
+    const formattedMonth = month.slice(0, 3).toLowerCase(); // Make sure the month is formatted correctly
+    const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`];
+  
+    if (!expensesData) {
+      setCurrentMonthExpenses([]); // Set to empty array if no expenses data is available
+      setTotalExpenses(0); // Reset total expenses
+      return;
+    }
+  
+    const loadedExpenses = [];
+    let totalExpenses = 0;
+  
+    for (const key in expensesData) {
+      const expense = {
+        id: key,
+        ...expensesData[key],
+        expenseDate: formatDate(expensesData[key]?.expenseDate || ""), // Handle missing expenseDate
+      };
+      totalExpenses += expense.expenseAmount || 0; // Ensure expenseAmount exists
+      loadedExpenses.push(expense);
+    }
+  
+    setCurrentMonthExpenses(loadedExpenses); // Update the current month's expenses
+    setTotalExpenses(totalExpenses); // Update the total expenses for the current month
+  }, [entireHMAdata, activeBoysHostel, month, year, userUid]);
+  
 
   // useEffect(() => {
   //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
@@ -440,8 +469,8 @@ const DashboardBoys = () => {
   };
 
   const handleCheckboxChange = (e) => {
-    setHasBike(e.target.value == 'yes');
-    if (e.target.value == 'no') {
+    setHasBike(e.target.value === 'yes');
+    if (e.target.value === 'no') {
       setHasBike(false);
       setBikeNumber('NA');
     } else {
@@ -656,7 +685,6 @@ const DashboardBoys = () => {
   // };
   const handleTenantIdChange = (e) => {
     if (e.target.files[0]) {
-      const file = e.target.files[0]
       // setFileName(file.name)
       setTenantId(e.target.files[0]);
     }
@@ -1049,7 +1077,7 @@ const DashboardBoys = () => {
   const Buttons = ['Add Rooms', 'Add Tenants', 'Add Rent', 'Add Expenses'];
 
   const handleClick = (text) => {
-    if (activeBoysHostelButtons.length == 0) {
+    if (activeBoysHostelButtons.length === 0) {
       toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,

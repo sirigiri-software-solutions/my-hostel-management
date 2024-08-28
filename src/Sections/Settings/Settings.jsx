@@ -19,7 +19,7 @@ const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag } = useData();
+  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag } = useData();
   const { database } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
@@ -66,7 +66,7 @@ const Settings = () => {
       })) : [];
       setEntireBoysData(loadedTenants)
     });
-  }, [selectedHostelType, activeBoysHostel])
+  }, [selectedHostelType, activeBoysHostel, userUid])
 
   useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
@@ -78,7 +78,7 @@ const Settings = () => {
       })) : [];
       setEntireGirlsData(loadedTenants)
     });
-  }, [selectedHostelType, activeGirlsHostel])
+  }, [selectedHostelType, activeGirlsHostel, userUid])
 
 
   useEffect(() => {
@@ -91,7 +91,7 @@ const Settings = () => {
       })) : [];
       setVacatedEntireBoysData(loadedTenants)
     });
-  }, [selectedHostelType, activeBoysHostel])
+  }, [selectedHostelType, activeBoysHostel, userUid])
 
   useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
@@ -103,7 +103,7 @@ const Settings = () => {
       })) : [];
       setVacatedEnitreGirlsData(loadedTenants)
     });
-  }, [selectedHostelType, activeGirlsHostel])
+  }, [selectedHostelType, activeGirlsHostel, userUid])
 
 
 
@@ -200,10 +200,6 @@ const Settings = () => {
     fetchExpenses();
   }, [selectedHostelType, activeBoysHostel, activeGirlsHostel, expensesInteracted]);
 
-
-
-
-  const [tenantsData, setTenantsData] = useState()
 
   // console.log(hostelData, "dataaa")
 
@@ -551,10 +547,6 @@ const Settings = () => {
 
   const handleExpensesGenerateBtn = () => {
     setExpensesDataTrigger(true)
-
-
-
-
 
     const doc = new jsPDF();
 
