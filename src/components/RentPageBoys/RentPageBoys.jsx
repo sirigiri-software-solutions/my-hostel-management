@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useRef } from 'react'
+import React, {  useEffect } from 'react'
 import Table from '../../Elements/Table'
 import RentIcon from '../../images/Icons (6).png'
 import SearchIcon from '../../images/Icons (9).png'
 import { push, ref } from "../../firebase/firebase";
 import { useState } from 'react'
-import { DataContext } from '../../ApiData/ContextProvider';
-import { onValue, update } from 'firebase/database';
+import {  update } from 'firebase/database';
 import "../RoomsBoys/RoomsBoys.css"
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,7 +15,7 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const RentPageBoys = () => {
   const { t } = useTranslation();
-  const { data } = useContext(DataContext);
+
   const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, fetchData, boysTenants, boysRooms, boysTenantsWithRents } = useData();
   const { database } = firebase;
   const [searchQuery, setSearchQuery] = useState('');
@@ -331,7 +330,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   };
   const handleAddNew = () => {
-    if (activeBoysHostelButtons.length == 0) {
+    if (activeBoysHostelButtons.length === 0) {
       toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
@@ -362,11 +361,9 @@ Please note that you made your last payment on ${paidDate}.\n`
     setErrors({});
   };
 
-
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
-
 
   const columns = [
     t('rentsPage.sNo'),

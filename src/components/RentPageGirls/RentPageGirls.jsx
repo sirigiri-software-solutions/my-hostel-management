@@ -1,11 +1,10 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import RentIcon from '../../images/Icons (6).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
 import { push, ref } from "../../firebase/firebase";
 import { useState } from 'react'
-import { DataContext } from '../../ApiData/ContextProvider';
-import { onValue, update } from 'firebase/database';
+import { update } from 'firebase/database';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { FaWhatsapp } from "react-icons/fa";
@@ -15,7 +14,6 @@ import { useTranslation } from 'react-i18next';
 
 const RentPageGirls = () => {
   const { t } = useTranslation();
-  const { data } = useContext(DataContext);
   const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, girlsRooms,  girlsTenants, girlsTenantsWithRents, fetchData} = useData();
   const { database } = firebase;
   const [searchQuery, setSearchQuery] = useState('');
@@ -350,7 +348,7 @@ Please note that you made your last payment on ${paidDate}.\n`
   };
 
   const handleAddNew = () => {
-    if (activeGirlsHostelButtons.length == 0) {
+    if (activeGirlsHostelButtons.length === 0) {
       toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,

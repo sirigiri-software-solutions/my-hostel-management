@@ -42,27 +42,28 @@ const DataProvider = ({ children }) => {
   // trying to fetch entire data from context
   
   
-  const [defaultArea, setDefaultArea] = useState(localStorage.getItem('userarea') || 'default')
+  const [defaultArea, setDefaultArea] = useState(localStorage.getItem('userarea'))
   const [entireHMAdata, setEntireHMAdata] = useState([]);
 
   const areaToApiEndPointEntireData = {
-    ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
-    srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
-    secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
-    default:"https://defaulthostel-default-rtdb.firebaseio.com/register.json",
-    kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
-    gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
-    ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
-    dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
-    himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
-    madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
+    ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/Hostel.json",
+    srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/Hostel.json",
+    secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/Hostel.json",
+    default:"https://defaulthostel-default-rtdb.firebaseio.com/Hostel.json",
+    kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/Hostel.json",
+    gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/Hostel.json",
+    ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/Hostel.json",
+    dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/Hostel.json",
+    himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/Hostel.json",
+    madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/Hostel.json",
     madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/Hostel.json",
-    lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
+    lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/Hostel.json",
     nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/Hostel.json",
   }
 
   const fetchData = async () => {
     const api = areaToApiEndPointEntireData[defaultArea];
+    console.log(api, 'apiii')
     const options = {
       method: "GET",
     };
@@ -81,9 +82,7 @@ const DataProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-}, []);
+ 
 
 console.log(entireHMAdata, "entireHMAdata")
 const [boysRooms, setBoysRooms] = useState()
@@ -276,13 +275,12 @@ console.log(girlsTenantsWithRents, "girlsTenantsWithRents")
    // Determine the initial active flag
    useEffect(() => {
     let initialActiveFlag = '';
-    if (activeBoysHostelButtons.length > 0 || activeGirlsHostelButtons.length == 0) {
+    if (activeBoysHostelButtons.length > 0 || activeGirlsHostelButtons.length === 0) {
           initialActiveFlag = 'boys';
         } else if (activeGirlsHostelButtons.length > 0) {
           initialActiveFlag = 'girls';
         }
         setActiveFlag(initialActiveFlag);
-      
     if(activeFlag === 'boys' &&  activeBoysHostelButtons.length > 0){
       setActiveFlag('boys')
     }
@@ -364,6 +362,12 @@ console.log(girlsTenantsWithRents, "girlsTenantsWithRents")
 
   console.log(boysExTenantsData, "exx")
   console.log(girlsExTenantsData, "exx")
+
+  const [completeData, setCompleteData] = useState(false);
+  useEffect(() => {
+    fetchData();
+}, [userUid, userarea, completeData]);
+console.log(completeData, "completeData")
   return (
     <DataContext.Provider
      value={{ 
@@ -399,6 +403,8 @@ console.log(girlsTenantsWithRents, "girlsTenantsWithRents")
       boysTenantsWithRents,
       girlsTenantsWithRents,
       entireHMAdata,
+      setCompleteData,
+      setDefaultArea,
       }}>
       {children}
     </DataContext.Provider>

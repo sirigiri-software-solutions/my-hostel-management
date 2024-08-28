@@ -3,8 +3,7 @@ import ExpenseIcon from '../../images/Icons (5).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
 import { push, ref } from "../../firebase/firebase";
-import { onValue } from 'firebase/database';
-import { remove, update, set } from 'firebase/database';
+import { remove, set } from 'firebase/database';
 import { toast } from "react-toastify";
 import './ExpensesBoys.css';
 import { useTranslation } from 'react-i18next';
@@ -73,7 +72,6 @@ const ExpensesBoys = () => {
       if (showModal && (event.target.id === "exampleModalExpensesBoys" || event.key === "Escape")) {
         setShowModal(false);
       }
-
     };
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener('keydown', handleOutsideClick)
@@ -211,7 +209,7 @@ const ExpensesBoys = () => {
     setExpenses(loadedExpenses);
     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
     setTotal(totalExpenses);
-  }, [entireHMAdata, activeBoysHostel]);
+  }, [entireHMAdata, activeBoysHostel, month, year, userUid]);
 
 
   const columns = [
@@ -396,7 +394,7 @@ const ExpensesBoys = () => {
 
 
   const handleAddNew = () => {
-    if (activeBoysHostelButtons.length == 0) {
+    if (activeBoysHostelButtons.length === 0) {
       toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,

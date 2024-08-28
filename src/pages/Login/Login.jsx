@@ -26,7 +26,7 @@ export const loginContext = createContext();
 
 const Login = () => {
   const navigate = useNavigate();
-  const { areaToApiEndpoint, setUserArea, setUserUid, firebase, setArea,setIsSubscribed} = useData();
+  const { areaToApiEndpoint, setUserArea, setUserUid, firebase, setArea, fetchData, setDefaultArea} = useData();
 
   const initialState = { Id: "", email: "", area: "", password: "" };
   const [loginData, setLoginData] = useState(initialState);
@@ -152,7 +152,9 @@ const Login = () => {
             localStorage.setItem("username", singleLoginUser.firstname);
             localStorage.setItem("userarea", singleLoginUser.area);
             localStorage.setItem("userUid", singleLoginUser.uid);
+            setDefaultArea(singleLoginUser.area)
             setUserUid(singleLoginUser.uid);
+            await fetchData(); 
             const now = moment();
             const accessEnd = singleLoginUser.accessEnd ? moment(singleLoginUser.accessEnd) : null;
 
@@ -181,6 +183,8 @@ const Login = () => {
             }
 
             setUserUid(singleLoginUser.uid);
+            // fetchData()
+            
             navigate("/mainPage");
 
             toast.success("You are logged in successfully.", {
@@ -193,9 +197,11 @@ const Login = () => {
               progress: undefined,
               theme: "light",
             });
+            
           } else {
             console.log("User not found in data array.");
           }
+          fetchData();
         } else {
           toast.error("Email is not verified.", {
             position: "bottom-right",
@@ -224,8 +230,6 @@ const Login = () => {
       }
     }
   };
-
- 
   
 
 

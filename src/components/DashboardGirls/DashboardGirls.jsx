@@ -31,7 +31,7 @@ const DashboardGirls = () => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
 
 
-  const { activeGirlsHostel, setActiveGirlsHostel,setActiveGirlsHostelName, activeGirlsHostelButtons, userUid, firebase,  changeActiveFlag, girlsRooms, fetchData, girlsTenants, girlsTenantsWithRents } = useData();
+  const { activeGirlsHostel, setActiveGirlsHostel,setActiveGirlsHostelName, activeGirlsHostelButtons, userUid, firebase,  changeActiveFlag, girlsRooms, fetchData, girlsTenants, girlsTenantsWithRents, entireHMAdata } = useData();
   const { database, storage } = firebase;
 
   const [loading, setLoading] = useState(false);
@@ -191,26 +191,56 @@ const DashboardGirls = () => {
   //   });
   // }, [activeGirlsHostel]);
 
+  // useEffect(() => {
+  //   const formattedMonth = month.slice(0, 3).toLowerCase();
+  //   const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
+  //   onValue(expensesRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     let total = 0;
+  //     const expensesArray = [];
+  //     for (const key in data) {
+  //       const expense = {
+  //         id: key,
+  //         ...data[key],
+  //         expenseDate: formatDate(data[key].expenseDate)
+  //       };
+  //       total += expense.expenseAmount;
+  //       expensesArray.push(expense);
+  //     }
+  //     setCurrentMonthExpenses(expensesArray);
+  //     setTotalExpenses(total);
+  //   });
+  // }, [activeGirlsHostel]);
+
   useEffect(() => {
-    const formattedMonth = month.slice(0, 3).toLowerCase();
-    const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
-    onValue(expensesRef, (snapshot) => {
-      const data = snapshot.val();
-      let total = 0;
-      const expensesArray = [];
-      for (const key in data) {
-        const expense = {
-          id: key,
-          ...data[key],
-          expenseDate: formatDate(data[key].expenseDate)
-        };
-        total += expense.expenseAmount;
-        expensesArray.push(expense);
-      }
-      setCurrentMonthExpenses(expensesArray);
-      setTotalExpenses(total);
-    });
-  }, [activeGirlsHostel]);
+    if (!entireHMAdata || !activeGirlsHostel ) return;
+  
+    const formattedMonth = month.slice(0, 3).toLowerCase(); // Make sure the month is formatted correctly
+    const expensesData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`];
+  
+    if (!expensesData) {
+      setCurrentMonthExpenses([]); // Set to empty array if no expenses data is available
+      setTotalExpenses(0); // Reset total expenses
+      return;
+    }
+  
+    const loadedExpenses = [];
+    let totalExpenses = 0;
+  
+    for (const key in expensesData) {
+      const expense = {
+        id: key,
+        ...expensesData[key],
+        expenseDate: formatDate(expensesData[key]?.expenseDate || ""), // Handle missing expenseDate
+      };
+      totalExpenses += expense.expenseAmount || 0; // Ensure expenseAmount exists
+      loadedExpenses.push(expense);
+    }
+  
+    setCurrentMonthExpenses(loadedExpenses); // Update the current month's expenses
+    setTotalExpenses(totalExpenses); // Update the total expenses for the current month
+  }, [entireHMAdata, activeGirlsHostel, month, year, userUid]);
+  
 
 
   // useEffect(() => {
