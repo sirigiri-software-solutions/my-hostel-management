@@ -135,9 +135,9 @@
       align-items:center;
     }
     .tenants-dialog-container{
-      width:400px;
+      width:300px;
       height:700px;
-      top:58%;
+      top:100%;
     }
   }
   .tenants-profile-container{
