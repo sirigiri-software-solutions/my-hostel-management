@@ -692,7 +692,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                         </div>
                         <div class="col-md-6 mb-3">
                           <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                          <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)}  name="paidAmount" onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} onFocus={handleFocus} />
+                          <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)}  name="paidAmount" onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} onFocus={handleFocus} />
                           {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
                         </div>
                         <div class="col-md-6 mb-3">

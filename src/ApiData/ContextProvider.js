@@ -366,7 +366,7 @@ console.log(girlsTenantsWithRents, "girlsTenantsWithRents")
   const [completeData, setCompleteData] = useState(false);
   useEffect(() => {
     fetchData();
-}, [userUid, userarea, completeData]);
+}, [userUid, userarea, completeData, defaultArea]);
 console.log(completeData, "completeData")
   return (
     <DataContext.Provider
