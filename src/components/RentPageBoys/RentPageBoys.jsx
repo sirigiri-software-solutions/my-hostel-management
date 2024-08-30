@@ -91,24 +91,6 @@ Please note that you made your last payment on ${paidDate}.\n`
 
 
 
-  // useEffect(() => {
-  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-  //   onValue(tenantsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedTenants = data ? Object.keys(data).map(key => ({
-  //       id: key,
-  //       ...data[key],
-  //     })) : [];
-  //     setTenants(loadedTenants);
-  //   });
-
-
-  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-  //   onValue(roomsRef, (snapshot) => {
-  //     const data = snapshot.val() || {};
-  //     setRooms(data);
-  //   });
-  // }, [activeBoysHostel]);
 
   useEffect(() => {
     const updateTotalFeeFromRoom = () => {
@@ -163,34 +145,6 @@ Please note that you made your last payment on ${paidDate}.\n`
     setDue(calculatedDue);
   }, [paidAmount, totalFee]);
 
-  // useEffect(() => {
-  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-  //   onValue(tenantsRef, (snapshot) => {
-  //     const tenantsData = snapshot.val();
-  //     const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
-
-  //     const rentsPromises = tenantIds.map(tenantId => {
-  //       return new Promise((resolve) => {
-  //         const rentsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantId}/rents`);
-  //         onValue(rentsRef, (rentSnapshot) => {
-  //           const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
-  //             id: key,
-  //             ...rentSnapshot.val()[key],
-  //           })) : [];
-  //           resolve({ id: tenantId, ...tenantsData[tenantId], rents });
-  //         }, {
-  //           onlyOnce: true
-  //         });
-  //       });
-  //     });
-
-  //     Promise.all(rentsPromises).then(tenantsWithTheirRents => {
-  //       setTenantsWithRents(tenantsWithTheirRents);
-  //     });
-  //   });
-  // }, [activeBoysHostel]);
-
-  // console.log(tenantsWithRents, "tenantsWithRents")
   const loadRentForEditing = (tenantId, rentId) => {
     const tenant = boysTenantsWithRents.find(t => t.id === tenantId);
     const rentRecord = tenant.rents.find(r => r.id === rentId);
@@ -595,18 +549,44 @@ Please note that you made your last payment on ${paidDate}.\n`
                           <input id="BedNumber" class="form-control" type="text" value={bedNumber} readOnly />
                         </div>
                         <div class="col-md-6 mb-3">
-                          <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}:</label>
-                          <input id="TotalFee" class="form-control" type="number" value={totalFee} readOnly />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                          <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="paidAmount" onFocus={handleFocus} />
-                          {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor="Due" class="form-label">{t('dashboard.due')}:</label>
-                          <input id="Due" class="form-control" type="number" value={due} readOnly />
-                        </div>
+  <label htmlFor="TotalFee" class="form-label">{t('dashboard.totalFee')}:</label>
+  <input id="TotalFee" class="form-control" type="number" value={totalFee} readOnly />
+</div>
+
+<div class="col-md-6 mb-3">
+  <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
+  <input 
+    id="PaidAmount" 
+    class="form-control" 
+    type="text" 
+    value={paidAmount} 
+    onChange={e => {
+      const value = e.target.value.replace(/[^0-9 ]/g, '');
+      if (parseFloat(value) > totalFee) {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          paidAmount: t('exceedTotalFee'),
+        }));
+      } else {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          paidAmount: '',
+        }));
+        setPaidAmount(value);
+      }
+    }} 
+    onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} 
+    name="paidAmount" 
+    onFocus={handleFocus} 
+  />
+  {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
+</div>
+
+<div class="col-md-6 mb-3">
+  <label htmlFor="Due" class="form-label">{t('dashboard.due')}:</label>
+  <input id="Due" class="form-control" type="number" value={due} readOnly />
+</div>
+
                         <div class="col-md-6 mb-3">
                           <label htmlFor='DateOfJoin' class="form-label">{t('dashboard.dateOfJoin')}:</label>
                           <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly // Make this field read-only since it's auto-populated 
@@ -685,18 +665,43 @@ Please note that you made your last payment on ${paidDate}.\n`
                           <input id="BedNumber" class="form-control" type="text" value={bedNumber} readOnly />
                         </div>
                         <div class="col-md-6 mb-3">
-                          <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}:</label>
-                          <input id="TotalFee" class="form-control" type="number" value={totalFee} onChange={e => setTotalFee(e.target.value)} />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                          <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="paidAmount" onFocus={handleFocus} />
-                          {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor="Due" class="form-label">{t('dashboard.due')}:</label>
-                          <input id="Due" class="form-control" type="number" value={due} readOnly />
-                        </div>
+  <label htmlFor="TotalFee" class="form-label">{t('dashboard.totalFee')}:</label>
+  <input id="TotalFee" class="form-control" type="number" value={totalFee} readOnly />
+</div>
+
+<div class="col-md-6 mb-3">
+  <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
+  <input 
+    id="PaidAmount" 
+    class="form-control" 
+    type="text" 
+    value={paidAmount} 
+    onChange={e => {
+      const value = e.target.value.replace(/[^0-9 ]/g, '');
+      if (parseFloat(value) > totalFee) {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          paidAmount: t('exceedTotalFee'),
+        }));
+      } else {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          paidAmount: '',
+        }));
+        setPaidAmount(value);
+      }
+    }} 
+    onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} 
+    name="paidAmount" 
+    onFocus={handleFocus} 
+  />
+  {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
+</div>
+
+<div class="col-md-6 mb-3">
+  <label htmlFor="Due" class="form-label">{t('dashboard.due')}:</label>
+  <input id="Due" class="form-control" type="number" value={due} readOnly />
+</div>
                         <div class="col-md-6 mb-3">
                           <label htmlFor='DateOfJoin' class="form-label">{t('dashboard.dateOfJoin')}:</label>
                           <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly // Make this field read-only since it's auto-populated 
