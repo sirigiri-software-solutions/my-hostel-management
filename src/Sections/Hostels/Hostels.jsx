@@ -132,8 +132,6 @@ const submitHostelEdit = async (e) => {
     });
 };
 
-
-
   const deleteHostel = (id) => {
     const isBoys = activeFlag === 'boys';
     setIsDeleteConfirmationOpen(true);
@@ -301,6 +299,11 @@ const submitHostelEdit = async (e) => {
   //   reader.readAsDataURL(file);
   // };
 
+  const isImageFile = (file) => {
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    return file && allowedImageTypes.includes(file.type);
+  };
+
   const handleHostelChange = (e, isBoys) => {
     const file = e.target.files[0];
     if (!file) {
@@ -309,6 +312,14 @@ const submitHostelEdit = async (e) => {
             autoClose: 3000,
         });
         return;
+    }
+    if (!isImageFile(file)) {
+      toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+      e.target.value = ''; // Clear the input
+      return;
     }
 
     if (isBoys) {
@@ -362,7 +373,7 @@ const submitHostelEdit = async (e) => {
 
     set(newHostelRef, hostelDetails)
       .then(() => {
-        toast.success(`New ${isBoys ? 'boys' : 'girls'} hostel '${name}' added successfully.`, {
+        toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
           position: "top-center",
           autoClose: 3000,
         });
