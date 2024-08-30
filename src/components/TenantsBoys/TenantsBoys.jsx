@@ -3,12 +3,10 @@ import * as pdfjsLib from 'pdfjs-dist/webpack';
 import TenantsIcon from '../../images/Icons (4).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
-import ImageIcon from '../../images/Icons (10).png'
-import { useState, useContext } from 'react'
-import { push, ref, storage } from "../../firebase/firebase";
+import { useState } from 'react'
+import { push, ref } from "../../firebase/firebase";
 import '../TenantsGirls/TenantsGirls.css';
 import './TenantsBoys.css'
-import { DataContext } from '../../ApiData/ContextProvider'
 
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -24,7 +22,7 @@ import imageCompression from 'browser-image-compression';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase,entireHMAdata,fetchData} = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms, boysTenants, entireHMAdata} = useData();
   const role = localStorage.getItem('role');
   const { database,storage } = firebase;
 
@@ -37,7 +35,7 @@ const TenantsBoys = () => {
   const [idNumber, setIdNumber] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [status, setStatus] = useState('occupied');
-  const [tenants, setTenants] = useState([]);
+  // const [tenants, setTenants] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
@@ -54,10 +52,9 @@ const TenantsBoys = () => {
   const [tenantAddress, setTenantAddress] = useState("");
   const [singleTenantProofId, setSingleTenantProofId] = useState("");
   const [fileName, setFileName] = useState('');
-  const [singleTenantAddress, setSingleTenantAddress] = useState('');
   const [singleTenanantBikeNum,setSingleTenantBikeNum] = useState('');
 
-  const [boysRooms, setBoysRooms] = useState([]);
+  // const [boysRooms, setBoysRooms] = useState([]);
   const [exTenants, setExTenants] = useState([]);
   const [showExTenants, setShowExTenants] = useState(false);
   const [hasBike, setHasBike] = useState(false);
@@ -97,8 +94,8 @@ const TenantsBoys = () => {
 
 
   const handleCheckboxChange = (e) => {
-    setHasBike(e.target.value == 'yes');
-    if (e.target.value == 'no') {
+    setHasBike(e.target.value === 'yes');
+    if (e.target.value === 'no') {
       setHasBike(false);
       setBikeNumber('NA');
     }
@@ -151,74 +148,75 @@ const TenantsBoys = () => {
   }, [selectedRoom, boysRooms]);
 
 
-  const { data } = useContext(DataContext);
-  const [boysTenants, setBoysTenants] = useState([]);
+  // const [boysTenants, setBoysTenants] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // useEffect(() => {
-  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
-  //     let boysAndGirlsData = Object.values(entireHMAdata);
-  //     console.log(boysAndGirlsData, "EntireHMAData");
-  
-  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
-  //       let boysData = Object.values(boysAndGirlsData[0].boys);
-  
-  //       if (boysData.length > 0) {
-  //         let tenantsData = boysData[0].tenants || {};
-  //         let roomsData = boysData[0].rooms || {};
-  //         let extenantsData = boysData[0].extenants || {};
-  
-  //         const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         setTenants(loadedTenants); 
-  //         setBoysRooms(loadedRooms);
-  //         setExTenants(loadedExTenants);
-  //       }
-  //     }
-  //   }
-  // }, []);
-  
-
-
   useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      setTenants(loadedTenants);
-    });
-  }, [activeBoysHostel]);
-
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
+    if (entireHMAdata && typeof entireHMAdata === 'object') {
+      let boysAndGirlsData = Object.values(entireHMAdata);
+      console.log(boysAndGirlsData, "EntireHMAData");
+  
+      if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+        let boysData = Object.values(boysAndGirlsData[0].boys);
+  
+        if (boysData.length > 0) {
+          // let tenantsData = boysData[0].tenants || {};
+          // let roomsData = boysData[0].rooms || {};
+          let extenantsData = boysData[0].extenants || {};
+  
+          // const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
+  
+          // const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
+  
+          const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+            id: key,
+            ...value,
+          }));
+  
+          // setTenants(loadedTenants); 
+          // setBoysRooms(loadedRooms);
+          setExTenants(loadedExTenants);
+        }
       }
-      setBoysRooms(loadedRooms);
-    });
-  }, [activeBoysHostel]);
+    }
+  }, [entireHMAdata]);
+  
+
+
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+  //   onValue(tenantsRef, snapshot => {
+  //     const data = snapshot.val() || {};
+  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
+  //       id: key,
+  //       ...value,
+  //     }));
+  //     setTenants(loadedTenants);
+  //   });
+  // }, [activeBoysHostel]);
+
+  // console.log(tenants, "tttenants")
+
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setBoysRooms(loadedRooms);
+  //   });
+  // }, [activeBoysHostel]);
 
 
   const validate = () => {
@@ -256,7 +254,7 @@ const TenantsBoys = () => {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
 
-    const isBedOccupied = tenants.some(tenant => {
+    const isBedOccupied = boysTenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentId;
     });
 
@@ -482,6 +480,7 @@ const TenantsBoys = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
         } else {
             await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData);
             toast.success(t('toastMessages.tenantAddedSuccess'), {
@@ -493,6 +492,7 @@ const TenantsBoys = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
             e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
@@ -739,7 +739,7 @@ const TenantsBoys = () => {
   };
 
   const handleAddNew = () => {
-    if (activeBoysHostelButtons.length == 0) {
+    if (activeBoysHostelButtons.length === 0) {
       toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
@@ -820,8 +820,8 @@ const TenantsBoys = () => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-console.log(tenants, "tenants")
-  const rows = tenants.map((tenant, index) => ({
+
+  const rows = boysTenants.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
     name: tenant.name,
@@ -873,7 +873,7 @@ console.log(tenants, "tenants")
 
 
     const [roomNo, bedNo] = tenant.room_bed_no.split('/');
-    const singleUserDueDate = tenants.find(eachTenant =>
+    const singleUserDueDate = boysTenants.find(eachTenant =>
       eachTenant.name === tenant.name &&
       eachTenant.mobileNo === tenant.mobile_no &&
       eachTenant.roomNo === roomNo &&
@@ -945,6 +945,7 @@ console.log(tenants, "tenants")
             draggable: true,
             progress: undefined,
           });
+          fetchData();
         }).catch(error => {
           toast.error("Error Tenant Vacate " + error.message, {
             position: "top-center",

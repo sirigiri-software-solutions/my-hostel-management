@@ -1,11 +1,10 @@
-import React, { useContext, useRef } from 'react'
+import React, { useRef } from 'react'
 import * as pdfjsLib from 'pdfjs-dist/webpack';
 import TenantsIcon from '../../images/Icons (4).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
-import ImageIcon from '../../images/Icons (10).png'
 import { useState, useEffect } from 'react'
-import { push, ref, storage } from "../../firebase/firebase";
+import { push, ref } from "../../firebase/firebase";
 
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -22,7 +21,7 @@ import imageCompression from 'browser-image-compression';
 
 const TenantsGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase,entireHMAdata } = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, fetchData, girlsTenants, girlsRooms, entireHMAdata} = useData();
   const role = localStorage.getItem('role');
   const { database, storage } = firebase;
 
@@ -37,7 +36,7 @@ const TenantsGirls = () => {
   const [idNumber, setIdNumber] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [status, setStatus] = useState('occupied');
-  const [tenants, setTenants] = useState([]);
+  // const [tenants, setTenants] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
@@ -45,7 +44,7 @@ const TenantsGirls = () => {
   const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantId, setTenantId] = useState(null);
   const [tenantIdUrl, setTenantIdUrl] = useState('');
-  const [girlsRoomsData, setGirlsRoomsData] = useState([]);
+  // const [girlsRoomsData, setGirlsRoomsData] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   const [userDetailsTenantPopup, setUserDetailsTenantsPopup] = useState(false);
@@ -102,8 +101,8 @@ const TenantsGirls = () => {
   // }
 
   const handleCheckboxChange = (e) => {
-    setHasBike(e.target.value == 'yes');
-    if (e.target.value == 'no') {
+    setHasBike(e.target.value === 'yes');
+    if (e.target.value === 'no') {
       setHasBike(false);
       setBikeNumber('NA');
     } else {
@@ -137,75 +136,76 @@ const TenantsGirls = () => {
     document.addEventListener("keydown", handleClickOutside)
   }, []);
 
-  // useEffect(() => {
-  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
-  //     // Extract the values from the data object
-  //     const boysAndGirlsData = Object.values(entireHMAdata);
-  
-  //     // Ensure we have data and that it contains 'boys'
-  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
-  //       const boysData = Object.values(boysAndGirlsData[0].girls);
-  
-  //       // Check if there's data in boysData
-  //       if (boysData.length > 0) {
-  //         const tenantsData = boysData[0].tenants || {};
-  //         const roomsData = boysData[0].rooms || {};
-  //         const extenantsData = boysData[0].extenants || {};
-  
-  //         // Map the data to the required format
-  //         const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         // Update the state with the processed data
-  //         setTenants(loadedTenants); 
-  //         setGirlsRooms(loadedRooms);
-  //         setExTenants(loadedExTenants);
-  //       }
-  //     }
-  //   }
-  // }, []);
-  
-
-
   useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      setTenants(loadedTenants);
-    });
-  }, [activeGirlsHostel]);
-
-  const [girlsRooms, setGirlsRooms] = useState([]);
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
+    if (entireHMAdata && typeof entireHMAdata === 'object') {
+      // Extract the values from the data object
+      const boysAndGirlsData = Object.values(entireHMAdata);
+  
+      // Ensure we have data and that it contains 'boys'
+      if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+        const boysData = Object.values(boysAndGirlsData[0].girls);
+  
+        // Check if there's data in boysData
+        if (boysData.length > 0) {
+          // const tenantsData = boysData[0].tenants || {};
+          // const roomsData = boysData[0].rooms || {};
+          const extenantsData = boysData[0].extenants || {};
+  
+          // Map the data to the required format
+          // const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
+  
+          // const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
+  
+          const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+            id: key,
+            ...value,
+          }));
+  
+          // Update the state with the processed data
+          // setTenants(loadedTenants); 
+          // setGirlsRooms(loadedRooms);
+          setExTenants(loadedExTenants);
+        }
       }
-      setGirlsRooms(loadedRooms);
-    });
-  }, [activeGirlsHostel]);
+    }
+  }, [entireHMAdata]);
+  
+
+
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+  //   onValue(tenantsRef, snapshot => {
+  //     const data = snapshot.val() || {};
+  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
+  //       id: key,
+  //       ...value,
+  //     }));
+  //     setTenants(loadedTenants);
+  //   });
+  // }, [activeGirlsHostel]);
+
+
+  // const [girlsRooms, setGirlsRooms] = useState([]);
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setGirlsRooms(loadedRooms);
+  //   });
+  // }, [activeGirlsHostel]);
 
 
 
@@ -258,7 +258,7 @@ const TenantsGirls = () => {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
 
-    const isBedOccupied = tenants.some(tenant => {
+    const isBedOccupied = girlsTenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentId;
     });
 
@@ -485,6 +485,7 @@ const TenantsGirls = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
         } else {
             await push(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`), tenantData);
             toast.success(t('toastMessages.tenantAddedSuccess'), {
@@ -496,6 +497,7 @@ const TenantsGirls = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
             e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
@@ -556,7 +558,7 @@ const TenantsGirls = () => {
     setShowModal(true);
     setBikeNumber(tenant.bikeNumber);
     setPermnentAddress(tenant.permnentAddress);
-    if (tenant.bikeNumber == 'NA') {
+    if (tenant.bikeNumber === 'NA') {
       setHasBike(false);
       setBikeNumber(tenant.bikeNumber);
     }
@@ -567,7 +569,7 @@ const TenantsGirls = () => {
   };
 
   const handleAddNew = () => {
-    if (activeGirlsHostelButtons.length == 0) {
+    if (activeGirlsHostelButtons.length === 0) {
       toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
@@ -647,7 +649,7 @@ const TenantsGirls = () => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-  const rows = tenants.map((tenant, index) => ({
+  const rows = girlsTenants.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
     name: capitalizeFirstLetter(tenant.name),
@@ -707,7 +709,7 @@ const TenantsGirls = () => {
 
 
     const [roomNo, bedNo] = tenant.room_bed_no.split('/');
-    const singleUserDueDate = tenants.find(eachTenant =>
+    const singleUserDueDate = girlsTenants.find(eachTenant =>
       eachTenant.name === tenant.name &&
       eachTenant.mobileNo === tenant.mobile_no &&
       eachTenant.roomNo === roomNo &&
@@ -777,6 +779,7 @@ const TenantsGirls = () => {
             draggable: true,
             progress: undefined,
           });
+          fetchData();
         }).catch(error => {
           toast.error("Error Tenant Vacate " + error.message, {
             position: "top-center",

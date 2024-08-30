@@ -22,13 +22,13 @@ const RoomsBoys = () => {
     adminRole = "Sub-admin"
   }
 
-  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons, firebase } = useData();
+  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms } = useData();
   const { database } = firebase;
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
   const [bedRent, setBedRent] = useState('');
-  const [rooms, setRooms] = useState([]);
+  // const [rooms, setRooms] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState('');
   const [createdBy, setCreatedBy] = useState(adminRole);
@@ -36,6 +36,7 @@ const RoomsBoys = () => {
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
 
+  // console.log(fetchData, "fetchData")
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (showModal && (event.target.id === "exampleModalRoomsBoys" || event.key === "Escape")) {
@@ -78,14 +79,12 @@ const RoomsBoys = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const now = new Date().toISOString();
-
-
     const newErrors = {};
 
     // Validation checks
     if (!floorNumber.trim()) newErrors.floorNumber = 'Floor number is required';
     if (!roomNumber.trim()) newErrors.roomNumber = 'Room number is required';
-    else if (rooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) { 
+    else if (boysRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) { 
       newErrors.roomNumber = 'Room number already exists';
     }
     if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
@@ -114,6 +113,7 @@ const RoomsBoys = () => {
           draggable: true,
           progress: undefined,
         });
+        fetchData()
         setIsEditing(false);
       }).catch(error => {
         toast.error("Error updating room: " + error.message, {
@@ -145,6 +145,7 @@ const RoomsBoys = () => {
           draggable: true,
           progress: undefined,
         });
+        fetchData()
       }).catch(error => {
         toast.error("Error adding room: " + error.message, {
           position: "top-center",
@@ -159,7 +160,6 @@ const RoomsBoys = () => {
     }
 
     setShowModal(false);
-
     resetForm();
     setUpdateDate(now);
     setErrors({});
@@ -207,6 +207,7 @@ const RoomsBoys = () => {
                   draggable: true,
                   progress: undefined,
                 });
+                fetchData()
               }).catch(error => {
                 toast.error("Error deleting room: " + error.message, {
                   position: "top-center",
@@ -276,8 +277,6 @@ const RoomsBoys = () => {
       setIsEditing(false);
       setShowModal(true);
     }
-
-
   };
 
   const closePopupModal = () => {
@@ -293,20 +292,20 @@ const RoomsBoys = () => {
     setErrors({});
   };
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setRooms(loadedRooms);
-    });
-  }, [activeBoysHostel]);
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setRooms(loadedRooms);
+  //   });
+  // }, [activeBoysHostel]);
 
   let roomsData = []
   const { data } = useContext(DataContext);
@@ -346,7 +345,7 @@ const RoomsBoys = () => {
 
 
   useEffect(() => {
-    const rows = rooms.map((room, index) => ({
+    const rows = boysRooms.map((room, index) => ({
       s_no: index + 1,
       room_no: room.roomNumber,
       floor: capitalizeFirstLetter(room.floorNumber),
@@ -363,7 +362,7 @@ const RoomsBoys = () => {
     }));
     setInitialRows(rows);
     // }
-  }, [rooms, activeBoysHostel]);
+  }, [boysRooms, activeBoysHostel]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [initialRows, setInitialRows] = useState([]);

@@ -3,8 +3,7 @@ import ExpenseIcon from '../../images/Icons (5).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
 import { push, ref } from "../../firebase/firebase";
-import { onValue } from 'firebase/database';
-import { remove, update, set } from 'firebase/database';
+import { remove, set } from 'firebase/database';
 import { toast } from "react-toastify";
 import './ExpensesBoys.css';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +21,7 @@ const ExpensesBoys = () => {
   }
 
   const isUneditable = role === 'admin' || role === 'subAdmin';
-  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase,setExpensesInteracted,expensesInteracted} = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, setExpensesInteracted, expensesInteracted, entireHMAdata, fetchData} = useData();
   const { database } = firebase;
   const [searchTerm, setSearchTerm] = useState('');
   const [initialRows, setInitialRows] = useState([]);
@@ -73,7 +72,6 @@ const ExpensesBoys = () => {
       if (showModal && (event.target.id === "exampleModalExpensesBoys" || event.key === "Escape")) {
         setShowModal(false);
       }
-
     };
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener('keydown', handleOutsideClick)
@@ -141,6 +139,7 @@ const ExpensesBoys = () => {
           draggable: true,
           progress: undefined,
         });
+        fetchData();
       }).catch(error => {
         toast.error(t('toastMessages.errorAddingExpense') + error.message, {
           position: "top-center",
@@ -173,24 +172,45 @@ const ExpensesBoys = () => {
     return `${day}-${month}-${year}`;
   }
 
+  // useEffect(() => {
+  //   const formattedMonth = month.slice(0, 3);
+  //   const expensesRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${formattedMonth}`);
+  //   onValue(expensesRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedExpenses = [];
+  //     for (const key in data) {
+  //       loadedExpenses.push({
+  //         id: key,
+  //         ...data[key],
+  //         expenseDate: formatDate(data[key].expenseDate)
+  //       });
+  //     }
+  //     setExpenses(loadedExpenses);
+  //     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
+  //     setTotal(totalExpenses);
+  //   });
+  // }, [month, year, activeBoysHostel]);
+
+ 
+
   useEffect(() => {
+    if (!entireHMAdata || !activeBoysHostel) return;
+
     const formattedMonth = month.slice(0, 3);
-    const expensesRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${formattedMonth}`);
-    onValue(expensesRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedExpenses = [];
-      for (const key in data) {
-        loadedExpenses.push({
-          id: key,
-          ...data[key],
-          expenseDate: formatDate(data[key].expenseDate)
-        });
-      }
-      setExpenses(loadedExpenses);
-      const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
-      setTotal(totalExpenses);
-    });
-  }, [month, year, activeBoysHostel]);
+    const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`] ; 
+    const loadedExpenses = [];
+    for (const key in expensesData) {
+      loadedExpenses.push({
+        id: key,
+        ...expensesData[key],
+        expenseDate: formatDate(expensesData[key].expenseDate),
+      });
+    }
+    setExpenses(loadedExpenses);
+    const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
+    setTotal(totalExpenses);
+  }, [entireHMAdata, activeBoysHostel, month, year, userUid]);
+
 
   const columns = [
     t('expensesPage.sNo'),
@@ -296,6 +316,7 @@ const ExpensesBoys = () => {
             draggable: true,
             progress: undefined,
           });
+          fetchData();
           setEditingExpense(null);
         }).catch(error => {
           toast.error(t('toastMessages.errorUpdatinExpense') + error.message, {
@@ -338,6 +359,7 @@ const ExpensesBoys = () => {
         draggable: true,
         progress: undefined,
       });
+      fetchData();
       setEditingExpense(null);
     }).catch(error => {
       toast.error(t('toastMessages.errorDeletingExpense') + error.message, {
@@ -372,7 +394,7 @@ const ExpensesBoys = () => {
 
 
   const handleAddNew = () => {
-    if (activeBoysHostelButtons.length == 0) {
+    if (activeBoysHostelButtons.length === 0) {
       toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
@@ -412,35 +434,53 @@ const ExpensesBoys = () => {
   }
 
   const [totalAnnualExpenses, setTotalAnnualExpenses] = useState(0);
+  // useEffect(() => {
+  //   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  //   let total = 0;
+
+  //   const fetchExpenses = async () => {
+  //     const promises = monthNames.map(month => {
+  //       const monthRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${month}`);
+  //       return new Promise((resolve) => {
+  //         onValue(monthRef, (snapshot) => {
+  //           const expenses = snapshot.val();
+  //           if (expenses) {
+  //             const monthlyTotal = Object.values(expenses).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);
+  //             resolve(monthlyTotal);
+  //           } else {
+  //             resolve(0);
+  //           }
+  //         }, {
+  //           onlyOnce: true
+  //         });
+  //       });
+  //     });
+
+  //     const monthlyTotals = await Promise.all(promises);
+  //     total = monthlyTotals.reduce((acc, curr) => acc + curr, 0);
+  //     setTotalAnnualExpenses(total);
+  //   };
+
+  //   fetchExpenses();
+  // }, [year, expenses, activeBoysHostel]);
+
   useEffect(() => {
+    if (!entireHMAdata || !activeBoysHostel) return;
+  
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-    let total = 0;
-
-    const fetchExpenses = async () => {
-      const promises = monthNames.map(month => {
-        const monthRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${month}`);
-        return new Promise((resolve) => {
-          onValue(monthRef, (snapshot) => {
-            const expenses = snapshot.val();
-            if (expenses) {
-              const monthlyTotal = Object.values(expenses).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);
-              resolve(monthlyTotal);
-            } else {
-              resolve(0);
-            }
-          }, {
-            onlyOnce: true
-          });
-        });
-      });
-
-      const monthlyTotals = await Promise.all(promises);
-      total = monthlyTotals.reduce((acc, curr) => acc + curr, 0);
-      setTotalAnnualExpenses(total);
-    };
-
-    fetchExpenses();
-  }, [year, expenses, activeBoysHostel]);
+    let totalAnnualExpenses = 0;
+  
+    monthNames.forEach(month => {
+        const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${month}`];
+        
+        if (expensesData) {
+            const monthlyTotal = Object.values(expensesData).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);
+            totalAnnualExpenses += monthlyTotal;
+        }
+    });
+  
+    setTotalAnnualExpenses(totalAnnualExpenses);
+  }, [entireHMAdata, activeBoysHostel, year]);
 
   function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -488,6 +528,8 @@ const ExpensesBoys = () => {
                 <option value="2023">2023</option>
                 <option value="2024">2024</option>
                 <option value="2025">2025</option>
+                <option value="2025">2026</option>
+                <option value="2025">2027</option>
               </select>
             </div>
             <div>
