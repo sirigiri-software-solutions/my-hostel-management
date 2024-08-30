@@ -159,17 +159,21 @@ const BedsPageBoys = () => {
     }
   };
 
-
+  
   const filteredRows = rows.filter((row) => {
     return (
       (selectedStatus === '' || row.status === selectedStatus) &&
-      (selectedFloor === '' || compareFloor(row.floor, selectedFloor) === 0) &&
-      (selectedRoomNo === '' || parseInt(row.room_no) === parseInt(selectedRoomNo)) &&
+      (selectedFloor === '' || row.floor=== selectedFloor)  &&
+      (selectedRoomNo === '' || row.room_no === selectedRoomNo) &&
       Object.values(row).some((value) =>
         value.toString().toLowerCase().includes(searchValue.toLowerCase())
       )
     );
   });
+ 
+  console.log(rows,"bedsPageData")
+  console.log(filteredRows,"bedsPageData")
+
 
   return (
     <div className='h-100'>
