@@ -882,13 +882,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                           <label htmlFor="TotalFee" class="form-label">
                             {t("dashboard.totalFee")}:
                           </label>
-                          <input
-                            id="TotalFee"
-                            class="form-control"
-                            type="number"
-                            value={totalFee}
-                            readOnly
-                          />
+                          <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')}/>
                         </div>
 
                         <div class="col-md-6 mb-3">

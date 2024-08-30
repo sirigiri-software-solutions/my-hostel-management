@@ -82,8 +82,8 @@
       "expenseDate": "Expense Date",
       "create": "Create",
       "welcomeTo":"Welcome to",
-      "boysHostel":"Mens Hostel",
-      "girlsHostel":"Womens Hostel"
+      "boysHostel":"Men's Hostel",
+      "girlsHostel":"Women's Hostel"
     },
     "roomsPage": {
 
