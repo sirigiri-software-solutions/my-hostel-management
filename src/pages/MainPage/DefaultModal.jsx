@@ -6,6 +6,11 @@ import { toast } from 'react-toastify';
 import { useData } from '../../ApiData/ContextProvider';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import './MainPage.css'
+import imageCompression from 'browser-image-compression';
+
+
+
+
 const DefaultModal = ({ show, handleClose }) => {
     const { firebase, userUid } = useData();
     const { t } = useTranslation();
@@ -15,7 +20,7 @@ const DefaultModal = ({ show, handleClose }) => {
     });
     const [currentForm, setCurrentForm] = useState('');
     const [mensFormData, setMensFormData] = useState(null);
-    
+
 
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
@@ -31,45 +36,90 @@ const DefaultModal = ({ show, handleClose }) => {
         }
     };
 
+    const compressImage = async (file) => {
+        const options = {
+            maxSizeMB: 0.6, // Compress to a maximum of 600 KB
+            maxWidthOrHeight: 1920,
+            useWebWorker: true, // Use a web worker for better performance
+            fileType: 'image/jpeg',
+        };
+
+        try {
+            const compressedFile = await imageCompression(file, options);
+            return compressedFile;
+        } catch (error) {
+            console.error('Error compressing the image:', error);
+            return null;
+        }
+    };
+
     const handleMenFormSubmit = async (e) => {
         e.preventDefault();
+        // Prevent multiple submissions
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
 
         let boysHostelImageUrlToUpdate = boysHostelImageUrl;
-    if (boysHostelImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${newBoysHostelName}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, boysHostelImage);
-        boysHostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
-        console.log(boysHostelImageUrlToUpdate, "boysHostelImageUrlToUpdate")
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-      }
-    }
+
+        if (boysHostelImage) { // Ensure that boysHostelImage is defined before proceeding
+            try {
+                const compressedImage = await compressImage(boysHostelImage); // Renamed to avoid conflict
+
+                if (compressedImage) {
+                    const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${newBoysHostelName}`);
+                    const snapshot = await uploadBytes(imageRef, compressedImage);
+                    boysHostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
+                    console.log(boysHostelImageUrlToUpdate, "boysHostelImageUrlToUpdate");
+                }
+            } catch (error) {
+                console.error("Error uploading boys hostel image:", error);
+            }
+        }
+
         const mensData = {
             name: newBoysHostelName,
             address: newBoysHostelAddress,
             hostelImage: boysHostelImageUrlToUpdate,
         };
+
         setMensFormData(mensData);
+
         if (selectedForms.women) {
             setCurrentForm('women');
         } else {
             submitHostelData(mensData, true);
         }
+        // Allow further submissions only after the process is completed
+        setIsSubmitting(false);
     };
 
-    const handleWomenFormSubmit = async(e) => {
+
+    const handleWomenFormSubmit = async (e) => {
         e.preventDefault();
+
+        // Prevent multiple submissions
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
         let girlsHostelImageUrlToUpdate = girlsHostelImageUrl;
         if (girlsHostelImage) {
-          const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${newGirlsHostelName}`);
-          try {
-            const snapshot = await uploadBytes(imageRef, girlsHostelImage);
-            girlsHostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
-            console.log(girlsHostelImageUrlToUpdate, "girlsHostelImageUrlToUpdate")
-          } catch (error) {
-            console.error("Error uploading tenant image:", error);
-          }
+
+            try {
+                const compressedImage = await compressImage(girlsHostelImage); // Renamed to avoid conflict
+
+                if (compressedImage) {
+                    const imageRef = storageRef(storage, `Hostel/${userUid}/girls/${newGirlsHostelName}`);
+                    const snapshot = await uploadBytes(imageRef, compressedImage);
+                    girlsHostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
+                    console.log(girlsHostelImageUrlToUpdate, "girlsHostelImageUrlToUpdate");
+                }
+            } catch (error) {
+                console.error("Error uploading boys hostel image:", error);
+            }
+
+
         }
 
         const womensData = {
@@ -82,6 +132,8 @@ const DefaultModal = ({ show, handleClose }) => {
             submitHostelData(mensFormData, true);
         }
         submitHostelData(womensData, false);
+         // Allow further submissions only after the process is completed
+    setIsSubmitting(false);
     };
 
     const [newBoysHostelName, setNewBoysHostelName] = useState('');
@@ -143,6 +195,11 @@ const DefaultModal = ({ show, handleClose }) => {
     //     reader.readAsDataURL(file);
     // };
 
+    const isImageFile = (file) => {
+        const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        return file && allowedImageTypes.includes(file.type);
+      };
+
     const handleHostelChange = (e, isBoys) => {
         const file = e.target.files[0];
         if (!file) {
@@ -152,7 +209,14 @@ const DefaultModal = ({ show, handleClose }) => {
             });
             return;
         }
-
+        if (!isImageFile(file)) {
+            toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
+              position: "top-center",
+              autoClose: 3000,
+            });
+            e.target.value = ''; 
+            return;
+          }
         if (isBoys) {
             setBoysHostelImage(file); // Store file directly
         } else {
@@ -179,7 +243,7 @@ const DefaultModal = ({ show, handleClose }) => {
             return;
         }
 
-        
+
         const newHostelRef = push(ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`));
 
         const hostelDetails = {
@@ -191,7 +255,7 @@ const DefaultModal = ({ show, handleClose }) => {
 
         set(newHostelRef, hostelDetails)
             .then(() => {
-                toast.success(`New ${isBoys ? 'boys' : 'girls'} hostel '${name}' added successfully.`, {
+                toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
                     position: "top-center",
                     autoClose: 3000,
                 });

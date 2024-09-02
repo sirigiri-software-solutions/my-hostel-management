@@ -2,55 +2,21 @@ import React, { useEffect, useState } from 'react'
 import bedIcon from '../../images/Icons (3).png'
 import Table from '../../Elements/Table'
 import SearchIcon from '../../images/Icons (9).png'
-import { push, ref } from '../../firebase/firebase'
-import { onValue } from 'firebase/database'
 import "../BedsPageBoys/BedsPageBoys.css"
 import { useData } from '../../ApiData/ContextProvider';
 import { useTranslation } from 'react-i18next';
 
 const BedsPageGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel, userUid, firebase } = useData();
-  const { database } = firebase;
-  const [girlsRooms, setGirlsRooms] = useState([])
-  const [bedsData, setBedsData] = useState([]);
-  const [tenants, setTenants] = useState([]);
+  const { activeGirlsHostel, girlsRooms, girlsTenants } = useData();
 
+  const [bedsData, setBedsData] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedFloor, setSelectedFloor] = useState('');
   const [selectedRoomNo, setSelectedRoomNo] = useState('');
   const [roomNumbersToShow, setRoomNumbersToShow] = useState([]);
   const [floorNumbersToShow, setFloorNumbersToShow] = useState([]);
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setGirlsRooms(loadedRooms);
-    })
-  }, [activeGirlsHostel]);
-  // Fetch tenants data
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = [];
-      for (const key in data) {
-        loadedTenants.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setTenants(loadedTenants);
-    });
-  }, [activeGirlsHostel]);
 
   // Construct beds data based on rooms and tenants
   useEffect(() => {
@@ -63,7 +29,7 @@ const BedsPageGirls = () => {
     const allBeds = girlsRooms.flatMap(room => {
       return Array.from({ length: room.numberOfBeds }, (_, i) => {
         const bedNumber = i + 1;
-        const tenant = tenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        const tenant = girlsTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
         const tenantName = tenant ? tenant.name : "-";
         return {
           name: tenantName,
@@ -91,7 +57,7 @@ const BedsPageGirls = () => {
     };
 
 
-  }, [girlsRooms, tenants, activeGirlsHostel]);
+  }, [girlsRooms, girlsTenants, activeGirlsHostel]);
 
 
   const columns = [
@@ -161,8 +127,8 @@ const BedsPageGirls = () => {
   const filteredRows = rows.filter((row) => {
     return (
       (selectedStatus === '' || row.status === selectedStatus) &&
-      (selectedFloor === '' || compareFloor(row.floor, selectedFloor) === 0) &&
-      (selectedRoomNo === '' || parseInt(row.room_no) === parseInt(selectedRoomNo)) &&
+      (selectedFloor === '' || row.floor === selectedFloor) &&
+      (selectedRoomNo === '' || row.room_no === selectedRoomNo) &&
       Object.values(row).some((value) =>
         value.toString().toLowerCase().includes(searchValue.toLowerCase())
       )

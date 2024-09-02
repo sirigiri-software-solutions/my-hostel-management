@@ -13,14 +13,15 @@ import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 // import Reports from './Reports';
-
+import imageCompression from 'browser-image-compression';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, hostelData, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag } = useData();
-  const { database } = firebase;
+  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag } = useData();
+  const { database, storage } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
   const [newBoysHostelAddress, setNewBoysHostelAddress] = useState('');
@@ -40,7 +41,8 @@ const Settings = () => {
 
   const [expensesDataTrigger, setExpensesDataTrigger] = useState(false);
   const [entireBoysYearExpensesData, setEntireBoysYearExpensesData] = useState([])
-  const [entireGirlsYearExpensesData, setEntireGirlsYearExpensesData] = useState([])
+  const [entireGirlsYearExpensesData, setEntireGirlsYearExpensesData] = useState([]);
+  const [hostelImageUrl, setHostelImageUrl] = useState('');
 
   const getCurrentMonth = () => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
@@ -66,7 +68,7 @@ const Settings = () => {
       })) : [];
       setEntireBoysData(loadedTenants)
     });
-  }, [selectedHostelType, activeBoysHostel])
+  }, [selectedHostelType, activeBoysHostel, userUid])
 
   useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
@@ -78,7 +80,7 @@ const Settings = () => {
       })) : [];
       setEntireGirlsData(loadedTenants)
     });
-  }, [selectedHostelType, activeGirlsHostel])
+  }, [selectedHostelType, activeGirlsHostel, userUid])
 
 
   useEffect(() => {
@@ -91,7 +93,7 @@ const Settings = () => {
       })) : [];
       setVacatedEntireBoysData(loadedTenants)
     });
-  }, [selectedHostelType, activeBoysHostel])
+  }, [selectedHostelType, activeBoysHostel, userUid])
 
   useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
@@ -103,7 +105,7 @@ const Settings = () => {
       })) : [];
       setVacatedEnitreGirlsData(loadedTenants)
     });
-  }, [selectedHostelType, activeGirlsHostel])
+  }, [selectedHostelType, activeGirlsHostel, userUid])
 
 
 
@@ -201,10 +203,6 @@ const Settings = () => {
   }, [selectedHostelType, activeBoysHostel, activeGirlsHostel, expensesInteracted]);
 
 
-
-
-  const [tenantsData, setTenantsData] = useState()
-
   // console.log(hostelData, "dataaa")
 
   const capitalizeFirstLetter = (string) => {
@@ -232,6 +230,28 @@ const Settings = () => {
     }
   };
 
+  const compressImage = async (file) => {
+    const options = {
+        maxSizeMB: 0.6, // Compress to a maximum of 600 KB
+        maxWidthOrHeight: 1920,
+        useWebWorker: true, // Use a web worker for better performance
+        fileType: 'image/jpeg',
+    };
+
+    try {
+        const compressedFile = await imageCompression(file, options);
+        return compressedFile;
+    } catch (error) {
+        console.error('Error compressing the image:', error);
+        return null;
+    }
+};
+
+const isImageFile = (file) => {
+  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  return file && allowedImageTypes.includes(file.type);
+};
+
   const handleHostelChange = (e, isBoys) => {
     const file = e.target.files[0];
     if (!file) {
@@ -241,38 +261,67 @@ const Settings = () => {
       });
       return;
     }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result;
-      if (isBoys) {
-        setBoysHostelImage(dataUrl);
-      } else {
-        setGirlsHostelImage(dataUrl);
-      }
-    };
-    reader.onerror = () => {
-      toast.error("Failed to read file.", {
+    if (!isImageFile(file)) {
+      toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
         position: "top-center",
         autoClose: 3000,
       });
-    };
-    reader.readAsDataURL(file);
+      e.target.value = ''; // Clear the input
+      return;
+    }
+
+    if (isBoys) {
+        setBoysHostelImage(file); // Store file directly
+    } else {
+        setGirlsHostelImage(file); // Store file directly
+    }
+
+    // const reader = new FileReader();
+    // reader.onload = () => {
+    //   const dataUrl = reader.result;
+    //   if (isBoys) {
+    //     setBoysHostelImage(dataUrl);
+    //   } else {
+    //     setGirlsHostelImage(dataUrl);
+    //   }
+    // };
+    // reader.onerror = () => {
+    //   toast.error("Failed to read file.", {
+    //     position: "top-center",
+    //     autoClose: 3000,
+    //   });
+    // };
+    // reader.readAsDataURL(file);
   };
 
-  const addNewHostel = (e, isBoys) => {
+  const addNewHostel = async (e, isBoys) => {
     e.preventDefault();
     setIsSubmitting(true);
     const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
     const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
-    const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
+    // const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
 
-    if (name.trim() === '' || address.trim() === '' || hostelImage.trim() === '') {
+    if (name.trim() === '' || address.trim() === '' ) {
       toast.error("Hostel name, address and image cannot be empty.", {
         position: "top-center",
         autoClose: 3000,
       });
       return;
+    }
+
+    let hostelImageUrlToUpdate = hostelImageUrl;
+    // console.log(isBoys ? boysHostelImage : girlsHostelImage, "kkk")
+    const hostelImageFile = isBoys ? boysHostelImage : girlsHostelImage;
+    let compressedHostelImageFile = await compressImage(hostelImageFile);
+    if (compressedHostelImageFile) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, compressedHostelImageFile);
+        hostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(hostelImageUrlToUpdate, "hostelImageUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
+      }
     }
 
     // Create a new reference with a unique ID
@@ -281,12 +330,12 @@ const Settings = () => {
       id: newHostelRef.key, // Store the unique key if needed
       name,
       address,
-      hostelImage
+      hostelImage: hostelImageUrlToUpdate
     };
 
     set(newHostelRef, hostelDetails)
       .then(() => {
-        toast.success(`New ${isBoys ? 'boys' : 'girls'} hostel '${name}' added successfully.`, {
+        toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
           position: "top-center",
           autoClose: 3000,
         });
@@ -551,10 +600,6 @@ const Settings = () => {
 
   const handleExpensesGenerateBtn = () => {
     setExpensesDataTrigger(true)
-
-
-
-
 
     const doc = new jsPDF();
 

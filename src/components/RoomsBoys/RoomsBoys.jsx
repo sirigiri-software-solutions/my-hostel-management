@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useData } from '../../ApiData/ContextProvider';
 import { useTranslation } from 'react-i18next';
 
+
 const RoomsBoys = () => {
 
   const { t } = useTranslation();
@@ -22,20 +23,23 @@ const RoomsBoys = () => {
     adminRole = "Sub-admin"
   }
 
-  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons, firebase } = useData();
+  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms } = useData();
   const { database } = firebase;
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
   const [bedRent, setBedRent] = useState('');
-  const [rooms, setRooms] = useState([]);
+  // const [rooms, setRooms] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState('');
   const [createdBy, setCreatedBy] = useState(adminRole);
   const [updateDate, setUpdateDate] = useState('');
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState({ roomNumber: '', currentId: '' });
 
+
+  // console.log(fetchData, "fetchData")
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (showModal && (event.target.id === "exampleModalRoomsBoys" || event.key === "Escape")) {
@@ -78,14 +82,12 @@ const RoomsBoys = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const now = new Date().toISOString();
-
-
     const newErrors = {};
 
     // Validation checks
     if (!floorNumber.trim()) newErrors.floorNumber = 'Floor number is required';
     if (!roomNumber.trim()) newErrors.roomNumber = 'Room number is required';
-    else if (rooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) { 
+    else if (boysRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) { 
       newErrors.roomNumber = 'Room number already exists';
     }
     if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
@@ -114,6 +116,7 @@ const RoomsBoys = () => {
           draggable: true,
           progress: undefined,
         });
+        fetchData()
         setIsEditing(false);
       }).catch(error => {
         toast.error("Error updating room: " + error.message, {
@@ -145,6 +148,7 @@ const RoomsBoys = () => {
           draggable: true,
           progress: undefined,
         });
+        fetchData()
       }).catch(error => {
         toast.error("Error adding room: " + error.message, {
           position: "top-center",
@@ -159,7 +163,6 @@ const RoomsBoys = () => {
     }
 
     setShowModal(false);
-
     resetForm();
     setUpdateDate(now);
     setErrors({});
@@ -167,10 +170,17 @@ const RoomsBoys = () => {
 
   const [showConfirmationPopUp, setShowConfirmationPopUp] = useState(false);
 
-  const handleDeleteRoom = () => {
+  // const handleDeleteRoom = () => {
+  //   setShowConfirmationPopUp(true);
+  //   setShowModal(false);
+  // };
+
+  const handleDeleteRoom = (roomNumber, currentId) => {
     setShowConfirmationPopUp(true);
     setShowModal(false);
+    setRoomToDelete({ roomNumber, currentId });  // Store room info in state
   };
+  
 
   const roomExists = (data, targetRoomNo) => {
     for (const key in data) {
@@ -184,43 +194,103 @@ const RoomsBoys = () => {
     return false; // No room found
   };
 
-  const confirmDeleteYes =async () => {
+  // const confirmDeleteYes =async () => {
 
+  //   try {
+  //     const path = `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`;
+  //     const dbRef = ref(database, path);
+  //     const snapshot = await get(dbRef);
+  //     console.log(snapshot,"roomsData")
+  //     if (snapshot.exists()) {
+  //       const data = snapshot.val();
+  //       console.log(data,"roomsData")
+
+
+
+
+
+  //       const exists = roomExists(data, roomNumber);
+  //       if(!exists){
+  //         const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
+  //             remove(roomRef).then(() => {
+  //               toast.success("Room deleted successfully.", {
+  //                 position: "top-center",
+  //                 autoClose: 2000,
+  //                 hideProgressBar: false,
+  //                 closeOnClick: true,
+  //                 pauseOnHover: true,
+  //                 draggable: true,
+  //                 progress: undefined,
+  //               });
+  //               fetchData()
+  //             }).catch(error => {
+  //               toast.error("Error deleting room: " + error.message, {
+  //                 position: "top-center",
+  //                 autoClose: 2000,
+  //                 hideProgressBar: false,
+  //                 closeOnClick: true,
+  //                 pauseOnHover: true,
+  //                 draggable: true,
+  //                 progress: undefined,
+  //               });
+  //             });
+  //             setShowConfirmationPopUp(false);
+  //       }else{
+  //         toast.error("Tenants are there you can't delete room until those are trasfered to other room", {
+  //           position: "top-center",
+  //           autoClose: 5000,
+  //           hideProgressBar: false,
+  //           closeOnClick: true,
+  //           pauseOnHover: true,
+  //           draggable: true,
+  //           progress: undefined,
+  //         });
+  //         setShowConfirmationPopUp(false);
+
+  //       }
+       
+  //     } else {
+  //       console.log('No data available');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error);
+  //   }
+   
+
+  // }
+
+
+
+  const confirmDeleteYes = async () => {
+    const { roomNumber, currentId } = roomToDelete;
+  
     try {
-      const path = `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`;
-      const dbRef = ref(database, path);
-      const snapshot = await get(dbRef);
-      console.log(snapshot,"roomsData")
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        console.log(data,"roomsData")
-        const exists = roomExists(data, roomNumber);
-        if(!exists){
-          const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
-              remove(roomRef).then(() => {
-                toast.success("Room deleted successfully.", {
-                  position: "top-center",
-                  autoClose: 2000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                });
-              }).catch(error => {
-                toast.error("Error deleting room: " + error.message, {
-                  position: "top-center",
-                  autoClose: 2000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                });
-              });
-              setShowConfirmationPopUp(false);
-        }else{
-          toast.error("Tenants are there you can't delete room until those are trasfered to other room", {
+      const tenantsPath = `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`;
+      const tenantsSnapshot = await get(ref(database, tenantsPath));
+  
+      if (tenantsSnapshot.exists()) {
+        const tenantsData = tenantsSnapshot.val();
+  
+        // Check if any tenant is in the room to be deleted
+        const roomHasTenants = Object.values(tenantsData).some(tenant => tenant.roomNo === roomNumber);
+  
+        if (!roomHasTenants) {
+          // Room has no tenants, proceed to delete the room
+          await remove(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`));
+  
+          toast.success("Room deleted successfully!", {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+  
+          fetchData(); // Refresh data after deletion
+        } else {
+          toast.error("Room cannot be deleted as it has tenants. Please transfer the tenants first.", {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,
@@ -229,19 +299,44 @@ const RoomsBoys = () => {
             draggable: true,
             progress: undefined,
           });
-          setShowConfirmationPopUp(false);
-
         }
-       
       } else {
-        console.log('No data available');
+        // No tenants found, safe to delete the room
+        await remove(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`));
+  
+        toast.success("Room deleted successfully!", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+  
+        fetchData(); // Refresh data after deletion
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error deleting room: ", error);
+      toast.error("Failed to delete room. Please try again.", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
-   
+  
+    setShowConfirmationPopUp(false);
+  };
+  
+  
 
-  }
+
+
+
 
   const confirmDeleteNo = () => {
     setShowConfirmationPopUp(false);
@@ -276,8 +371,6 @@ const RoomsBoys = () => {
       setIsEditing(false);
       setShowModal(true);
     }
-
-
   };
 
   const closePopupModal = () => {
@@ -293,20 +386,7 @@ const RoomsBoys = () => {
     setErrors({});
   };
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setRooms(loadedRooms);
-    });
-  }, [activeBoysHostel]);
+  
 
   let roomsData = []
   const { data } = useContext(DataContext);
@@ -346,7 +426,7 @@ const RoomsBoys = () => {
 
 
   useEffect(() => {
-    const rows = rooms.map((room, index) => ({
+    const rows = boysRooms.map((room, index) => ({
       s_no: index + 1,
       room_no: room.roomNumber,
       floor: capitalizeFirstLetter(room.floorNumber),
@@ -363,7 +443,7 @@ const RoomsBoys = () => {
     }));
     setInitialRows(rows);
     // }
-  }, [rooms, activeBoysHostel]);
+  }, [boysRooms, activeBoysHostel]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [initialRows, setInitialRows] = useState([]);
@@ -449,7 +529,7 @@ const RoomsBoys = () => {
                       {isEditing ? (
                         <div className="roomsEditBtnsContainer">
                           <button type="button" className="btn btn-warning roomUpdateBtn" onClick={handleSubmit}>{t('roomsPage.Update Room')}</button>
-                          <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button>
+                          <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(roomNumber, currentId)}>{t('roomsPage.Delete Room')}</button>
                         </div>
                       ) : (
                         <button type="submit" className="btn btn-warning" >{t('roomsPage.CreateRoom')}</button>

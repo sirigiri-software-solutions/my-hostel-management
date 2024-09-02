@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react'
 import bedIcon from '../../images/Icons (3).png'
 import Table from '../../Elements/Table'
 import SearchIcon from '../../images/Icons (9).png'
-import { push, ref } from '../../firebase/firebase'
-import { onValue } from 'firebase/database';
 import "../BedsPageBoys/BedsPageBoys.css"
 import { useData } from '../../ApiData/ContextProvider';
 import { useTranslation } from 'react-i18next';
@@ -11,12 +9,9 @@ import { useTranslation } from 'react-i18next';
 const BedsPageBoys = () => {
   const { t } = useTranslation();
 
-  const { activeBoysHostel, userUid, firebase } = useData();
-  const { database } = firebase;
-  const [boysRooms, setBoysRooms] = useState([])
-  const [bedsData, setBedsData] = useState([]);
-  const [tenants, setTenants] = useState([]);
+  const { activeBoysHostel, boysRooms, boysTenants} = useData();
 
+  const [bedsData, setBedsData] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedFloor, setSelectedFloor] = useState('');
@@ -24,37 +19,6 @@ const BedsPageBoys = () => {
   const [roomNumbersToShow, setRoomNumbersToShow] = useState([]);
   const [floorNumbersToShow, setFloorNumbersToShow] = useState([]);
 
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setBoysRooms(loadedRooms);
-    })
-  }, [activeBoysHostel]);
-
-
-  // Fetch tenants data
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = [];
-      for (const key in data) {
-        loadedTenants.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setTenants(loadedTenants);
-    });
-  }, [activeBoysHostel]);
 
   // Construct beds data based on rooms and tenants
   useEffect(() => {
@@ -67,7 +31,7 @@ const BedsPageBoys = () => {
     const allBeds = boysRooms.flatMap(room => {
       return Array.from({ length: room.numberOfBeds }, (_, i) => {
         const bedNumber = i + 1;
-        const tenant = tenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        const tenant = boysTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
         const tenantName = tenant ? tenant.name : "-";
         return {
           name: tenantName,
@@ -93,7 +57,7 @@ const BedsPageBoys = () => {
       setRoomNumbersToShow([]);
     };
 
-  }, [boysRooms, tenants, activeBoysHostel]);
+  }, [boysRooms, boysTenants, activeBoysHostel]);
 
   const columns = [
     t('bedsPage.sNo'),
@@ -159,17 +123,21 @@ const BedsPageBoys = () => {
     }
   };
 
-
+  
   const filteredRows = rows.filter((row) => {
     return (
       (selectedStatus === '' || row.status === selectedStatus) &&
-      (selectedFloor === '' || compareFloor(row.floor, selectedFloor) === 0) &&
-      (selectedRoomNo === '' || parseInt(row.room_no) === parseInt(selectedRoomNo)) &&
+      (selectedFloor === '' || row.floor=== selectedFloor)  &&
+      (selectedRoomNo === '' || row.room_no === selectedRoomNo) &&
       Object.values(row).some((value) =>
         value.toString().toLowerCase().includes(searchValue.toLowerCase())
       )
     );
   });
+ 
+  console.log(rows,"bedsPageData")
+  console.log(filteredRows,"bedsPageData")
+
 
   return (
     <div className='h-100'>
@@ -223,14 +191,14 @@ const BedsPageBoys = () => {
           <Table columns={columns} rows={filteredRows} />
         </div>
 
-        <div class="modal fade" id="exampleModalBedsBoys" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div className="modal fade" id="exampleModalBedsBoys" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <div class="modal-body">
+              <div className="modal-body">
                 <div className="container-fluid">
                   <h1 className='text-center mb-2 fs-5'>
                     Create Beds
