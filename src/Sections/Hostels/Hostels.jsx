@@ -33,6 +33,7 @@ const Hostels = () => {
   const [boysHostelImage, setBoysHostelImage] = useState('');
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
   const [hostelImageUrl, setHostelImageUrl] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   
 
   useEffect(() => {
@@ -301,7 +302,9 @@ const Hostels = () => {
 
   const handleHostelChange = (e, isBoys) => {
     const file = e.target.files[0];
+    
     if (!file) {
+        // No file selected
         toast.error("Please select a file.", {
             position: "top-center",
             autoClose: 3000,
@@ -309,12 +312,22 @@ const Hostels = () => {
         return;
     }
 
-    if (isBoys) {
-        setBoysHostelImage(file); // Store file directly
+    const validFormats = ['image/jpeg', 'image/png'];
+    if (validFormats.includes(file.type)) {
+        
+        if (isBoys) {
+            setBoysHostelImage(file); 
+        } else {
+            setGirlsHostelImage(file); 
+        }
+        setErrorMessage(''); 
     } else {
-        setGirlsHostelImage(file); // Store file directly
+        
+        setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+        e.target.value = null; 
     }
 };
+
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -549,7 +562,8 @@ const Hostels = () => {
             </div>
             <div className="form-group">
               <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
-              <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, true)} />
+              <input type="file" className="form-control" accept=".jpg, .jpeg, .png"  onChange={(e) => handleHostelChange(e, true)} />
+              {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             </div>
             <div className='mt-3 d-flex justify-content-between'>
               <Button variant="primary" style={{ marginRight: '10px' }} type="submit" disabled={isSubmitting}>{isSubmitting ? 'Adding...' : t("settings.addHostel")}</Button>
@@ -590,7 +604,8 @@ const Hostels = () => {
             </div>
             <div className="form-group">
               <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
-              <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, false)} />
+              <input type="file" className="form-control"  accept=".jpg, .jpeg, .png"  onChange={(e) => handleHostelChange(e, false)} />
+              {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             </div>
             <div className='mt-3 d-flex justify-content-between'>
               <Button variant="primary" type="submit" style={{ marginRight: '10px' }} disabled={isSubmitting}>{isSubmitting ? 'Adding...' : t("settings.addHostel")}</Button>

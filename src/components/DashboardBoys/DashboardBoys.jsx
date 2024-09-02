@@ -73,6 +73,8 @@ const DashboardBoys = () => {
   const [selectedTenant, setSelectedTenant] = useState('');
   const [tenantAddress, setTenantAddress] = useState("");
   const [permnentAddress, setPermnentAddress] = useState("");
+  const [fileName, setFileName] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const tenantImageInputRef = useRef(null);
   const tenantProofIdRef = useRef(null);
@@ -369,35 +371,7 @@ const DashboardBoys = () => {
   }, [boysRooms, tenants]);
 
 
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     setBikeImage(reader.result);
-  //   };
-  //   reader.readAsDataURL(file);
-  // };
-  const handleTenantBikeChange = (e) => {
-    if (e.target.files[0]) {
-      setBikeImage(e.target.files[0]);
-    }
-  };
-  const handleTenantBikeRcChange = (e) => {
-    if (e.target.files[0]) {
-      setBikeRcImage(e.target.files[0]);
-    }
-  };
-
-
-  // const handleRcChange = (e) => {
-  //   const file1 = e.target.files[0];
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     setBikeRcImage(reader.result);
-  //   }
-  //   reader.readAsDataURL(file1);
-
-  // }
+  
 
 
 
@@ -626,40 +600,107 @@ const DashboardBoys = () => {
   };
 
 
-  // const handleTenantImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       setTenantImage(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
   const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      const validFormats = ['image/jpeg', 'image/png'];
+      if (validFormats.includes(file.type)) {
+        setTenantImage(file);
+        setErrorMessage(''); 
+      } else {
+        setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+        e.target.value = null; 
+      }
+    }
+  };
+  
+
+  const handleTenantIdChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+
+      const validFormat = 'application/pdf';
+      const maxSize = 1 * 1024 * 1024;
+
+
+      if (file.type === validFormat) {
+
+        if (file.size <= maxSize) {
+
+          setFileName(file.name);
+          setTenantId(file);
+          setTenantId(file);
+          setErrorMessage('');
+        } else {
+
+          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+        e.target.value = null;
+
+
+       
+        }
+      } else {
+
+        setErrorMessage('Please upload a valid  file.');
+
+
+        e.target.value = null;
+      }
+    }
+  };
+  const handleTenantBikeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      
+      const validFormats = ['image/jpeg', 'image/png'];
+
+     
+      if (validFormats.includes(file.type)) {
+        
+        setBikeImage(file);
+        setErrorMessage('');
+        
+      } else {
+        setErrorMessage('Please upload a valid  file.');
+        
+
+        
+        e.target.value = null;
+      }
     }
   };
 
-  // const handleTenantIdChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       // Once the file is loaded, set the image in state as a base64 URL
-  //       setTenantId(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-  const handleTenantIdChange = (e) => {
-    if (e.target.files[0]) {
-      const file = e.target.files[0]
-      // setFileName(file.name)
-      setTenantId(e.target.files[0]);
+  const handleTenantBikeRcChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+     
+      const validFormat = 'application/pdf';
+      const maxSize = 1 * 1024 * 1024; 
+
+      
+      if (file.type === validFormat) {
+        
+        if (file.size <= maxSize) {
+          
+          setBikeRcImage(file);
+          setErrorMessage('');
+        } else {
+          
+          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+          e.target.value = null; 
+        }
+      } else {
+        
+        setErrorMessage('Please upload a valid  file.');
+        e.target.value = null; 
+      }
     }
   };
+
+
+
 
   const handleTenantSubmit = async (e) => {
     e.preventDefault();
@@ -1456,8 +1497,9 @@ const DashboardBoys = () => {
                   <p>{t('dashboard.currentImage')}</p>
                 </div>
               )}
-              <input id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} ref={imageInputRef} required />
+              <input id="tenantUpload" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantImageChange} ref={imageInputRef} required />
               {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
+              {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             </div>
             <div class="col-md-6">
               <label htmlFor='tenantUploadId' class="form-label">
@@ -1473,7 +1515,8 @@ const DashboardBoys = () => {
                   <a href={tenantId}>{t('dashboard.downloadPdf')}</a>
                 </object>
               )}
-              <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef} multiple />
+              <input id="tenantUploadId" class="form-control" type="file"   accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantIdChange} ref={idInputRef} multiple />
+              {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             </div>
             <div className='col-md-12'>
               <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
@@ -1527,11 +1570,13 @@ const DashboardBoys = () => {
               <>
                 <div className="col-md-6">
                   <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-                  <input type="file" className="form-control" onChange={handleTenantBikeChange} />
+                  <input type="file" className="form-control" accept=".jpg, .jpeg, .png" onChange={handleTenantBikeChange} />
+                  {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                 </div>
                 <div className="col-md-6">
                   <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-                  <input type="file" className="form-control" onChange={handleTenantBikeRcChange} />
+                  <input type="file" className="form-control" accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantBikeRcChange} />
+                  {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                 </div>
               </>
             )}
