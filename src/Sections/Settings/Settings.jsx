@@ -19,7 +19,7 @@ const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag } = useData();
+  const { activeBoysHostelName,activeGirlsHostelName,userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag } = useData();
   const { database } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
@@ -354,6 +354,7 @@ const Settings = () => {
 
     // Determine the data source based on the selected hostel type
     const dataToUse = selectedHostelType === "mens" ? entireBoysData : entireGirlsData;
+    const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + "Mens" : activeGirlsHostelName + "Womens";
 
     // Filter and map data
     const dataWithBike = dataToUse.filter(tenant => tenant.bikeNumber && tenant.bikeNumber !== 'NA').map((tenant, index) => {
@@ -394,7 +395,7 @@ const Settings = () => {
     // Add title for the report
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('Tenants Report', doc.internal.pageSize.width / 2, 10, { align: 'center' });
+    doc.text(`${nameToUse}Tenants Report`, doc.internal.pageSize.width / 2, 10, { align: 'center' });
 
     // Add title for tenants with bikes
     doc.setFontSize(12);
@@ -426,7 +427,7 @@ const Settings = () => {
     });
 
     // Save the PDF
-    doc.save('Tenants_Report.pdf');
+    doc.save(`${nameToUse} Tenants_Report.pdf`);
   };
 
   const handleVacatedReportBtn = () => {
@@ -461,7 +462,7 @@ const Settings = () => {
 
     // Determine the data source based on the selected hostel type
     const dataToUse = selectedHostelType === "mens" ? vacatedEntireBoysData : vacatedEntireGirlsData;
-
+    const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + "Mens" : activeGirlsHostelName + "Womens";
     // Filter and map data
     const dataWithBike = dataToUse.filter(tenant => tenant.bikeNumber && tenant.bikeNumber !== 'NA').map((tenant, index) => {
       const rents = tenant.rents || {};
@@ -501,7 +502,7 @@ const Settings = () => {
     // Add title for the report
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('Vacated Tenants Report', doc.internal.pageSize.width / 2, 10, { align: 'center' });
+    doc.text(`${nameToUse} Vacated Tenants Report`, doc.internal.pageSize.width / 2, 10, { align: 'center' });
 
     // Add title for tenants with bikes
     doc.setFontSize(12);
@@ -533,7 +534,7 @@ const Settings = () => {
     });
 
     // Save the PDF
-    doc.save('VacatedTenants_Report.pdf');
+    doc.save(`${nameToUse} VacatedTenants_Report.pdf`);
 
   }
 
@@ -567,7 +568,7 @@ const Settings = () => {
 
     // Determine the data source based on the selected hostel type
     const dataToUse = selectedHostelType === "mens" ? entireBoysYearExpensesData : entireGirlsYearExpensesData;
-
+    const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + " Mens" : activeGirlsHostelName + "Womens";
     // Convert month name to number
     const newMonth = monthMapping[month.toLowerCase()];
 
@@ -598,7 +599,7 @@ const Settings = () => {
         // Add heading for monthly report
         const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
         doc.setFontSize(16);
-        doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
+        doc.text(`${nameToUse} ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
 
         // Create table for specific month
         doc.autoTable({
@@ -617,11 +618,11 @@ const Settings = () => {
         doc.text(`Total Expenses: ${totalAmount}`, 10, doc.lastAutoTable.finalY + 10);
 
         // Save file with month in filename
-        doc.save(`${monthName}_expenses.pdf`);
+        doc.save(`${nameToUse} ${monthName}_expenses.pdf`);
       } else {
         doc.setFontSize(16);
         const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-        doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
+        doc.text(`${nameToUse} ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
 
         // Create an empty table
         doc.autoTable({
@@ -632,7 +633,7 @@ const Settings = () => {
         });
 
         doc.text('No expenses found for the selected month and year.', 10, doc.lastAutoTable.finalY + 10);
-        doc.save(`${monthName}_expenses.pdf`);
+        doc.save(`${nameToUse} ${monthName}_expenses.pdf`);
       }
     } else if (year) {
       // Yearly Report
@@ -663,7 +664,7 @@ const Settings = () => {
 
       // Add heading for yearly report
       doc.setFontSize(16);
-      doc.text('Yearly Expenses', 105, 20, { align: 'center' });
+      doc.text(`${nameToUse} Yearly Expenses`, 105, 20, { align: 'center' });
 
       let grandTotal = 0;
       let startY = 30;
@@ -712,7 +713,7 @@ const Settings = () => {
       doc.text(`Grand Total: ${grandTotal}`, 10, startY + 2);
 
       // Save file with year in filename
-      doc.save(`${year}_expenses.pdf`);
+      doc.save(`${nameToUse} ${year}_expenses.pdf`);
     }
 
     setExpensesDataTrigger(false)
