@@ -13,14 +13,15 @@ import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 // import Reports from './Reports';
-
+import imageCompression from 'browser-image-compression';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { activeBoysHostelName,activeGirlsHostelName,userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag } = useData();
-  const { database } = firebase;
+  const { activeBoysHostelName,activeGirlsHostelName,userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons,girlsTenants, boysTenants, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag,entireHMAdata } = useData();
+  const { database,storage } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
   const [newBoysHostelAddress, setNewBoysHostelAddress] = useState('');
@@ -31,16 +32,10 @@ const Settings = () => {
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
   const [isBoysModalOpen, setIsBoysModalOpen] = useState(false);
   const [isGirlsModalOpen, setIsGirlsModalOpen] = useState(false);
-  const [entireBoysData, setEntireBoysData] = useState([]);
-  const [entireGirlsData, setEntireGirlsData] = useState([]);
   const [selectedHostelType, setSelectedHostelType] = useState("mens");
-  const [vacatedEntireBoysData, setVacatedEntireBoysData] = useState([]);
-  const [vacatedEntireGirlsData, setVacatedEnitreGirlsData] = useState([]);
-
-
-  const [expensesDataTrigger, setExpensesDataTrigger] = useState(false);
   const [entireBoysYearExpensesData, setEntireBoysYearExpensesData] = useState([])
-  const [entireGirlsYearExpensesData, setEntireGirlsYearExpensesData] = useState([])
+  const [entireGirlsYearExpensesData, setEntireGirlsYearExpensesData] = useState([]);
+  const [hostelImageUrl, setHostelImageUrl] = useState('');
 
   const getCurrentMonth = () => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
@@ -54,143 +49,32 @@ const Settings = () => {
   const [year, setYear] = useState(getCurrentYear());
   const [month, setMonth] = useState(getCurrentMonth())
 
-  console.log(activeFlag, "active")
-
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-      })) : [];
-      setEntireBoysData(loadedTenants)
-    });
-  }, [selectedHostelType, activeBoysHostel, userUid])
-
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-      })) : [];
-      setEntireGirlsData(loadedTenants)
-    });
-  }, [selectedHostelType, activeGirlsHostel, userUid])
 
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-      })) : [];
-      setVacatedEntireBoysData(loadedTenants)
-    });
-  }, [selectedHostelType, activeBoysHostel, userUid])
-
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-      })) : [];
-      setVacatedEnitreGirlsData(loadedTenants)
-    });
-  }, [selectedHostelType, activeGirlsHostel, userUid])
-
-
-
-
-  // useEffect(() => {
-  //   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-  //   let total = 0;
-
-  //   const fetchExpenses = async () => {
-  //     const promises = monthNames.map(month => {
-  //       const monthRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${month}`);
-  //       return new Promise((resolve) => {
-  //         onValue(monthRef, (snapshot) => {
-  //           const expenses = snapshot.val();
-  //           if (expenses) {
-  //             resolve(expenses);
-  //           } else {
-  //             resolve(0);
-  //           }
-  //         }, {
-  //           onlyOnce: true
-  //         });
-  //       });
-  //     });
-
-  //     const monthlyTotals = await Promise.all(promises);
-  //     setEntireBoysYearExpensesData(monthlyTotals)
-  //   };
-
-  //   fetchExpenses();
-  // }, [selectedHostelType, activeBoysHostel,expensesDataTrigger]);
-
-  // useEffect(() => {
-  //   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-  //   let total = 0;
-
-  //   const fetchExpenses = async () => {
-  //     const promises = monthNames.map(month => {
-  //       const monthRef = ref(database, `Hostel/${userUid}/boys/${activeGirlsHostel}/expenses/${year}-${month}`);
-  //       return new Promise((resolve) => {
-  //         onValue(monthRef, (snapshot) => {
-  //           const expenses = snapshot.val();
-  //           if (expenses) {
-  //             resolve(expenses);
-  //           } else {
-  //             resolve(0);
-  //           }
-  //         }, {
-  //           onlyOnce: true
-  //         });
-  //       });
-  //     });
-
-  //     const monthlyTotals = await Promise.all(promises);
-  //     setEntireGirlsYearExpensesData(monthlyTotals)
-  //   };
-
-  //   fetchExpenses();
-  // }, [selectedHostelType, activeGirlsHostel,expensesDataTrigger]);
-
-
-
-  const fetchExpensesData = async (hostelType, hostel) => {
+  const fetchExpensesData = (hostelType, hostel) => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 
-    const promises = monthNames.map(month => {
-      const monthRef = ref(database, `Hostel/${userUid}/${hostelType}/${hostel}/expenses/${year}-${month}`);
-      return new Promise((resolve) => {
-        onValue(monthRef, (snapshot) => {
-          const expenses = snapshot.val();
-          resolve(expenses || 0);
-          console.log(expenses)
-        }, {
-          onlyOnce: true
-        });
-      });
-    });
+    
 
-    return await Promise.all(promises);
+    const entireYearData = [];
+    
+    monthNames.forEach(month => {
+      const expensesData = entireHMAdata[userUid]?.[hostelType]?.[hostel]?.expenses?.[`${year}-${month}`];
+      if (expensesData !== undefined && expensesData !== null) {
+        entireYearData.push(expensesData);
+    } else {
+        entireYearData.push(0);
+    }
+    })
+    return entireYearData;
   };
 
-  // Usage in useEffect
+
   useEffect(() => {
-    const fetchExpenses = async () => {
-      const data = await fetchExpensesData(selectedHostelType === 'mens' ? 'boys' : 'girls', selectedHostelType === 'mens' ? activeBoysHostel : activeGirlsHostel);
+    const fetchExpenses = () => {
+      const data = fetchExpensesData(selectedHostelType === 'mens' ? 'boys' : 'girls', selectedHostelType === 'mens' ? activeBoysHostel : activeGirlsHostel);
       if (selectedHostelType === 'mens') {
-        console.log(data, "expensesData");
+        console.log(data,"yearlyExpensesData")
         setEntireBoysYearExpensesData(data);
       } else {
         setEntireGirlsYearExpensesData(data);
@@ -198,10 +82,10 @@ const Settings = () => {
     };
 
     fetchExpenses();
-  }, [selectedHostelType, activeBoysHostel, activeGirlsHostel, expensesInteracted]);
+  }, [selectedHostelType, activeBoysHostel, activeGirlsHostel,entireHMAdata]);
 
 
-  // console.log(hostelData, "dataaa")
+ 
 
   const capitalizeFirstLetter = (string) => {
     return string.replace(/\b\w/g, char => char.toUpperCase());
@@ -228,6 +112,28 @@ const Settings = () => {
     }
   };
 
+  const compressImage = async (file) => {
+    const options = {
+        maxSizeMB: 0.6, // Compress to a maximum of 600 KB
+        maxWidthOrHeight: 1920,
+        useWebWorker: true, // Use a web worker for better performance
+        fileType: 'image/jpeg',
+    };
+
+    try {
+        const compressedFile = await imageCompression(file, options);
+        return compressedFile;
+    } catch (error) {
+        console.error('Error compressing the image:', error);
+        return null;
+    }
+};
+
+const isImageFile = (file) => {
+  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  return file && allowedImageTypes.includes(file.type);
+};
+
   const handleHostelChange = (e, isBoys) => {
     const file = e.target.files[0];
     if (!file) {
@@ -237,38 +143,52 @@ const Settings = () => {
       });
       return;
     }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result;
-      if (isBoys) {
-        setBoysHostelImage(dataUrl);
-      } else {
-        setGirlsHostelImage(dataUrl);
-      }
-    };
-    reader.onerror = () => {
-      toast.error("Failed to read file.", {
+    if (!isImageFile(file)) {
+      toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
         position: "top-center",
         autoClose: 3000,
       });
-    };
-    reader.readAsDataURL(file);
+      e.target.value = ''; // Clear the input
+      return;
+    }
+
+    if (isBoys) {
+        setBoysHostelImage(file); 
+    } else {
+        setGirlsHostelImage(file); 
+    }
+
+   
   };
 
-  const addNewHostel = (e, isBoys) => {
+  const addNewHostel = async (e, isBoys) => {
     e.preventDefault();
     setIsSubmitting(true);
     const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
     const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
-    const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
+  
 
-    if (name.trim() === '' || address.trim() === '' || hostelImage.trim() === '') {
+    if (name.trim() === '' || address.trim() === '' ) {
       toast.error("Hostel name, address and image cannot be empty.", {
         position: "top-center",
         autoClose: 3000,
       });
       return;
+    }
+
+    let hostelImageUrlToUpdate = hostelImageUrl;
+    // console.log(isBoys ? boysHostelImage : girlsHostelImage, "kkk")
+    const hostelImageFile = isBoys ? boysHostelImage : girlsHostelImage;
+    let compressedHostelImageFile = await compressImage(hostelImageFile);
+    if (compressedHostelImageFile) {
+      const imageRef = storageRef(storage, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+      try {
+        const snapshot = await uploadBytes(imageRef, compressedHostelImageFile);
+        hostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
+        console.log(hostelImageUrlToUpdate, "hostelImageUrlToUpdate")
+      } catch (error) {
+        console.error("Error uploading tenant image:", error);
+      }
     }
 
     // Create a new reference with a unique ID
@@ -277,12 +197,12 @@ const Settings = () => {
       id: newHostelRef.key, // Store the unique key if needed
       name,
       address,
-      hostelImage
+      hostelImage: hostelImageUrlToUpdate
     };
 
     set(newHostelRef, hostelDetails)
       .then(() => {
-        toast.success(`New ${isBoys ? 'boys' : 'girls'} hostel '${name}' added successfully.`, {
+        toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
           position: "top-center",
           autoClose: 3000,
         });
@@ -353,8 +273,8 @@ const Settings = () => {
     ];
 
     // Determine the data source based on the selected hostel type
-    const dataToUse = selectedHostelType === "mens" ? entireBoysData : entireGirlsData;
-    const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + "Mens" : activeGirlsHostelName + "Womens";
+    const dataToUse = selectedHostelType === "mens" ? boysTenants : girlsTenants;
+    const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + " Mens " : activeGirlsHostelName + " Womens ";
 
     // Filter and map data
     const dataWithBike = dataToUse.filter(tenant => tenant.bikeNumber && tenant.bikeNumber !== 'NA').map((tenant, index) => {
@@ -461,8 +381,8 @@ const Settings = () => {
     ];
 
     // Determine the data source based on the selected hostel type
-    const dataToUse = selectedHostelType === "mens" ? vacatedEntireBoysData : vacatedEntireGirlsData;
-    const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + "Mens" : activeGirlsHostelName + "Womens";
+    const dataToUse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData;
+    const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + " Mens " : activeGirlsHostelName + " Womens ";
     // Filter and map data
     const dataWithBike = dataToUse.filter(tenant => tenant.bikeNumber && tenant.bikeNumber !== 'NA').map((tenant, index) => {
       const rents = tenant.rents || {};
@@ -547,7 +467,7 @@ const Settings = () => {
   };
 
   const handleExpensesGenerateBtn = () => {
-    setExpensesDataTrigger(true)
+  
 
     const doc = new jsPDF();
 
@@ -716,7 +636,7 @@ const Settings = () => {
       doc.save(`${nameToUse} ${year}_expenses.pdf`);
     }
 
-    setExpensesDataTrigger(false)
+  
   };
 
 
@@ -725,7 +645,7 @@ const Settings = () => {
 
   const handleTenantBtnExcel = () => {
 
-    const dataTouse = selectedHostelType === "mens" ? boysTenantsData : girlsTenantsData
+    const dataTouse = selectedHostelType === "mens" ? boysTenants : girlsTenants
 
 
     const flatData = dataTouse.map(item => {

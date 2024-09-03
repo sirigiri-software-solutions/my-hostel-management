@@ -292,28 +292,64 @@ const TenantsBoys = () => {
   //     reader.readAsDataURL(file);
   //   }
   // };
+  const isFileType = (file, allowedTypes) => {
+    return allowedTypes.includes(file.type);
+  };
+
   const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
+    const file = e.target.files[0];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (file) {
+      if (isFileType(file, allowedTypes)) {
+        setTenantImage(file);
+      }  else {
+        alert('Please upload a valid image file (JPEG, PNG, GIF).');
+        e.target.value = ''; 
+      }
     }
   };
+
   const handleTenantIdChange = (e) => {
-    if (e.target.files[0]) {
-      const file = e.target.files[0]
-      setFileName(file.name)
-      setTenantId(e.target.files[0]);
+    const file = e.target.files[0];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+  
+    if (file) {
+      if (isFileType(file, allowedTypes)) {
+        setFileName(file.name); 
+        setTenantId(file);
+      } else {
+        alert('Please upload a valid image or PDF file.');
+        e.target.value = ''; 
+      }
     }
   };
 
   const handleTenantBikeChange = (e) => {
-    if (e.target.files[0]) {
-      setBikeImage(e.target.files[0]);
+    const file = e.target.files[0];
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+  if (file) {
+    if (isFileType(file, allowedTypes)) {
+      setBikeImage(file);
+    } else {
+      alert('Please upload a valid image file (JPEG, PNG, GIF).');
+      e.target.value = ''; 
     }
+  }
   };
-  const handleTenantBikeRcChange = (e) => {
-    if (e.target.files[0]) {
-      setBikeRcImage(e.target.files[0]);
+
+   const handleTenantBikeRcChange = (e) => {
+    const file = e.target.files[0];
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+
+  if (file) {
+    if (isFileType(file, allowedTypes)) {
+      setBikeRcImage(file);
+    } else {
+      alert('Please upload a valid image or PDF file.');
+      e.target.value = ''; // Clear the input
     }
+  }
   };
 
   // const handleTenantIdChange = (e) => {

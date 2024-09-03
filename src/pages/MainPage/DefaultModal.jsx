@@ -195,6 +195,11 @@ const DefaultModal = ({ show, handleClose }) => {
     //     reader.readAsDataURL(file);
     // };
 
+    const isImageFile = (file) => {
+        const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        return file && allowedImageTypes.includes(file.type);
+      };
+
     const handleHostelChange = (e, isBoys) => {
         const file = e.target.files[0];
         if (!file) {
@@ -204,7 +209,14 @@ const DefaultModal = ({ show, handleClose }) => {
             });
             return;
         }
-
+        if (!isImageFile(file)) {
+            toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
+              position: "top-center",
+              autoClose: 3000,
+            });
+            e.target.value = ''; 
+            return;
+          }
         if (isBoys) {
             setBoysHostelImage(file); // Store file directly
         } else {
@@ -243,7 +255,7 @@ const DefaultModal = ({ show, handleClose }) => {
 
         set(newHostelRef, hostelDetails)
             .then(() => {
-                toast.success(`New ${isBoys ? 'boys' : 'girls'} hostel '${name}' added successfully.`, {
+                toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
                     position: "top-center",
                     autoClose: 3000,
                 });

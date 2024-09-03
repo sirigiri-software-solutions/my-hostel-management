@@ -45,6 +45,10 @@ const ExpensesGirls = () => {
   const [year, setYear] = useState(getCurrentYear());
   const [month, setMonth] = useState(getCurrentMonth());
   const [total, setTotal] = useState(0);
+  const [yearsList, setYearsList] = useState([]);
+
+  const minDate = `${getCurrentYear()}-01-01`;
+  const maxDate = `${getCurrentYear()}-12-31`;
 
   const [formData, setFormData] = useState({
     expenseName: '',
@@ -212,6 +216,27 @@ window.addEventListener('keydown',handleOutsideClick);
 
     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
     setTotal(totalExpenses);
+    const totalExpensesOfhostel = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses 
+    const yearsMonth = Object.keys(totalExpensesOfhostel)
+
+const expenseYears = yearsMonth.map(item => parseInt(item.split('-')[0], 10));
+
+
+const currentYear = new Date().getFullYear();
+const earliestYear = Math.min(currentYear, ...expenseYears);
+const latestYear = Math.max(currentYear, ...expenseYears);
+const years = [];
+for (let yr = earliestYear; yr <= latestYear; yr++) {
+    years.push(yr);
+}
+
+
+    
+ 
+     setYearsList(years);
+
+
+
   }, [entireHMAdata, activeGirlsHostel, month, year, userUid]);
 
   const columns = [
@@ -523,10 +548,12 @@ const handleExpensesFocus = (e) => {
           <div style={{display:'flex',marginTop:'10px'}} >
           <div>
             <select className='filterExpenseField' value={year} onChange={e => setYear(e.target.value)}>
-              <option value="2022">2022</option>
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
+            {yearsList.map((yearOption) => (
+          <option key={yearOption} value={yearOption}>
+            {yearOption}
+          </option>
+        ))}
+             
             </select>
           </div>
           <div>
@@ -575,7 +602,7 @@ const handleExpensesFocus = (e) => {
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputDate" className="form-label">{t('expensesPage.expenseDate')} : </label>
-                      <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+                      <input type="date" min={minDate} max={maxDate} className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
                       {formErrors.expenseDate && <div className="text-danger">{formErrors.expenseDate}</div>}
                     </div>
 

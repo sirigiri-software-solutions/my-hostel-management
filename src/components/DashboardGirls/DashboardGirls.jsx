@@ -141,7 +141,8 @@ const DashboardGirls = () => {
   const [year, setYear] = useState(getCurrentYear());
   const [month, setMonth] = useState(getCurrentMonth());
 
-
+  const minDate = `${getCurrentYear()}-01-01`;
+  const maxDate = `${getCurrentYear()}-12-31`;
 
 
 
@@ -415,16 +416,35 @@ const DashboardGirls = () => {
 
   //   reader.readAsDataURL(file);
   // };
-
-  const handleTenantBikeChange = (e) => {
-    if (e.target.files[0]) {
-      setBikeImage(e.target.files[0]);
-    }
+  const isFileType = (file, allowedTypes) => {
+    return allowedTypes.includes(file.type);
   };
-  const handleTenantBikeRcChange = (e) => {
-    if (e.target.files[0]) {
-      setBikeRcImage(e.target.files[0]);
+  const handleTenantBikeChange = (e) => {
+    const file = e.target.files[0];
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+  if (file) {
+    if (isFileType(file, allowedTypes)) {
+      setBikeImage(file);
+    } else {
+      alert('Please upload a valid image file (JPEG, PNG, GIF).');
+      e.target.value = ''; 
     }
+  }
+  };
+
+  const handleTenantBikeRcChange = (e) => {
+    const file = e.target.files[0];
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+
+  if (file) {
+    if (isFileType(file, allowedTypes)) {
+      setBikeRcImage(file);
+    } else {
+      alert('Please upload a valid image or PDF file.');
+      e.target.value = ''; // Clear the input
+    }
+  }
   };
 
 
@@ -597,12 +617,6 @@ Please note that you made your last payment on ${paidDate}.\n`
   };
 
 
-
-
-
-
-
-
   const validate = () => {
 
     let tempErrors = {};
@@ -678,11 +692,17 @@ Please note that you made your last payment on ${paidDate}.\n`
   //   }
   // };
   const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
+    const file = e.target.files[0];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (file) {
+      if (isFileType(file, allowedTypes)) {
+        setTenantImage(file);
+      }  else {
+        alert('Please upload a valid image file (JPEG, PNG, GIF).');
+        e.target.value = ''; 
+      }
     }
   };
-
   // const handleTenantIdChange = (e) => {
   //   const file = e.target.files[0];
   //   if (file) {
@@ -694,12 +714,19 @@ Please note that you made your last payment on ${paidDate}.\n`
   //   }
   // };
   const handleTenantIdChange = (e) => {
-    if (e.target.files[0]) {
-      const file = e.target.files[0]
-      // setFileName(file.name)
-      setTenantId(e.target.files[0]);
+    const file = e.target.files[0];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+  
+    if (file) {
+      if (isFileType(file, allowedTypes)) {
+        setTenantId(file);
+      } else {
+        alert('Please upload a valid image or PDF file.');
+        e.target.value = ''; 
+      }
     }
   };
+
   const compressImage = async (file) => {
     const options = {
       maxSizeMB: 1, // Compress to a maximum of 1 MB (adjust as needed)
@@ -1401,7 +1428,7 @@ Please note that you made your last payment on ${paidDate}.\n`
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}</label>
-                    <input id="TotalFee" class="form-control" type="number" value={totalFee} onChange={e => setTotalFee(e.target.value)} />
+                    <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')}/>
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}</label>
@@ -1666,7 +1693,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
             <div className="col-md-6">
               <label htmlFor="inputDate" className="form-label">{t('dashboard.expenseDate')}</label>
-              <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+              <input type="date" min={minDate} max={maxDate} className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
               {formErrors.expenseDate && <div className="text-danger">{formErrors.expenseDate}</div>}
             </div>
 
