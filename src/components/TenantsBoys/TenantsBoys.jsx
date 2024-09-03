@@ -24,7 +24,7 @@ const TenantsBoys = () => {
   const { t } = useTranslation();
   const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms, boysTenants, entireHMAdata} = useData();
   const role = localStorage.getItem('role');
-  const { database,storage } = firebase;
+  const { database, storage } = firebase;
 
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
@@ -43,6 +43,8 @@ const TenantsBoys = () => {
   const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantId, setTenantId] = useState(null);
   const [tenantIdUrl, setTenantIdUrl] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
 
 
   const [showModal, setShowModal] = useState(false);
@@ -52,7 +54,8 @@ const TenantsBoys = () => {
   const [tenantAddress, setTenantAddress] = useState("");
   const [singleTenantProofId, setSingleTenantProofId] = useState("");
   const [fileName, setFileName] = useState('');
-  const [singleTenanantBikeNum,setSingleTenantBikeNum] = useState('');
+  const [singleTenantAddress, setSingleTenantAddress] = useState('');
+  const [singleTenanantBikeNum, setSingleTenantBikeNum] = useState('');
 
   // const [boysRooms, setBoysRooms] = useState([]);
   const [exTenants, setExTenants] = useState([]);
@@ -264,24 +267,25 @@ const TenantsBoys = () => {
     if (!tenantImage && !tenantImageUrl) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
+    
     if (hasBike) {
       if (!bikeNumber) {
         tempErrors.bikeNumber = 'Bike number required';
       } else {
         // Remove spaces for validation
         const bikeNumberWithoutSpaces = bikeNumber.replace(/\s+/g, '');
-        
+
         if (!/^[A-Za-z0-9]{6,10}$/.test(bikeNumberWithoutSpaces)) {
           tempErrors.bikeNumber = 'Enter a valid bike number (letters and numbers only)';
         }
       }
     }
-    
+
     setErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
- 
+
   // const handleTenantImageChange = (e) => {
   //   const file = e.target.files[0];
   //   if (file) {
@@ -292,65 +296,112 @@ const TenantsBoys = () => {
   //     reader.readAsDataURL(file);
   //   }
   // };
-  const isFileType = (file, allowedTypes) => {
-    return allowedTypes.includes(file.type);
-  };
+
 
   const handleTenantImageChange = (e) => {
     const file = e.target.files[0];
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (file) {
-      if (isFileType(file, allowedTypes)) {
+      const validFormats = ['image/jpeg', 'image/png'];
+      if (validFormats.includes(file.type)) {
         setTenantImage(file);
-      }  else {
-        alert('Please upload a valid image file (JPEG, PNG, GIF).');
-        e.target.value = ''; 
+        setErrorMessage(''); 
+      } else {
+        setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+        e.target.value = null; 
       }
     }
   };
+  
 
   const handleTenantIdChange = (e) => {
     const file = e.target.files[0];
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
-  
+
     if (file) {
-      if (isFileType(file, allowedTypes)) {
-        setFileName(file.name); 
-        setTenantId(file);
+
+      const validFormat = 'application/pdf';
+      const maxSize = 1 * 1024 * 1024;
+
+
+      if (file.type === validFormat) {
+
+        if (file.size <= maxSize) {
+
+          setFileName(file.name);
+          setTenantId(file);
+          setTenantId(file);
+          setErrorMessage('');
+        } else {
+
+          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+        e.target.value = null;
+
+
+       
+        }
       } else {
-        alert('Please upload a valid image or PDF file.');
-        e.target.value = ''; 
+
+        setErrorMessage('Please upload a valid  file.');
+
+
+        e.target.value = null;
       }
     }
   };
 
+
   const handleTenantBikeChange = (e) => {
     const file = e.target.files[0];
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (file) {
+      
+      const validFormats = ['image/jpeg', 'image/png'];
 
-  if (file) {
-    if (isFileType(file, allowedTypes)) {
-      setBikeImage(file);
-    } else {
-      alert('Please upload a valid image file (JPEG, PNG, GIF).');
-      e.target.value = ''; 
+     
+      if (validFormats.includes(file.type)) {
+        
+        setBikeImage(file);
+        setErrorMessage('');
+        
+      } else {
+        setErrorMessage('Please upload a valid  file.');
+        
+
+        
+        e.target.value = null;
+      }
     }
   }
-  };
+  
 
-   const handleTenantBikeRcChange = (e) => {
+  const handleTenantBikeRcChange = (e) => {
     const file = e.target.files[0];
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
 
-  if (file) {
-    if (isFileType(file, allowedTypes)) {
-      setBikeRcImage(file);
-    } else {
-      alert('Please upload a valid image or PDF file.');
-      e.target.value = ''; // Clear the input
+    if (file) {
+     
+      const validFormat = 'application/pdf';
+      const maxSize = 1 * 1024 * 1024; 
+
+      
+      if (file.type === validFormat) {
+        
+        if (file.size <= maxSize) {
+          
+          setBikeRcImage(file);
+          setErrorMessage('');
+        } else {
+          
+          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+          e.target.value = null; 
+        }
+      } else {
+        
+        setErrorMessage('Please upload a valid  file.');
+        e.target.value = null; 
+      }
     }
   }
-  };
+  
+
+
 
   // const handleTenantIdChange = (e) => {
   //   const file = e.target.files[0];
@@ -735,28 +786,28 @@ const TenantsBoys = () => {
     setIsEditing(true);
     setCurrentId(tenant.id);
 
-    if(tenantImage){
+    if (tenantImage) {
       setTenantImage(tenant.tenantImageUrl)
     } else {
       setTenantImageUrl(tenant.tenantImageUrl)
     }
-    if(tenantId){
+    if (tenantId) {
       setTenantId(tenant.tenantIdUrl || '');
     } else {
       setTenantIdUrl(tenant.tenantIdUrl)
     }
-    if(bikeImage){
+    if (bikeImage) {
       setBikeImage(tenant.bikeImageUrl || '')
     } else {
       setBikeImageUrl(tenant.bikeImageUrl || '')
     }
-    if(bikeRcImage){
+    if (bikeRcImage) {
       setBikeRcImage(tenant.bikeRcImageUrl || '')
     } else {
       setBikeRcImageUrl(tenant.bikeRcImageUrl || '')
     }
 
-    
+
     setBikeNumber("");
     setHasBike(false);
     setFileName(tenant.fileName || '');
@@ -918,7 +969,7 @@ const TenantsBoys = () => {
     console.log(tenant,"singleuserDataFr")
     console.log(singleUserDueDate,"singleuserDataFr")
 
-    if(singleUserDueDate && singleUserDueDate.bikeNumber){
+    if (singleUserDueDate && singleUserDueDate.bikeNumber) {
       setSingleTenantBikeNum(singleUserDueDate.bikeNumber)
     }
 
@@ -1107,65 +1158,62 @@ const TenantsBoys = () => {
   const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
 const isImage = (fileData) => fileData.startsWith('data:image/' || "image/jpeg");
 
-const pdfToImages = async (pdfUrl) => {
-  const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
-  const numPages = pdf.numPages;
-  const images = [];
+  const pdfToImages = async (pdfUrl) => {
+    const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
+    const numPages = pdf.numPages;
+    const images = [];
 
-  for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-    const viewport = page.getViewport({ scale: 2 });
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 2 });
 
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
 
-    await page.render({
-      canvasContext: context,
-      viewport: viewport
-    }).promise;
+      await page.render({
+        canvasContext: context,
+        viewport: viewport
+      }).promise;
 
-    const imgData = canvas.toDataURL('image/png');
-    images.push({ imgData, width: viewport.width, height: viewport.height });
-  }
+      const imgData = canvas.toDataURL('image/png');
+      images.push({ imgData, width: viewport.width, height: viewport.height });
+    }
 
-  return images;
-};
-
-const calculateFitDimensions = (imgWidth, imgHeight, maxWidth, maxHeight) => {
-  const widthRatio = maxWidth / imgWidth;
-  const heightRatio = maxHeight / imgHeight;
-  const ratio = Math.min(widthRatio, heightRatio);
-  return {
-    width: imgWidth * ratio,
-    height: imgHeight * ratio
+    return images;
   };
-};
 
-const loadImage = (src) => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
-};
+  const calculateFitDimensions = (imgWidth, imgHeight, maxWidth, maxHeight) => {
+    const widthRatio = maxWidth / imgWidth;
+    const heightRatio = maxHeight / imgHeight;
+    const ratio = Math.min(widthRatio, heightRatio);
+    return {
+      width: imgWidth * ratio,
+      height: imgHeight * ratio
+    };
+  };
 
-const handleTenantDownload = async () => {
-  const doc = new jsPDF();
-  console.log(singleTenantDetails, "singleTenantDetails");
+  const loadImage = (src) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  };
 
-  // Page 1: Tenant Details
-  doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.text("Tenant Details", 80, 10);
+  const handleTenantDownload = async () => {
+    const doc = new jsPDF();
 
-  // Fetch and add the tenant image
-  if (singleTenantDetails.image) {
-    doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
-  }
+    // Page 1: Tenant Details
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text("Tenant Details", 80, 10);
 
+    if (singleTenantDetails.image) {
+      doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
+    }
 
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
@@ -1291,8 +1339,7 @@ const handleTenantDownload = async () => {
 
     // Save the PDF
     doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-  
-};
+  };
 
 
 
@@ -1419,7 +1466,7 @@ const handleTenantDownload = async () => {
                     <label htmlFor='tenantMobileNo' class="form-label">
                       {t('dashboard.mobileNo')}
                     </label>
-                    <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)}  onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
+                    <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
                     {errors.mobileNo && <p style={{ color: 'red' }}>{errors.mobileNo}</p>}
                   </div>
                   <div class="col-md-6">
@@ -1433,7 +1480,7 @@ const handleTenantDownload = async () => {
                     <label htmlFor='tenantEmergency' class="form-label">
                       {t('dashboard.emergencyContact')}
                     </label>
-                    <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)}  onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="emergencyContact" onFocus={handleTenantFocus} />
+                    <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="emergencyContact" onFocus={handleTenantFocus} />
                     {errors.emergencyContact && <p style={{ color: 'red' }}>{errors.emergencyContact}</p>}
                   </div>
                   <div class="col-md-6">
@@ -1455,8 +1502,9 @@ const handleTenantDownload = async () => {
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
-                    <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} required />
+                    <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantImageChange} required />
                     {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
+                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                   </div>
                   <div className="col-md-6">
                     <label htmlFor='tenantUploadId' className="form-label">
@@ -1468,7 +1516,8 @@ const handleTenantDownload = async () => {
                       </div>
                     )}
 
-                    <input ref={tenantProofIdRef} id="tenantUploadId" className="form-control" type="file" onChange={handleTenantIdChange} />
+                    <input ref={tenantProofIdRef} id="tenantUploadId" className="form-control" type="file"accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantIdChange} />
+                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
 
                   </div>
                   <div className='col-md-12'>
@@ -1522,11 +1571,14 @@ const handleTenantDownload = async () => {
                     <>
                       <div className="col-md-6">
                         <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-                        <input type="file" className="form-control" onChange={handleTenantBikeChange} />
+                        <input type="file" className="form-control" accept=".jpg, .jpeg, .png" onChange={handleTenantBikeChange} />
+                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                        
                       </div>
                       <div className="col-md-6">
                         <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-                        <input type="file" className="form-control" onChange={handleTenantBikeRcChange} />
+                        <input type="file" className="form-control" accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantBikeRcChange} />
+                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                       </div>
                     </>
                   )}
