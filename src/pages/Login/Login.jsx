@@ -154,6 +154,7 @@ const Login = () => {
             localStorage.setItem("userUid", singleLoginUser.uid);
             setDefaultArea(singleLoginUser.area)
             setUserUid(singleLoginUser.uid);
+
             await fetchData(); 
             const now = moment();
             const accessEnd = singleLoginUser.accessEnd ? moment(singleLoginUser.accessEnd) : null;
@@ -162,17 +163,17 @@ const Login = () => {
             const userRef = ref(database, `register/${singleLoginUser.uid}`);
             update(userRef, {
               firstLogin: true,
-              accessEnd: now.add(1, 'minute').toISOString(),
+              accessEnd: now.add(3, 'months').toISOString(), 
             });
-            localStorage.setItem('accessEnd', now.add(1, 'minute').toISOString());
+            localStorage.setItem('accessEnd', now.add(3, 'months').toISOString()); 
           } 
             else if(singleLoginUser.firstLogin === false){
               const userRef = ref(database, `register/${singleLoginUser.uid}`);
               update(userRef, {
                 firstLogin: true,
-                accessEnd: now.add(1, 'minute').toISOString(),
+                accessEnd: now.add(3, 'months').toISOString(), 
               })
-              localStorage.setItem('accessEnd', now.add(1, 'minute').toISOString());
+              localStorage.setItem('accessEnd', now.add(3, 'months').toISOString()); 
 
             }else if (accessEnd && now.isAfter(accessEnd)) {
               navigate('/subscribe');
@@ -201,7 +202,7 @@ const Login = () => {
           } else {
             console.log("User not found in data array.");
           }
-          fetchData();
+          await fetchData();
         } else {
           toast.error("Email is not verified.", {
             position: "bottom-right",

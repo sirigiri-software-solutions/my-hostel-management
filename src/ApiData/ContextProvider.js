@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useRef, useEffect } from 'react';
 
-import { onValue } from 'firebase/database';
 import isEqual from 'lodash/isEqual';
 import { firebaseInstances, ref } from '../firebase/firebase';
 
@@ -14,7 +13,6 @@ function useDeepCompareEffect(callback, dependencies) {
   React.useEffect(callback, [currentDependenciesRef.current]);
 } 
 
-
 const DataProvider = ({ children }) => {
   const [activeBoysHostel, setActiveBoysHostel] = useState(null);
   const [activeBoysHostelName, setActiveBoysHostelName] = useState(null);
@@ -24,8 +22,6 @@ const DataProvider = ({ children }) => {
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
   const [userarea, setUserArea] = useState();
   const [userUid, setUserUid] = useState(localStorage.getItem('userUid' || ''));
-  const [ boysTenantsData, setBoysTenantsData] = useState([])
-  const [girlsTenantsData, setGirlsTenantsData] = useState([]);
   const [ boysExTenantsData, setBoysExTenantsData] = useState([])
   const [girlsExTenantsData, setGirlsExTenantsData] = useState([]);
 
@@ -63,7 +59,7 @@ const DataProvider = ({ children }) => {
 
   const fetchData = async () => {
     const api = areaToApiEndPointEntireData[defaultArea];
-    console.log(api, 'apiii')
+
     const options = {
       method: "GET",
     };
@@ -74,7 +70,6 @@ const DataProvider = ({ children }) => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      console.log(data, "EntireDataOfHMA");
       // Handle the data (e.g., set it to state)
       setEntireHMAdata(data);
     } catch (error) {
@@ -84,14 +79,17 @@ const DataProvider = ({ children }) => {
 
  
 
-console.log(entireHMAdata, "entireHMAdata")
-const [boysRooms, setBoysRooms] = useState()
-const [girlsRooms, setGirlsRooms] = useState()
-const [boysTenants, setBoysTenants] = useState([]);  // State to hold boys tenants data
+
+  const [boysRooms, setBoysRooms] = useState()
+  const [girlsRooms, setGirlsRooms] = useState()
+  const [boysTenants, setBoysTenants] = useState([]);  
   const [girlsTenants, setGirlsTenants] = useState([]);
   const [boysTenantsWithRents, setBoysTenantsWithRents] = useState([]);
   const [girlsTenantsWithRents, setGirlsTenantsWithRents] = useState([]);
- // Extract and assign rooms data from entireHMAdata
+
+  
+ // Extract and assign data from entireHMAdata
+
  useEffect(() => {
   if (entireHMAdata && userUid) {
 
@@ -173,19 +171,61 @@ const [boysTenants, setBoysTenants] = useState([]);  // State to hold boys tenan
       });
       setGirlsTenantsWithRents(processedGirlsTenants)
 
-      const boysExpenses = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses
-      console.log(boysExpenses, "boysExpenses")
-  }
-}, [entireHMAdata, activeBoysHostel, activeGirlsHostel, userUid, ]);
 
-console.log(boysRooms, "tttboysRooms");
-console.log(girlsRooms, "tttgirlsRooms");
-console.log(boysTenants, "tttboysTenants");
-console.log(girlsTenants, "tttgirlsTenants");
-console.log(boysTenantsWithRents, "boysTenantsWithRents")
-console.log(girlsTenantsWithRents, "girlsTenantsWithRents")
+      // Extracting Boys Hostel buttons 
+
+      const boysHostelButtons = entireHMAdata[userUid]?.boys;
+   
+      if(boysHostelButtons){
+        const dataBoysHostelButtons = Object.keys(boysHostelButtons).map(key => ({
+          id:key,
+          name:boysHostelButtons[key].name
+        }))
+ 
+        setActiveBoysHostelButtons(dataBoysHostelButtons)
+      }else{
+        setActiveBoysHostelButtons([]);
+      }
+      
+
+      // Extracting Girls Hostel buttons
+
+      const girlsHostelButtons = entireHMAdata[userUid]?.girls;
+
+      if(girlsHostelButtons){
+        const dataGirlsHostelButtons = Object.keys(girlsHostelButtons).map(key => ({
+          id:key,
+          name:girlsHostelButtons[key].name 
+        }))
+        setActiveGirlsHostelButtons(dataGirlsHostelButtons);
+      }else{
+        setActiveGirlsHostelButtons([]);
+      }
+
+
+      // extract ex-tenants boys data 
+      const exTenantsBoysData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.extenants || {};
+      const exTenantsBoysFormattedData = Object.entries(exTenantsBoysData).map(([key,value]) => ({
+        id:key,
+        ...value,
+      }))
+      setBoysExTenantsData(exTenantsBoysFormattedData)
+
+      // extract ex-tenants girls data 
+      const exTenantsGirlsData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.extenants || {};
+      const exTenantsGirlsFormattedData = Object.entries(exTenantsGirlsData).map(([key,value]) => ({
+        id:key,
+        ...value,
+      }))
+      setGirlsExTenantsData(exTenantsGirlsFormattedData)
+   
+  }
+}, [entireHMAdata, activeBoysHostel, activeGirlsHostel]);
+
 
   // end to get entireData
+
+
 
   
   useEffect(() => {
@@ -193,7 +233,6 @@ console.log(girlsTenantsWithRents, "girlsTenantsWithRents")
 
   }, [area]);
 
-  console.log(firebase, "fire")
 
   const areaToApiEndpoint = {
     // hyderabad: "https://ameerpet-588ee-default-rtdb.firebaseio.com/register.json",
@@ -219,42 +258,6 @@ console.log(girlsTenantsWithRents, "girlsTenantsWithRents")
     setUserUid(userId);
   }, [userUid, area])
 
-
-
-
-  useEffect(() => {
-    const boysRef = ref(database, `Hostel/${userUid}/boys`);
-    const unsubscribe = onValue(boysRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const buttonData = Object.keys(data).map(key => ({
-          id: key,
-          name: data[key].name
-        }));
-        setActiveBoysHostelButtons(buttonData);
-      } else {
-        setActiveBoysHostelButtons([]);
-      }
-    });
-    return () => unsubscribe();
-  }, [userUid, area]);
-
-  useEffect(() => {
-    const boysRef = ref(database, `Hostel/${userUid}/girls`);
-    const unsubscribe = onValue(boysRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const buttonData = Object.keys(data).map(key => ({
-          id: key,
-          name: data[key].name
-        }));
-        setActiveGirlsHostelButtons(buttonData);
-      } else {
-        setActiveGirlsHostelButtons([]);
-      }
-    });
-    return () => unsubscribe();
-  }, [userUid, area]);
 
 
   useDeepCompareEffect(() => {
@@ -292,82 +295,17 @@ console.log(girlsTenantsWithRents, "girlsTenantsWithRents")
   , [activeBoysHostelButtons, activeGirlsHostelButtons]);
 
 
-  // Function to update activeFlag
+  
   const changeActiveFlag = (newFlag) => {
     setActiveFlag(newFlag);
   };
-  // console.log(activeFlag, "flaggg"); // ===> 'boys', 'girls', or 'hhh' based on conditions
-  // console.log(activeBoysHostelButtons.length > 0, "activeBoysHostelButtons flag"); // ===> true or false
 
-
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      console.log(data, "dtat")
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      console.log(loadedTenants, "dta")
-      setBoysTenantsData(loadedTenants);
-    });
-  }, [userUid, activeBoysHostel]);
-
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      console.log(data, "dtat")
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      console.log(loadedTenants, "dta")
-      setGirlsTenantsData(loadedTenants);
-    });
-  }, [userUid, activeGirlsHostel]);
-
-
- 
-
-  
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      console.log(data, "dtat")
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      console.log(loadedTenants, "dta")
-      setBoysExTenantsData(loadedTenants);
-    });
-  }, [userUid, activeBoysHostel]);
-  
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      console.log(data, "dtat")
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      console.log(loadedTenants, "dta")
-      setGirlsExTenantsData(loadedTenants);
-    });
-  }, [userUid, activeGirlsHostel]);
-
-  console.log(boysExTenantsData, "exx")
-  console.log(girlsExTenantsData, "exx")
 
   const [completeData, setCompleteData] = useState(false);
   useEffect(() => {
     fetchData();
 }, [userUid, userarea, completeData, defaultArea]);
-console.log(completeData, "completeData")
+
   return (
     <DataContext.Provider
      value={{ 
@@ -389,8 +327,6 @@ console.log(completeData, "completeData")
       setUserUid, 
       activeFlag,  
       changeActiveFlag, 
-      girlsTenantsData, 
-      boysTenantsData, 
       girlsExTenantsData, 
       boysExTenantsData,
       expensesInteracted,

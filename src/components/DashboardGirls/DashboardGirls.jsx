@@ -143,7 +143,8 @@ const DashboardGirls = () => {
   const [year, setYear] = useState(getCurrentYear());
   const [month, setMonth] = useState(getCurrentMonth());
 
-
+  const minDate = `${getCurrentYear()}-01-01`;
+  const maxDate = `${getCurrentYear()}-12-31`;
 
 
 
@@ -1735,7 +1736,7 @@ Please note that you made your last payment on ${paidDate}.\n`
 
             <div className="col-md-6">
               <label htmlFor="inputDate" className="form-label">{t('dashboard.expenseDate')}</label>
-              <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+              <input type="date" min={minDate} max={maxDate} className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
               {formErrors.expenseDate && <div className="text-danger">{formErrors.expenseDate}</div>}
             </div>
 

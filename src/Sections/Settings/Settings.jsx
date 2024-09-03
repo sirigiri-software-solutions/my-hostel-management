@@ -20,8 +20,8 @@ const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons, girlsTenantsData, boysTenantsData, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag } = useData();
-  const { database, storage } = firebase;
+  const { activeBoysHostelName,activeGirlsHostelName,userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons,girlsTenants, boysTenants, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag,entireHMAdata } = useData();
+  const { database,storage } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
   const [newBoysHostelAddress, setNewBoysHostelAddress] = useState('');
@@ -32,14 +32,7 @@ const Settings = () => {
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
   const [isBoysModalOpen, setIsBoysModalOpen] = useState(false);
   const [isGirlsModalOpen, setIsGirlsModalOpen] = useState(false);
-  const [entireBoysData, setEntireBoysData] = useState([]);
-  const [entireGirlsData, setEntireGirlsData] = useState([]);
   const [selectedHostelType, setSelectedHostelType] = useState("mens");
-  const [vacatedEntireBoysData, setVacatedEntireBoysData] = useState([]);
-  const [vacatedEntireGirlsData, setVacatedEnitreGirlsData] = useState([]);
-
-
-  const [expensesDataTrigger, setExpensesDataTrigger] = useState(false);
   const [entireBoysYearExpensesData, setEntireBoysYearExpensesData] = useState([])
   const [entireGirlsYearExpensesData, setEntireGirlsYearExpensesData] = useState([]);
   const [hostelImageUrl, setHostelImageUrl] = useState('');
@@ -56,143 +49,32 @@ const Settings = () => {
   const [year, setYear] = useState(getCurrentYear());
   const [month, setMonth] = useState(getCurrentMonth())
 
-  console.log(activeFlag, "active")
-
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-      })) : [];
-      setEntireBoysData(loadedTenants)
-    });
-  }, [selectedHostelType, activeBoysHostel, userUid])
-
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-      })) : [];
-      setEntireGirlsData(loadedTenants)
-    });
-  }, [selectedHostelType, activeGirlsHostel, userUid])
 
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-      })) : [];
-      setVacatedEntireBoysData(loadedTenants)
-    });
-  }, [selectedHostelType, activeBoysHostel, userUid])
-
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-      })) : [];
-      setVacatedEnitreGirlsData(loadedTenants)
-    });
-  }, [selectedHostelType, activeGirlsHostel, userUid])
-
-
-
-
-  // useEffect(() => {
-  //   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-  //   let total = 0;
-
-  //   const fetchExpenses = async () => {
-  //     const promises = monthNames.map(month => {
-  //       const monthRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${month}`);
-  //       return new Promise((resolve) => {
-  //         onValue(monthRef, (snapshot) => {
-  //           const expenses = snapshot.val();
-  //           if (expenses) {
-  //             resolve(expenses);
-  //           } else {
-  //             resolve(0);
-  //           }
-  //         }, {
-  //           onlyOnce: true
-  //         });
-  //       });
-  //     });
-
-  //     const monthlyTotals = await Promise.all(promises);
-  //     setEntireBoysYearExpensesData(monthlyTotals)
-  //   };
-
-  //   fetchExpenses();
-  // }, [selectedHostelType, activeBoysHostel,expensesDataTrigger]);
-
-  // useEffect(() => {
-  //   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-  //   let total = 0;
-
-  //   const fetchExpenses = async () => {
-  //     const promises = monthNames.map(month => {
-  //       const monthRef = ref(database, `Hostel/${userUid}/boys/${activeGirlsHostel}/expenses/${year}-${month}`);
-  //       return new Promise((resolve) => {
-  //         onValue(monthRef, (snapshot) => {
-  //           const expenses = snapshot.val();
-  //           if (expenses) {
-  //             resolve(expenses);
-  //           } else {
-  //             resolve(0);
-  //           }
-  //         }, {
-  //           onlyOnce: true
-  //         });
-  //       });
-  //     });
-
-  //     const monthlyTotals = await Promise.all(promises);
-  //     setEntireGirlsYearExpensesData(monthlyTotals)
-  //   };
-
-  //   fetchExpenses();
-  // }, [selectedHostelType, activeGirlsHostel,expensesDataTrigger]);
-
-
-
-  const fetchExpensesData = async (hostelType, hostel) => {
+  const fetchExpensesData = (hostelType, hostel) => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 
-    const promises = monthNames.map(month => {
-      const monthRef = ref(database, `Hostel/${userUid}/${hostelType}/${hostel}/expenses/${year}-${month}`);
-      return new Promise((resolve) => {
-        onValue(monthRef, (snapshot) => {
-          const expenses = snapshot.val();
-          resolve(expenses || 0);
-          console.log(expenses)
-        }, {
-          onlyOnce: true
-        });
-      });
-    });
+    
 
-    return await Promise.all(promises);
+    const entireYearData = [];
+    
+    monthNames.forEach(month => {
+      const expensesData = entireHMAdata[userUid]?.[hostelType]?.[hostel]?.expenses?.[`${year}-${month}`];
+      if (expensesData !== undefined && expensesData !== null) {
+        entireYearData.push(expensesData);
+    } else {
+        entireYearData.push(0);
+    }
+    })
+    return entireYearData;
   };
 
-  // Usage in useEffect
+
   useEffect(() => {
-    const fetchExpenses = async () => {
-      const data = await fetchExpensesData(selectedHostelType === 'mens' ? 'boys' : 'girls', selectedHostelType === 'mens' ? activeBoysHostel : activeGirlsHostel);
+    const fetchExpenses = () => {
+      const data = fetchExpensesData(selectedHostelType === 'mens' ? 'boys' : 'girls', selectedHostelType === 'mens' ? activeBoysHostel : activeGirlsHostel);
       if (selectedHostelType === 'mens') {
-        console.log(data, "expensesData");
+        console.log(data,"yearlyExpensesData")
         setEntireBoysYearExpensesData(data);
       } else {
         setEntireGirlsYearExpensesData(data);
@@ -200,10 +82,10 @@ const Settings = () => {
     };
 
     fetchExpenses();
-  }, [selectedHostelType, activeBoysHostel, activeGirlsHostel, expensesInteracted]);
+  }, [selectedHostelType, activeBoysHostel, activeGirlsHostel,entireHMAdata]);
 
 
-  // console.log(hostelData, "dataaa")
+ 
 
   const capitalizeFirstLetter = (string) => {
     return string.replace(/\b\w/g, char => char.toUpperCase());
@@ -271,27 +153,12 @@ const isImageFile = (file) => {
     }
 
     if (isBoys) {
-        setBoysHostelImage(file); // Store file directly
+        setBoysHostelImage(file); 
     } else {
-        setGirlsHostelImage(file); // Store file directly
+        setGirlsHostelImage(file); 
     }
 
-    // const reader = new FileReader();
-    // reader.onload = () => {
-    //   const dataUrl = reader.result;
-    //   if (isBoys) {
-    //     setBoysHostelImage(dataUrl);
-    //   } else {
-    //     setGirlsHostelImage(dataUrl);
-    //   }
-    // };
-    // reader.onerror = () => {
-    //   toast.error("Failed to read file.", {
-    //     position: "top-center",
-    //     autoClose: 3000,
-    //   });
-    // };
-    // reader.readAsDataURL(file);
+   
   };
 
   const addNewHostel = async (e, isBoys) => {
@@ -299,7 +166,7 @@ const isImageFile = (file) => {
     setIsSubmitting(true);
     const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
     const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
-    // const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
+  
 
     if (name.trim() === '' || address.trim() === '' ) {
       toast.error("Hostel name, address and image cannot be empty.", {
@@ -406,7 +273,8 @@ const isImageFile = (file) => {
     ];
 
     // Determine the data source based on the selected hostel type
-    const dataToUse = selectedHostelType === "mens" ? entireBoysData : entireGirlsData;
+    const dataToUse = selectedHostelType === "mens" ? boysTenants : girlsTenants;
+    const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + " Mens " : activeGirlsHostelName + " Womens ";
 
     // Filter and map data
     const dataWithBike = dataToUse.filter(tenant => tenant.bikeNumber && tenant.bikeNumber !== 'NA').map((tenant, index) => {
@@ -447,7 +315,7 @@ const isImageFile = (file) => {
     // Add title for the report
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('Tenants Report', doc.internal.pageSize.width / 2, 10, { align: 'center' });
+    doc.text(`${nameToUse}Tenants Report`, doc.internal.pageSize.width / 2, 10, { align: 'center' });
 
     // Add title for tenants with bikes
     doc.setFontSize(12);
@@ -479,7 +347,7 @@ const isImageFile = (file) => {
     });
 
     // Save the PDF
-    doc.save('Tenants_Report.pdf');
+    doc.save(`${nameToUse} Tenants_Report.pdf`);
   };
 
   const handleVacatedReportBtn = () => {
@@ -513,8 +381,8 @@ const isImageFile = (file) => {
     ];
 
     // Determine the data source based on the selected hostel type
-    const dataToUse = selectedHostelType === "mens" ? vacatedEntireBoysData : vacatedEntireGirlsData;
-
+    const dataToUse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData;
+    const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + " Mens " : activeGirlsHostelName + " Womens ";
     // Filter and map data
     const dataWithBike = dataToUse.filter(tenant => tenant.bikeNumber && tenant.bikeNumber !== 'NA').map((tenant, index) => {
       const rents = tenant.rents || {};
@@ -554,7 +422,7 @@ const isImageFile = (file) => {
     // Add title for the report
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('Vacated Tenants Report', doc.internal.pageSize.width / 2, 10, { align: 'center' });
+    doc.text(`${nameToUse} Vacated Tenants Report`, doc.internal.pageSize.width / 2, 10, { align: 'center' });
 
     // Add title for tenants with bikes
     doc.setFontSize(12);
@@ -586,7 +454,7 @@ const isImageFile = (file) => {
     });
 
     // Save the PDF
-    doc.save('VacatedTenants_Report.pdf');
+    doc.save(`${nameToUse} VacatedTenants_Report.pdf`);
 
   }
 
@@ -599,7 +467,7 @@ const isImageFile = (file) => {
   };
 
   const handleExpensesGenerateBtn = () => {
-    setExpensesDataTrigger(true)
+  
 
     const doc = new jsPDF();
 
@@ -620,7 +488,7 @@ const isImageFile = (file) => {
 
     // Determine the data source based on the selected hostel type
     const dataToUse = selectedHostelType === "mens" ? entireBoysYearExpensesData : entireGirlsYearExpensesData;
-
+    const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + " Mens" : activeGirlsHostelName + "Womens";
     // Convert month name to number
     const newMonth = monthMapping[month.toLowerCase()];
 
@@ -651,7 +519,7 @@ const isImageFile = (file) => {
         // Add heading for monthly report
         const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
         doc.setFontSize(16);
-        doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
+        doc.text(`${nameToUse} ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
 
         // Create table for specific month
         doc.autoTable({
@@ -670,11 +538,11 @@ const isImageFile = (file) => {
         doc.text(`Total Expenses: ${totalAmount}`, 10, doc.lastAutoTable.finalY + 10);
 
         // Save file with month in filename
-        doc.save(`${monthName}_expenses.pdf`);
+        doc.save(`${nameToUse} ${monthName}_expenses.pdf`);
       } else {
         doc.setFontSize(16);
         const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-        doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
+        doc.text(`${nameToUse} ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
 
         // Create an empty table
         doc.autoTable({
@@ -685,7 +553,7 @@ const isImageFile = (file) => {
         });
 
         doc.text('No expenses found for the selected month and year.', 10, doc.lastAutoTable.finalY + 10);
-        doc.save(`${monthName}_expenses.pdf`);
+        doc.save(`${nameToUse} ${monthName}_expenses.pdf`);
       }
     } else if (year) {
       // Yearly Report
@@ -716,7 +584,7 @@ const isImageFile = (file) => {
 
       // Add heading for yearly report
       doc.setFontSize(16);
-      doc.text('Yearly Expenses', 105, 20, { align: 'center' });
+      doc.text(`${nameToUse} Yearly Expenses`, 105, 20, { align: 'center' });
 
       let grandTotal = 0;
       let startY = 30;
@@ -765,10 +633,10 @@ const isImageFile = (file) => {
       doc.text(`Grand Total: ${grandTotal}`, 10, startY + 2);
 
       // Save file with year in filename
-      doc.save(`${year}_expenses.pdf`);
+      doc.save(`${nameToUse} ${year}_expenses.pdf`);
     }
 
-    setExpensesDataTrigger(false)
+  
   };
 
 
@@ -777,7 +645,7 @@ const isImageFile = (file) => {
 
   const handleTenantBtnExcel = () => {
 
-    const dataTouse = selectedHostelType === "mens" ? boysTenantsData : girlsTenantsData
+    const dataTouse = selectedHostelType === "mens" ? boysTenants : girlsTenants
 
 
     const flatData = dataTouse.map(item => {
