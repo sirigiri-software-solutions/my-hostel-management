@@ -78,11 +78,12 @@ const ExpensesBoys = () => {
 
   }, [showModal]);
 
-
-
   const getMonthYearKey = (dateString) => {
     const date = new Date(dateString);
-    const month = date.toLocaleString('default', { month: 'short' }).toLowerCase();
+
+    const monthFull = date.toLocaleString('default', { month: 'short' });
+    const month = monthFull.slice(0, 3).toLowerCase();
+    // const month = date.toLocaleString('default', { month: 'short' }).toLowerCase();
     const year = date.getFullYear();
     return `${year}-${month}`;
   };
@@ -91,7 +92,6 @@ const ExpensesBoys = () => {
     e.preventDefault();
     let errors = {};
     let formIsValid = true;
-
     setExpensesInteracted(!expensesInteracted)
 
     if (!formData.expenseName.match(/^[a-zA-Z\s]+$/)) {
@@ -210,7 +210,6 @@ const ExpensesBoys = () => {
     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
     setTotal(totalExpenses);
   }, [entireHMAdata, activeBoysHostel, month, year, userUid]);
-
 
   const columns = [
     t('expensesPage.sNo'),

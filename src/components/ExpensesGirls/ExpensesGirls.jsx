@@ -214,6 +214,7 @@ window.addEventListener('keydown',handleOutsideClick);
     setTotal(totalExpenses);
   }, [entireHMAdata, activeGirlsHostel, month, year, userUid]);
 
+
   const columns = [
     t('expensesPage.sNo'),
     t('expensesPage.expenseName'),

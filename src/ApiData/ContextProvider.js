@@ -173,21 +173,11 @@ const [boysTenants, setBoysTenants] = useState([]);  // State to hold boys tenan
       });
       setGirlsTenantsWithRents(processedGirlsTenants)
 
-      const boysExpenses = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses
-      console.log(boysExpenses, "boysExpenses")
   }
 }, [entireHMAdata, activeBoysHostel, activeGirlsHostel, userUid, ]);
 
-console.log(boysRooms, "tttboysRooms");
-console.log(girlsRooms, "tttgirlsRooms");
-console.log(boysTenants, "tttboysTenants");
-console.log(girlsTenants, "tttgirlsTenants");
-console.log(boysTenantsWithRents, "boysTenantsWithRents")
-console.log(girlsTenantsWithRents, "girlsTenantsWithRents")
-
   // end to get entireData
 
-  
   useEffect(() => {
     setFirebase(firebaseInstances[area]);
 

@@ -838,15 +838,15 @@ const TenantsGirls = () => {
     setErrors({});
 
   };
-  const fetchExTenants = () => {
-    const exTenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
-    onValue(exTenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
-      setExTenants(loadedExTenants);
-    });
-  };
-  useEffect(() => { fetchExTenants() }, []);
+  // const fetchExTenants = () => {
+  //   const exTenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
+  //   onValue(exTenantsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
+  //     setExTenants(loadedExTenants);
+  //   });
+  // };
+  // useEffect(() => { fetchExTenants() }, []);
 
 
   const [showConfirmation, setShowConfirmation] = useState(false);
