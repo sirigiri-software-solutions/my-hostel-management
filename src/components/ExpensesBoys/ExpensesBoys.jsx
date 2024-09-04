@@ -222,24 +222,26 @@ const ExpensesBoys = () => {
     setTotal(totalExpenses);
      
     const totalExpensesOfhostel = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses
-   
-      const yearsMonth = Object.keys(totalExpensesOfhostel)
+   if(totalExpensesOfhostel){
+    const yearsMonth = Object.keys(totalExpensesOfhostel)
  
-      const expenseYears = yearsMonth.map(item => parseInt(item.split('-')[0], 10));
+    const expenseYears = yearsMonth.map(item => parseInt(item.split('-')[0], 10));
+     
+     
+    const currentYear = new Date().getFullYear();
+    const earliestYear = Math.min(currentYear, ...expenseYears);
+    const latestYear = Math.max(currentYear, ...expenseYears);
+    const years = [];
+    for (let yr = earliestYear; yr <= latestYear; yr++) {
+        years.push(yr);
+    }
+     
+     
        
-       
-      const currentYear = new Date().getFullYear();
-      const earliestYear = Math.min(currentYear, ...expenseYears);
-      const latestYear = Math.max(currentYear, ...expenseYears);
-      const years = [];
-      for (let yr = earliestYear; yr <= latestYear; yr++) {
-          years.push(yr);
-      }
-       
-       
-         
-       
-           setYearsList(years);
+     
+         setYearsList(years);
+   }
+      
     
    
  
