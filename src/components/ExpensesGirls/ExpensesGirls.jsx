@@ -89,7 +89,8 @@ window.addEventListener('keydown',handleOutsideClick);
 
   const getMonthYearKey = (dateString) => {
     const date = new Date(dateString);
-    const month = date.toLocaleString('default', { month: 'short' }).toLowerCase(); 
+    const monthFull = date.toLocaleString('default', { month: 'short' });
+    const month = monthFull.slice(0, 3).toLowerCase();
     const year = date.getFullYear();
     return `${year}-${month}`;
   };
@@ -216,25 +217,28 @@ window.addEventListener('keydown',handleOutsideClick);
 
     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
     setTotal(totalExpenses);
-    const totalExpensesOfhostel = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses 
-    const yearsMonth = Object.keys(totalExpensesOfhostel)
+    const totalExpensesOfhostel = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses
+    if(totalExpensesOfhostel){
+      const yearsMonth =  Object.keys(totalExpensesOfhostel)
 
-const expenseYears = yearsMonth.map(item => parseInt(item.split('-')[0], 10));
-
-
-const currentYear = new Date().getFullYear();
-const earliestYear = Math.min(currentYear, ...expenseYears);
-const latestYear = Math.max(currentYear, ...expenseYears);
-const years = [];
-for (let yr = earliestYear; yr <= latestYear; yr++) {
-    years.push(yr);
-}
-
-
+      const expenseYears = yearsMonth.map(item => parseInt(item.split('-')[0], 10));
+      
+      
+      const currentYear = new Date().getFullYear();
+      const earliestYear = Math.min(currentYear, ...expenseYears);
+      const latestYear = Math.max(currentYear, ...expenseYears);
+      const years = [];
+      for (let yr = earliestYear; yr <= latestYear; yr++) {
+          years.push(yr);
+      }
+      
+      
+          
+       
+           setYearsList(years);
+      
+    } 
     
- 
-     setYearsList(years);
-
 
 
   }, [entireHMAdata, activeGirlsHostel, month, year, userUid]);
