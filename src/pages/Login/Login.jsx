@@ -26,7 +26,7 @@ export const loginContext = createContext();
 
 const Login = () => {
   const navigate = useNavigate();
-  const { areaToApiEndpoint, setUserArea, setUserUid, firebase, setArea,setIsSubscribed} = useData();
+  const { areaToApiEndpoint, setUserArea, setUserUid, firebase, setArea, fetchData, setDefaultArea} = useData();
 
   const initialState = { Id: "", email: "", area: "", password: "" };
   const [loginData, setLoginData] = useState(initialState);
@@ -62,7 +62,7 @@ const Login = () => {
 
   const [uniqueforgotUserId, setUniqueForgotUserId] = useState(null);
 
-  const areaOptions = [ "default", "ameerpet", "srnagar", "secunderabad", "kukatpally", "gachibouli", "ashoknagar", "dhilshuknagar", "himayathnagar", "madhuranagar", "madhapur", "lbnagar", "nanakramguda"];
+  const areaOptions = [ "default", "ameerpet", "srnagar", "kukatpally", "gachibouli", "ashoknagar", "dhilshuknagar", "himayathnagar", "madhuranagar", "madhapur", "lbnagar", "nanakramguda"];
 
 
   const [signUpEmail, setSignUpEmail] = useState("");
@@ -152,7 +152,10 @@ const Login = () => {
             localStorage.setItem("username", singleLoginUser.firstname);
             localStorage.setItem("userarea", singleLoginUser.area);
             localStorage.setItem("userUid", singleLoginUser.uid);
+            setDefaultArea(singleLoginUser.area)
             setUserUid(singleLoginUser.uid);
+
+            await fetchData(); 
             const now = moment();
             const accessEnd = singleLoginUser.accessEnd ? moment(singleLoginUser.accessEnd) : null;
 
@@ -160,17 +163,17 @@ const Login = () => {
             const userRef = ref(database, `register/${singleLoginUser.uid}`);
             update(userRef, {
               firstLogin: true,
-              accessEnd: now.add(1, 'minute').toISOString(),
+              accessEnd: now.add(3, 'months').toISOString(), 
             });
-            localStorage.setItem('accessEnd', now.add(1, 'minute').toISOString());
+            localStorage.setItem('accessEnd', now.add(3, 'months').toISOString()); 
           } 
             else if(singleLoginUser.firstLogin === false){
               const userRef = ref(database, `register/${singleLoginUser.uid}`);
               update(userRef, {
                 firstLogin: true,
-                accessEnd: now.add(1, 'minute').toISOString(),
+                accessEnd: now.add(3, 'months').toISOString(), 
               })
-              localStorage.setItem('accessEnd', now.add(1, 'minute').toISOString());
+              localStorage.setItem('accessEnd', now.add(3, 'months').toISOString()); 
 
             }else if (accessEnd && now.isAfter(accessEnd)) {
               navigate('/subscribe');
@@ -181,6 +184,8 @@ const Login = () => {
             }
 
             setUserUid(singleLoginUser.uid);
+            // fetchData()
+            
             navigate("/mainPage");
 
             toast.success("You are logged in successfully.", {
@@ -193,9 +198,11 @@ const Login = () => {
               progress: undefined,
               theme: "light",
             });
+            
           } else {
             console.log("User not found in data array.");
           }
+          await fetchData();
         } else {
           toast.error("Email is not verified.", {
             position: "bottom-right",
@@ -224,8 +231,6 @@ const Login = () => {
       }
     }
   };
-
- 
   
 
 

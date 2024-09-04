@@ -1,48 +1,54 @@
-import React, { useContext, useEffect } from 'react'
-import RentIcon from '../../images/Icons (6).png'
-import SearchIcon from '../../images/Icons (9).png'
-import Table from '../../Elements/Table'
+import React, { useEffect } from "react";
+import RentIcon from "../../images/Icons (6).png";
+import SearchIcon from "../../images/Icons (9).png";
+import Table from "../../Elements/Table";
 import { push, ref } from "../../firebase/firebase";
-import { useState } from 'react'
-import { DataContext } from '../../ApiData/ContextProvider';
-import { onValue, update } from 'firebase/database';
+import { useState } from "react";
+import { update } from "firebase/database";
 import { toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import { FaWhatsapp } from "react-icons/fa";
-import "../../App.css"
-import { useData } from '../../ApiData/ContextProvider';
-import { useTranslation } from 'react-i18next';
+import "../../App.css";
+import { useData } from "../../ApiData/ContextProvider";
+import { useTranslation } from "react-i18next";
 
 const RentPageGirls = () => {
   const { t } = useTranslation();
-  const { data } = useContext(DataContext);
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase } = useData();
+  const {
+    activeGirlsHostel,
+    userUid,
+    activeGirlsHostelButtons,
+    firebase,
+    girlsRooms,
+    girlsTenants,
+    girlsTenantsWithRents,
+    fetchData,
+  } = useData();
   const { database } = firebase;
-  const [searchQuery, setSearchQuery] = useState('');
-  const [tenants, setTenants] = useState([]);
-  const [rooms, setRooms] = useState({});
-  const [selectedTenant, setSelectedTenant] = useState('');
-  const [roomNumber, setRoomNumber] = useState('');
-  const [bedNumber, setBedNumber] = useState('');
-  const [totalFee, setTotalFee] = useState('');
-  const [paidAmount, setPaidAmount] = useState('');
-  const [due, setDue] = useState('');
-  const [tenantsWithRents, setTenantsWithRents] = useState([]);
-  const [paidDate, setPaidDate] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  // const [tenants, setTenants] = useState([]);
+  // const [rooms, setRooms] = useState({});
+  const [selectedTenant, setSelectedTenant] = useState("");
+  const [roomNumber, setRoomNumber] = useState("");
+  const [bedNumber, setBedNumber] = useState("");
+  const [totalFee, setTotalFee] = useState("");
+  const [paidAmount, setPaidAmount] = useState("");
+  const [due, setDue] = useState("");
+  // const [tenantsWithRents, setTenantsWithRents] = useState([]);
+  const [paidDate, setPaidDate] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editingRentId, setEditingRentId] = useState(null);
   const [errors, setErrors] = useState({});
   const [availableTenants, setAvailableTenants] = useState([]);
-  const [dateOfJoin, setDateOfJoin] = useState()
+  const [dateOfJoin, setDateOfJoin] = useState();
 
   const [showModal, setShowModal] = useState(false);
 
   const [notify, setNotify] = useState(false);
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [showForm, setShowForm] = useState(true);
-  const [filterOption, setFilterOption] = useState('all');
-
+  const [filterOption, setFilterOption] = useState("all");
 
   // Function to send WhatsApp message
   const sendMessage = (tenant, rentRecord) => {
@@ -54,30 +60,30 @@ const RentPageGirls = () => {
     const paidAmount = rentRecord.paidAmount;
     const paidDate = rentRecord.paidDate;
 
-
     const message = `Hi ${tenantName},\n
 Hope you are doing fine.\n
 Your total fee is ${totalFee}.\n
 You have paid ${paidAmount} so far.\n
 Therefore, your remaining due amount is ${amount}.\n
 You joined on ${dateOfJoin}, and your due date is ${dueDate}.\n
-Please note that you made your last payment on ${paidDate}.\n`
+Please note that you made your last payment on ${paidDate}.\n`;
 
     const phoneNumber = tenant.mobileNo;
-    const formattedPhoneNumber = phoneNumber.startsWith('+91') ? phoneNumber : `+91${phoneNumber}`;
+    const formattedPhoneNumber = phoneNumber.startsWith("+91")
+      ? phoneNumber
+      : `+91${phoneNumber}`;
 
     const encodedMessage = encodeURIComponent(message);
 
     let whatsappLink = `https://wa.me/${formattedPhoneNumber}?text=${encodedMessage}`;
 
-    window.open(whatsappLink, '_blank');
+    window.open(whatsappLink, "_blank");
   };
-
 
   const handleNotifyCheckbox = (rentData) => {
     if (notify && notifyUserInfo) {
       const { tenant, rentRecord } = notifyUserInfo;
-  
+
       sendMessage(tenant, rentData);
     }
     setNotify(!notify);
@@ -85,138 +91,133 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-  
-      if (showModal && (event.target.id === "exampleModalRentsGirls" || event.key === "Escape")) {
+      if (
+        showModal &&
+        (event.target.id === "exampleModalRentsGirls" || event.key === "Escape")
+      ) {
         setShowModal(false);
       }
-
     };
-    window.addEventListener('click', handleOutsideClick);
-    window.addEventListener('keydown', handleOutsideClick)
-
+    window.addEventListener("click", handleOutsideClick);
+    window.addEventListener("keydown", handleOutsideClick);
   }, [showModal]);
 
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+  //   onValue(tenantsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedTenants = data ? Object.keys(data).map(key => ({
+  //       id: key,
+  //       ...data[key],
+  //     })) : [];
+  //     setTenants(loadedTenants);
+  //   });
 
-
-
-
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedTenants = data ? Object.keys(data).map(key => ({
-        id: key,
-        ...data[key],
-      })) : [];
-      setTenants(loadedTenants);
-    });
-
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setRooms(data);
-    });
-  }, [activeGirlsHostel]);
-
+  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val() || {};
+  //     setRooms(data);
+  //   });
+  // }, [activeGirlsHostel]);
 
   useEffect(() => {
     const updateTotalFeeFromRoom = () => {
+      const roomsArray = Object.values(girlsRooms);
 
-      const roomsArray = Object.values(rooms);
-
-      const matchingRoom = roomsArray.find(room => room.roomNumber === roomNumber);
+      const matchingRoom = roomsArray.find(
+        (room) => room.roomNumber === roomNumber
+      );
 
       if (matchingRoom && matchingRoom.bedRent) {
         setTotalFee(matchingRoom.bedRent.toString());
       } else {
-        setTotalFee('');
+        setTotalFee("");
       }
     };
 
     if (roomNumber) {
       updateTotalFeeFromRoom();
     }
-  }, [roomNumber, rooms]);
-
+  }, [roomNumber, girlsRooms]);
 
   useEffect(() => {
     if (selectedTenant) {
-      const tenant = tenants.find(t => t.id === selectedTenant);
+      const tenant = girlsTenants.find((t) => t.id === selectedTenant);
       if (tenant) {
-        setRoomNumber(tenant.roomNo || '');
-        setBedNumber(tenant.bedNo || '');
-        setDateOfJoin(tenant.dateOfJoin || '');
+        setRoomNumber(tenant.roomNo || "");
+        setBedNumber(tenant.bedNo || "");
+        setDateOfJoin(tenant.dateOfJoin || "");
       }
     } else {
-
-      setRoomNumber('');
-      setBedNumber('');
-      setPaidAmount('');
-      setDue('');
-      setDateOfJoin('');
-      setDueDate('');
+      setRoomNumber("");
+      setBedNumber("");
+      setPaidAmount("");
+      setDue("");
+      setDateOfJoin("");
+      setDueDate("");
     }
-  }, [selectedTenant, tenants]);
+  }, [selectedTenant, girlsTenants]);
 
   useEffect(() => {
-    const tenantIdsWithRents = tenantsWithRents.flatMap(tenant =>
+    const tenantIdsWithRents = girlsTenantsWithRents.flatMap((tenant) =>
       tenant.rents.length > 0 ? [tenant.id] : []
     );
 
-    const availableTenants = tenants.filter(
-      tenant => !tenantIdsWithRents.includes(tenant.id)
+    const availableTenants = girlsTenants.filter(
+      (tenant) => !tenantIdsWithRents.includes(tenant.id)
     );
 
     setAvailableTenants(availableTenants);
-  }, [tenants, tenantsWithRents, activeGirlsHostel]);
-
+  }, [girlsTenants, girlsTenantsWithRents, activeGirlsHostel]);
 
   useEffect(() => {
-
-    const calculatedDue = Math.max(parseFloat(totalFee) - parseFloat(paidAmount), 0).toString();
+    const calculatedDue = Math.max(
+      parseFloat(totalFee) - parseFloat(paidAmount),
+      0
+    ).toString();
     setDue(calculatedDue);
   }, [paidAmount, totalFee]);
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const tenantsData = snapshot.val();
-      const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+  //   onValue(tenantsRef, (snapshot) => {
+  //     const tenantsData = snapshot.val();
+  //     const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
 
-      const rentsPromises = tenantIds.map(tenantId => {
-        return new Promise((resolve) => {
-          const rentsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
-          onValue(rentsRef, (rentSnapshot) => {
-            const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
-              id: key,
-              ...rentSnapshot.val()[key],
-            })) : [];
-            resolve({ id: tenantId, ...tenantsData[tenantId], rents });
-          }, {
-            onlyOnce: true
-          });
-        });
-      });
+  //     const rentsPromises = tenantIds.map(tenantId => {
+  //       return new Promise((resolve) => {
+  //         const rentsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
+  //         onValue(rentsRef, (rentSnapshot) => {
+  //           const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
+  //             id: key,
+  //             ...rentSnapshot.val()[key],
+  //           })) : [];
+  //           resolve({ id: tenantId, ...tenantsData[tenantId], rents });
+  //         }, {
+  //           onlyOnce: true
+  //         });
+  //       });
+  //     });
 
-      Promise.all(rentsPromises).then(tenantsWithTheirRents => {
-        setTenantsWithRents(tenantsWithTheirRents);
-      });
-    });
-  }, [activeGirlsHostel]);
+  //     Promise.all(rentsPromises).then(tenantsWithTheirRents => {
+  //       setTenantsWithRents(tenantsWithTheirRents);
+  //     });
+  //   });
+  // }, [activeGirlsHostel]);
 
   const loadRentForEditing = (tenantId, rentId) => {
-    const tenant = tenantsWithRents.find(t => t.id === tenantId);
-    const rentRecord = tenant.rents.find(r => r.id === rentId);
+    const tenant = girlsTenantsWithRents.find((t) => t.id === tenantId);
+    const rentRecord = tenant.rents.find((r) => r.id === rentId);
 
     if (rentRecord) {
       setSelectedTenant(tenantId);
-      setRoomNumber(rentRecord.roomNumber || '');
-      setBedNumber(rentRecord.bedNumber || '');
-      setTotalFee(rentRecord.totalFee || '');
-      setPaidAmount(rentRecord.paidAmount || '');
-      setDue(rentRecord.due || '');
-      setPaidDate(rentRecord.paidDate || '');
-      setDueDate(rentRecord.dueDate || '');
+      setRoomNumber(rentRecord.roomNumber || "");
+      setBedNumber(rentRecord.bedNumber || "");
+      setTotalFee(rentRecord.totalFee || "");
+      setPaidAmount(rentRecord.paidAmount || "");
+      setDue(rentRecord.due || "");
+      setPaidDate(rentRecord.paidDate || "");
+      setDueDate(rentRecord.dueDate || "");
       setIsEditing(true);
       setEditingRentId(rentId);
     }
@@ -230,45 +231,41 @@ Please note that you made your last payment on ${paidDate}.\n`
 
     if (!selectedTenant) {
       formIsValid = false;
-      errors["selectedTenant"] = t('errors.selectedTenantRequired');
+      errors["selectedTenant"] = t("errors.selectedTenantRequired");
     }
 
     if (!paidAmount) {
       formIsValid = false;
-      errors["paidAmount"] = t('errors.paidAmountRequired');
+      errors["paidAmount"] = t("errors.paidAmountRequired");
     }
 
     if (!paidDate) {
       formIsValid = false;
-      errors["paidDate"] = t('errors.paidDateRequired');
+      errors["paidDate"] = t("errors.paidDateRequired");
     }
 
     if (!dueDate) {
       formIsValid = false;
-      errors["dueDate"] = t('errors.dueDateRequired');
+      errors["dueDate"] = t("errors.dueDateRequired");
     }
 
     setErrors(errors);
     return formIsValid;
   };
 
+  // useEffect(() => {
+  //   if (selectedTenant) {
+  //     const tenant = girlsTenants.find(t => t.id === selectedTenant);
+  //     if (tenant) {
 
-  useEffect(() => {
-    if (selectedTenant) {
-      const tenant = tenants.find(t => t.id === selectedTenant);
-      if (tenant) {
-
-        setDateOfJoin(tenant.dateOfJoin || '');
-
-
-        const currentDate = new Date(tenant.dateOfJoin);
-        const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1));
-        const formattedDueDate = dueDate.toISOString().split('T')[0];
-        setDueDate(formattedDueDate);
-      }
-    }
-  }, [selectedTenant, tenants]);
-
+  //       setDateOfJoin(tenant.dateOfJoin || '');
+  //       const currentDate = new Date(tenant.dateOfJoin);
+  //       const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1));
+  //       const formattedDueDate = dueDate.toISOString().split('T')[0];
+  //       setDueDate(formattedDueDate);
+  //     }
+  //   }
+  // }, [selectedTenant, girlsTenants]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -286,81 +283,94 @@ Please note that you made your last payment on ${paidDate}.\n`
       dateOfJoin,
       paidDate,
       dueDate,
-      status: parseFloat(due) <= 0 ? 'Paid' : 'Unpaid',
+      status: parseFloat(due) <= 0 ? "Paid" : "Unpaid",
     };
 
     if (isEditing) {
-      const rentRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents/${editingRentId}`);
-      await update(rentRef, rentData).then(() => {
-        toast.success(t('toastMessages.rentAddedSuccess'), {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
+      const rentRef = ref(
+        database,
+        `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents/${editingRentId}`
+      );
+      await update(rentRef, rentData)
+        .then(() => {
+          toast.success(t("toastMessages.rentAddedSuccess"), {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          setIsEditing(false);
+          if (notify) {
+            handleNotifyCheckbox(rentData);
+          }
+          fetchData();
+        })
+        .catch((error) => {
+          toast.error(t("toastMessages.errorAddingRent") + error.message, {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
         });
-        setIsEditing(false);
-        if (notify) {
-          handleNotifyCheckbox(rentData);
-        }
-      }).catch(error => {
-        toast.error(t('toastMessages.errorAddingRent') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
     } else {
-
-      const rentRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents`);
-      await push(rentRef, rentData).then(() => {
-        toast.success(t('toastMessages.rentAddedSuccess'), {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
+      const rentRef = ref(
+        database,
+        `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${selectedTenant}/rents`
+      );
+      await push(rentRef, rentData)
+        .then(() => {
+          toast.success(t("toastMessages.rentAddedSuccess"), {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          setIsEditing(false);
+          if (notify) {
+            handleNotifyCheckbox(rentData);
+          }
+          fetchData();
+        })
+        .catch((error) => {
+          toast.error(t("toastMessages.errorAddingRent") + error.message, {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
         });
-        setIsEditing(false);
-        
-        if (notify) {
-          handleNotifyCheckbox(rentData);
-        }
-      }).catch(error => {
-        toast.error(t('toastMessages.errorAddingRent') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
     }
     resetForm();
     setShowModal(false);
   };
 
   const handleAddNew = () => {
-    if (activeGirlsHostelButtons.length == 0) {
-      toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
-        position: "top-center",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      })
+    if (activeGirlsHostelButtons.length === 0) {
+      toast.warn(
+        "You have not added any girls hostel, please add your first Hostel in Settings",
+        {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        }
+      );
     } else {
       resetForm();
       setIsEditing(false);
@@ -368,59 +378,56 @@ Please note that you made your last payment on ${paidDate}.\n`
     }
   };
   const resetForm = () => {
-    setSelectedTenant('');
-    setRoomNumber('');
-    setBedNumber('');
-    setTotalFee('');
-    setPaidAmount('');
-    setDue('');
-    setPaidDate('');
-    setDueDate('');
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee("");
+    setPaidAmount("");
+    setDue("");
+    setPaidDate("");
+    setDueDate("");
     setIsEditing(false);
     setEditingRentId(null);
     setErrors({});
   };
 
-
-
-
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
 
-
-
   const columns = [
-    t('rentsPage.sNo'),
-    t('rentsPage.roomNo'),
-    t('rentsPage.personName'),
-    t('rentsPage.personMobile'),
-    t('rentsPage.bedNo'),
-    t('rentsPage.rent'),
-    t('rentsPage.paid'),
-    t('rentsPage.due'),
-    t('rentsPage.joiningDate'),
-    t('rentsPage.dueDate'),
-    t('rentsPage.lastFee'),
-    t('rentsPage.status'),
-    t('rentsPage.update')
+    t("rentsPage.sNo"),
+    t("rentsPage.roomNo"),
+    t("rentsPage.personName"),
+    t("rentsPage.personMobile"),
+    t("rentsPage.bedNo"),
+    t("rentsPage.rent"),
+    t("rentsPage.paid"),
+    t("rentsPage.due"),
+    t("rentsPage.joiningDate"),
+    t("rentsPage.dueDate"),
+    t("rentsPage.lastFee"),
+    t("rentsPage.status"),
+    t("rentsPage.update"),
   ];
 
-  const rentsRows = tenantsWithRents.flatMap((tenant, index) => tenant.rents.map((rent) => ({
-    roomNumber: rent.roomNumber,
-    name: tenant.name,
-    mobileNo: tenant.mobileNo,
-    bedNumber: rent.bedNumber,
-    totalFee: rent.totalFee,
-    paid: rent.paidAmount,
-    due: rent.due,
-    dateOfJoin: tenant.dateOfJoin,
-    dueDate: rent.dueDate,
-    paidDate: rent.paidDate,
-    status: rent.status === 'Unpaid' ? 'Unpaid' : 'Paid',
-    tenantId: tenant.id,
-    rentId: rent.id,
-  })))
+  const rentsRows = girlsTenantsWithRents.flatMap((tenant, index) =>
+    tenant.rents.map((rent) => ({
+      roomNumber: rent.roomNumber,
+      name: tenant.name,
+      mobileNo: tenant.mobileNo,
+      bedNumber: rent.bedNumber,
+      totalFee: rent.totalFee,
+      paid: rent.paidAmount,
+      due: rent.due,
+      dateOfJoin: tenant.dateOfJoin,
+      dueDate: rent.dueDate,
+      paidDate: rent.paidDate,
+      status: rent.status === "Unpaid" ? "Unpaid" : "Paid",
+      tenantId: tenant.id,
+      rentId: rent.id,
+    }))
+  );
 
   const rows = rentsRows.map((rent, index) => {
     const currentDate = new Date();
@@ -439,15 +446,15 @@ Please note that you made your last payment on ${paidDate}.\n`
       joining_date: rent.dateOfJoin,
       due_date: rent.dueDate,
       last_fee: rent.paidDate,
-      status: rent.status === 'Unpaid' ? 'Unpaid' : 'Paid',
+      status: rent.status === "Unpaid" ? "Unpaid" : "Paid",
       actions: (
         <button
           style={{
-            backgroundColor: isPastDue ? 'red' : '#ff8a00',
-            padding: '4px',
-            borderRadius: '5px',
-            color: 'white',
-            border: 'none',
+            backgroundColor: isPastDue ? "red" : "#ff8a00",
+            padding: "4px",
+            borderRadius: "5px",
+            color: "white",
+            border: "none",
           }}
           onClick={() => {
             loadRentForEditing(rent.tenantId, rent.rentId);
@@ -460,76 +467,85 @@ Please note that you made your last payment on ${paidDate}.\n`
     };
   });
 
-
-  const filteredRows = rows.filter(row => {
+  const filteredRows = rows.filter((row) => {
     const currentDate = new Date();
     const dueDate = new Date(row.due_date);
 
     const isPastDueDate = currentDate > dueDate;
-    const isTodayDueDate = currentDate.toDateString() === dueDate.toDateString();
-    const matchesSearchQuery = Object.values(row).some(value => {
+    const isTodayDueDate =
+      currentDate.toDateString() === dueDate.toDateString();
+    const matchesSearchQuery = Object.values(row).some((value) => {
       if (value) {
-        return value.toString().toLowerCase().includes(searchQuery.toLowerCase());
+        return value
+          .toString()
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
       }
       return false;
     });
 
-    const filterCondition = filterOption === 'all' ||
-      (filterOption === 'today' && isTodayDueDate) ||
-      (filterOption === 'overdue' && isPastDueDate);
+    const filterCondition =
+      filterOption === "all" ||
+      (filterOption === "today" && isTodayDueDate) ||
+      (filterOption === "overdue" && isPastDueDate);
 
     return matchesSearchQuery && filterCondition;
   });
-
 
   const handleSelectChange = (event) => {
     setFilterOption(event.target.value);
   };
 
-
   const handleClosePopUp = () => {
     setShowModal(false);
-    setNotify(false)
-  }
+    setNotify(false);
+  };
 
   const onClickCheckbox = () => {
-    setNotify(!notify)
+    setNotify(!notify);
 
     if (selectedTenant) {
-      const tenant = tenantsWithRents.find(t => t.id === selectedTenant);
-      
-      const rentRecord = tenant.rents
+      const tenant = girlsTenantsWithRents.find((t) => t.id === selectedTenant);
+
+      const rentRecord = tenant.rents;
       setNotifyUserInfo({ tenant, rentRecord });
     }
-  }
+  };
 
   const handleFocus = (e) => {
     const { name } = e.target;
     setErrors((prevErrors) => ({
       ...prevErrors,
-      [name]: '',
+      [name]: "",
     }));
   };
 
-
-
   return (
-    <div className='h-100'>
-
+    <div className="h-100">
       <>
         <div className="row d-flex flex-wrap align-items-center justify-content-between">
           <div className="col-12 col-md-4 d-flex align-items-center mr-5 mb-2">
-            <div className='roomlogo-container'>
-              <img src={RentIcon} alt="RoomsIcon" className='roomlogo' />
+            <div className="roomlogo-container">
+              <img src={RentIcon} alt="RoomsIcon" className="roomlogo" />
             </div>
-            <h1 className='management-heading'>{t('rentsPage.rentsManagement')}</h1>
+            <h1 className="management-heading">
+              {t("rentsPage.rentsManagement")}
+            </h1>
           </div>
           <div className="col-12 col-md-4 search-wrapper">
-            <input type="text" placeholder={t('common.search')} className='search-input' value={searchQuery}
-              onChange={handleSearch} />
-            <img src={SearchIcon} alt="search-icon" className='search-icon' />
+            <input
+              type="text"
+              placeholder={t("common.search")}
+              className="search-input"
+              value={searchQuery}
+              onChange={handleSearch}
+            />
+            <img src={SearchIcon} alt="search-icon" className="search-icon" />
           </div>
-          <div id="rentPagefilterbtn" className="col-12 col-md-4 d-flex justify-content-md-end align-items-end gap-3">
+          <div
+            id="rentPagefilterbtn"
+            className="col-12 col-md-4 d-flex justify-content-md-end align-items-end gap-3"
+          >
             <div className="filterRentDropDownContainer">
               <select
                 id="dueDateFilter"
@@ -542,8 +558,16 @@ Please note that you made your last payment on ${paidDate}.\n`
                 <option value="overdue">Due Over</option>
               </select>
             </div>
-            <button id="roomGirlsPageBtn" type="button" class="add-button" onClick={() => { handleAddNew(); setShowForm(true) }} >
-              {t('rentsPage.addRent')}
+            <button
+              id="roomGirlsPageBtn"
+              type="button"
+              class="add-button"
+              onClick={() => {
+                handleAddNew();
+                setShowForm(true);
+              }}
+            >
+              {t("rentsPage.addRent")}
             </button>
           </div>
         </div>
@@ -552,96 +576,236 @@ Please note that you made your last payment on ${paidDate}.\n`
           <Table columns={columns} rows={filteredRows} />
         </div>
 
-        <div class={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalRentsGirls" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal}>
+        <div
+          class={`modal fade ${showModal ? "show" : ""}`}
+          style={{ display: showModal ? "block" : "none" }}
+          id="exampleModalRentsGirls"
+          tabindex="-1"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden={!showModal}
+        >
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel"> {t('rentsPage.addRent')}</h1>
-                <button onClick={handleClosePopUp} type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">
+                  {" "}
+                  {t("rentsPage.addRent")}
+                </h1>
+                <button
+                  onClick={handleClosePopUp}
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
               </div>
               <div class="modal-body">
                 <div className="container-fluid">
-                  {isEditing ? null :
-                    <div className='monthlyDailyButtons'>
-                      <div className={showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(true)}>
-                        <text>{t('dashboard.monthly')}</text>
+                  {isEditing ? null : (
+                    <div className="monthlyDailyButtons">
+                      <div
+                        className={
+                          showForm
+                            ? "manageRentButton active"
+                            : "manageRentButton"
+                        }
+                        onClick={() => setShowForm(true)}
+                      >
+                        <text>{t("dashboard.monthly")}</text>
                       </div>
-                      <div className={!showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(false)}>
-                        <text>{t('dashboard.daily')}</text>
+                      <div
+                        className={
+                          !showForm
+                            ? "manageRentButton active"
+                            : "manageRentButton"
+                        }
+                        onClick={() => setShowForm(false)}
+                      >
+                        <text>{t("dashboard.daily")}</text>
                       </div>
                     </div>
-                  }
-                  {showForm ?
-                    <div className='monthlyAddForm'>
+                  )}
+                  {showForm ? (
+                    <div className="monthlyAddForm">
                       <form class="row lg-10" onSubmit={handleSubmit}>
-                        <div class='col-12 mb-3'>
-                          <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
-                            <option value="">{t('dashboard.selectTenant')} *</option>
-
+                        <div class="col-12 mb-3">
+                          <select
+                            id="bedNo"
+                            class="form-select"
+                            value={selectedTenant}
+                            onChange={(e) => setSelectedTenant(e.target.value)}
+                            disabled={isEditing}
+                            name="selectedTenant"
+                            onFocus={handleFocus}
+                          >
+                            <option value="">
+                              {t("dashboard.selectTenant")} *
+                            </option>
 
                             {isEditing ? (
-                              <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
+                              <option
+                                key={selectedTenant}
+                                value={selectedTenant}
+                              >
+                                {
+                                  girlsTenantsWithRents.find(
+                                    (tenant) => tenant.id === selectedTenant
+                                  )?.name
+                                }
+                              </option>
                             ) : (
-                              availableTenants.map(tenant => (
-                                <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
+                              availableTenants.map((tenant) => (
+                                <option key={tenant.id} value={tenant.id}>
+                                  {tenant.name}
+                                </option>
                               ))
                             )}
                           </select>
-                          {errors.selectedTenant && <div style={{ color: 'red' }}>{errors.selectedTenant}</div>}
+                          {errors.selectedTenant && (
+                            <div style={{ color: "red" }}>
+                              {errors.selectedTenant}
+                            </div>
+                          )}
                         </div>
                         <div class="col-md-6 mb-3">
-                          <label htmlFor='roomNo' class="form-label">{t('dashboard.roomNumber')}:</label>
-                          <input id="roomNo" class="form-control" type="text" value={roomNumber} readOnly />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor='BedNumber' class="form-label">{t('dashboard.bedNumber')}:</label>
-                          <input id="BedNumber" class="form-control" type="text" value={bedNumber} readOnly />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}:</label>
-                          <input id="TotalFee" class="form-control" type="number" value={totalFee} readOnly />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                          <input id="PaidAmount" class="form-control" type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} name="paidAmount" onFocus={handleFocus} />
-                          {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor="Due" class="form-label">{t('dashboard.due')}:</label>
-                          <input id="Due" class="form-control" type="number" value={due} readOnly />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor='DateOfJoin' class="form-label">{t('dashboard.dateOfJoin')}:</label>
-                          <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly // Make this field read-only since it's auto-populated 
+                          <label htmlFor="roomNo" class="form-label">
+                            {t("dashboard.roomNumber")}:
+                          </label>
+                          <input
+                            id="roomNo"
+                            class="form-control"
+                            type="text"
+                            value={roomNumber}
+                            readOnly
                           />
                         </div>
                         <div class="col-md-6 mb-3">
-                          <label htmlFor='PaidDate' class="form-label">{t('dashboard.paidDate')}:</label>
+                          <label htmlFor="BedNumber" class="form-label">
+                            {t("dashboard.bedNumber")}:
+                          </label>
+                          <input
+                            id="BedNumber"
+                            class="form-control"
+                            type="text"
+                            value={bedNumber}
+                            readOnly
+                          />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label htmlFor="TotalFee" class="form-label">
+                            {t("dashboard.totalFee")}:
+                          </label>
+                          <input
+                            id="TotalFee"
+                            class="form-control"
+                            type="number"
+                            value={totalFee}
+                            readOnly
+                          />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                            }
+                            name="paidAmount"
+                            onFocus={handleFocus}
+                          />
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label htmlFor="Due" class="form-label">
+                            {t("dashboard.due")}:
+                          </label>
+                          <input
+                            id="Due"
+                            class="form-control"
+                            type="number"
+                            value={due}
+                            readOnly
+                          />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label htmlFor="DateOfJoin" class="form-label">
+                            {t("dashboard.dateOfJoin")}:
+                          </label>
+                          <input
+                            id="DateOfJoin"
+                            class="form-control"
+                            type="date"
+                            value={dateOfJoin}
+                            readOnly // Make this field read-only since it's auto-populated
+                          />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label htmlFor="PaidDate" class="form-label">
+                            {t("dashboard.paidDate")}:
+                          </label>
                           <input
                             id="PaidDate"
                             class="form-control"
                             type="date"
                             value={paidDate}
-                            onChange={e => setPaidDate(e.target.value)}
+                            onChange={(e) => setPaidDate(e.target.value)}
                             name="paidDate"
                             onFocus={handleFocus}
                           />
-                          {errors.paidDate && <div style={{ color: 'red' }}>{errors.paidDate}</div>}
+                          {errors.paidDate && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidDate}
+                            </div>
+                          )}
                         </div>
                         <div class="col-md-6 mb-3">
-                          <label htmlFor="DueDate" class="form-label">{t('dashboard.dueDate')}:</label>
+                          <label htmlFor="DueDate" class="form-label">
+                            {t("dashboard.dueDate")}:
+                          </label>
                           <input
                             id="DueDate"
                             class="form-control"
                             type="date"
                             value={dueDate}
-                            onChange={e => setDueDate(e.target.value)}
+                            onChange={(e) => setDueDate(e.target.value)}
                             name="dueDate"
                             onFocus={handleFocus}
                           />
-                          {errors.dueDate && <div style={{ color: 'red' }}>{errors.dueDate}</div>}
+                          {errors.dueDate && (
+                            <div style={{ color: "red" }}>{errors.dueDate}</div>
+                          )}
                         </div>
-                        <div className="col-12 mb-3" >
+                        <div className="col-12 mb-3">
                           <div className="form-check">
                             <input
                               id="notifyCheckbox"
@@ -649,91 +813,208 @@ Please note that you made your last payment on ${paidDate}.\n`
                               type="checkbox"
                               checked={notify}
                               onChange={onClickCheckbox}
-
                             />
-                            <label className="form-check-label" htmlFor="notifyCheckbox">
-                              {t('dashboard.notify')}
+                            <label
+                              className="form-check-label"
+                              htmlFor="notifyCheckbox"
+                            >
+                              {t("dashboard.notify")}
                             </label>
-                            <FaWhatsapp style={{ backgroundColor: 'green', color: 'white', marginLeft: '7px', marginBottom: '4px' }} />
+                            <FaWhatsapp
+                              style={{
+                                backgroundColor: "green",
+                                color: "white",
+                                marginLeft: "7px",
+                                marginBottom: "4px",
+                              }}
+                            />
                           </div>
                         </div>
                         <div class="col-12 text-center mt-2">
-                          <button type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
+                          <button type="submit" className="btn btn-warning">
+                            {isEditing
+                              ? t("dashboard.updateRent")
+                              : t("dashboard.submitRentDetails")}
+                          </button>
                         </div>
                       </form>
-                    </div> :
-                    <div className='monthlyAddForm'>
+                    </div>
+                  ) : (
+                    <div className="monthlyAddForm">
                       <form class="row lg-10" onSubmit={handleSubmit}>
-                        <div class='col-12 mb-3'>
-                          <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
-                            <option value="">{t('dashboard.selectTenant')} *</option>
-
+                        <div class="col-12 mb-3">
+                          <select
+                            id="bedNo"
+                            class="form-select"
+                            value={selectedTenant}
+                            onChange={(e) => setSelectedTenant(e.target.value)}
+                            disabled={isEditing}
+                            name="selectedTenant"
+                            onFocus={handleFocus}
+                          >
+                            <option value="">
+                              {t("dashboard.selectTenant")} *
+                            </option>
 
                             {isEditing ? (
-                              <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
+                              <option
+                                key={selectedTenant}
+                                value={selectedTenant}
+                              >
+                                {
+                                  girlsTenantsWithRents.find(
+                                    (tenant) => tenant.id === selectedTenant
+                                  )?.name
+                                }
+                              </option>
                             ) : (
-                              availableTenants.map(tenant => (
-                                <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
+                              availableTenants.map((tenant) => (
+                                <option key={tenant.id} value={tenant.id}>
+                                  {tenant.name}
+                                </option>
                               ))
                             )}
-
-
                           </select>
-                          {errors.selectedTenant && <div style={{ color: 'red' }}>{errors.selectedTenant}</div>}
+                          {errors.selectedTenant && (
+                            <div style={{ color: "red" }}>
+                              {errors.selectedTenant}
+                            </div>
+                          )}
                         </div>
                         <div class="col-md-6 mb-3">
-                          <label htmlFor='roomNo' class="form-label">{t('dashboard.roomNumber')}:</label>
-                          <input id="roomNo" class="form-control" type="text" value={roomNumber} readOnly />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor='BedNumber' class="form-label">{t('dashboard.bedNumber')}:</label>
-                          <input id="BedNumber" class="form-control" type="text" value={bedNumber} readOnly />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}:</label>
-                          <input id="TotalFee" class="form-control" type="number" value={totalFee} onChange={e => setTotalFee(e.target.value)} />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                          <input id="PaidAmount" class="form-control" type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} name="paidAmount" onFocus={handleFocus} />
-                          {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor="Due" class="form-label">{t('dashboard.due')}:</label>
-                          <input id="Due" class="form-control" type="number" value={due} readOnly />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <label htmlFor='DateOfJoin' class="form-label">{t('dashboard.dateOfJoin')}:</label>
-                          <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly
+                          <label htmlFor="roomNo" class="form-label">
+                            {t("dashboard.roomNumber")}:
+                          </label>
+                          <input
+                            id="roomNo"
+                            class="form-control"
+                            type="text"
+                            value={roomNumber}
+                            readOnly
                           />
                         </div>
                         <div class="col-md-6 mb-3">
-                          <label htmlFor='PaidDate' class="form-label">{t('dashboard.paidDate')}:</label>
+                          <label htmlFor="BedNumber" class="form-label">
+                            {t("dashboard.bedNumber")}:
+                          </label>
+                          <input
+                            id="BedNumber"
+                            class="form-control"
+                            type="text"
+                            value={bedNumber}
+                            readOnly
+                          />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}:</label>
+                          <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')}/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            name="paidAmount"
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                              
+                            }
+                            
+                            onFocus={handleFocus}
+                          />
+
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label htmlFor="Due" class="form-label">
+                            {t("dashboard.due")}:
+                          </label>
+                          <input
+                            id="Due"
+                            class="form-control"
+                            type="number"
+                            value={due}
+                            readOnly
+                          />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label htmlFor="DateOfJoin" class="form-label">
+                            {t("dashboard.dateOfJoin")}:
+                          </label>
+                          <input
+                            id="DateOfJoin"
+                            class="form-control"
+                            type="date"
+                            value={dateOfJoin}
+                            readOnly
+                          />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label htmlFor="PaidDate" class="form-label">
+                            {t("dashboard.paidDate")}:
+                          </label>
                           <input
                             id="PaidDate"
                             class="form-control"
                             type="date"
                             value={paidDate}
-                            onChange={e => setPaidDate(e.target.value)}
+                            onChange={(e) => setPaidDate(e.target.value)}
                             name="paidDate"
                             onFocus={handleFocus}
                           />
-                          {errors.paidDate && <div style={{ color: 'red' }}>{errors.paidDate}</div>}
+                          {errors.paidDate && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidDate}
+                            </div>
+                          )}
                         </div>
                         <div class="col-md-6 mb-3">
-                          <label htmlFor="DueDate" class="form-label">{t('dashboard.dueDate')}:</label>
+                          <label htmlFor="DueDate" class="form-label">
+                            {t("dashboard.dueDate")}:
+                          </label>
                           <input
                             id="DueDate"
                             class="form-control"
                             type="date"
                             value={dueDate}
-                            onChange={e => setDueDate(e.target.value)}
+                            onChange={(e) => setDueDate(e.target.value)}
                             name="dueDate"
                             onFocus={handleFocus}
                           />
-                          {errors.dueDate && <div style={{ color: 'red' }}>{errors.dueDate}</div>}
+                          {errors.dueDate && (
+                            <div style={{ color: "red" }}>{errors.dueDate}</div>
+                          )}
                         </div>
-                        <div className="col-12 mb-3" >
+                        <div className="col-12 mb-3">
                           <div className="form-check">
                             <input
                               id="notifyCheckbox"
@@ -742,29 +1023,40 @@ Please note that you made your last payment on ${paidDate}.\n`
                               checked={notify}
                               onChange={onClickCheckbox}
                             />
-                            <label className="form-check-label" htmlFor="notifyCheckbox">
-                              {t('dashboard.notify')}
+                            <label
+                              className="form-check-label"
+                              htmlFor="notifyCheckbox"
+                            >
+                              {t("dashboard.notify")}
                             </label>
-                            <FaWhatsapp style={{ backgroundColor: 'green', color: 'white', marginLeft: '7px', marginBottom: '4px' }} />
+                            <FaWhatsapp
+                              style={{
+                                backgroundColor: "green",
+                                color: "white",
+                                marginLeft: "7px",
+                                marginBottom: "4px",
+                              }}
+                            />
                           </div>
                         </div>
                         <div class="col-12 text-center mt-2">
-                          <button type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
+                          <button type="submit" className="btn btn-warning">
+                            {isEditing
+                              ? t("dashboard.updateRent")
+                              : t("dashboard.submitRentDetails")}
+                          </button>
                         </div>
                       </form>
                     </div>
-                  }
+                  )}
                 </div>
               </div>
-
             </div>
           </div>
         </div>
-
-
       </>
     </div>
-  )
-}
+  );
+};
 
-export default RentPageGirls
+export default RentPageGirls;

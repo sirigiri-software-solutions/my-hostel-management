@@ -1,11 +1,10 @@
-import React, { useContext, useRef } from 'react'
+import React, { useRef } from 'react'
 import * as pdfjsLib from 'pdfjs-dist/webpack';
 import TenantsIcon from '../../images/Icons (4).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
-import ImageIcon from '../../images/Icons (10).png'
 import { useState, useEffect } from 'react'
-import { push, ref, storage } from "../../firebase/firebase";
+import { push, ref } from "../../firebase/firebase";
 
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -29,7 +28,7 @@ import imageCompression from 'browser-image-compression';
 
 const TenantsGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase,entireHMAdata } = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, fetchData, girlsTenants, girlsRooms, entireHMAdata} = useData();
   const role = localStorage.getItem('role');
   const { database, storage } = firebase;
 
@@ -44,7 +43,7 @@ const TenantsGirls = () => {
   const [idNumber, setIdNumber] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [status, setStatus] = useState('occupied');
-  const [tenants, setTenants] = useState([]);
+  // const [tenants, setTenants] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
@@ -52,7 +51,7 @@ const TenantsGirls = () => {
   const [tenantId, setTenantId] = useState(null);
   const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantIdUrl, setTenantIdUrl] = useState('');
-  const [girlsRoomsData, setGirlsRoomsData] = useState([]);
+  // const [girlsRoomsData, setGirlsRoomsData] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   const [userDetailsTenantPopup, setUserDetailsTenantsPopup] = useState(false);
@@ -82,6 +81,7 @@ const TenantsGirls = () => {
   const [tenantAddress, setTenantAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [singleTenanantBikeNum,setSingleTenantBikeNum] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
 
    
@@ -281,8 +281,8 @@ const TenantsGirls = () => {
 }
 
   const handleCheckboxChange = (e) => {
-    setHasBike(e.target.value == 'yes');
-    if (e.target.value == 'no') {
+    setHasBike(e.target.value === 'yes');
+    if (e.target.value === 'no') {
       setHasBike(false);
       setBikeNumber('NA');
     } else {
@@ -316,75 +316,76 @@ const TenantsGirls = () => {
     document.addEventListener("keydown", handleClickOutside)
   }, []);
 
-  // useEffect(() => {
-  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
-  //     // Extract the values from the data object
-  //     const boysAndGirlsData = Object.values(entireHMAdata);
-  
-  //     // Ensure we have data and that it contains 'boys'
-  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
-  //       const boysData = Object.values(boysAndGirlsData[0].girls);
-  
-  //       // Check if there's data in boysData
-  //       if (boysData.length > 0) {
-  //         const tenantsData = boysData[0].tenants || {};
-  //         const roomsData = boysData[0].rooms || {};
-  //         const extenantsData = boysData[0].extenants || {};
-  
-  //         // Map the data to the required format
-  //         const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         // Update the state with the processed data
-  //         setTenants(loadedTenants); 
-  //         setGirlsRooms(loadedRooms);
-  //         setExTenants(loadedExTenants);
-  //       }
-  //     }
-  //   }
-  // }, []);
-  
-
-
   useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      setTenants(loadedTenants);
-    });
-  }, [activeGirlsHostel]);
-
-  const [girlsRooms, setGirlsRooms] = useState([]);
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
+    if (entireHMAdata && typeof entireHMAdata === 'object') {
+      // Extract the values from the data object
+      const boysAndGirlsData = Object.values(entireHMAdata);
+  
+      // Ensure we have data and that it contains 'boys'
+      if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+        const boysData = Object.values(boysAndGirlsData[0].girls);
+  
+        // Check if there's data in boysData
+        if (boysData.length > 0) {
+          // const tenantsData = boysData[0].tenants || {};
+          // const roomsData = boysData[0].rooms || {};
+          const extenantsData = boysData[0].extenants || {};
+  
+          // Map the data to the required format
+          // const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
+  
+          // const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
+  
+          const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+            id: key,
+            ...value,
+          }));
+  
+          // Update the state with the processed data
+          // setTenants(loadedTenants); 
+          // setGirlsRooms(loadedRooms);
+          setExTenants(loadedExTenants);
+        }
       }
-      setGirlsRooms(loadedRooms);
-    });
-  }, [activeGirlsHostel]);
+    }
+  }, [entireHMAdata]);
+  
+
+
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+  //   onValue(tenantsRef, snapshot => {
+  //     const data = snapshot.val() || {};
+  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
+  //       id: key,
+  //       ...value,
+  //     }));
+  //     setTenants(loadedTenants);
+  //   });
+  // }, [activeGirlsHostel]);
+
+
+  // const [girlsRooms, setGirlsRooms] = useState([]);
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setGirlsRooms(loadedRooms);
+  //   });
+  // }, [activeGirlsHostel]);
 
 
 
@@ -437,7 +438,7 @@ const TenantsGirls = () => {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
 
-    const isBedOccupied = tenants.some(tenant => {
+    const isBedOccupied = girlsTenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentId;
     });
 
@@ -465,39 +466,34 @@ const TenantsGirls = () => {
 
   
 
+ 
+
   // const handleTenantImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       setTenantImage(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
+  //   if (e.target.files[0]) {
+  //     setTenantImage(e.target.files[0]);
   //   }
   // };
-  const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
-    }
-  };
-  const handleTenantIdChange = (e) => {
-    if (e.target.files[0]) {
-      const file = e.target.files[0]
-      setFileName(file.name)
-      setTenantId(e.target.files[0]);
-    }
-  };
+  // const handleTenantIdChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     const file = e.target.files[0]
+  //     setFileName(file.name)
+  //     setTenantId(e.target.files[0]);
+  //   }
+  // };
 
-  const handleTenantBikeChange = (e) => {
-    if (e.target.files[0]) {
-      setBikeImage(e.target.files[0]);
-    }
-  };
-  const handleTenantBikeRcChange = (e) => {
-    if (e.target.files[0]) {
-      setBikeRcImage(e.target.files[0]);
-    }
-  };
+  // const handleTenantBikeChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     setBikeImage(e.target.files[0]);
+  //   }
+  // };
+  // const handleTenantBikeRcChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     setBikeRcImage(e.target.files[0]);
+  //   }
+  // };
+
+
+
   // const handleTenantIdChange = (e) => {
   //   const file = e.target.files[0];
   //   if (file) {
@@ -528,6 +524,106 @@ const TenantsGirls = () => {
   const checkImage = (type) =>  {
     return type === "image/jpeg"
   }
+
+
+  const handleTenantImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validFormats = ['image/jpeg', 'image/png'];
+      if (validFormats.includes(file.type)) {
+        setTenantImage(file);
+        setErrorMessage(''); 
+      } else {
+        setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+        e.target.value = null; 
+      }
+    }
+  };
+  
+
+  const handleTenantIdChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+
+      const validFormat = 'application/pdf';
+      const maxSize = 1 * 1024 * 1024;
+
+
+      if (file.type === validFormat) {
+
+        if (file.size <= maxSize) {
+
+          setFileName(file.name);
+          setTenantId(file);
+          setTenantId(file);
+          setErrorMessage('');
+        } else {
+
+          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+        e.target.value = null;
+
+
+       
+        }
+      } else {
+
+        setErrorMessage('Please upload a valid  file.');
+
+
+        e.target.value = null;
+      }
+    }
+  };
+  const handleTenantBikeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      
+      const validFormats = ['image/jpeg', 'image/png'];
+
+     
+      if (validFormats.includes(file.type)) {
+        
+        setBikeImage(file);
+        setErrorMessage('');
+        
+      } else {
+        setErrorMessage('Please upload a valid  file.');
+        
+
+        
+        e.target.value = null;
+      }
+    }
+  };
+
+  const handleTenantBikeRcChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+     
+      const validFormat = 'application/pdf';
+      const maxSize = 1 * 1024 * 1024; 
+
+      
+      if (file.type === validFormat) {
+        
+        if (file.size <= maxSize) {
+          
+          setBikeRcImage(file);
+          setErrorMessage('');
+        } else {
+          
+          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+          e.target.value = null; 
+        }
+      } else {
+        
+        setErrorMessage('Please upload a valid  file.');
+        e.target.value = null; 
+      }
+    }
+  };
 
 
   const handleSubmit = async (e) => {
@@ -664,6 +760,7 @@ const TenantsGirls = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
         } else {
             await push(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`), tenantData);
             toast.success(t('toastMessages.tenantAddedSuccess'), {
@@ -675,6 +772,7 @@ const TenantsGirls = () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
             e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
@@ -735,7 +833,7 @@ const TenantsGirls = () => {
     setShowModal(true);
     setBikeNumber(tenant.bikeNumber);
     setPermnentAddress(tenant.permnentAddress);
-    if (tenant.bikeNumber == 'NA') {
+    if (tenant.bikeNumber === 'NA') {
       setHasBike(false);
       setBikeNumber(tenant.bikeNumber);
     }
@@ -746,7 +844,7 @@ const TenantsGirls = () => {
   };
 
   const handleAddNew = () => {
-    if (activeGirlsHostelButtons.length == 0) {
+    if (activeGirlsHostelButtons.length === 0) {
       toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
@@ -830,7 +928,7 @@ const TenantsGirls = () => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-  const rows = tenants.map((tenant, index) => ({
+  const rows = girlsTenants.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
     name: capitalizeFirstLetter(tenant.name),
@@ -894,7 +992,7 @@ const TenantsGirls = () => {
 
 
     const [roomNo, bedNo] = tenant.room_bed_no.split('/');
-    const singleUserDueDate = tenants.find(eachTenant =>
+    const singleUserDueDate = girlsTenants.find(eachTenant =>
       eachTenant.name === tenant.name &&
       eachTenant.mobileNo === tenant.mobile_no &&
       eachTenant.roomNo === roomNo &&
@@ -968,6 +1066,7 @@ const TenantsGirls = () => {
             draggable: true,
             progress: undefined,
           });
+          fetchData();
         }).catch(error => {
           toast.error("Error Tenant Vacate " + error.message, {
             position: "top-center",
@@ -990,15 +1089,15 @@ const TenantsGirls = () => {
     setErrors({});
 
   };
-  const fetchExTenants = () => {
-    const exTenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
-    onValue(exTenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
-      setExTenants(loadedExTenants);
-    });
-  };
-  useEffect(() => { fetchExTenants() }, []);
+  // const fetchExTenants = () => {
+  //   const exTenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
+  //   onValue(exTenantsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
+  //     setExTenants(loadedExTenants);
+  //   });
+  // };
+  // useEffect(() => { fetchExTenants() }, []);
 
 
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -1702,7 +1801,7 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
-                    <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange}  />
+                    <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantImageChange}  />
                     {isMobile && (
                     <div>
                     <p>{t('tenantsPage.or')}</p>
@@ -1715,6 +1814,7 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                     )}
 
                     {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
+                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                   </div>
                   <div class="col-md-6">
                     <label htmlFor='tenantUploadId' class="form-label">
@@ -1725,7 +1825,7 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                         <p>{fileName}</p>
                       </div>
                     )}
-                    <input ref={tenantProofIdRef} id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} />
+                    <input ref={tenantProofIdRef} id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantIdChange} />
                     {isMobile && (
                     <div>
                     <p>{t('tenantsPage.or')}</p>
@@ -1736,6 +1836,9 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                     </div>
                     </div>
                     )}
+                    {errors.tenantId && <p style={{ color: 'red' }}>{errors.tenantId}</p>}
+                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                    
 
                   </div>
                   <div className='col-md-12'>
@@ -1790,11 +1893,14 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                     <>
                       <div className="col-md-6">
                         <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-                        <input type="file" className="form-control" onChange={handleTenantBikeChange} />
+                        <input type="file" className="form-control" accept=".jpg, .jpeg, .png"  onChange={handleTenantBikeChange} />
+                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                       </div>
                       <div className="col-md-6">
                         <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-                        <input type="file" className="form-control" onChange={handleTenantBikeRcChange} />
+                        <input type="file" className="form-control"accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantBikeRcChange} />
+                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                        
                       </div>
                     </>
                   )}

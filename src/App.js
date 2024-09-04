@@ -10,6 +10,7 @@ import { DataProvider } from './ApiData/ContextProvider';
 import ProtectedRoute from './ProtectedRoute';
 
 const App = () => {
+  
   return (
     <BrowserRouter>
       <DataProvider>

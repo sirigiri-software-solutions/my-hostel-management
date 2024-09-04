@@ -14,7 +14,7 @@ import imageCompression from 'browser-image-compression';
 
 const Hostels = () => {
   const { t } = useTranslation();
-  const { userUid, firebase, activeFlag,  changeActiveFlag, activeBoysHostelButtons, activeGirlsHostelButtons, } = useData();
+  const { userUid, firebase, activeFlag,  changeActiveFlag, activeBoysHostelButtons, activeGirlsHostelButtons,fetchData } = useData();
   const { database, storage } = firebase;
   const [isEditing, setIsEditing] = useState(null);
   const [hostels, setHostels] = useState({ boys: [], girls: [] });
@@ -34,6 +34,7 @@ const Hostels = () => {
   const [boysHostelImage, setBoysHostelImage] = useState('');
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
   const [hostelImageUrl, setHostelImageUrl] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   
 
   useEffect(() => {
@@ -123,6 +124,7 @@ const submitHostelEdit = async (e) => {
         autoClose: 3000,
       });
       cancelEdit();
+      fetchData();
     })
     .catch(error => {
       toast.error("Failed to update hostel: " + error.message, {
@@ -132,32 +134,61 @@ const submitHostelEdit = async (e) => {
     });
 };
 
-
-
   const deleteHostel = (id) => {
     const isBoys = activeFlag === 'boys';
     setIsDeleteConfirmationOpen(true);
     setHostelToDelete({ isBoys, id });
   };
 
-  const confirmDeleteHostel = () => {
+  const confirmDeleteHostel =async () => {
     const { isBoys, id } = hostelToDelete;
-    const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
-    remove(ref(database, path))
-      .then(() => {
+
+    try{
+      const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
+      const hostelSnapshot = await get(ref(database,path));
+      if(hostelSnapshot.exists()){
+        const hostelData = hostelSnapshot.val();
+        console.log(hostelData,"inHostelPage")
+        const hasTenants = hostelData.tenants && Object.keys(hostelData.tenants).length > 0;
+        const hasExTenants = hostelData.extenants && Object.keys(hostelData.extenants).length > 0;
+        if(!hasTenants && !hasExTenants){
+          await remove(ref(database, path))
+     
+          toast.success("Hostel deleted successfully.", {
+            position: "top-center",
+            autoClose: 3000,
+          });
+          fetchData();
+          setIsDeleteConfirmationOpen(false);
+          setHostelToDelete(null);
+        }else{
+          toast.error("Hostel cannot be deleted as it has tenants,extenants.Please transfer the tenants first.",{
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          })
+          setIsDeleteConfirmationOpen(false);
+          setHostelToDelete(null);
+        }
+
+      }
+    }catch(error){
+      const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
+
+      await remove(ref(database, path))
+     
         toast.success("Hostel deleted successfully.", {
           position: "top-center",
           autoClose: 3000,
         });
         setIsDeleteConfirmationOpen(false);
         setHostelToDelete(null);
-      })
-      .catch(error => {
-        toast.error("Failed to delete hostel: " + error.message, {
-          position: "top-center",
-          autoClose: 3000,
-        });
-      });
+    }
+   
   };
 
   const cancelDeleteHostel = () => {
@@ -301,22 +332,47 @@ const submitHostelEdit = async (e) => {
   //   reader.readAsDataURL(file);
   // };
 
+  const isImageFile = (file) => {
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    return file && allowedImageTypes.includes(file.type);
+  };
+
   const handleHostelChange = (e, isBoys) => {
     const file = e.target.files[0];
+    
     if (!file) {
+        // No file selected
         toast.error("Please select a file.", {
             position: "top-center",
             autoClose: 3000,
         });
         return;
     }
+    if (!isImageFile(file)) {
+      toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+      e.target.value = ''; // Clear the input
+      return;
+    }
 
-    if (isBoys) {
-        setBoysHostelImage(file); // Store file directly
+    const validFormats = ['image/jpeg', 'image/png'];
+    if (validFormats.includes(file.type)) {
+        
+        if (isBoys) {
+            setBoysHostelImage(file); 
+        } else {
+            setGirlsHostelImage(file); 
+        }
+        setErrorMessage(''); 
     } else {
-        setGirlsHostelImage(file); // Store file directly
+        
+        setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+        e.target.value = null; 
     }
 };
+
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -362,10 +418,11 @@ const submitHostelEdit = async (e) => {
 
     set(newHostelRef, hostelDetails)
       .then(() => {
-        toast.success(`New ${isBoys ? 'boys' : 'girls'} hostel '${name}' added successfully.`, {
+        toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
           position: "top-center",
           autoClose: 3000,
         });
+        fetchData()
         if (isBoys) {
           setNewBoysHostelName('');
           setBoysHostelImage('');
@@ -552,7 +609,8 @@ const submitHostelEdit = async (e) => {
             </div>
             <div className="form-group">
               <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
-              <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, true)} />
+              <input type="file" className="form-control" accept=".jpg, .jpeg, .png"  onChange={(e) => handleHostelChange(e, true)} />
+              {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             </div>
             <div className='mt-3 d-flex justify-content-between'>
               <Button variant="primary" style={{ marginRight: '10px' }} type="submit" disabled={isSubmitting}>{isSubmitting ? 'Adding...' : t("settings.addHostel")}</Button>
@@ -593,7 +651,8 @@ const submitHostelEdit = async (e) => {
             </div>
             <div className="form-group">
               <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
-              <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, false)} />
+              <input type="file" className="form-control"  accept=".jpg, .jpeg, .png"  onChange={(e) => handleHostelChange(e, false)} />
+              {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             </div>
             <div className='mt-3 d-flex justify-content-between'>
               <Button variant="primary" type="submit" style={{ marginRight: '10px' }} disabled={isSubmitting}>{isSubmitting ? 'Adding...' : t("settings.addHostel")}</Button>

@@ -3,12 +3,10 @@ import * as pdfjsLib from 'pdfjs-dist/webpack';
 import TenantsIcon from '../../images/Icons (4).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
-import ImageIcon from '../../images/Icons (10).png'
-import { useState, useContext } from 'react'
-import { push, ref, storage } from "../../firebase/firebase";
+import { useState } from 'react'
+import { push, ref } from "../../firebase/firebase";
 import '../TenantsGirls/TenantsGirls.css';
 import './TenantsBoys.css'
-import { DataContext } from '../../ApiData/ContextProvider'
 
 import { onValue, remove, set, update } from 'firebase/database'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -32,9 +30,9 @@ import jsPDF from 'jspdf';
 
 const TenantsBoys = () => {
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase,entireHMAdata,fetchData} = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms, boysTenants, entireHMAdata} = useData();
   const role = localStorage.getItem('role');
-  const { database,storage } = firebase;
+  const { database, storage } = firebase;
 
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
@@ -45,15 +43,18 @@ const TenantsBoys = () => {
   const [idNumber, setIdNumber] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [status, setStatus] = useState('occupied');
-  const [tenants, setTenants] = useState([]);
+  // const [tenants, setTenants] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
    const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
   const [tenantId, setTenantId] = useState(null);
-   const [tenantIdUrl, setTenantIdUrl] = useState('');
- 
+  const [tenantIdUrl, setTenantIdUrl] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+
+
   const [showModal, setShowModal] = useState(false);
   const [userDetailsTenantPopup, setUserDetailsTenantsPopup] = useState(false);
   const [singleTenantDetails, setSingleTenantDetails] = useState(false);
@@ -62,9 +63,9 @@ const TenantsBoys = () => {
   const [singleTenantProofId, setSingleTenantProofId] = useState("");
   const [fileName, setFileName] = useState('');
   const [singleTenantAddress, setSingleTenantAddress] = useState('');
-  const [singleTenanantBikeNum,setSingleTenantBikeNum] = useState('');
+  const [singleTenanantBikeNum, setSingleTenantBikeNum] = useState('');
 
-  const [boysRooms, setBoysRooms] = useState([]);
+  // const [boysRooms, setBoysRooms] = useState([]);
   const [exTenants, setExTenants] = useState([]);
   const [showExTenants, setShowExTenants] = useState(false);
   const [hasBike, setHasBike] = useState(false);
@@ -276,8 +277,8 @@ const takeidPicture = async () => {
 
 
   const handleCheckboxChange = (e) => {
-    setHasBike(e.target.value == 'yes');
-    if (e.target.value == 'no') {
+    setHasBike(e.target.value === 'yes');
+    if (e.target.value === 'no') {
       setHasBike(false);
       setBikeNumber('NA');
     }
@@ -330,74 +331,75 @@ const takeidPicture = async () => {
   }, [selectedRoom, boysRooms]);
 
 
-  const { data } = useContext(DataContext);
-  const [boysTenants, setBoysTenants] = useState([]);
+  // const [boysTenants, setBoysTenants] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // useEffect(() => {
-  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
-  //     let boysAndGirlsData = Object.values(entireHMAdata);
-  //     console.log(boysAndGirlsData, "EntireHMAData");
-  
-  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
-  //       let boysData = Object.values(boysAndGirlsData[0].boys);
-  
-  //       if (boysData.length > 0) {
-  //         let tenantsData = boysData[0].tenants || {};
-  //         let roomsData = boysData[0].rooms || {};
-  //         let extenantsData = boysData[0].extenants || {};
-  
-  //         const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
-  //           id: key,
-  //           ...value,
-  //         }));
-  
-  //         setTenants(loadedTenants); 
-  //         setBoysRooms(loadedRooms);
-  //         setExTenants(loadedExTenants);
-  //       }
-  //     }
-  //   }
-  // }, []);
-  
-
-
   useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      setTenants(loadedTenants);
-    });
-  }, [activeBoysHostel]);
-
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
+    if (entireHMAdata && typeof entireHMAdata === 'object') {
+      let boysAndGirlsData = Object.values(entireHMAdata);
+      console.log(boysAndGirlsData, "EntireHMAData");
+  
+      if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+        let boysData = Object.values(boysAndGirlsData[0].boys);
+  
+        if (boysData.length > 0) {
+          // let tenantsData = boysData[0].tenants || {};
+          // let roomsData = boysData[0].rooms || {};
+          let extenantsData = boysData[0].extenants || {};
+  
+          // const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
+  
+          // const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+          //   id: key,
+          //   ...value,
+          // }));
+  
+          const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+            id: key,
+            ...value,
+          }));
+  
+          // setTenants(loadedTenants); 
+          // setBoysRooms(loadedRooms);
+          setExTenants(loadedExTenants);
+        }
       }
-      setBoysRooms(loadedRooms);
-    });
-  }, [activeBoysHostel]);
+    }
+  }, [entireHMAdata]);
+  
+
+
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+  //   onValue(tenantsRef, snapshot => {
+  //     const data = snapshot.val() || {};
+  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
+  //       id: key,
+  //       ...value,
+  //     }));
+  //     setTenants(loadedTenants);
+  //   });
+  // }, [activeBoysHostel]);
+
+  // console.log(tenants, "tttenants")
+
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setBoysRooms(loadedRooms);
+  //   });
+  // }, [activeBoysHostel]);
 
 
   const validate = () => {
@@ -435,7 +437,7 @@ const takeidPicture = async () => {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
 
-    const isBedOccupied = tenants.some(tenant => {
+    const isBedOccupied = boysTenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentId;
     });
 
@@ -445,24 +447,25 @@ const takeidPicture = async () => {
     if (!tenantImage && !tenantImageUrl) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
+    
     if (hasBike) {
       if (!bikeNumber) {
         tempErrors.bikeNumber = 'Bike number required';
       } else {
         // Remove spaces for validation
         const bikeNumberWithoutSpaces = bikeNumber.replace(/\s+/g, '');
-        
+
         if (!/^[A-Za-z0-9]{6,10}$/.test(bikeNumberWithoutSpaces)) {
           tempErrors.bikeNumber = 'Enter a valid bike number (letters and numbers only)';
         }
       }
     }
-    
+
     setErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
- 
+
   // const handleTenantImageChange = (e) => {
   //   const file = e.target.files[0];
   //   if (file) {
@@ -473,29 +476,112 @@ const takeidPicture = async () => {
   //     reader.readAsDataURL(file);
   //   }
   // };
+
+
   const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      const validFormats = ['image/jpeg', 'image/png'];
+      if (validFormats.includes(file.type)) {
+        setTenantImage(file);
+        setErrorMessage(''); 
+      } else {
+        setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+        e.target.value = null; 
+      }
     }
   };
+  
+
   const handleTenantIdChange = (e) => {
-    if (e.target.files[0]) {
-      const file = e.target.files[0]
-      setFileName(file.name)
-      setTenantId(e.target.files[0]);
+    const file = e.target.files[0];
+
+    if (file) {
+
+      const validFormat = 'application/pdf';
+      const maxSize = 1 * 1024 * 1024;
+
+
+      if (file.type === validFormat) {
+
+        if (file.size <= maxSize) {
+
+          setFileName(file.name);
+          setTenantId(file);
+          setTenantId(file);
+          setErrorMessage('');
+        } else {
+
+          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+        e.target.value = null;
+
+
+       
+        }
+      } else {
+
+        setErrorMessage('Please upload a valid  file.');
+
+
+        e.target.value = null;
+      }
     }
   };
 
+
   const handleTenantBikeChange = (e) => {
-    if (e.target.files[0]) {
-      setBikeImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      
+      const validFormats = ['image/jpeg', 'image/png'];
+
+     
+      if (validFormats.includes(file.type)) {
+        
+        setBikeImage(file);
+        setErrorMessage('');
+        
+      } else {
+        setErrorMessage('Please upload a valid  file.');
+        
+
+        
+        e.target.value = null;
+      }
     }
-  };
+  }
+  
+
   const handleTenantBikeRcChange = (e) => {
-    if (e.target.files[0]) {
-      setBikeRcImage(e.target.files[0]);
+    const file = e.target.files[0];
+
+    if (file) {
+     
+      const validFormat = 'application/pdf';
+      const maxSize = 1 * 1024 * 1024; 
+
+      
+      if (file.type === validFormat) {
+        
+        if (file.size <= maxSize) {
+          
+          setBikeRcImage(file);
+          setErrorMessage('');
+        } else {
+          
+          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+          e.target.value = null; 
+        }
+      } else {
+        
+        setErrorMessage('Please upload a valid  file.');
+        e.target.value = null; 
+      }
     }
-  };
+  }
+  
+
+
 
   // const handleTenantIdChange = (e) => {
   //   const file = e.target.files[0];
@@ -661,6 +747,7 @@ const takeidPicture = async () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
         } else {
             await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData);
             toast.success(t('toastMessages.tenantAddedSuccess'), {
@@ -672,6 +759,7 @@ const takeidPicture = async () => {
                 draggable: true,
                 progress: undefined,
             });
+            fetchData()
             e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
@@ -879,28 +967,28 @@ const takeidPicture = async () => {
     setIsEditing(true);
     setCurrentId(tenant.id);
 
-    if(tenantImage){
+    if (tenantImage) {
       setTenantImage(tenant.tenantImageUrl)
     } else {
       setTenantImageUrl(tenant.tenantImageUrl)
     }
-    if(tenantId){
+    if (tenantId) {
       setTenantId(tenant.tenantIdUrl || '');
     } else {
       setTenantIdUrl(tenant.tenantIdUrl)
     }
-    if(bikeImage){
+    if (bikeImage) {
       setBikeImage(tenant.bikeImageUrl || '')
     } else {
       setBikeImageUrl(tenant.bikeImageUrl || '')
     }
-    if(bikeRcImage){
+    if (bikeRcImage) {
       setBikeRcImage(tenant.bikeRcImageUrl || '')
     } else {
       setBikeRcImageUrl(tenant.bikeRcImageUrl || '')
     }
 
-    
+
     setBikeNumber("");
     setHasBike(false);
     setFileName(tenant.fileName || '');
@@ -918,7 +1006,7 @@ const takeidPicture = async () => {
 
   };
 
-const handleAddNew = (event) => {
+  const handleAddNew = () => {
     if (activeBoysHostelButtons.length == 0) {
       toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
@@ -1010,8 +1098,8 @@ const handleAddNew = (event) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-console.log(tenants, "tenants")
-  const rows = tenants.map((tenant, index) => ({
+
+  const rows = boysTenants.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
     name: tenant.name,
@@ -1067,7 +1155,7 @@ console.log(tenants, "tenants")
 
 
     const [roomNo, bedNo] = tenant.room_bed_no.split('/');
-    const singleUserDueDate = tenants.find(eachTenant =>
+    const singleUserDueDate = boysTenants.find(eachTenant =>
       eachTenant.name === tenant.name &&
       eachTenant.mobileNo === tenant.mobile_no &&
       eachTenant.roomNo === roomNo &&
@@ -1076,7 +1164,7 @@ console.log(tenants, "tenants")
     console.log(tenant,"singleuserDataFr")
     console.log(singleUserDueDate,"singleuserDataFr")
 
-    if(singleUserDueDate && singleUserDueDate.bikeNumber){
+    if (singleUserDueDate && singleUserDueDate.bikeNumber) {
       setSingleTenantBikeNum(singleUserDueDate.bikeNumber)
     }
 
@@ -1142,6 +1230,7 @@ console.log(tenants, "tenants")
             draggable: true,
             progress: undefined,
           });
+          fetchData();
         }).catch(error => {
           toast.error("Error Tenant Vacate " + error.message, {
             position: "top-center",
@@ -1163,15 +1252,16 @@ console.log(tenants, "tenants")
     resetForm();
     setErrors({});
   };
-  const fetchExTenants = () => {
-    const exTenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
-    onValue(exTenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
-      setExTenants(loadedExTenants);
-    });
-  };
-  useEffect(() => { fetchExTenants() }, []);
+
+  // const fetchExTenants = () => {
+  //   const exTenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
+  //   onValue(exTenantsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
+  //     setExTenants(loadedExTenants);
+  //   });
+  // };
+  // useEffect(() => { fetchExTenants() }, []);
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [tenantIdToDelete, setTenantIdToDelete] = useState(null);
@@ -1266,275 +1356,190 @@ console.log(tenants, "tenants")
   const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
 const isImage = (fileData) => fileData.startsWith('data:image/');
 
-const pdfToImages = async (pdfUrl) => {
-  const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
-  const numPages = pdf.numPages;
-  const images = [];
+  const pdfToImages = async (pdfUrl) => {
+    const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
+    const numPages = pdf.numPages;
+    const images = [];
 
-  for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-    const viewport = page.getViewport({ scale: 2 });
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 2 });
 
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
 
-    await page.render({
-      canvasContext: context,
-      viewport: viewport
-    }).promise;
+      await page.render({
+        canvasContext: context,
+        viewport: viewport
+      }).promise;
 
-    const imgData = canvas.toDataURL('image/png');
-    images.push({ imgData, width: viewport.width, height: viewport.height });
-  }
+      const imgData = canvas.toDataURL('image/png');
+      images.push({ imgData, width: viewport.width, height: viewport.height });
+    }
 
-  return images;
-};
-
-const calculateFitDimensions = (imgWidth, imgHeight, maxWidth, maxHeight) => {
-  const widthRatio = maxWidth / imgWidth;
-  const heightRatio = maxHeight / imgHeight;
-  const ratio = Math.min(widthRatio, heightRatio);
-  return {
-    width: imgWidth * ratio,
-    height: imgHeight * ratio
+    return images;
   };
-};
 
-const loadImage = (src) => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
-};
+  const calculateFitDimensions = (imgWidth, imgHeight, maxWidth, maxHeight) => {
+    const widthRatio = maxWidth / imgWidth;
+    const heightRatio = maxHeight / imgHeight;
+    const ratio = Math.min(widthRatio, heightRatio);
+    return {
+      width: imgWidth * ratio,
+      height: imgHeight * ratio
+    };
+  };
+
+  const loadImage = (src) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  };
 
 const handleTenantDownload = async () => {
   const doc = new jsPDF();
-
+  console.log(singleTenantDetails,"singletenantDetals")
   // Page 1: Tenant Details
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   doc.text("Tenant Details", 80, 10);
 
-  if (singleTenantDetails.image) {
-    doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
-  }
+    if (singleTenantDetails.image) {
+      doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
+    }
 
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("Name: ", 20, 25);
-
-  doc.setFont("helvetica", "normal");
-  doc.text(singleTenantDetails.name, 34, 25);
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Mobile No: ", 20, 35);
-
-  doc.setFont("helvetica", "normal");
-  doc.text(singleTenantDetails.mobile_no, 43, 35);
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Proof ID: ", 20, 45);
-
-  doc.setFont("helvetica", "normal");
-  doc.text(singleTenantDetails.id, 40, 45);
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Room/Bed No: ", 20, 55);
-
-  doc.setFont("helvetica", "normal");
-  doc.text(singleTenantDetails.room_bed_no, 50, 55);
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Joining Date: ", 20, 65);
-
-  doc.setFont("helvetica", "normal");
-  doc.text(singleTenantDetails.joining_date, 48, 65);
-
-  if (dueDateOfTenant) {
+    doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("Due Date: ", 20, 75);
+    doc.text("Name: ", 20, 25);
 
     doc.setFont("helvetica", "normal");
-    doc.text(dueDateOfTenant, 40, 75);
-  }
+    doc.text(singleTenantDetails.name, 34, 25);
 
-  if (bikeNumber) {
     doc.setFont("helvetica", "bold");
-    doc.text("Bike Number: ", 20, 85);
+    doc.text("Mobile No: ", 20, 35);
 
     doc.setFont("helvetica", "normal");
-    doc.text(singleTenanantBikeNum, 48, 85);
-  }
+    doc.text(singleTenantDetails.mobile_no, 43, 35);
 
-  if (tenantAddress) {
     doc.setFont("helvetica", "bold");
-    doc.text("Address: ", 20, 95);
+    doc.text("Proof ID: ", 20, 45);
 
     doc.setFont("helvetica", "normal");
-    doc.text(tenantAddress, 39, 95);
-  }
+    doc.text(singleTenantDetails.id, 40, 45);
 
-  // Add a new page
-  doc.addPage();
+    doc.setFont("helvetica", "bold");
+    doc.text("Room/Bed No: ", 20, 55);
 
-  // Page 2: ID Proof Image or PDF
-  if (singleTenantProofId) {
-    if (isImage(singleTenantProofId)) {
-      try {
-        const img = await loadImage(singleTenantProofId);
-        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-        doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-      } catch (error) {
-        console.error('Error loading image:', error);
-      }
-      doc.addPage();
-    } else if (isPDF(singleTenantProofId)) {
-      const images = await pdfToImages(singleTenantProofId);
-      images.forEach((img, index) => {
-        if (index > 0) doc.addPage();
-        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-        doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-      });
-      doc.addPage();
+    doc.setFont("helvetica", "normal");
+    doc.text(singleTenantDetails.room_bed_no, 50, 55);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Joining Date: ", 20, 65);
+
+    doc.setFont("helvetica", "normal");
+    doc.text(singleTenantDetails.joining_date, 48, 65);
+
+    if (dueDateOfTenant) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Due Date: ", 20, 75);
+
+      doc.setFont("helvetica", "normal");
+      doc.text(dueDateOfTenant, 40, 75);
     }
-  }
 
-  // Page 3: Bike Image or PDF
-  if (bikeImageField) {
-    if (isImage(bikeImageField)) {
-      try {
-        const img = await loadImage(bikeImageField);
-        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-        doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-      } catch (error) {
-        console.error('Error loading image:', error);
-      }
-      doc.addPage();
-    } else if (isPDF(bikeImageField)) {
-      const images = await pdfToImages(bikeImageField);
-      images.forEach((img, index) => {
-        if (index > 0) doc.addPage();
-        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-        doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-      });
-      doc.addPage();
-    }
-  }
+    if (bikeNumber) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Bike Number: ", 20, 85);
 
-  // Page 4: Bike RC Image or PDF
-  if (bikeRcImageField) {
-    if (isImage(bikeRcImageField)) {
-      try {
-        const img = await loadImage(bikeRcImageField);
-        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-        doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-      } catch (error) {
-        console.error('Error loading image:', error);
-      }
-    } else if (isPDF(bikeRcImageField)) {
-      const images = await pdfToImages(bikeRcImageField);
-      images.forEach((img, index) => {
-        if (index > 0) doc.addPage();
-        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-        doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-      });
+      doc.setFont("helvetica", "normal");
+      doc.text(singleTenanantBikeNum, 48, 85);
     }
-  }
+
+    if (tenantAddress) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Address: ", 20, 95);
+
+      doc.setFont("helvetica", "normal");
+      doc.text(tenantAddress, 39, 95);
+    }
+
+    // Add a new page
+    doc.addPage();
+
+    // Page 2: ID Proof Image or PDF
+    if (singleTenantProofId) {
+      if (isImage(singleTenantProofId)) {
+        try {
+          const img = await loadImage(singleTenantProofId);
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+        } catch (error) {
+          console.error('Error loading image:', error);
+        }
+        doc.addPage();
+      } else if (isPDF(singleTenantProofId)) {
+        const images = await pdfToImages(singleTenantProofId);
+        images.forEach((img, index) => {
+          if (index > 0) doc.addPage();
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+        });
+        doc.addPage();
+      }
+    }
+
+    // Page 3: Bike Image or PDF
+    if (bikeImageField) {
+      if (isImage(bikeImageField)) {
+        try {
+          const img = await loadImage(bikeImageField);
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+        } catch (error) {
+          console.error('Error loading image:', error);
+        }
+        doc.addPage();
+      } else if (isPDF(bikeImageField)) {
+        const images = await pdfToImages(bikeImageField);
+        images.forEach((img, index) => {
+          if (index > 0) doc.addPage();
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+        });
+        doc.addPage();
+      }
+    }
+
+    // Page 4: Bike RC Image or PDF
+    if (bikeRcImageField) {
+      if (isImage(bikeRcImageField)) {
+        try {
+          const img = await loadImage(bikeRcImageField);
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
+        } catch (error) {
+          console.error('Error loading image:', error);
+        }
+      } else if (isPDF(bikeRcImageField)) {
+        const images = await pdfToImages(bikeRcImageField);
+        images.forEach((img, index) => {
+          if (index > 0) doc.addPage();
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+        });
+      }
+    }
 
   // Save the PDF
-//   doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-// };
-// Convert PDF to Blob
-const pdfOutput = doc.output('blob');
-
-if (Capacitor.isNativePlatform()) {
-  // Save the PDF file to the mobile device
-  const fileName = `${singleTenantDetails.name}_Complete_Details.pdf`;
-  const filePath = `pdf/${fileName}`;
-
-  try {
-    const reader = new FileReader();
-    reader.readAsDataURL(pdfOutput);
-    reader.onloadend = async () => {
-      const base64Data = reader.result.split(',')[1];
-
-      await Filesystem.writeFile({
-        path: filePath,
-        data: base64Data,
-        directory: FilesystemDirectory.Documents,
-        recursive: true,
-      });
-
-      const result = await Filesystem.getUri({
-        directory: FilesystemDirectory.Documents,
-        path: filePath,
-      });
-
-      // Optionally open the file using the FileOpener plugin
-      await FileOpener.open({
-        filePath: result.uri,
-        fileMimeType: 'application/pdf',
-      });
-    };
-    reader.onerror = (error) => {
-      console.error('Error converting PDF to base64:', error);
-    };
-  } catch (error) {
-    console.error('Error saving file:', error);
-  }
-} else {
-  // Save the PDF file for web
-  const url = URL.createObjectURL(pdfOutput);
-  const a = document.createElement('a');
-  a.style.display = 'none';
-  a.href = url;
-  a.download = `${singleTenantDetails.name}_Complete_Details.pdf`;
-  document.body.appendChild(a);
-  a.click();
-  URL.revokeObjectURL(url);
-}
+  doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
 };
 
-const handleImageDownload = async (e, imageUrl, fileName) => {
-if (Capacitor.isNativePlatform()) {
-  e.preventDefault();
 
-  try {
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
-    const reader = new FileReader();
-
-    reader.onloadend = async () => {
-      const base64data = reader.result.split(',')[1];
-
-      try {
-        const savedFile = await Filesystem.writeFile({
-          path: `${fileName}.jpg`,
-          data: base64data,
-          directory: FilesystemDirectory.Documents
-        });
-        
-        await FileOpener.open({
-          filePath: savedFile.uri,
-          fileMimeType: 'image/jpeg',
-        });
-
-      } catch (error) {
-        console.error('Error saving file:', error);
-      }
-    };
-
-    reader.readAsDataURL(blob);
-
-  } catch (error) {
-    console.error('Error fetching image:', error);
-  }
-}
-};
 
  
   return (
@@ -1658,7 +1663,7 @@ if (Capacitor.isNativePlatform()) {
                     <label htmlFor='tenantMobileNo' class="form-label">
                       {t('dashboard.mobileNo')}
                     </label>
-                    <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)}  onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
+                    <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
                     {errors.mobileNo && <p style={{ color: 'red' }}>{errors.mobileNo}</p>}
                   </div>
                   <div class="col-md-6">
@@ -1672,7 +1677,7 @@ if (Capacitor.isNativePlatform()) {
                     <label htmlFor='tenantEmergency' class="form-label">
                       {t('dashboard.emergencyContact')}
                     </label>
-                    <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)}  onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="emergencyContact" onFocus={handleTenantFocus} />
+                    <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="emergencyContact" onFocus={handleTenantFocus} />
                     {errors.emergencyContact && <p style={{ color: 'red' }}>{errors.emergencyContact}</p>}
                   </div>
                   <div class="col-md-6">
@@ -1694,21 +1699,9 @@ if (Capacitor.isNativePlatform()) {
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
-                    <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} />
-                    
-                    {isMobile && (
-                    <div>
-                    <p>{t('tenantsPage.or')}</p>
-                    <div style={{display:'flex',flexDirection:'row'}}>
-                    <p>{t('tenantsPage.takePhoto')}</p>
-                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
-                    {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
-                    </div>
-                    </div>
-                    )}
-
-
+                    <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} required />
                     {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
+                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                   </div>
                   <div className="col-md-6">
                     <label htmlFor='tenantUploadId' className="form-label">
@@ -1721,21 +1714,8 @@ if (Capacitor.isNativePlatform()) {
                     )}
 
                     <input ref={tenantProofIdRef} id="tenantUploadId" className="form-control" type="file" onChange={handleTenantIdChange} />
-                    
-                    {isMobile && (
-                    <div>
-                    <p>{t('tenantsPage.or')}</p>
-                    <div style={{display:'flex',flexDirection:'row'}}>
-                    <p>{t('tenantsPage.takePhoto')}</p>
-                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeidPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
-                    {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
-                    </div>
-                    </div>
-                    )}
 
-                    </div>
-
-                  {/* </div> */}
+                  </div>
                   <div className='col-md-12'>
                     <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
                     <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' />
@@ -1787,11 +1767,14 @@ if (Capacitor.isNativePlatform()) {
                     <>
                       <div className="col-md-6">
                         <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-                        <input type="file" className="form-control" onChange={handleTenantBikeChange} />
+                        <input type="file" className="form-control" accept=".jpg, .jpeg, .png" onChange={handleTenantBikeChange} />
+                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                        
                       </div>
                       <div className="col-md-6">
                         <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-                        <input type="file" className="form-control" onChange={handleTenantBikeRcChange} />
+                        <input type="file" className="form-control" accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantBikeRcChange} />
+                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                       </div>
                     </>
                   )}
