@@ -306,7 +306,7 @@ const DataProvider = ({ children }) => {
   useEffect(() => {
     fetchData();
 }, [userUid, userarea, completeData, defaultArea]);
- 
+
   return (
     <DataContext.Provider
      value={{
