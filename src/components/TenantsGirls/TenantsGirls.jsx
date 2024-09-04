@@ -28,7 +28,7 @@ import imageCompression from 'browser-image-compression';
 
 const TenantsGirls = () => {
   const { t } = useTranslation();
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, fetchData, girlsTenants, girlsRooms, entireHMAdata} = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, fetchData, girlsTenants, girlsRooms, entireHMAdata, girlsExTenantsData} = useData();
   const role = localStorage.getItem('role');
   const { database, storage } = firebase;
 
@@ -58,7 +58,7 @@ const TenantsGirls = () => {
   const [singleTenantDetails, setSingleTenantDetails] = useState(false);
   const [dueDateOfTenant, setDueDateOfTenant] = useState("");
 
-  const [exTenants, setExTenants] = useState([]);
+  // const [exTenants, setExTenants] = useState([]);
   const [showExTenants, setShowExTenants] = useState(false);
   const [singleTenantProofId, setSingleTenantProofId] = useState("");
 
@@ -81,7 +81,12 @@ const TenantsGirls = () => {
   const [tenantAddress, setTenantAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [singleTenanantBikeNum,setSingleTenantBikeNum] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState({
+    tenantImage: '',
+    tenantId: '',
+    bikeImage: '',
+    bikeRcImage: '',
+  });
 
 
    
@@ -316,45 +321,45 @@ const TenantsGirls = () => {
     document.addEventListener("keydown", handleClickOutside)
   }, []);
 
-  useEffect(() => {
-    if (entireHMAdata && typeof entireHMAdata === 'object') {
-      // Extract the values from the data object
-      const boysAndGirlsData = Object.values(entireHMAdata);
+  // useEffect(() => {
+  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
+  //     // Extract the values from the data object
+  //     const boysAndGirlsData = Object.values(entireHMAdata);
   
-      // Ensure we have data and that it contains 'boys'
-      if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
-        const boysData = Object.values(boysAndGirlsData[0].girls);
+  //     // Ensure we have data and that it contains 'boys'
+  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+  //       const boysData = Object.values(boysAndGirlsData[0].girls);
   
-        // Check if there's data in boysData
-        if (boysData.length > 0) {
-          // const tenantsData = boysData[0].tenants || {};
-          // const roomsData = boysData[0].rooms || {};
-          const extenantsData = boysData[0].extenants || {};
+  //       // Check if there's data in boysData
+  //       if (boysData.length > 0) {
+  //         // const tenantsData = boysData[0].tenants || {};
+  //         // const roomsData = boysData[0].rooms || {};
+  //         const extenantsData = boysData[0].extenants || {};
   
-          // Map the data to the required format
-          // const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
-          //   id: key,
-          //   ...value,
-          // }));
+  //         // Map the data to the required format
+  //         // const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+  //         //   id: key,
+  //         //   ...value,
+  //         // }));
   
-          // const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
-          //   id: key,
-          //   ...value,
-          // }));
+  //         // const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+  //         //   id: key,
+  //         //   ...value,
+  //         // }));
   
-          const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
-            id: key,
-            ...value,
-          }));
+  //         // const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+  //         //   id: key,
+  //         //   ...value,
+  //         // }));
   
-          // Update the state with the processed data
-          // setTenants(loadedTenants); 
-          // setGirlsRooms(loadedRooms);
-          setExTenants(loadedExTenants);
-        }
-      }
-    }
-  }, [entireHMAdata]);
+  //         // Update the state with the processed data
+  //         // setTenants(loadedTenants); 
+  //         // setGirlsRooms(loadedRooms);
+  //         setExTenants(loadedExTenants);
+  //       }
+  //     }
+  //   }
+  // }, [entireHMAdata]);
   
 
 
@@ -532,99 +537,86 @@ const TenantsGirls = () => {
       const validFormats = ['image/jpeg', 'image/png'];
       if (validFormats.includes(file.type)) {
         setTenantImage(file);
-        setErrorMessage(''); 
+        setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' })); 
       } else {
-        setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          tenantImage: 'Please upload a valid image file (JPG, JPEG, PNG).',
+        }));
         e.target.value = null; 
       }
     }
   };
   
-
   const handleTenantIdChange = (e) => {
     const file = e.target.files[0];
-
     if (file) {
-
-      const validFormat = 'application/pdf';
-      const maxSize = 1 * 1024 * 1024;
-
-
-      if (file.type === validFormat) {
-
+      const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting PDFs and images
+      const maxSize = 1 * 1024 * 1024; // 1 MB
+      if (validFormats.includes(file.type)) {
         if (file.size <= maxSize) {
-
-          setFileName(file.name);
           setTenantId(file);
-          setTenantId(file);
-          setErrorMessage('');
+          setErrorMessage((prevErrors) => ({ ...prevErrors, tenantId: '' }));
         } else {
-
-          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
-        e.target.value = null;
-
-
-       
+          setErrorMessage((prevErrors) => ({
+            ...prevErrors,
+            tenantId: 'The file size exceeds the 1 MB limit. Please upload a smaller file.',
+          }));
+          e.target.value = null;
         }
       } else {
-
-        setErrorMessage('Please upload a valid  file.');
-
-
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          tenantId: 'Please upload a valid PDF or image file.',
+        }));
         e.target.value = null;
       }
     }
   };
+
+
   const handleTenantBikeChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      
-      const validFormats = ['image/jpeg', 'image/png'];
-
-     
+      const validFormats = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting all image types
       if (validFormats.includes(file.type)) {
-        
         setBikeImage(file);
-        setErrorMessage('');
-        
+        setErrorMessage((prevErrors) => ({ ...prevErrors, bikeImage: '' }));
       } else {
-        setErrorMessage('Please upload a valid  file.');
-        
-
-        
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          bikeImage: 'Please upload a valid image file.',
+        }));
         e.target.value = null;
       }
     }
   };
-
+  
   const handleTenantBikeRcChange = (e) => {
     const file = e.target.files[0];
-
     if (file) {
-     
-      const validFormat = 'application/pdf';
-      const maxSize = 1 * 1024 * 1024; 
-
-      
-      if (file.type === validFormat) {
-        
+      const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting PDFs and images
+      const maxSize = 1 * 1024 * 1024; // 1 MB
+      if (validFormats.includes(file.type)) {
         if (file.size <= maxSize) {
-          
           setBikeRcImage(file);
-          setErrorMessage('');
+          setErrorMessage((prevErrors) => ({ ...prevErrors, bikeRcImage: '' }));
         } else {
-          
-          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
-          e.target.value = null; 
+          setErrorMessage((prevErrors) => ({
+            ...prevErrors,
+            bikeRcImage: 'The file size exceeds the 1 MB limit. Please upload a smaller file.',
+          }));
+          e.target.value = null;
         }
       } else {
-        
-        setErrorMessage('Please upload a valid  file.');
-        e.target.value = null; 
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          bikeRcImage: 'Please upload a valid PDF or image file.',
+        }));
+        e.target.value = null;
       }
     }
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -881,6 +873,12 @@ const TenantsGirls = () => {
     setIsEditing(false);
     setCurrentId('');
     setErrors({});
+    setErrorMessage({
+      tenantImage: '',
+      tenantId: '',
+      bikeImage: '',
+      bikeRcImage: '',
+    })
     setTenantImage(null);
     setTenantImageUrl('');
     setTenantId(null);
@@ -1142,7 +1140,7 @@ const TenantsGirls = () => {
   };
 
 
-  const exTenantRows = exTenants.map((tenant, index) => ({
+  const exTenantRows = girlsExTenantsData.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
     name: capitalizeFirstLetter(tenant.name),
@@ -1814,7 +1812,7 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                     )}
 
                     {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
-                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                    {errorMessage.tenantImage && <p style={{ color: 'red' }}>{errorMessage.tenantImage}</p>}
                   </div>
                   <div class="col-md-6">
                     <label htmlFor='tenantUploadId' class="form-label">
@@ -1894,12 +1892,12 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                       <div className="col-md-6">
                         <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
                         <input type="file" className="form-control" accept=".jpg, .jpeg, .png"  onChange={handleTenantBikeChange} />
-                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                        {errorMessage.bikeImage && <p style={{ color: 'red' }}>{errorMessage.bikeImage}</p>}
                       </div>
                       <div className="col-md-6">
                         <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
                         <input type="file" className="form-control"accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantBikeRcChange} />
-                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                        {errorMessage.bikeRcImage && <p style={{ color: 'red' }}>{errorMessage.bikeRcImage}</p>}
                         
                       </div>
                     </>

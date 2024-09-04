@@ -131,7 +131,12 @@ const DashboardGirls = () => {
   const [bikeRcImageField, setBikeRcImageField] = useState('');
   const [tenantAddress, setTenantAddress] = useState('');
   const [fileName, setFileName] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState({
+    tenantImage: '',
+    tenantId: '',
+    bikeImage: '',
+    bikeRcImage: '',
+  });
 
   const [formData, setFormData] = useState({
     expenseName: '',
@@ -817,104 +822,193 @@ const takePicture = async () => {
   //     reader.readAsDataURL(file);
   //   }
   // };
+
+  
   const handleTenantImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const validFormats = ['image/jpeg', 'image/png'];
       if (validFormats.includes(file.type)) {
         setTenantImage(file);
-        setErrorMessage(''); 
+        setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' })); 
       } else {
-        setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          tenantImage: 'Please upload a valid image file (JPG, JPEG, PNG).',
+        }));
         e.target.value = null; 
       }
     }
   };
   
-
   const handleTenantIdChange = (e) => {
     const file = e.target.files[0];
-
     if (file) {
-
-      const validFormat = 'application/pdf';
-      const maxSize = 1 * 1024 * 1024;
-
-
-      if (file.type === validFormat) {
-
+      const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting PDFs and images
+      const maxSize = 1 * 1024 * 1024; // 1 MB
+      if (validFormats.includes(file.type)) {
         if (file.size <= maxSize) {
-
-          setFileName(file.name);
           setTenantId(file);
-          setTenantId(file);
-          setErrorMessage('');
+          setErrorMessage((prevErrors) => ({ ...prevErrors, tenantId: '' }));
         } else {
-
-          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
-        e.target.value = null;
-
-
-       
+          setErrorMessage((prevErrors) => ({
+            ...prevErrors,
+            tenantId: 'The file size exceeds the 1 MB limit. Please upload a smaller file.',
+          }));
+          e.target.value = null;
         }
       } else {
-
-        setErrorMessage('Please upload a valid  file.');
-
-
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          tenantId: 'Please upload a valid PDF or image file.',
+        }));
         e.target.value = null;
       }
     }
   };
+
+
   const handleTenantBikeChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      
-      const validFormats = ['image/jpeg', 'image/png'];
-
-     
+      const validFormats = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting all image types
       if (validFormats.includes(file.type)) {
-        
         setBikeImage(file);
-        setErrorMessage('');
-        
+        setErrorMessage((prevErrors) => ({ ...prevErrors, bikeImage: '' }));
       } else {
-        setErrorMessage('Please upload a valid  file.');
-        
-
-        
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          bikeImage: 'Please upload a valid image file.',
+        }));
+        e.target.value = null;
+      }
+    }
+  };
+  
+  const handleTenantBikeRcChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting PDFs and images
+      const maxSize = 1 * 1024 * 1024; // 1 MB
+      if (validFormats.includes(file.type)) {
+        if (file.size <= maxSize) {
+          setBikeRcImage(file);
+          setErrorMessage((prevErrors) => ({ ...prevErrors, bikeRcImage: '' }));
+        } else {
+          setErrorMessage((prevErrors) => ({
+            ...prevErrors,
+            bikeRcImage: 'The file size exceeds the 1 MB limit. Please upload a smaller file.',
+          }));
+          e.target.value = null;
+        }
+      } else {
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          bikeRcImage: 'Please upload a valid PDF or image file.',
+        }));
         e.target.value = null;
       }
     }
   };
 
-  const handleTenantBikeRcChange = (e) => {
-    const file = e.target.files[0];
 
-    if (file) {
+  // const handleTenantImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const validFormats = ['image/jpeg', 'image/png'];
+  //     if (validFormats.includes(file.type)) {
+  //       setTenantImage(file);
+  //       setErrorMessage(''); 
+  //     } else {
+  //       setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+  //       e.target.value = null; 
+  //     }
+  //   }
+  // };
+
+  // const handleTenantIdChange = (e) => {
+  //   const file = e.target.files[0];
+
+  //   if (file) {
+
+  //     const validFormat = 'application/pdf';
+  //     const maxSize = 1 * 1024 * 1024;
+
+
+  //     if (file.type === validFormat) {
+
+  //       if (file.size <= maxSize) {
+
+  //         setFileName(file.name);
+  //         setTenantId(file);
+  //         setTenantId(file);
+  //         setErrorMessage('');
+  //       } else {
+
+  //         setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+  //       e.target.value = null;
+
+
+       
+  //       }
+  //     } else {
+
+  //       setErrorMessage('Please upload a valid  file.');
+
+
+  //       e.target.value = null;
+  //     }
+  //   }
+  // };
+  // const handleTenantBikeChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+      
+  //     const validFormats = ['image/jpeg', 'image/png'];
+
      
-      const validFormat = 'application/pdf';
-      const maxSize = 1 * 1024 * 1024; 
+  //     if (validFormats.includes(file.type)) {
+        
+  //       setBikeImage(file);
+  //       setErrorMessage('');
+        
+  //     } else {
+  //       setErrorMessage('Please upload a valid  file.');
+        
+
+        
+  //       e.target.value = null;
+  //     }
+  //   }
+  // };
+
+  // const handleTenantBikeRcChange = (e) => {
+  //   const file = e.target.files[0];
+
+  //   if (file) {
+     
+  //     const validFormat = 'application/pdf';
+  //     const maxSize = 1 * 1024 * 1024; 
 
       
-      if (file.type === validFormat) {
+  //     if (file.type === validFormat) {
         
-        if (file.size <= maxSize) {
+  //       if (file.size <= maxSize) {
           
-          setBikeRcImage(file);
-          setErrorMessage('');
-        } else {
+  //         setBikeRcImage(file);
+  //         setErrorMessage('');
+  //       } else {
           
-          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
-          e.target.value = null; 
-        }
-      } else {
+  //         setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+  //         e.target.value = null; 
+  //       }
+  //     } else {
         
-        setErrorMessage('Please upload a valid  file.');
-        e.target.value = null; 
-      }
-    }
-  };
+  //       setErrorMessage('Please upload a valid  file.');
+  //       e.target.value = null; 
+  //     }
+  //   }
+  // };
 
   const compressImage = async (file) => {
     const options = {
@@ -1241,6 +1335,12 @@ const takePicture = async () => {
     setIsEditing(false);
     setCurrentId('');
     setErrors({});
+    setErrorMessage({
+      tenantImage: '',
+      tenantId: '',
+      bikeImage: '',
+      bikeRcImage: '',
+    })
     setTenantImage(null);
     setTenantId(null);
     setFloorNumber('');
@@ -1787,7 +1887,7 @@ const takePicture = async () => {
 
 
               {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
-              {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+              {errorMessage.tenantImage && <p style={{ color: 'red' }}>{errorMessage.tenantImage}</p>}
             </div>
             <div class="col-md-6">
               <label htmlFor='tenantUploadId' class="form-label">
@@ -1872,12 +1972,12 @@ const takePicture = async () => {
                 <div className="col-md-6">
                   <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
                   <input type="file" className="form-control"accept=".jpg, .jpeg, .png" onChange={handleTenantBikeChange} />
-                  {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                  {errorMessage.bikeImage && <p style={{ color: 'red' }}>{errorMessage.bikeImage}</p>}
                 </div>
                 <div className="col-md-6">
                   <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
                   <input type="file" className="form-control"  accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantBikeRcChange} />
-                  {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                  {errorMessage.bikeRcImage && <p style={{ color: 'red' }}>{errorMessage.bikeRcImage}</p>}
                 </div>
               </>
             )}
