@@ -239,6 +239,7 @@ for (let yr = earliestYear; yr <= latestYear; yr++) {
 
   }, [entireHMAdata, activeGirlsHostel, month, year, userUid]);
 
+
   const columns = [
     t('expensesPage.sNo'),
     t('expensesPage.expenseName'),

@@ -1195,7 +1195,8 @@ Please note that you made your last payment on ${paidDate}.\n`
 
   const getMonthYearKey = (dateString) => {
     const date = new Date(dateString);
-    const month = date.toLocaleString('default', { month: 'short' }).toLowerCase();
+    const monthFull = date.toLocaleString('default', { month: 'short' });
+    const month = monthFull.slice(0, 3).toLowerCase();
     const year = date.getFullYear();
     return `${year}-${month}`;
   };

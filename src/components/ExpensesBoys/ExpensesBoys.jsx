@@ -92,8 +92,6 @@ const ExpensesBoys = () => {
 
   }, [showModal]);
 
-
-
   const getMonthYearKey = (dateString) => {
     const date = new Date(dateString);
     // const month = date.toLocaleString('default', { month: 'short' }).toLowerCase();
@@ -107,7 +105,6 @@ const ExpensesBoys = () => {
     e.preventDefault();
     let errors = {};
     let formIsValid = true;
-
     setExpensesInteracted(!expensesInteracted)
 
     if (!formData.expenseName.match(/^[a-zA-Z\s]+$/)) {
@@ -207,13 +204,11 @@ const ExpensesBoys = () => {
   //   });
   // }, [month, year, activeBoysHostel]);
 
- 
-
   useEffect(() => {
     if (!entireHMAdata || !activeBoysHostel) return;
-
+ 
     const formattedMonth = month.slice(0, 3);
-    const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`] ; 
+    const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`] ;
     const loadedExpenses = [];
     for (const key in expensesData) {
       loadedExpenses.push({
@@ -226,29 +221,31 @@ const ExpensesBoys = () => {
     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
     setTotal(totalExpenses);
      
-    const totalExpensesOfhostel = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses 
-    const yearsMonth = Object.keys(totalExpensesOfhostel)
-
-const expenseYears = yearsMonth.map(item => parseInt(item.split('-')[0], 10));
-
-
-const currentYear = new Date().getFullYear();
-const earliestYear = Math.min(currentYear, ...expenseYears);
-const latestYear = Math.max(currentYear, ...expenseYears);
-const years = [];
-for (let yr = earliestYear; yr <= latestYear; yr++) {
-    years.push(yr);
-}
-
-
-    
+    const totalExpensesOfhostel = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses
+   
+      const yearsMonth = Object.keys(totalExpensesOfhostel)
  
-     setYearsList(years);
-
-
-
+      const expenseYears = yearsMonth.map(item => parseInt(item.split('-')[0], 10));
+       
+       
+      const currentYear = new Date().getFullYear();
+      const earliestYear = Math.min(currentYear, ...expenseYears);
+      const latestYear = Math.max(currentYear, ...expenseYears);
+      const years = [];
+      for (let yr = earliestYear; yr <= latestYear; yr++) {
+          years.push(yr);
+      }
+       
+       
+         
+       
+           setYearsList(years);
+    
+   
+ 
+ 
+ 
   }, [entireHMAdata, activeBoysHostel, month, year, userUid]);
-
 
   const columns = [
     t('expensesPage.sNo'),

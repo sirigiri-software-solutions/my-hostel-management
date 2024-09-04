@@ -1054,15 +1054,16 @@ const TenantsBoys = () => {
     resetForm();
     setErrors({});
   };
-  const fetchExTenants = () => {
-    const exTenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
-    onValue(exTenantsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
-      setExTenants(loadedExTenants);
-    });
-  };
-  useEffect(() => { fetchExTenants() }, []);
+
+  // const fetchExTenants = () => {
+  //   const exTenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
+  //   onValue(exTenantsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
+  //     setExTenants(loadedExTenants);
+  //   });
+  // };
+  // useEffect(() => { fetchExTenants() }, []);
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [tenantIdToDelete, setTenantIdToDelete] = useState(null);

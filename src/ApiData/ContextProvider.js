@@ -1,18 +1,18 @@
 import React, { createContext, useState, useContext, useRef, useEffect } from 'react';
-
+ 
 import isEqual from 'lodash/isEqual';
 import { firebaseInstances, ref } from '../firebase/firebase';
-
+ 
 const DataContext = createContext();
-
+ 
 function useDeepCompareEffect(callback, dependencies) {
   const currentDependenciesRef = useRef();
   if (!isEqual(currentDependenciesRef.current, dependencies)) {
     currentDependenciesRef.current = dependencies;
   }
   React.useEffect(callback, [currentDependenciesRef.current]);
-} 
-
+}
+ 
 const DataProvider = ({ children }) => {
   const [activeBoysHostel, setActiveBoysHostel] = useState(null);
   const [activeBoysHostelName, setActiveBoysHostelName] = useState(null);
@@ -24,23 +24,23 @@ const DataProvider = ({ children }) => {
   const [userUid, setUserUid] = useState(localStorage.getItem('userUid' || ''));
   const [ boysExTenantsData, setBoysExTenantsData] = useState([])
   const [girlsExTenantsData, setGirlsExTenantsData] = useState([]);
-
+ 
   // new code to implement multiple configuration
   const [area, setArea] = useState(localStorage.getItem('userarea') || 'default');
   const [firebase, setFirebase] = useState(firebaseInstances[area]);
   const [activeFlag, setActiveFlag] = useState("");
-
+ 
   const [expensesInteracted,setExpensesInteracted] = useState(false);
-
+ 
   const { database } = firebase;
-
-
+ 
+ 
   // trying to fetch entire data from context
-  
-  
+ 
+ 
   const [defaultArea, setDefaultArea] = useState(localStorage.getItem('userarea'))
   const [entireHMAdata, setEntireHMAdata] = useState([]);
-
+ 
   const areaToApiEndPointEntireData = {
     ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/Hostel.json",
     srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/Hostel.json",
@@ -56,43 +56,44 @@ const DataProvider = ({ children }) => {
     lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/Hostel.json",
     nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/Hostel.json",
   }
-
+ 
   const fetchData = async () => {
     const api = areaToApiEndPointEntireData[defaultArea];
-
+ 
     const options = {
       method: "GET",
     };
-
+ 
     try {
       const response = await fetch(api, options);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
+ 
       // Handle the data (e.g., set it to state)
       setEntireHMAdata(data);
     } catch (error) {
       console.error("Error fetching data:", error.message); // Improved error logging
     }
   };
-
  
-
-
+ 
+ 
+ 
   const [boysRooms, setBoysRooms] = useState()
   const [girlsRooms, setGirlsRooms] = useState()
   const [boysTenants, setBoysTenants] = useState([]);  
   const [girlsTenants, setGirlsTenants] = useState([]);
   const [boysTenantsWithRents, setBoysTenantsWithRents] = useState([]);
   const [girlsTenantsWithRents, setGirlsTenantsWithRents] = useState([]);
-
-  
+ 
+ 
  // Extract and assign data from entireHMAdata
-
+ 
  useEffect(() => {
   if (entireHMAdata && userUid) {
-
+ 
     const boysRoomsData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.rooms || {};
     const loadedBoysRooms = [];
     for (const key in boysRoomsData) {
@@ -102,7 +103,7 @@ const DataProvider = ({ children }) => {
       });
     }
     setBoysRooms(loadedBoysRooms);  
-
+ 
     const girlsRoomsData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.rooms || {};
     const loadedGirlsRooms = [];
     for (const key in girlsRoomsData) {
@@ -112,8 +113,8 @@ const DataProvider = ({ children }) => {
       });
     }
     setGirlsRooms(loadedGirlsRooms);  
-
-
+ 
+ 
       // Extract boys tenants
       const boysTenantsData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.tenants || {};
       const loadedBoysTenants = [];
@@ -124,9 +125,9 @@ const DataProvider = ({ children }) => {
         });
       }
       setBoysTenants(loadedBoysTenants);  // Update the boysTenants state
-
+ 
       if (!boysTenantsData) return;
-
+ 
       // Process tenants to include rent data
       const processedBoysTenants = Object.keys(boysTenantsData).map(tenantId => {
         const tenant = boysTenantsData[tenantId];
@@ -141,8 +142,8 @@ const DataProvider = ({ children }) => {
         };
       });
       setBoysTenantsWithRents(processedBoysTenants)
-  
-
+ 
+ 
       // Extract girls tenants
       const girlsTenantsData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.tenants || {};
       const loadedGirlsTenants = [];
@@ -153,9 +154,9 @@ const DataProvider = ({ children }) => {
         });
       }
       setGirlsTenants(loadedGirlsTenants);  // Update the girlsTenants state
-
+ 
       if (!girlsTenantsData) return;
-
+ 
       // Process tenants to include rent data
       const processedGirlsTenants = Object.keys(girlsTenantsData).map(tenantId => {
         const tenant = girlsTenantsData[tenantId];
@@ -170,10 +171,10 @@ const DataProvider = ({ children }) => {
         };
       });
       setGirlsTenantsWithRents(processedGirlsTenants)
-
-
-      // Extracting Boys Hostel buttons 
-
+ 
+ 
+      // Extracting Boys Hostel buttons
+ 
       const boysHostelButtons = entireHMAdata[userUid]?.boys;
    
       if(boysHostelButtons){
@@ -186,32 +187,32 @@ const DataProvider = ({ children }) => {
       }else{
         setActiveBoysHostelButtons([]);
       }
-      
-
+     
+ 
       // Extracting Girls Hostel buttons
-
+ 
       const girlsHostelButtons = entireHMAdata[userUid]?.girls;
-
+ 
       if(girlsHostelButtons){
         const dataGirlsHostelButtons = Object.keys(girlsHostelButtons).map(key => ({
           id:key,
-          name:girlsHostelButtons[key].name 
+          name:girlsHostelButtons[key].name
         }))
         setActiveGirlsHostelButtons(dataGirlsHostelButtons);
       }else{
         setActiveGirlsHostelButtons([]);
       }
-
-
-      // extract ex-tenants boys data 
+ 
+ 
+      // extract ex-tenants boys data
       const exTenantsBoysData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.extenants || {};
       const exTenantsBoysFormattedData = Object.entries(exTenantsBoysData).map(([key,value]) => ({
         id:key,
         ...value,
       }))
       setBoysExTenantsData(exTenantsBoysFormattedData)
-
-      // extract ex-tenants girls data 
+ 
+      // extract ex-tenants girls data
       const exTenantsGirlsData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.extenants || {};
       const exTenantsGirlsFormattedData = Object.entries(exTenantsGirlsData).map(([key,value]) => ({
         id:key,
@@ -221,19 +222,19 @@ const DataProvider = ({ children }) => {
    
   }
 }, [entireHMAdata, activeBoysHostel, activeGirlsHostel]);
-
-
+ 
+ 
   // end to get entireData
-
-
-
-  
+ 
+ 
+ 
+ 
   useEffect(() => {
     setFirebase(firebaseInstances[area]);
-
+ 
   }, [area]);
-
-
+ 
+ 
   const areaToApiEndpoint = {
     // hyderabad: "https://ameerpet-588ee-default-rtdb.firebaseio.com/register.json",
     ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
@@ -250,31 +251,31 @@ const DataProvider = ({ children }) => {
     lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
     nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/register.json"
   };
-
  
-
+ 
+ 
   useEffect(() => {
     const userId = localStorage.getItem('userUid')
     setUserUid(userId);
   }, [userUid, area])
-
-
-
+ 
+ 
+ 
   useDeepCompareEffect(() => {
     if (activeBoysHostelButtons.length > 0) {
       setActiveBoysHostel(activeBoysHostelButtons[0].id);
       setActiveBoysHostelName(activeBoysHostelButtons[0].name)
     }
   }, [activeBoysHostelButtons]);
-
+ 
   useDeepCompareEffect(() => {
     if (activeGirlsHostelButtons.length > 0) {
       setActiveGirlsHostel(activeGirlsHostelButtons[0].id);
       setActiveGirlsHostelName(activeGirlsHostelButtons[0].name)
     }
   }, [activeGirlsHostelButtons]);
-
-
+ 
+ 
    // Determine the initial active flag
    useEffect(() => {
     let initialActiveFlag = '';
@@ -289,52 +290,52 @@ const DataProvider = ({ children }) => {
     }
     if(activeFlag === "girls" && activeGirlsHostelButtons.length > 0){
       setActiveFlag('girls')
-    } 
+    }
   }
-
+ 
   , [activeBoysHostelButtons, activeGirlsHostelButtons]);
-
-
-  
+ 
+ 
+ 
   const changeActiveFlag = (newFlag) => {
     setActiveFlag(newFlag);
   };
-
-
+ 
+ 
   const [completeData, setCompleteData] = useState(false);
   useEffect(() => {
     fetchData();
 }, [userUid, userarea, completeData, defaultArea]);
-
+ 
   return (
     <DataContext.Provider
-     value={{ 
-      activeBoysHostel, 
-      setActiveBoysHostel, 
-      setActiveBoysHostelName, 
-      activeBoysHostelName, 
-      activeGirlsHostelName, 
-      setActiveGirlsHostelName, 
-      activeBoysHostelButtons, 
-      activeGirlsHostel, 
-      setActiveGirlsHostel, 
-      activeGirlsHostelButtons, 
-      areaToApiEndpoint, 
-      setUserArea, 
-      userUid, 
-      firebase, 
-      setArea, 
-      setUserUid, 
+     value={{
+      activeBoysHostel,
+      setActiveBoysHostel,
+      setActiveBoysHostelName,
+      activeBoysHostelName,
+      activeGirlsHostelName,
+      setActiveGirlsHostelName,
+      activeBoysHostelButtons,
+      activeGirlsHostel,
+      setActiveGirlsHostel,
+      activeGirlsHostelButtons,
+      areaToApiEndpoint,
+      setUserArea,
+      userUid,
+      firebase,
+      setArea,
+      setUserUid,
       activeFlag,  
-      changeActiveFlag, 
-      girlsExTenantsData, 
+      changeActiveFlag,
+      girlsExTenantsData,
       boysExTenantsData,
       expensesInteracted,
-      setExpensesInteracted, 
-      fetchData, 
-      boysRooms, 
-      girlsRooms, 
-      boysTenants, 
+      setExpensesInteracted,
+      fetchData,
+      boysRooms,
+      girlsRooms,
+      boysTenants,
       girlsTenants,
       boysTenantsWithRents,
       girlsTenantsWithRents,
@@ -346,8 +347,6 @@ const DataProvider = ({ children }) => {
     </DataContext.Provider>
   );
 };
-
+ 
 const useData = () => useContext(DataContext);
 export { DataContext, useData, DataProvider };
-
-
