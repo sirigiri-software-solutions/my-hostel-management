@@ -12,7 +12,7 @@ import imageCompression from 'browser-image-compression';
 
 
 const DefaultModal = ({ show, handleClose }) => {
-    const { firebase, userUid } = useData();
+    const { firebase, userUid, fetchData } = useData();
     const { t } = useTranslation();
     const [selectedForms, setSelectedForms] = useState({
         men: false,
@@ -259,6 +259,7 @@ const DefaultModal = ({ show, handleClose }) => {
                     position: "top-center",
                     autoClose: 3000,
                 });
+                fetchData();
                 if (isBoys) {
                     setNewBoysHostelName('');
                     setBoysHostelImage('');
@@ -346,6 +347,7 @@ const DefaultModal = ({ show, handleClose }) => {
                                     placeholder={t("settings.hostelName")}
                                     value={newBoysHostelName}
                                     onChange={(e) => handleHostelNameChange(e, true)}
+                                    onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')}
                                 />
                             </div>
                             <div className="form-group">
@@ -398,6 +400,7 @@ const DefaultModal = ({ show, handleClose }) => {
                                     placeholder={t("settings.hostelName")}
                                     value={newGirlsHostelName}
                                     onChange={(e) => handleHostelNameChange(e, false)}
+                                    onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')}
                                 />
                             </div>
                             <div className="form-group">

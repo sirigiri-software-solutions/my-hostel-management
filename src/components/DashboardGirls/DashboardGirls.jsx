@@ -586,8 +586,11 @@ Please note that you made your last payment on ${paidDate}.\n`
     setErrors({});
     setShowModal(false);
   };
-
-  const totalBeds = girlsRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
+  const [totalBeds, setTotalBeds] = useState(0);
+  useEffect(()=>{
+    const totalBeds = girlsRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
+    setTotalBeds(totalBeds)
+  }, [userUid, entireHMAdata, activeGirlsHostel,girlsRooms, girlsTenants])
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
