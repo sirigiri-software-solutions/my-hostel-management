@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState,useMemo  } from 'react'
 import ExpenseIcon from '../../images/Icons (5).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
@@ -39,11 +39,25 @@ const ExpensesBoys = () => {
 
   const getCurrentYear = () => {
     return new Date().getFullYear().toString();
-  };
+};
+
 
   const [year, setYear] = useState(getCurrentYear());
   const [month, setMonth] = useState(getCurrentMonth());
   const [total, setTotal] = useState(0);
+  const [yearsList, setYearsList] = useState([]);
+
+  const minDate = `${getCurrentYear()}-01-01`;
+  const maxDate = `${getCurrentYear()}-12-31`;
+
+  // const years = useMemo(() => {
+  //   const yearArray = [];
+  //   for (let y = 2024; y <= year; y++) {
+  //     yearArray.push(y);
+  //   }
+  //   return yearArray;
+  // }, [year]);
+
 
   const [formData, setFormData] = useState({
     expenseName: '',
@@ -80,10 +94,9 @@ const ExpensesBoys = () => {
 
   const getMonthYearKey = (dateString) => {
     const date = new Date(dateString);
-
+    // const month = date.toLocaleString('default', { month: 'short' }).toLowerCase();
     const monthFull = date.toLocaleString('default', { month: 'short' });
     const month = monthFull.slice(0, 3).toLowerCase();
-    // const month = date.toLocaleString('default', { month: 'short' }).toLowerCase();
     const year = date.getFullYear();
     return `${year}-${month}`;
   };
@@ -191,13 +204,11 @@ const ExpensesBoys = () => {
   //   });
   // }, [month, year, activeBoysHostel]);
 
- 
-
   useEffect(() => {
     if (!entireHMAdata || !activeBoysHostel) return;
-
+ 
     const formattedMonth = month.slice(0, 3);
-    const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`] ; 
+    const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`] ;
     const loadedExpenses = [];
     for (const key in expensesData) {
       loadedExpenses.push({
@@ -209,6 +220,31 @@ const ExpensesBoys = () => {
     setExpenses(loadedExpenses);
     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
     setTotal(totalExpenses);
+     
+    const totalExpensesOfhostel = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses
+   
+      const yearsMonth = Object.keys(totalExpensesOfhostel)
+ 
+      const expenseYears = yearsMonth.map(item => parseInt(item.split('-')[0], 10));
+       
+       
+      const currentYear = new Date().getFullYear();
+      const earliestYear = Math.min(currentYear, ...expenseYears);
+      const latestYear = Math.max(currentYear, ...expenseYears);
+      const years = [];
+      for (let yr = earliestYear; yr <= latestYear; yr++) {
+          years.push(yr);
+      }
+       
+       
+         
+       
+           setYearsList(years);
+    
+   
+ 
+ 
+ 
   }, [entireHMAdata, activeBoysHostel, month, year, userUid]);
 
   const columns = [
@@ -522,13 +558,15 @@ const ExpensesBoys = () => {
 
           <div style={{ display: 'flex', marginTop: '10px' }} >
             <div>
+              
               <select className='filterExpenseField' value={year} onChange={e => setYear(e.target.value)}>
-                <option value="2022">2022</option>
-                <option value="2023">2023</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="2025">2026</option>
-                <option value="2025">2027</option>
+              {yearsList.map((yearOption) => (
+          <option key={yearOption} value={yearOption}>
+            {yearOption}
+          </option>
+        ))}
+
+                
               </select>
             </div>
             <div>
@@ -574,7 +612,7 @@ const ExpensesBoys = () => {
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputDate" className="form-label">{t('expensesPage.expenseDate')} : </label>
-                      <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+                      <input type="date" min={minDate} max={maxDate}  className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
                       {formErrors.expenseDate && <div className="text-danger">{formErrors.expenseDate}</div>}
                     </div>
 

@@ -75,6 +75,8 @@ const DashboardBoys = () => {
   const [selectedTenant, setSelectedTenant] = useState('');
   const [tenantAddress, setTenantAddress] = useState("");
   const [permnentAddress, setPermnentAddress] = useState("");
+  const [fileName, setFileName] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const tenantImageInputRef = useRef(null);
   const tenantProofIdRef = useRef(null);
@@ -141,7 +143,8 @@ const DashboardBoys = () => {
   const [year, setYear] = useState(getCurrentYear());
   const [month, setMonth] = useState(getCurrentMonth());
 
-
+  const minDate = `${getCurrentYear()}-01-01`;
+  const maxDate = `${getCurrentYear()}-12-31`;
 
 
   // use effects
@@ -400,51 +403,7 @@ const DashboardBoys = () => {
   }, [boysRooms, boysTenants]);
 
 
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     setBikeImage(reader.result);
-  //   };
-  //   reader.readAsDataURL(file);
-  // };
-  const handleTenantBikeChange = (e) => {
-    const file = e.target.files[0];
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-
-  if (file) {
-    if (isFileType(file, allowedTypes)) {
-      setBikeImage(file);
-    } else {
-      alert('Please upload a valid image file (JPEG, PNG, GIF).');
-      e.target.value = ''; 
-    }
-  }
-  };
-  const handleTenantBikeRcChange = (e) => {
-    const file = e.target.files[0];
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
-
-  if (file) {
-    if (isFileType(file, allowedTypes)) {
-      setBikeRcImage(file);
-    } else {
-      alert('Please upload a valid image or PDF file.');
-      e.target.value = ''; // Clear the input
-    }
-  }
-  };
-
-
-  // const handleRcChange = (e) => {
-  //   const file1 = e.target.files[0];
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     setBikeRcImage(reader.result);
-  //   }
-  //   reader.readAsDataURL(file1);
-
-  // }
+  
 
 
 
@@ -672,54 +631,101 @@ const DashboardBoys = () => {
   };
 
 
-  // const handleTenantImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       setTenantImage(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-  const isFileType = (file, allowedTypes) => {
-    return allowedTypes.includes(file.type);
-  };
   const handleTenantImageChange = (e) => {
     const file = e.target.files[0];
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (file) {
-      if (isFileType(file, allowedTypes)) {
+      const validFormats = ['image/jpeg', 'image/png'];
+      if (validFormats.includes(file.type)) {
         setTenantImage(file);
-      }  else {
-        alert('Please upload a valid image file (JPEG, PNG, GIF).');
-        e.target.value = ''; 
+        setErrorMessage(''); 
+      } else {
+        setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+        e.target.value = null; 
+      }
+    }
+  };
+  
+
+  const handleTenantIdChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+
+      const validFormat = 'application/pdf';
+      const maxSize = 1 * 1024 * 1024;
+
+
+      if (file.type === validFormat) {
+
+        if (file.size <= maxSize) {
+
+          setFileName(file.name);
+          setTenantId(file);
+          setTenantId(file);
+          setErrorMessage('');
+        } else {
+
+          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+        e.target.value = null;
+
+
+       
+        }
+      } else {
+
+        setErrorMessage('Please upload a valid  file.');
+
+
+        e.target.value = null;
+      }
+    }
+  };
+  const handleTenantBikeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      
+      const validFormats = ['image/jpeg', 'image/png'];
+
+     
+      if (validFormats.includes(file.type)) {
+        
+        setBikeImage(file);
+        setErrorMessage('');
+        
+      } else {
+        setErrorMessage('Please upload a valid  file.');
+        
+
+        
+        e.target.value = null;
       }
     }
   };
 
-  // const handleTenantIdChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       // Once the file is loaded, set the image in state as a base64 URL
-  //       setTenantId(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-  const handleTenantIdChange = (e) => {
+  const handleTenantBikeRcChange = (e) => {
     const file = e.target.files[0];
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
-  
+
     if (file) {
-      if (isFileType(file, allowedTypes)) {
-        // setFileName(file.name); 
-        setTenantId(file);
+     
+      const validFormat = 'application/pdf';
+      const maxSize = 1 * 1024 * 1024; 
+
+      
+      if (file.type === validFormat) {
+        
+        if (file.size <= maxSize) {
+          
+          setBikeRcImage(file);
+          setErrorMessage('');
+        } else {
+          
+          setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+          e.target.value = null; 
+        }
       } else {
-        alert('Please upload a valid image or PDF file.');
-        e.target.value = ''; 
+        
+        setErrorMessage('Please upload a valid  file.');
+        e.target.value = null; 
       }
     }
   };
@@ -1136,13 +1142,12 @@ const DashboardBoys = () => {
     setHasBike(false);
     setBikeNumber("NA");
     setNotify(false)
-
-
   };
 
   const getMonthYearKey = (dateString) => {
     const date = new Date(dateString);
-    const month = date.toLocaleString('default', { month: 'short' }).toLowerCase();
+    const monthFull = date.toLocaleString('default', { month: 'short' });
+    const month = monthFull.slice(0, 3).toLowerCase();
     const year = date.getFullYear();
     return `${year}-${month}`;
   };
@@ -1569,8 +1574,9 @@ const DashboardBoys = () => {
                   <p>{t('dashboard.currentImage')}</p>
                 </div>
               )}
-              <input id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} ref={imageInputRef} required />
+              <input id="tenantUpload" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantImageChange} ref={imageInputRef} required />
               {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
+              {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             </div>
             <div class="col-md-6">
               <label htmlFor='tenantUploadId' class="form-label">
@@ -1586,7 +1592,8 @@ const DashboardBoys = () => {
                   <a href={tenantId}>{t('dashboard.downloadPdf')}</a>
                 </object>
               )}
-              <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef} multiple />
+              <input id="tenantUploadId" class="form-control" type="file"   accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantIdChange} ref={idInputRef} multiple />
+              {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             </div>
             <div className='col-md-12'>
               <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
@@ -1640,11 +1647,13 @@ const DashboardBoys = () => {
               <>
                 <div className="col-md-6">
                   <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-                  <input type="file" className="form-control" onChange={handleTenantBikeChange} />
+                  <input type="file" className="form-control" accept=".jpg, .jpeg, .png" onChange={handleTenantBikeChange} />
+                  {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                 </div>
                 <div className="col-md-6">
                   <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-                  <input type="file" className="form-control" onChange={handleTenantBikeRcChange} />
+                  <input type="file" className="form-control" accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantBikeRcChange} />
+                  {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                 </div>
               </>
             )}
@@ -1675,7 +1684,7 @@ const DashboardBoys = () => {
             </div>
             <div className="col-md-6">
               <label htmlFor="inputDate" className="form-label">{t('dashboard.expenseDate')}</label>
-              <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+              <input type="date" min={minDate} max={maxDate} className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
               {formErrors.expenseDate && <div className="text-danger">{formErrors.expenseDate}</div>}
             </div>
 
