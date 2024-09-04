@@ -127,67 +127,133 @@ const TenantsBoys = () => {
   //     toast.error(t('toastMessages.Image not Uploaded'));
   //   }
   // };
+  // const takePicture = async () => {
+  //   if (!isMobile) {
+  //     console.error("Camera access is not supported on your device.");
+  //     return;
+  //   }
+  //   try {
+  //     const photo = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri
+  //     });
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setPhotoUrl(reader.result);
+  //       setTenantImage(reader.result);
+  //     };
+  //     fetch(photo.webPath)
+  //       .then(response => response.blob())
+  //       .then(blob => reader.readAsDataURL(blob));
+  //   } catch (error) {
+  //     console.error("Error accessing the camera", error);
+  //     toast.error(t('toastMessages.imageNotUploaded'));
+  //   }
+  // }
   const takePicture = async () => {
     if (!isMobile) {
-      console.error("Camera access is not supported on your device.");
-      return;
+        console.error("Camera access is not supported on your device.");
+        return;
     }
     try {
-      const photo = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri
-      });
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoUrl(reader.result);
-        setTenantImage(reader.result);
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
+
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+
+        setTenantImage(blob); // Set the blob to tenantImage
+        const uploadFile = async (file, path) => {
+          try {
+              const imageRef = storageRef(storage, path);
+              const snapshot = await uploadBytes(imageRef, file);
+              return await getDownloadURL(snapshot.ref);
+          } catch (error) {
+              console.error(`Error uploading file ${file.name}:`, error);
+              throw error;
+          }
       };
-      fetch(photo.webPath)
-        .then(response => response.blob())
-        .then(blob => reader.readAsDataURL(blob));
+   
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${blob.name}`);
+        setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
     } catch (error) {
-      console.error("Error accessing the camera", error);
-      toast.error(t('toastMessages.imageNotUploaded'));
-    }
-  }
+        console.error("Error accessing the camera", error);
+        toast.error(t('toastMessages.imageNotUploaded'));    }
+}
 
 
-  const takeidPicture = async () => {
+  // const takeidPicture = async () => {
 
-    if (!isMobile) {
-      console.error("Camera access is not supported on your device.");
-      return;
-  }
-    try {
-      const photo = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri
-      });
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setIdUrl(reader.result);
-        setTenantId(reader.result);
-      };
-      fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
 
-      // const response = await fetch(photo.webPath);
-      // const blob = await response.blob();
-      // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-      // const snapshot = await uploadBytes(imageRef, blob);
-      // const url = await getDownloadURL(snapshot.ref);
+  //   if (!isMobile) {
+  //     console.error("Camera access is not supported on your device.");
+  //     return;
+  // }
+  //   try {
+  //     const photo = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri
+  //     });
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setIdUrl(reader.result);
+  //       setTenantId(reader.result);
+  //     };
+  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
+
+  //     // const response = await fetch(photo.webPath);
+  //     // const blob = await response.blob();
+  //     // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
+  //     // const snapshot = await uploadBytes(imageRef, blob);
+  //     // const url = await getDownloadURL(snapshot.ref);
       
-      // setIdUrl(url); // Display in UI
-      // setTenantIdUrl(url); // Use in form submission
-      // setPhotoUrl(photo.webPath);
-    } catch (error) {
-      console.error("Error accessing the camera", error);
-      toast.error(t('toastMessages.idNotUploaded'));
+  //     // setIdUrl(url); // Display in UI
+  //     // setTenantIdUrl(url); // Use in form submission
+  //     // setPhotoUrl(photo.webPath);
+  //   } catch (error) {
+  //     console.error("Error accessing the camera", error);
+  //     toast.error(t('toastMessages.idNotUploaded'));
+  //   }
+  // };
+
+const takeidPicture = async () => {
+    if (!isMobile) {
+        console.error("Camera access is not supported on your device.");
+        return;
     }
-  };
+    try {
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
 
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
 
+        setTenantId(blob); // Set the blob to tenantImage
+        const uploadFile = async (file, path) => {
+          try {
+              const imageRef = storageRef(storage, path);
+              const snapshot = await uploadBytes(imageRef, file);
+              return await getDownloadURL(snapshot.ref);
+          } catch (error) {
+              console.error(`Error uploading file ${file.name}:`, error);
+              throw error;
+          }
+      };
+   
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${blob.name}`);
+        setIdUrl(uploadedUrl); // Set the uploaded URL to display the image
+    } catch (error) {
+        console.error("Error accessing the camera", error);
+        toast.error(t('toastMessages.imageNotUploaded'));    }
+}
   const [loading, setLoading] = useState(false);
 
   // const handleImageChange = (e) => {
@@ -465,22 +531,20 @@ const TenantsBoys = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+ 
     if (!isEditing) {
-        const submitButton = e.target.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-
+        e.target.querySelector('button[type="submit"]').disabled = true;
         if (!validate()) {
-            submitButton.disabled = false;
+            e.target.querySelector('button[type="submit"]').disabled = false;
             return;
         }
     } else {
         if (!validate()) return;
     }
-
+ 
     setShowModal(false);
     setLoading(true);
-
+ 
     // Helper function to upload a file and return its URL
     const uploadFile = async (file, path) => {
         try {
@@ -492,15 +556,14 @@ const TenantsBoys = () => {
             throw error;
         }
     };
-
+ 
     const tasks = [];
-    let imageUrlToUpdate, idUrlToUpdate, bikeUrlToUpdate, bikeRcUrlToUpdate;
-
+ 
     if (tenantImage) {
         tasks.push(
             (async () => {
                 let fileToUpload = tenantImage;
-                console.log(tenantImage, "whatisComing");
+                console.log(tenantImage,"whatisComing")
                 if (checkImage(tenantImage.type)) {
                     console.log("Executing compression for tenantImage");
                     try {
@@ -509,28 +572,29 @@ const TenantsBoys = () => {
                         console.error("Error compressing tenant image:", error);
                     }
                 }
-                imageUrlToUpdate = await uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
+                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
             })()
         );
     }
-
     if (tenantId) {
-        tasks.push(
-            (async () => {
-                let fileToUpload = tenantId;
-                if (checkImage(tenantId.type)) {
-                    console.log("Executing compression for tenantId");
-                    try {
-                        fileToUpload = await compressImage(tenantId);
-                    } catch (error) {
-                        console.error("Error compressing tenant ID image:", error);
-                    }
-                }
-                idUrlToUpdate = await uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
-            })()
-        );
-    }
-
+      tasks.push(
+          (async () => {
+              let fileToUpload = tenantId;
+ 
+              if (checkImage(tenantId.type)) {
+                  console.log("Executing compression for tenantId");
+                  try {
+                      fileToUpload = await compressImage(tenantId);
+                  } catch (error) {
+                      console.error("Error compressing tenant ID image:", error);
+                  }
+              }
+ 
+              return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
+          })()
+      );
+  }
+ 
     if (bikeImage) {
         tasks.push(
             (async () => {
@@ -543,40 +607,49 @@ const TenantsBoys = () => {
                         console.error("Error compressing bike image:", error);
                     }
                 }
-                bikeUrlToUpdate = await uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${bikeImage.name}`);
+                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${bikeImage.name}`);
             })()
         );
     }
-
+ 
     if (bikeRcImage) {
-        try {
-            const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
-            const snapshot = await uploadBytes(imageRef, bikeRcImage);
-            bikeRcUrlToUpdate = await getDownloadURL(snapshot.ref);
-            console.log(bikeRcUrlToUpdate, "bikeRcUrlToUpdate");
-        } catch (error) {
-            console.error("Error uploading bike RC image:", error);
-        }
+        tasks.push(
+            (async () => {
+                let fileToUpload = bikeRcImage;
+ 
+                if (checkImage(bikeRcImage.type)) {
+                    console.log("Executing compression for bikeRcImage");
+                    try {
+                        fileToUpload = await compressImage(bikeRcImage);
+                    } catch (error) {
+                        console.error("Error compressing bike RC image:", error);
+                    }
+                }
+                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
+            })()
+        );
     }
-
-    const tenantData = {
-        roomNo: selectedRoom,
-        bedNo: selectedBed,
-        dateOfJoin,
-        name: name.charAt(0).toUpperCase() + name.slice(1),
-        mobileNo,
-        idNumber,
-        emergencyContact,
-        status,
-        tenantImageUrl: imageUrlToUpdate,
-        tenantIdUrl: idUrlToUpdate,
-        bikeNumber,
-        permnentAddress,
-        bikeImageUrl: bikeUrlToUpdate,
-        bikeRcImageUrl: bikeRcUrlToUpdate,
-    };
-
+ 
     try {
+        const [imageUrlToUpdate, idUrlToUpdate, bikeUrlToUpdate, bikeRcUrlToUpdate] = await Promise.all(tasks);
+ 
+        const tenantData = {
+            roomNo: selectedRoom,
+            bedNo: selectedBed,
+            dateOfJoin,
+            name: name.charAt(0).toUpperCase() + name.slice(1),
+            mobileNo,
+            idNumber,
+            emergencyContact,
+            status,
+            tenantImageUrl: imageUrlToUpdate || tenantImageUrl,
+            tenantIdUrl: idUrlToUpdate || tenantIdUrl,
+            bikeNumber,
+            permnentAddress,
+            bikeImageUrl: bikeUrlToUpdate || bikeImageUrl,
+            bikeRcImageUrl: bikeRcUrlToUpdate || bikeRcImageUrl,
+        };
+ 
         if (isEditing) {
             await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
             toast.success(t('toastMessages.tenantUpdated'), {
@@ -599,9 +672,11 @@ const TenantsBoys = () => {
                 draggable: true,
                 progress: undefined,
             });
+            e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
-        toast.error(t(isEditing ? 'toastMessages.errorUpdatingTenant' : 'toastMessages.errorAddingTenant') + error.message, {
+        console.error("Error submitting form:", error);
+        toast.error(t('toastMessages.errorSubmitting') + error.message, {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -614,13 +689,10 @@ const TenantsBoys = () => {
         setLoading(false);
         resetForm();
         setErrors({});
-        if (!isEditing) {
-            e.target.querySelector('button[type="submit"]').disabled = false;
-        }
-        // fetchData() // Uncomment if needed
+        // fetchData()
     }
 };
-
+ 
 
 
 
@@ -1374,12 +1446,97 @@ const handleTenantDownload = async () => {
   }
 
   // Save the PDF
-  doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+//   doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+// };
+// Convert PDF to Blob
+const pdfOutput = doc.output('blob');
+
+if (Capacitor.isNativePlatform()) {
+  // Save the PDF file to the mobile device
+  const fileName = `${singleTenantDetails.name}_Complete_Details.pdf`;
+  const filePath = `pdf/${fileName}`;
+
+  try {
+    const reader = new FileReader();
+    reader.readAsDataURL(pdfOutput);
+    reader.onloadend = async () => {
+      const base64Data = reader.result.split(',')[1];
+
+      await Filesystem.writeFile({
+        path: filePath,
+        data: base64Data,
+        directory: FilesystemDirectory.Documents,
+        recursive: true,
+      });
+
+      const result = await Filesystem.getUri({
+        directory: FilesystemDirectory.Documents,
+        path: filePath,
+      });
+
+      // Optionally open the file using the FileOpener plugin
+      await FileOpener.open({
+        filePath: result.uri,
+        fileMimeType: 'application/pdf',
+      });
+    };
+    reader.onerror = (error) => {
+      console.error('Error converting PDF to base64:', error);
+    };
+  } catch (error) {
+    console.error('Error saving file:', error);
+  }
+} else {
+  // Save the PDF file for web
+  const url = URL.createObjectURL(pdfOutput);
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = `${singleTenantDetails.name}_Complete_Details.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  URL.revokeObjectURL(url);
+}
 };
 
+const handleImageDownload = async (e, imageUrl, fileName) => {
+if (Capacitor.isNativePlatform()) {
+  e.preventDefault();
 
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const reader = new FileReader();
 
-    
+    reader.onloadend = async () => {
+      const base64data = reader.result.split(',')[1];
+
+      try {
+        const savedFile = await Filesystem.writeFile({
+          path: `${fileName}.jpg`,
+          data: base64data,
+          directory: FilesystemDirectory.Documents
+        });
+        
+        await FileOpener.open({
+          filePath: savedFile.uri,
+          fileMimeType: 'image/jpeg',
+        });
+
+      } catch (error) {
+        console.error('Error saving file:', error);
+      }
+    };
+
+    reader.readAsDataURL(blob);
+
+  } catch (error) {
+    console.error('Error fetching image:', error);
+  }
+}
+};
+
+ 
   return (
     <>
       <div className="row d-flex flex-wrap align-items-center justify-content-between">

@@ -205,7 +205,7 @@ const RoomsBoys = () => {
                   closeOnClick: true,
                   pauseOnHover: true,
                   draggable: true,
-                  progress: undefined,
+                  progress: undefined,      
                 });
               }).catch(error => {
                 toast.error("Error deleting room: " + error.message, {

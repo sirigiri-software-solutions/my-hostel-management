@@ -454,73 +454,138 @@ const DashboardBoys = () => {
     setIsMobile(/iPhone|iPod|iPad|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent));
 }, []);
 
-  const takePicture = async () => {
+  // const takePicture = async () => {
 
-    if (!isMobile) {
-      console.error("Camera access is not supported on your device.");
-      return;
-  }
-    try {
-      const photo = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri
-      });
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoUrl(reader.result);
-        setTenantImage(reader.result);
-      };
-      fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
+  //   if (!isMobile) {
+  //     console.error("Camera access is not supported on your device.");
+  //     return;
+  // }
+  //   try {
+  //     const photo = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri
+  //     });
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setPhotoUrl(reader.result);
+  //       setTenantImage(reader.result);
+  //     };
+  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
 
-      // const response = await fetch(photo.webPath);
-      // const blob = await response.blob();
-      // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-      // const snapshot = await uploadBytes(imageRef, blob);
-      // const url = await getDownloadURL(snapshot.ref);
+  //     // const response = await fetch(photo.webPath);
+  //     // const blob = await response.blob();
+  //     // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
+  //     // const snapshot = await uploadBytes(imageRef, blob);
+  //     // const url = await getDownloadURL(snapshot.ref);
       
-      // setPhotoUrl(url); // Display in UI
-      // setTenantImageUrl(url); // Use in form submission
-      // setPhotoUrl(photo.webPath);
-    } catch (error) {
-      console.error("Error accessing the camera", error);
-      toast.error("Image not Uploaded");
+  //     // setPhotoUrl(url); // Display in UI
+  //     // setTenantImageUrl(url); // Use in form submission
+  //     // setPhotoUrl(photo.webPath);
+  //   } catch (error) {
+  //     console.error("Error accessing the camera", error);
+  //     toast.error("Image not Uploaded");
+  //   }
+  // };
+
+
+  const takePicture = async () => {
+    if (!isMobile) {
+        console.error("Camera access is not supported on your device.");
+        return;
     }
-  };
+    try {
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
+
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+
+        setTenantImage(blob); // Set the blob to tenantImage
+        const uploadFile = async (file, path) => {
+          try {
+              const imageRef = storageRef(storage, path);
+              const snapshot = await uploadBytes(imageRef, file);
+              return await getDownloadURL(snapshot.ref);
+          } catch (error) {
+              console.error(`Error uploading file ${file.name}:`, error);
+              throw error;
+          }
+      };
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${blob.name}`);
+        setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
+    } catch (error) {
+        console.error("Error accessing the camera", error);
+        toast.error(t('toastMessages.imageNotUploaded'));    }
+}
+  // const takeIdPicture = async () => {
+
+  //   if (!isMobile) {
+  //     console.error("Camera access is not supported on your device.");
+  //     return;
+  // }
+  //   try {
+  //     const photo = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri
+  //     });
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setIdUrl(reader.result);
+  //       setTenantId(reader.result);
+  //     };
+  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
+  //     // const response = await fetch(photo.webPath);
+  //     // const blob = await response.blob();
+  //     // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
+  //     // const snapshot = await uploadBytes(imageRef, blob);
+  //     // const url = await getDownloadURL(snapshot.ref);
+      
+  //     // setPhotoUrl(url); // Display in UI
+  //     // setTenantImageUrl(url); // Use in form submission
+  //     // // setPhotoUrl(photo.webPath);
+  //   } catch (error) {
+  //     console.error("Error accessing the camera", error);
+  //     toast.error("Id not Uploaded");
+  //   }
+  // };
 
   const takeIdPicture = async () => {
-
     if (!isMobile) {
-      console.error("Camera access is not supported on your device.");
-      return;
-  }
-    try {
-      const photo = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri
-      });
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setIdUrl(reader.result);
-        setTenantId(reader.result);
-      };
-      fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
-      // const response = await fetch(photo.webPath);
-      // const blob = await response.blob();
-      // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-      // const snapshot = await uploadBytes(imageRef, blob);
-      // const url = await getDownloadURL(snapshot.ref);
-      
-      // setPhotoUrl(url); // Display in UI
-      // setTenantImageUrl(url); // Use in form submission
-      // // setPhotoUrl(photo.webPath);
-    } catch (error) {
-      console.error("Error accessing the camera", error);
-      toast.error("Id not Uploaded");
+        console.error("Camera access is not supported on your device.");
+        return;
     }
-  };
+    try {
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
 
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+
+        setTenantId(blob); // Set the blob to tenantImage
+        const uploadFile = async (file, path) => {
+          try {
+              const imageRef = storageRef(storage, path);
+              const snapshot = await uploadBytes(imageRef, file);
+              return await getDownloadURL(snapshot.ref);
+          } catch (error) {
+              console.error(`Error uploading file ${file.name}:`, error);
+              throw error;
+          }
+      };
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${blob.name}`);
+        setIdUrl(uploadedUrl); // Set the uploaded URL to display the image
+    } catch (error) {
+        console.error("Error accessing the camera", error);
+        toast.error(t('toastMessages.imageNotUploaded'));     }
+}
 
   const handleCheckboxChange = (e) => {
     setHasBike(e.target.value == 'yes');
@@ -532,16 +597,6 @@ const DashboardBoys = () => {
       setBikeNumber('');
     }
   };
-
-
-
-
-
-
-
-
-
-
 
 
   const handleRoomsIntegerChange = (event) => {
@@ -1150,8 +1205,6 @@ const DashboardBoys = () => {
     setTenantImage(null);
 
   };
-
-
   const menu = [
     {
       image: Rooms,
@@ -1179,8 +1232,6 @@ const DashboardBoys = () => {
       btntext: t('dashboard.addExpenses'),
     },
   ];
-
-
 
   const Buttons = ['Add Rooms', 'Add Tenants', 'Add Rent', 'Add Expenses'];
 
@@ -1210,7 +1261,6 @@ const DashboardBoys = () => {
     setHasBike(false);
     setBikeNumber("NA");
     setNotify(false)
-
 
   };
 
@@ -1785,7 +1835,6 @@ const DashboardBoys = () => {
     }
   }
 
-
   const handleCardClick = (item) => {
     if (item.heading === t('dashboard.totalBeds')) {
       setPopupOpen(true);
@@ -1802,8 +1851,6 @@ const DashboardBoys = () => {
   const onClickCloseExpensePopup = () => {
     setExpensePopupOpen(false);
   }
-
-
 
   const rows = bedsData.filter((bed) => bed.status === 'Unoccupied').map((bed, index) => ({
     bed_number: bed.bedNumber,
@@ -1827,9 +1874,6 @@ const DashboardBoys = () => {
     expense: expense.expenseName,
     amount: expense.expenseAmount,
   }));
-
-
-
 
   return (
     <div className="dashboardboys">

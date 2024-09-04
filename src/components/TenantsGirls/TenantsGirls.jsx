@@ -131,63 +131,96 @@ const TenantsGirls = () => {
   //   }
   // };
 
+  // const takePicture = async () => {
+  //   if (!isMobile) {
+  //     console.error("Camera access is not supported on your device.");
+  //     return;
+  //   }
+  //   try {
+  //     const photo = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri
+  //     });
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setPhotoUrl(reader.result);
+  //       setTenantImage(reader.result);
+  //     };
+  //     fetch(photo.webPath)
+  //       .then(response => response.blob())
+  //       .then(blob => reader.readAsDataURL(blob));
+  //   } catch (error) {
+  //     console.error("Error accessing the camera", error);
+  //     toast.error(t('toastMessages.imageNotUploaded'));
+  //   }
+  // }
   const takePicture = async () => {
     if (!isMobile) {
-      console.error("Camera access is not supported on your device.");
-      return;
+        console.error("Camera access is not supported on your device.");
+        return;
     }
     try {
-      const photo = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri
-      });
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoUrl(reader.result);
-        setTenantImage(reader.result);
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
+
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+
+        setTenantImage(blob); // Set the blob to tenantImage
+        const uploadFile = async (file, path) => {
+          try {
+              const imageRef = storageRef(storage, path);
+              const snapshot = await uploadBytes(imageRef, file);
+              return await getDownloadURL(snapshot.ref);
+          } catch (error) {
+              console.error(`Error uploading file ${file.name}:`, error);
+              throw error;
+          }
       };
-      fetch(photo.webPath)
-        .then(response => response.blob())
-        .then(blob => reader.readAsDataURL(blob));
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${blob.name}`);
+        setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
+
     } catch (error) {
-      console.error("Error accessing the camera", error);
-      toast.error(t('toastMessages.imageNotUploaded'));
-    }
-  }
-  const takeidPicture = async () => {
+        console.error("Error accessing the camera", error);
+        toast.error(t('toastMessages.imageNotUploaded'));    }
+}
+  // const takeidPicture = async () => {
 
-    if (!isMobile) {
-      console.error("Camera access is not supported on your device.");
-      return;
-  }
-    try {
-      const photo = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri
-      });
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setIdUrl(reader.result);
-        setTenantId(reader.result);
-      };
-      fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
+  //   if (!isMobile) {
+  //     console.error("Camera access is not supported on your device.");
+  //     return;
+  // }
+  //   try {
+  //     const photo = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri
+  //     });
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setIdUrl(reader.result);
+  //       setTenantId(reader.result);
+  //     };
+  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
 
-      // const response = await fetch(photo.webPath);
-      // const blob = await response.blob();
-      // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-      // const snapshot = await uploadBytes(imageRef, blob);
-      // const url = await getDownloadURL(snapshot.ref);
+  //     // const response = await fetch(photo.webPath);
+  //     // const blob = await response.blob();
+  //     // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
+  //     // const snapshot = await uploadBytes(imageRef, blob);
+  //     // const url = await getDownloadURL(snapshot.ref);
       
-      // setIdUrl(url); // Display in UI
-      // setTenantIdUrl(url); // Use in form submission
-      // setPhotoUrl(photo.webPath);
-    } catch (error) {
-      console.error("Error accessing the camera", error);
-      toast.error(t('toastMessages.idNotUploaded'));
-    }
-  };
+  //     // setIdUrl(url); // Display in UI
+  //     // setTenantIdUrl(url); // Use in form submission
+  //     // setPhotoUrl(photo.webPath);
+  //   } catch (error) {
+  //     console.error("Error accessing the camera", error);
+  //     toast.error(t('toastMessages.idNotUploaded'));
+  //   }
+  // };
 
 
 
@@ -214,6 +247,38 @@ const TenantsGirls = () => {
   //   reader.readAsDataURL(file1);
 
   // }
+  const takeidPicture = async () => {
+    if (!isMobile) {
+        console.error("Camera access is not supported on your device.");
+        return;
+    }
+    try {
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
+
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+
+        setTenantId(blob); // Set the blob to tenantImage
+        const uploadFile = async (file, path) => {
+          try {
+              const imageRef = storageRef(storage, path);
+              const snapshot = await uploadBytes(imageRef, file);
+              return await getDownloadURL(snapshot.ref);
+          } catch (error) {
+              console.error(`Error uploading file ${file.name}:`, error);
+              throw error;
+          }
+      };
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${blob.name}`);
+        setIdUrl(uploadedUrl); // Set the uploaded URL to display the image
+    } catch (error) {
+        console.error("Error accessing the camera", error);
+        toast.error(t('toastMessages.imageNotUploaded'));    }
+}
 
   const handleCheckboxChange = (e) => {
     setHasBike(e.target.value == 'yes');
@@ -1771,53 +1836,29 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                 <p><strong>{t('tenantsPage.joiningDate')} :</strong> {singleTenantDetails.joining_date}</p>
                 <p><strong>{t('tenantsPage.dueDate')} :</strong> {dueDateOfTenant}</p>
                 <p><strong>{t('tenantsPage.idProof')} :</strong>
+                  {singleTenantProofId ? (
+                    <a className='downloadPdfText' href={singleTenantProofId} download> <FaDownload /> {t('tenantsPage.downloadId')}</a>
+                  ) : (
+                    <span className='NotUploadedText'>{t('tenantsPage.notUploaded')}</span>
+                  )}
+                </p>
+                <p><strong>{t('tenantsPage.PermanentAddress')}</strong>{tenantAddress}</p>
 
-
-            {singleTenantProofId ? (
-             <a
-             className="downloadPdfText"
-             href={singleTenantProofId}
-            download
-            onClick={(e) => handleImageDownload(e, singleTenantProofId, 'Tenant_Proof_Id')}
-    >
-            <FaDownload /> {t('tenantsPage.downloadId')}
-           </a>
-          ) : (
-        <span className="NotUploadedText">{t('tenantsPage.notUploaded')}</span>
-      )}
-    </p>
-
-<p><strong>{t('tenantsPage.BikePic')}</strong>
-  {bikeImageField ? (
-    <a
-      className="downloadPdfText"
-      href={bikeImageField}
-      download
-      onClick={(e) => handleImageDownload(e, bikeImageField, 'Bike_Image')}
-    >
-      <FaDownload /> {t('tenantsPage.DownloadPic')}
-    </a>
-  ) : (
-    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
-  )}
-</p>
-
-<p><strong>{t('tenantsPage.BikeRc')}</strong>
-  {bikeRcImageField ? (
-    <a
-      className="downloadPdfText"
-      href={bikeRcImageField}
-      download
-      onClick={(e) => handleImageDownload(e, bikeRcImageField, 'Bike_RC')}
-    >
-      <FaDownload /> {t('tenantsPage.DownloadRc')}
-    </a>
-  ) : (
-    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
-  )}
-</p>
-
-              </div>
+                <p><strong>{t('tenantsPage.BikePic')}</strong>
+                  {bikeImageField ? (
+                    <a className="downloadPdfText" href={bikeImageField} download> <FaDownload />{t('tenantsPage.DownloadPic')}</a>
+                  ) : (
+                    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
+                  )}
+                </p>
+                <p><strong>{t('tenantsPage.BikeRc')}</strong>
+                  {bikeRcImageField ? (
+                    <a className="downloadPdfText" href={bikeRcImageField} download> <FaDownload />{t('tenantsPage.DownloadRc')}</a>
+                  ) : (
+                    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
+                  )}
+                </p>              
+                </div>
             </div>
             <div className='popup-tenants-closeBtn'>
               <button className='btn btn-warning' onClick={tenantPopupClose}>{t('tenantsPage.close')}</button>
