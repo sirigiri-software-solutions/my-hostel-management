@@ -557,8 +557,10 @@ const DashboardBoys = () => {
   };
 const [totalBeds, setTotalBeds] = useState(0);
 useEffect(()=>{
-  const totalBeds = boysRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
-  setTotalBeds(totalBeds)
+  if(boysRooms){
+    const totalBeds = boysRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
+    setTotalBeds(totalBeds)
+  }
 }, [userUid, entireHMAdata, activeBoysHostel, boysRooms, boysTenants])
   
 

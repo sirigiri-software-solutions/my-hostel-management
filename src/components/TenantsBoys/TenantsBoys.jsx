@@ -797,7 +797,7 @@ const TenantsBoys = () => {
 
 
     setBikeNumber("");
-    setHasBike(false);
+    setHasBike(false); 
     setFileName(tenant.fileName || '');
     setShowModal(true);
     setBikeNumber(tenant.bikeNumber);

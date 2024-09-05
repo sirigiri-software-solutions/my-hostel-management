@@ -184,7 +184,7 @@ const Login = () => {
             }
 
             setUserUid(singleLoginUser.uid);
-            // fetchData()
+            fetchData()
             
             navigate("/mainPage");
 

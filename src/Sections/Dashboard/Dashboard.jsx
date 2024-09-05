@@ -16,7 +16,7 @@ const Dashboard = ({ onTabSelect, activeTab }) => {
     // onTabSelect(tab);
     changeActiveFlag(tab)
   };
-
+console.log(activeBoysHostelButtons.length,"area",  "length")
 
   return (
     <div className='container_main'>
