@@ -1134,8 +1134,8 @@ const isImage = (contentType) => contentType.startsWith('image/');
           console.log("image","pdfOFTenant")
             try {
               const imageUrl = await createPDFWithImage(singleTenantProofId);
-                const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-                doc.addImage(imageUrl, "PNG", 20, 20, width, height);
+                // const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+                doc.addImage(imageUrl, "PNG", 20, 20, 120, 120);
             } catch (error) {
                 console.error('Error loading image:', error);
             }
@@ -1160,7 +1160,7 @@ const isImage = (contentType) => contentType.startsWith('image/');
         if (isImage(response)) {
             try {
               const imageUrl = await createPDFWithImage(bikeImageField);
-                const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+                // const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
                 doc.addImage(imageUrl, 'JPEG', 20, 20,120, 120);
             } catch (error) {
                 console.error('Error loading image:', error);
@@ -1184,8 +1184,8 @@ const isImage = (contentType) => contentType.startsWith('image/');
         if (isImage(response)) {
             try {
               const imageUrl = await createPDFWithImage(bikeRcImageField);
-                const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-                doc.addImage(imageUrl, 'JPEG', 20, 20, width, height);
+                // const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+                doc.addImage(imageUrl, 'JPEG', 20, 20, 120, 120);
             } catch (error) {
                 console.error('Error loading image:', error);
             }
@@ -1201,7 +1201,9 @@ const isImage = (contentType) => contentType.startsWith('image/');
 
     // Save the PDF
     doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-    setDownloadingTextFlag(false)
+    setTimeout(() => {
+      setDownloadingTextFlag(false);
+    }, 800);
   };
 
   const getImageBase64 = (url) => {
@@ -1529,10 +1531,12 @@ const handleDownload = async (url, type,tenantName) => {
       </div>
 
       {loading && <Spinner />}
+      {downloadingTextFlag && <Spinner />}
 
       {userDetailsTenantPopup &&
         <div id="userDetailsTenantPopupIdGirl" className='userDetailsTenantPopup'>
           <div className='tenants-dialog-container'>
+          <span className="close-icon" onClick={tenantPopupClose}>&times;</span>
             <h1 className="tenants-popup-heading">{t('tenantsPage.tenantDetails')} </h1>
             <div className='tenants-popup-mainContainer'>
               <div className='tenants-profile-container'>
@@ -1544,8 +1548,8 @@ const handleDownload = async (url, type,tenantName) => {
                 <p><strong>{t('tenantsPage.proofID')} :</strong> {singleTenantDetails.id}</p>
                 <p><strong>{t('tenantsPage.roomBedNo')}:</strong> {singleTenantDetails.room_bed_no}</p>
                 <p><strong>{t('tenantsPage.joiningDate')} :</strong> {singleTenantDetails.joining_date}</p>
-                <p><strong>{t('tenantsPage.dueDate')} :</strong> {dueDateOfTenant}</p>
-                <p>
+                <p><strong>{t('tenantsPage.dueDate')} :</strong> {dueDateOfTenant ? dueDateOfTenant : " Not paid"}</p>
+                {/* <p>
         <strong>{t('tenantsPage.idProof')} :</strong>
         {singleTenantProofId ? (
           downloadStatus.idProof ? (
@@ -1561,13 +1565,13 @@ const handleDownload = async (url, type,tenantName) => {
         ) : (
           <span className='NotUploadedText'>{t('tenantsPage.notUploaded')}</span>
         )}
-      </p>
+      </p> */}
       
       <p>
-        <strong>{t('tenantsPage.PermanentAddress')}</strong>{tenantAddress}
+        <strong>{t('tenantsPage.PermanentAddress')}</strong>{tenantAddress? tenantAddress : " NA"}
       </p>
 
-      <p>
+      {/* <p>
         <strong>{t('tenantsPage.BikePic')}</strong>
         {bikeImageField ? (
           downloadStatus.bikePic ? (
@@ -1583,9 +1587,9 @@ const handleDownload = async (url, type,tenantName) => {
         ) : (
           <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
         )}
-      </p>
+      </p> */}
 
-      <p>
+      {/* <p>
         <strong>{t('tenantsPage.BikeRc')}</strong>
         {bikeRcImageField ? (
           downloadStatus.bikeRc ? (
@@ -1601,7 +1605,7 @@ const handleDownload = async (url, type,tenantName) => {
         ) : (
           <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
         )}
-      </p>
+      </p> */}
               </div>
             </div>
             <div className='popup-tenants-closeBtn'>
