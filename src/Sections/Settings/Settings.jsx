@@ -27,7 +27,7 @@ const Settings = () => {
 
   const { t } = useTranslation();
 
-  const { activeBoysHostelName,activeGirlsHostelName,userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons,girlsTenants, boysTenants, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag,entireHMAdata } = useData();
+  const { activeBoysHostelName,activeGirlsHostelName,userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons,girlsTenants, boysTenants, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag,entireHMAdata, fetchData } = useData();
   const { database,storage } = firebase;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newBoysHostelName, setNewBoysHostelName] = useState('');
@@ -58,24 +58,48 @@ const Settings = () => {
 
 
 
+  // const fetchExpensesData = (hostelType, hostel) => {
+  //   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+    
+
+  //   const entireYearData = [];
+    
+  //   monthNames.forEach(month => {
+  //     console.log(entireHMAdata, "hhh")
+  //     console.log(userUid, "hhh")
+  //     const expensesData = entireHMAdata[userUid]?.[hostelType]?.[hostel]?.expenses?.[`${year}-${month}`];
+  //     if (expensesData !== undefined && expensesData !== null) {
+  //       entireYearData.push(expensesData);
+  //   } else {
+  //       entireYearData.push(0);
+  //   }
+  //   })
+  //   return entireYearData;
+  // };
+
   const fetchExpensesData = (hostelType, hostel) => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-
-    
-
     const entireYearData = [];
-    
+  
     monthNames.forEach(month => {
-      const expensesData = entireHMAdata[userUid]?.[hostelType]?.[hostel]?.expenses?.[`${year}-${month}`];
+      const hostelData = entireHMAdata?.[userUid]?.[hostelType]?.[hostel];
+      if (!hostelData || !hostelData.expenses) {
+        entireYearData.push(0);
+        return;
+      }
+  
+      const expensesData = hostelData.expenses[`${year}-${month}`];
       if (expensesData !== undefined && expensesData !== null) {
         entireYearData.push(expensesData);
-    } else {
+      } else {
         entireYearData.push(0);
-    }
-    })
+      }
+    });
+  
     return entireYearData;
   };
-
+  
 
   useEffect(() => {
     const fetchExpenses = () => {
@@ -213,6 +237,7 @@ const isImageFile = (file) => {
           position: "top-center",
           autoClose: 3000,
         });
+        fetchData()
         if (isBoys) {
           setNewBoysHostelName('');
           setBoysHostelImage('');

@@ -200,8 +200,9 @@
   "DownloadRc": "Download RC",
   "NotUploaded": "Not Uploaded",
   "or": "or",
-  "takePhoto": "Take Photo"
+  "takePhoto": "Take Photo",
 
+  "downloading":"Downloading..."
 
         
     },

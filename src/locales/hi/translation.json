@@ -200,7 +200,8 @@
   "DownloadRc": "आरसी डाउनलोड करें",
   "NotUploaded": "अपलोड नहीं हुआ",
   "or":"या",
-  "takePhoto": "फोटो लें"
+  "takePhoto": "फोटो लें",
+  "downloading":"डाउनलोड हो रहा है..."
         
     },
     "expensesPage": {

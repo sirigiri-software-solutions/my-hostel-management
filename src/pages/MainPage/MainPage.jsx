@@ -86,7 +86,7 @@ const MainPage = () => {
     });
   }, [isModalOpen1]);
 
-
+  console.log(activeBoysHostelButtons.length,"area", "length")
   // useEffect(() => {
   //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
   //   onValue(tenantsRef, (snapshot) => {
@@ -264,7 +264,7 @@ const MainPage = () => {
   }, [navigate, flag]);
 
   const logout = () => {
-    localStorage.removeItem('username');
+    localStorage.removeItem('username'); //
     localStorage.removeItem('userarea');
     localStorage.removeItem('role');
     localStorage.removeItem('userUid');

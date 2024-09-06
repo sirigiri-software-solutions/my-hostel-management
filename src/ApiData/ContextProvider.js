@@ -177,25 +177,29 @@ const DataProvider = ({ children }) => {
  
       const boysHostelButtons = entireHMAdata[userUid]?.boys;
    
-      if(boysHostelButtons){
+      if(boysHostelButtons && boysHostelButtons != undefined && boysHostelButtons != null){
         const dataBoysHostelButtons = Object.keys(boysHostelButtons).map(key => ({
           id:key,
           name:boysHostelButtons[key].name
         }))
  
         setActiveBoysHostelButtons(dataBoysHostelButtons)
+      }else{
+        setActiveBoysHostelButtons([])
       }
  
       // Extracting Girls Hostel buttons
  
       const girlsHostelButtons = entireHMAdata[userUid]?.girls;
- 
-      if(girlsHostelButtons){
+ console.log(girlsHostelButtons , "hhh")
+      if(girlsHostelButtons && girlsHostelButtons != undefined && girlsHostelButtons != null){
         const dataGirlsHostelButtons = Object.keys(girlsHostelButtons).map(key => ({
           id:key,
           name:girlsHostelButtons[key].name
         }))
         setActiveGirlsHostelButtons(dataGirlsHostelButtons);
+      }else{
+        setActiveGirlsHostelButtons([])
       }
  
  
@@ -216,7 +220,7 @@ const DataProvider = ({ children }) => {
       setGirlsExTenantsData(exTenantsGirlsFormattedData)
    
   }
-}, [entireHMAdata, activeBoysHostel, activeGirlsHostel,  area, defaultArea, userUid]);
+}, [entireHMAdata, activeBoysHostel, activeGirlsHostel, area, defaultArea, userUid]);
  
  
   // end to get entireData
@@ -301,7 +305,7 @@ const DataProvider = ({ children }) => {
   useEffect(() => {
     fetchData();
 }, [userUid, userarea, completeData, defaultArea]);
- 
+console.log(entireHMAdata, "entire")
   return (
     <DataContext.Provider
      value={{
