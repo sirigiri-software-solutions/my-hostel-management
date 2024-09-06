@@ -18,6 +18,7 @@ import Spinner from '../../Elements/Spinner'
 import { jsPDF } from "jspdf";
 
 import imageCompression from 'browser-image-compression';
+import { v4 as uuidv4 } from 'uuid';
 
 const TenantsGirls = () => {
   const { t } = useTranslation();
@@ -79,6 +80,12 @@ const TenantsGirls = () => {
     tenantId: '',
     bikeImage: '',
     bikeRcImage: '',
+  });
+  const [downloadingTextFlag,setDownloadingTextFlag] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState({
+    idProof: false,
+    bikePic: false,
+    bikeRc: false
   });
 
 
@@ -333,7 +340,7 @@ const TenantsGirls = () => {
 
   const compressImage = async (file) => {
     const options = {
-      maxSizeMB: 1, // Compress to a maximum of 1 MB (adjust as needed)
+      maxSizeMB: 0.6, // Compress to a maximum of 1 MB (adjust as needed)
       maxWidthOrHeight: 1920, 
       useWebWorker: true, // Use a web worker for better performance
       fileType: 'image/jpeg',
@@ -454,7 +461,7 @@ const TenantsGirls = () => {
 
     setShowModal(false);
     setLoading(true);
-
+    const tenantUniqueId = isEditing ? currentId : uuidv4();
     // Helper function to upload a file and return its URL
     const uploadFile = async (file, path) => {
         try {
@@ -468,99 +475,65 @@ const TenantsGirls = () => {
     };
 
     const tasks = [];
+    const uploadResults = {};
 
-    if (tenantImage) {
-        tasks.push(
-            (async () => {
-                let fileToUpload = tenantImage;
-                console.log(tenantImage, "whatisComing");
-                if (checkImage(tenantImage.type)) {
-                    console.log("Executing compression for tenantImage");
-                    try {
-                        fileToUpload = await compressImage(tenantImage);
-                    } catch (error) {
-                        console.error("Error compressing tenant image:", error);
-                    }
-                }
-                return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
-            })()
-        );
-    }
-    if (tenantId) {
+    const addUploadTask = (file, type, path) => {
       tasks.push(
           (async () => {
-              let fileToUpload = tenantId;
-
-              if (checkImage(tenantId.type)) {
-                  console.log("Executing compression for tenantId");
+              let fileToUpload = file;
+              if (checkImage(file.type)) {
+                  console.log(`Executing compression for ${type}`);
                   try {
-                      fileToUpload = await compressImage(tenantId);
+                      fileToUpload = await compressImage(file);
                   } catch (error) {
-                      console.error("Error compressing tenant ID image:", error);
+                      console.error(`Error compressing ${type}:`, error);
                   }
               }
-
-              return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
+              const url = await uploadFile(fileToUpload, path);
+              return { type, url };
           })()
       );
-  }
+  };
+
+  if (tenantImage) {
+    addUploadTask(tenantImage, 'tenantImage', `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantUniqueId}`);
+}
+if (tenantId) {
+    addUploadTask(tenantId, 'tenantId', `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantUniqueId}`);
+}
+if (bikeImage) {
+    addUploadTask(bikeImage, 'bikeImage', `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeImage/${tenantUniqueId}`);
+}
+if (bikeRcImage) {
+    addUploadTask(bikeRcImage, 'bikeRcImage', `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeRcImage/${tenantUniqueId}`);
+}
 
    
 
-    if (bikeImage) {
-        tasks.push(
-            (async () => {
-                let fileToUpload = bikeImage;
-                if (checkImage(bikeImage.type)) {
-                    console.log("Executing compression for bikeImage");
-                    try {
-                        fileToUpload = await compressImage(bikeImage);
-                    } catch (error) {
-                        console.error("Error compressing bike image:", error);
-                    }
-                }
-                return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeImage/${bikeImage.name}`);
-            })()
-        );
-    }
-
-    if (bikeRcImage) {
-        tasks.push(
-            (async () => {
-                let fileToUpload = bikeRcImage;
-
-                if (checkImage(bikeRcImage.type)) {
-                    console.log("Executing compression for bikeRcImage");
-                    try {
-                        fileToUpload = await compressImage(bikeRcImage);
-                    } catch (error) {
-                        console.error("Error compressing bike RC image:", error);
-                    }
-                }
-                return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
-            })()
-        );
-    }
-
     try {
-        const [imageUrlToUpdate, idUrlToUpdate, bikeUrlToUpdate, bikeRcUrlToUpdate] = await Promise.all(tasks);
+      const results = await Promise.all(tasks);
+         // Process results
+         results.forEach(({ type, url }) => {
+          uploadResults[type] = url;
+      });
 
-        const tenantData = {
-            roomNo: selectedRoom,
-            bedNo: selectedBed,
-            dateOfJoin,
-            name: name.charAt(0).toUpperCase() + name.slice(1),
-            mobileNo,
-            idNumber,
-            emergencyContact,
-            status,
-            tenantImageUrl: imageUrlToUpdate || tenantImageUrl,
-            tenantIdUrl: idUrlToUpdate || tenantIdUrl,
-            bikeNumber,
-            permnentAddress,
-            bikeImageUrl: bikeUrlToUpdate || bikeImageUrl,
-            bikeRcImageUrl: bikeRcUrlToUpdate || bikeRcImageUrl,
-        };
+      const tenantData = {
+        roomNo: selectedRoom,
+        bedNo: selectedBed,
+        dateOfJoin,
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        mobileNo,
+        idNumber,
+        emergencyContact,
+        status,
+        tenantImageUrl: uploadResults['tenantImage'] || tenantImageUrl,
+        tenantIdUrl: uploadResults['tenantId'] || tenantIdUrl,
+        bikeNumber,
+        permnentAddress,
+        bikeImageUrl: uploadResults['bikeImage'] || bikeImageUrl,
+        bikeRcImageUrl: uploadResults['bikeRcImage'] || bikeRcImageUrl,
+       
+    };
 
         if (isEditing) {
             await update(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${currentId}`), tenantData);
@@ -575,7 +548,7 @@ const TenantsGirls = () => {
             });
             fetchData()
         } else {
-            await push(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`), tenantData);
+            await set(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantUniqueId}`), tenantData);
             toast.success(t('toastMessages.tenantAddedSuccess'), {
                 position: "top-center",
                 autoClose: 2000,
@@ -992,8 +965,10 @@ const TenantsGirls = () => {
   };
 
   //handleGirlTenantDownload
-  const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
-  const isImage = (fileData) => fileData.startsWith('data:image/');
+  // const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
+  // const isImage = (fileData) => fileData.startsWith('data:image/');
+  const isPDF = (contentType) => contentType === 'application/pdf';
+const isImage = (contentType) => contentType.startsWith('image/');
   
   const pdfToImages = async (pdfUrl) => {
     const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
@@ -1039,146 +1014,257 @@ const TenantsGirls = () => {
       img.src = src;
     });
   };
+
+  const getContentType = async (url) => {
+    try {
+        const response = await fetch(url);
+        return response.headers.get('Content-Type');
+    } catch (error) {
+        console.error('Error fetching content type:', error);
+        return null;
+    }
+};
   
   const handleGirlTenantDownload = async () => {
+    setDownloadingTextFlag(true)
     const doc = new jsPDF();
-  
+
     // Page 1: Tenant Details
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.text("Tenant Details", 80, 10);
-    console.log(singleTenantDetails,"girlsData")
+
+    const createPDFWithImage = async (imageUrl) => {
+
+        try {
+            const base64Image = await getImageBase64(imageUrl);
+            return base64Image;
+        } catch (error) {
+            console.error("Error creating base64 image", error);
+            return null;
+        }
+    };
+
+   
+
+
     if (singleTenantDetails.image) {
-      doc.addImage(singleTenantDetails.image, 'JPEG', 130, 24, 50, 50); // Adjust the size and position accordingly
+        const imageUrl = await createPDFWithImage(singleTenantDetails.image);
+        if (imageUrl) {
+            doc.addImage(imageUrl, "PNG", 130, 24, 50, 50);
+        }
     }
-  
+
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.text("Name: ", 20, 25);
-  
+
     doc.setFont("helvetica", "normal");
     doc.text(singleTenantDetails.name, 34, 25);
-  
+
     doc.setFont("helvetica", "bold");
     doc.text("Mobile No: ", 20, 35);
-  
+
     doc.setFont("helvetica", "normal");
     doc.text(singleTenantDetails.mobile_no, 43, 35);
-  
+
     doc.setFont("helvetica", "bold");
     doc.text("Proof ID: ", 20, 45);
-  
+
     doc.setFont("helvetica", "normal");
     doc.text(singleTenantDetails.id, 40, 45);
-  
+
     doc.setFont("helvetica", "bold");
     doc.text("Room/Bed No: ", 20, 55);
-  
+
     doc.setFont("helvetica", "normal");
     doc.text(singleTenantDetails.room_bed_no, 50, 55);
-  
+
     doc.setFont("helvetica", "bold");
     doc.text("Joining Date: ", 20, 65);
-  
+
     doc.setFont("helvetica", "normal");
     doc.text(singleTenantDetails.joining_date, 48, 65);
-  
+
     if (dueDateOfTenant) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Due Date: ", 20, 75);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(dueDateOfTenant, 40, 75);
+    }else{
       doc.setFont("helvetica", "bold");
       doc.text("Due Date: ", 20, 75);
-  
+
       doc.setFont("helvetica", "normal");
-      doc.text(dueDateOfTenant, 40, 75);
+      doc.text(" Not paid", 40, 75);
     }
-  
+
     if (bikeNumber) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Bike Number: ", 20, 85);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(singleTenanantBikeNum, 48, 85);
+    }else{
       doc.setFont("helvetica", "bold");
       doc.text("Bike Number: ", 20, 85);
-  
+
       doc.setFont("helvetica", "normal");
-      doc.text(singleTenanantBikeNum, 48, 85);
+      doc.text(" No bike", 48, 85);
     }
-  
+
     if (tenantAddress) {
-      doc.setFont("helvetica", "bold");
-      doc.text("Address: ", 20, 95);
-  
-      doc.setFont("helvetica", "normal");
-      doc.text(tenantAddress, 39, 95);
+        doc.setFont("helvetica", "bold");
+        doc.text("Address: ", 20, 95);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(tenantAddress, 39, 95);
     }
-  
+
     // Add a new page
     doc.addPage();
-  
+   
     // Page 2: ID Proof Image or PDF
     if (singleTenantProofId) {
-      if (isImage(singleTenantProofId)) {
-        try {
-          const img = await loadImage(singleTenantProofId);
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-        } catch (error) {
-          console.error('Error loading image:', error);
+      const response =await getContentType(singleTenantProofId)
+      console.log(response,'whatComingfromAPi')
+        if (isImage(response)) {
+         
+          console.log("image","pdfOFTenant")
+            try {
+              const imageUrl = await createPDFWithImage(singleTenantProofId);
+                const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+                doc.addImage(imageUrl, "PNG", 20, 20, width, height);
+            } catch (error) {
+                console.error('Error loading image:', error);
+            }
+        } else if (isPDF(response)) {
+          console.log("image","pdfOFTenant")
+            const images = await pdfToImages(singleTenantProofId);
+            images.forEach((img, index) => {
+                if (index > 0) doc.addPage();
+                const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+                doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+            });
         }
-        doc.addPage();
-      } else if (isPDF(singleTenantProofId)) {
-        const images = await pdfToImages(singleTenantProofId);
-        images.forEach((img, index) => {
-          if (index > 0) doc.addPage();
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-        });
-        doc.addPage();
-      }
     }
-  
+
+    // Add a new page
+    doc.addPage();
+    
+    console.log(bikeImageField,bikeRcImageField,"whatUrlisComing")
     // Page 3: Bike Image or PDF
     if (bikeImageField) {
-      if (isImage(bikeImageField)) {
-        try {
-          const img = await loadImage(bikeImageField);
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-        } catch (error) {
-          console.error('Error loading image:', error);
+      const response =await getContentType(bikeImageField)
+        if (isImage(response)) {
+            try {
+              const imageUrl = await createPDFWithImage(bikeImageField);
+                const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+                doc.addImage(imageUrl, 'JPEG', 20, 20,120, 120);
+            } catch (error) {
+                console.error('Error loading image:', error);
+            }
+        } else if (isPDF(response)) {
+            const images = await pdfToImages(bikeImageField);
+            images.forEach((img, index) => {
+                if (index > 0) doc.addPage();
+                const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+                doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+            });
         }
-        doc.addPage();
-      } else if (isPDF(bikeImageField)) {
-        const images = await pdfToImages(bikeImageField);
-        images.forEach((img, index) => {
-          if (index > 0) doc.addPage();
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-        });
-        doc.addPage();
-      }
     }
-  
+
+    // Add a new page
+    doc.addPage();
+
     // Page 4: Bike RC Image or PDF
     if (bikeRcImageField) {
-      if (isImage(bikeRcImageField)) {
-        try {
-          const img = await loadImage(bikeRcImageField);
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.src, 'JPEG', 20, 20, width, height);
-        } catch (error) {
-          console.error('Error loading image:', error);
+      const response =await getContentType(bikeRcImageField)
+        if (isImage(response)) {
+            try {
+              const imageUrl = await createPDFWithImage(bikeRcImageField);
+                const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+                doc.addImage(imageUrl, 'JPEG', 20, 20, width, height);
+            } catch (error) {
+                console.error('Error loading image:', error);
+            }
+        } else if (isPDF(response)) {
+            const images = await pdfToImages(bikeRcImageField);
+            images.forEach((img, index) => {
+                if (index > 0) doc.addPage();
+                const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+                doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+            });
         }
-      } else if (isPDF(bikeRcImageField)) {
-        const images = await pdfToImages(bikeRcImageField);
-        images.forEach((img, index) => {
-          if (index > 0) doc.addPage();
-          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-        });
-      }
     }
-  
+
     // Save the PDF
     doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+    setDownloadingTextFlag(false)
   };
 
+  const getImageBase64 = (url) => {
+    return new Promise((resolve, reject) => {
+        let img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = url;
+        img.onload = () => {
+            let canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            let ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            let dataURL = canvas.toDataURL("image/png");
+            resolve(dataURL);
+        };
+        img.onerror = (error) => {
+            reject(error);
+        };
+    });
+};
+ 
+const createPDFWithImage = async (imageUrl) => {
 
+  try {
+      const base64Image = await getImageBase64(imageUrl);
+      return base64Image;
+  } catch (error) {
+      console.error("Error creating base64 image", error);
+      return null;
+  }
+};
+
+
+const handleDownload = async (url, type,tenantName) => {
+  setDownloadStatus(prev => ({ ...prev, [type]: true }));
+  
+  try {
+    const response = await getContentType(url);
+    console.log(response, "downloadIssue");
+    
+    if (isImage(response)) {
+      const imageUrl = await createPDFWithImage(url);
+      const doc = new jsPDF();
+      doc.addImage(imageUrl, "PNG", 20, 20, 100, 100);
+      doc.save(`${tenantName} ${type}.pdf`);
+    } else if (isPDF(response)) {
+      const images = await pdfToImages(url);
+      const doc = new jsPDF();
+      images.forEach((img, index) => {
+        if (index > 0) doc.addPage();
+        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+        doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+      });
+      doc.save(`${tenantName} ${type}.pdf`);
+    }
+  } catch (error) {
+    console.error("Download error:", error);
+  } finally {
+    setDownloadStatus(prev => ({ ...prev, [type]: false }));
+  }
+};
+ 
 
 
   
@@ -1459,31 +1545,63 @@ const TenantsGirls = () => {
                 <p><strong>{t('tenantsPage.roomBedNo')}:</strong> {singleTenantDetails.room_bed_no}</p>
                 <p><strong>{t('tenantsPage.joiningDate')} :</strong> {singleTenantDetails.joining_date}</p>
                 <p><strong>{t('tenantsPage.dueDate')} :</strong> {dueDateOfTenant}</p>
-                <p><strong>{t('tenantsPage.idProof')} :</strong>
+                <p>
+        <strong>{t('tenantsPage.idProof')} :</strong>
+        {singleTenantProofId ? (
+          downloadStatus.idProof ? (
+            <span className='downloadPdfText'>&nbsp;{t('tenantsPage.downloading')}</span>
+          ) : (
+            <span 
+              className='downloadPdfText' 
+              onClick={() => handleDownload(singleTenantProofId, 'idProof',singleTenantDetails.name)}
+            >
+              <FaDownload /> {t('tenantsPage.downloadId')}
+            </span>
+          )
+        ) : (
+          <span className='NotUploadedText'>{t('tenantsPage.notUploaded')}</span>
+        )}
+      </p>
+      
+      <p>
+        <strong>{t('tenantsPage.PermanentAddress')}</strong>{tenantAddress}
+      </p>
 
+      <p>
+        <strong>{t('tenantsPage.BikePic')}</strong>
+        {bikeImageField ? (
+          downloadStatus.bikePic ? (
+            <span className="downloadPdfText">&nbsp;{t('tenantsPage.downloading')}</span>
+          ) : (
+            <span 
+              className="downloadPdfText" 
+              onClick={() => handleDownload(bikeImageField, 'bikePic',singleTenantDetails.name)}
+            >
+              <FaDownload />{t('tenantsPage.DownloadPic')}
+            </span>
+          )
+        ) : (
+          <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
+        )}
+      </p>
 
-                  {singleTenantProofId ? (
-                    <a className='downloadPdfText' href={singleTenantProofId} download> <FaDownload /> {t('tenantsPage.downloadPdf')}</a>
-                  ) : (
-                    <span className='NotUploadedText'>{t('tenantsPage.notUploaded')}</span>
-                  )}
-                </p>
-                <p><strong>{t('tenantsPage.PermanentAddress')}</strong>{tenantAddress}</p>
-
-                <p><strong>{t('tenantsPage.BikePic')}</strong>
-                  {bikeImageField ? (
-                    <a className="downloadPdfText" href={bikeImageField} download> <FaDownload />{t('tenantsPage.DownloadPic')}</a>
-                  ) : (
-                    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
-                  )}
-                </p>
-                <p><strong>{t('tenantsPage.BikeRc')}</strong>
-                  {bikeRcImageField ? (
-                    <a className="downloadPdfText" href={bikeRcImageField} download> <FaDownload />{t('tenantsPage.DownloadRc')}</a>
-                  ) : (
-                    <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
-                  )}
-                </p>
+      <p>
+        <strong>{t('tenantsPage.BikeRc')}</strong>
+        {bikeRcImageField ? (
+          downloadStatus.bikeRc ? (
+            <span className="downloadPdfText">&nbsp;{t('tenantsPage.downloading')}</span>
+          ) : (
+            <span 
+              className="downloadPdfText" 
+              onClick={() => handleDownload(bikeRcImageField, 'bikeRc',singleTenantDetails.name)}
+            >
+              <FaDownload />{t('tenantsPage.DownloadRc')}
+            </span>
+          )
+        ) : (
+          <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
+        )}
+      </p>
               </div>
             </div>
             <div className='popup-tenants-closeBtn'>

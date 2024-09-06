@@ -198,7 +198,8 @@
   "BikeRc": "बाइक आरसी:",
   "DownloadPic": "चित्र डाउनलोड करें",
   "DownloadRc": "आरसी डाउनलोड करें",
-  "NotUploaded": "अपलोड नहीं हुआ"
+  "NotUploaded": "अपलोड नहीं हुआ",
+  "downloading":"डाउनलोड हो रहा है..."
         
     },
     "expensesPage": {

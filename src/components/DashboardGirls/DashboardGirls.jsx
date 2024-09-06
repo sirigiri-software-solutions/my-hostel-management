@@ -7,7 +7,7 @@ import './DashboardGirls.css'
 import SmallCard from '../../Elements/SmallCard'
 import PlusIcon from '../../images/Icons (8).png'
 import { push, ref } from "../../firebase/firebase";
-import { onValue, update } from 'firebase/database';
+import { onValue, update,set } from 'firebase/database';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { Modal, Button } from 'react-bootstrap';
@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import Spinner from '../../Elements/Spinner';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
+import { v4 as uuidv4 } from 'uuid';
 
 const DashboardGirls = () => {
   const { t } = useTranslation();
@@ -902,6 +903,8 @@ Please note that you made your last payment on ${paidDate}.\n`
     setShowModal(false);
     setLoading(true);
 
+    const tenantUniqueId = isEditing ? currentId : uuidv4();
+
     // Helper function to upload a file and return its URL
     const uploadFile = async (file, path) => {
         try {
@@ -915,99 +918,64 @@ Please note that you made your last payment on ${paidDate}.\n`
     };
 
     const tasks = [];
+    const uploadResults = {};
 
-    if (tenantImage) {
-        tasks.push(
-            (async () => {
-                let fileToUpload = tenantImage;
-                console.log(tenantImage, "whatisComing");
-                if (checkImage(tenantImage.type)) {
-                    console.log("Executing compression for tenantImage");
-                    try {
-                        fileToUpload = await compressImage(tenantImage);
-                    } catch (error) {
-                        console.error("Error compressing tenant image:", error);
-                    }
-                }
-                return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantImage.name}`);
-            })()
-        );
-    }
-    if (tenantId) {
+    const addUploadTask = (file, type, path) => {
       tasks.push(
           (async () => {
-              let fileToUpload = tenantId;
-
-              if (checkImage(tenantId.type)) {
-                  console.log("Executing compression for tenantId");
+              let fileToUpload = file;
+              if (checkImage(file.type)) {
+                  console.log(`Executing compression for ${type}`);
                   try {
-                      fileToUpload = await compressImage(tenantId);
+                      fileToUpload = await compressImage(file);
                   } catch (error) {
-                      console.error("Error compressing tenant ID image:", error);
+                      console.error(`Error compressing ${type}:`, error);
                   }
               }
-
-              return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantId.name}`);
+              const url = await uploadFile(fileToUpload, path);
+              return { type, url };
           })()
       );
-  }
+  };
 
-   
+  if (tenantImage) {
+    addUploadTask(tenantImage, 'tenantImage', `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${tenantUniqueId}`);
+}
+if (tenantId) {
+    addUploadTask(tenantId, 'tenantId', `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${tenantUniqueId}`);
+}
+if (bikeImage) {
+    addUploadTask(bikeImage, 'bikeImage', `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeImage/${tenantUniqueId}`);
+}
+if (bikeRcImage) {
+    addUploadTask(bikeRcImage, 'bikeRcImage', `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeRcImage/${tenantUniqueId}`);
+}
 
-    if (bikeImage) {
-        tasks.push(
-            (async () => {
-                let fileToUpload = bikeImage;
-                if (checkImage(bikeImage.type)) {
-                    console.log("Executing compression for bikeImage");
-                    try {
-                        fileToUpload = await compressImage(bikeImage);
-                    } catch (error) {
-                        console.error("Error compressing bike image:", error);
-                    }
-                }
-                return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeImage/${bikeImage.name}`);
-            })()
-        );
-    }
-
-    if (bikeRcImage) {
-        tasks.push(
-            (async () => {
-                let fileToUpload = bikeRcImage;
-
-                if (checkImage(bikeRcImage.type)) {
-                    console.log("Executing compression for bikeRcImage");
-                    try {
-                        fileToUpload = await compressImage(bikeRcImage);
-                    } catch (error) {
-                        console.error("Error compressing bike RC image:", error);
-                    }
-                }
-                return uploadFile(fileToUpload, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
-            })()
-        );
-    }
 
     try {
-        const [imageUrlToUpdate, idUrlToUpdate, bikeUrlToUpdate, bikeRcUrlToUpdate] = await Promise.all(tasks);
+      const results = await Promise.all(tasks);
+         // Process results
+         results.forEach(({ type, url }) => {
+          uploadResults[type] = url;
+      });
 
-        const tenantData = {
-            roomNo: selectedRoom,
-            bedNo: selectedBed,
-            dateOfJoin,
-            name: name.charAt(0).toUpperCase() + name.slice(1),
-            mobileNo,
-            idNumber,
-            emergencyContact,
-            status,
-            tenantImageUrl: imageUrlToUpdate || tenantImageUrl,
-            tenantIdUrl: idUrlToUpdate || tenantIdUrl,
-            bikeNumber,
-            permnentAddress,
-            bikeImageUrl: bikeUrlToUpdate || bikeImageUrl,
-            bikeRcImageUrl: bikeRcUrlToUpdate || bikeRcImageUrl,
-        };
+      const tenantData = {
+        roomNo: selectedRoom,
+        bedNo: selectedBed,
+        dateOfJoin,
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        mobileNo,
+        idNumber,
+        emergencyContact,
+        status,
+        tenantImageUrl: uploadResults['tenantImage'] || tenantImageUrl,
+        tenantIdUrl: uploadResults['tenantId'] || tenantIdUrl,
+        bikeNumber,
+        permnentAddress,
+        bikeImageUrl: uploadResults['bikeImage'] || bikeImageUrl,
+        bikeRcImageUrl: uploadResults['bikeRcImage'] || bikeRcImageUrl,
+       
+    };
 
         if (isEditing) {
             await update(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${currentId}`), tenantData);
@@ -1022,7 +990,7 @@ Please note that you made your last payment on ${paidDate}.\n`
             });
             fetchData();
         } else {
-            await push(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`), tenantData);
+            await set(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantUniqueId}`), tenantData);
             toast.success(t('toastMessages.tenantAddedSuccess'), {
                 position: "top-center",
                 autoClose: 2000,
