@@ -532,6 +532,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     // }
   };
   const handleGirlsRoomsSubmit = (e) => {
+   
     e.preventDefault();
     const now = new Date().toISOString();
     const newErrors = {};
@@ -1389,6 +1390,31 @@ if (bikeRcImage) {
     }));
   };
 
+  const handleResetMonthly = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee(0);
+    setPaidAmount(0);
+    setDue(0);
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+  };
+
+  const handleResetDaily = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee(0);
+    setPaidAmount(0);
+    setDue(0);
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+  };
 
   const renderFormLayout = () => {
     switch (formLayout) {
@@ -1425,12 +1451,20 @@ if (bikeRcImage) {
         return (
           <div >
             <div className='monthlyDailyButtons'>
-              <div className={showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(true)}>
-                <text>{t('dashboard.monthly')}</text>
-              </div>
-              <div className={!showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(false)}>
-                <text>{t('dashboard.daily')}</text>
-              </div>
+            <div
+  className={showForm ? 'manageRentButton active' : 'manageRentButton'}
+  onClick={() => {setShowForm(true);handleResetMonthly();}}
+>
+  <text>{t('dashboard.monthly')}</text> {/* Using <span> for inline text */}
+</div>
+
+<div
+  className={!showForm ? 'manageRentButton active' : 'manageRentButton'}
+  onClick={() => {setShowForm(false);handleResetDaily();}}
+>
+  <text>{t('dashboard.daily')}</text> {/* Replace <text> with <span> */}
+</div>
+
             </div>
             {showForm ?
               <div className='monthlyAddForm'>
