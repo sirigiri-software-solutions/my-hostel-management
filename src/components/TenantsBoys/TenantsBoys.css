@@ -172,6 +172,8 @@
   }
   .downloadPdfText{
     text-decoration:none;
+    color:#007bff;
+    cursor:pointer;
   }
 
 .Radio {
