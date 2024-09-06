@@ -1210,20 +1210,20 @@ if (bikeRcImage) {
     {
       image: Rooms,
       heading: t('dashboard.totalRooms'),
-      number: `${girlsRooms.length}`,
+      number: `${girlsRooms?.length}`,
       btntext: t('dashboard.addRooms'),
     },
 
     {
       image: Tenants,
       heading: t('dashboard.totalTenants'),
-      number: `${girlsTenants.length}`,
+      number: `${girlsTenants?.length}`,
       btntext: t('dashboard.addTenants'),
     },
     {
       image: Beds,
       heading: t('dashboard.totalBeds'),
-      number: `${totalBeds}/${totalBeds - girlsTenants.length}`,
+      number: `${totalBeds}/${totalBeds - girlsTenants?.length}`,
       btntext: t('dashboard.addRent'),
     },
     {
@@ -1238,7 +1238,7 @@ if (bikeRcImage) {
   const Buttons = ['Add Rooms', 'Add Tenants', 'Add Rent', 'Add Expenses'];
 
   const handleClick = (text) => {
-    if (activeGirlsHostelButtons.length == 0) {
+    if (activeGirlsHostelButtons?.length == 0) {
       toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
@@ -1876,7 +1876,7 @@ if (bikeRcImage) {
 
   return (
     <div className="dashboardgirls">
-      {activeGirlsHostelButtons.length > 0 ? (
+      {activeGirlsHostelButtons?.length > 0 ? (
         <div>
           <h1 className="heading1">{t('dashboard.womens')}</h1>
           <div className={"flex1"}>

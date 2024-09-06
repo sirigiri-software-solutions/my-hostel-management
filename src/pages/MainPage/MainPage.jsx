@@ -37,7 +37,7 @@ import Spinner from 'react-bootstrap/Spinner';
 const MainPage = () => {
   const { t } = useTranslation()
   const [isHostels, setIsHostels] = useState(false)
-  const { activeBoysHostelName, activeGirlsHostelName, activeBoysHostelButtons, activeGirlsHostelButtons, userUid, firebase, activeFlag, changeActiveFlag } = useData();
+  const { activeBoysHostelName, activeGirlsHostelName, entireHMAdata, activeBoysHostelButtons, activeGirlsHostelButtons, userUid, firebase, activeFlag, changeActiveFlag,setUserUid, setEntireHMAdata } = useData();
   const name = localStorage.getItem("username");
   const [isModalOpen1, setIsModalOpen1] = useState(true);
   const { database } = firebase;
@@ -270,8 +270,15 @@ const MainPage = () => {
     localStorage.removeItem('rememberedUserarea');
     localStorage.removeItem('rememberedPassword');
     localStorage.removeItem("accessEnd");
+    localStorage.clear();
+    setUserUid(null)
+    setEntireHMAdata(null)
+    console.log(entireHMAdata, 'k_00100')
+    console.log(userUid, 'k_001010')
     navigate('/');
   };
+  console.log(userUid, 'k_001011x')
+  console.log(entireHMAdata, 'k_00101')
 
 
   const renderWelcomeext = index => {

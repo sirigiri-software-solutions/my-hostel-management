@@ -419,7 +419,7 @@ const RoomsGirls = () => {
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h1 className="modal-title fs-5" id="exampleModalLabel">{t('roomsPage.CreateRoom')}</h1>
+                <h1 className="modal-title fs-5" id="exampleModalLabel">{isEditing ? t('roomsPage.updateRoom') :t('roomsPage.CreateRoom')}</h1>
                 <button onClick={closePopupModal} className="btn-close" aria-label="Close"></button>
               </div>
               <div className="modal-body">
@@ -427,12 +427,12 @@ const RoomsGirls = () => {
                   <form className="row g-3" onSubmit={handleSubmit}>
                     <div className="col-md-6">
                       <label htmlFor="inputNumber" className="form-label">{t('roomsPage.floorNumber')}</label>
-                      <input type="text" className="form-control" id="inputNumber" name="floorNumber" value={floorNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+                      <input type="text" className="form-control" id="inputNumber" name="floorNumber" value={floorNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} disabled={isEditing}/>
                       {errors.floorNumber && <div style={{ color: 'red' }}>{errors.floorNumber}</div>}
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputRent" className="form-label">{t('roomsPage.roomNumber')}</label>
-                      <input type="text" placeholder='like F1, 102, ...etc' className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+                      <input type="text" placeholder='like F1, 102, ...etc' className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} disabled={isEditing}/>
 
                       {errors.roomNumber && <div style={{ color: 'red' }}>{errors.roomNumber}</div>}
                     </div>
