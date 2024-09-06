@@ -1882,7 +1882,7 @@ const DashboardBoys = () => {
                     </div>
                     )}
                      {errors.tenantId && <p style={{ color: 'red' }}>{errors.tenantId}</p>}
-                     {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                     {errorMessage.tenantId && <p style={{ color: 'red' }}>{errorMessage.tenantId}</p>}
             </div>
             <div className='col-md-12'>
               <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>

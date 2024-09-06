@@ -1784,8 +1784,8 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                       {t('dashboard.status')}
                     </label>
                     <select id="tenantStatus" class="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
-                      <option value="occupied">Occupied</option>
-                      <option value="unoccupied">Unoccupied</option>
+                      <option value="occupied">{t('dashboard.occupied')}</option>
+                      <option value="unoccupied">{t('dashboard.unoccupied')}</option>
                     </select>
 
                   </div>
@@ -1835,7 +1835,7 @@ const handleImageDownload = async (e, imageUrl, fileName) => {
                     </div>
                     )}
                     {errors.tenantId && <p style={{ color: 'red' }}>{errors.tenantId}</p>}
-                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                    {errorMessage.tenantId && <p style={{ color: 'red' }}>{errorMessage.tenantId}</p>}
                     
 
                   </div>

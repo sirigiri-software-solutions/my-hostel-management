@@ -184,10 +184,7 @@ const DataProvider = ({ children }) => {
         }))
  
         setActiveBoysHostelButtons(dataBoysHostelButtons)
-      }else{
-        setActiveBoysHostelButtons([]);
       }
-     
  
       // Extracting Girls Hostel buttons
  
@@ -199,8 +196,6 @@ const DataProvider = ({ children }) => {
           name:girlsHostelButtons[key].name
         }))
         setActiveGirlsHostelButtons(dataGirlsHostelButtons);
-      }else{
-        setActiveGirlsHostelButtons([]);
       }
  
  
@@ -221,7 +216,7 @@ const DataProvider = ({ children }) => {
       setGirlsExTenantsData(exTenantsGirlsFormattedData)
    
   }
-}, [entireHMAdata, activeBoysHostel, activeGirlsHostel]);
+}, [entireHMAdata, activeBoysHostel, activeGirlsHostel,  area, defaultArea, userUid]);
  
  
   // end to get entireData

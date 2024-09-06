@@ -1529,8 +1529,59 @@ const handleTenantDownload = async () => {
     }
 
   // Save the PDF
-  doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+  // doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+  // Convert PDF to Blob
+  const pdfOutput = doc.output('blob');
+
+  if (Capacitor.isNativePlatform()) {
+    // Save the PDF file to the mobile device
+    const fileName = `${singleTenantDetails.name}_Complete_Details.pdf`;
+    const filePath = `pdf/${fileName}`;
+
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(pdfOutput);
+      reader.onloadend = async () => {
+        const base64Data = reader.result.split(',')[1];
+
+        await Filesystem.writeFile({
+          path: filePath,
+          data: base64Data,
+          directory: FilesystemDirectory.Documents,
+          recursive: true,
+        });
+
+        const result = await Filesystem.getUri({
+          directory: FilesystemDirectory.Documents,
+          path: filePath,
+        });
+
+        // Optionally open the file using the FileOpener plugin
+        await FileOpener.open({
+          filePath: result.uri,
+          fileMimeType: 'application/pdf',
+        });
+      };
+      reader.onerror = (error) => {
+        console.error('Error converting PDF to base64:', error);
+      };
+    } catch (error) {
+      console.error('Error saving file:', error);
+    }
+  } else {
+    // Save the PDF file for web
+    const url = URL.createObjectURL(pdfOutput);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = `${singleTenantDetails.name}_Complete_Details.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 };
+
+
 
 
 
@@ -1705,7 +1756,7 @@ const handleTenantDownload = async () => {
                     )}
 
                     {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
-                    {errorMessage.tenantImage && <p style={{ color: 'red' }}>{errorMessage.tenantImage}</p>}
+                    {errorMessage?.tenantImage && <p style={{ color: 'red' }}>{errorMessage?.tenantImage}</p>}
                   </div>
                   <div className="col-md-6">
                     <label htmlFor='tenantUploadId' className="form-label">
@@ -1729,7 +1780,7 @@ const handleTenantDownload = async () => {
                     </div>
                     )}
                     {errors.tenantId && <p style={{ color: 'red' }}>{errors.tenantId}</p>}
-                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                    {errorMessage?.tenantId && <p style={{ color: 'red' }}>{errorMessage?.tenantId}</p>}
                     
                   </div>
                   <div className='col-md-12'>
@@ -1784,13 +1835,13 @@ const handleTenantDownload = async () => {
                       <div className="col-md-6">
                         <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
                         <input type="file" className="form-control" accept=".jpg, .jpeg, .png" onChange={handleTenantBikeChange} />
-                        {errorMessage.bikeImage && <p style={{ color: 'red' }}>{errorMessage.bikeImage}</p>}
+                        {errorMessage?.bikeImage && <p style={{ color: 'red' }}>{errorMessage?.bikeImage}</p>}
                         
                       </div>
                       <div className="col-md-6">
                         <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
                         <input type="file" className="form-control" accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantBikeRcChange} />
-                        {errorMessage.bikeRcImage && <p style={{ color: 'red' }}>{errorMessage.bikeRcImage}</p>}
+                        {errorMessage?.bikeRcImage && <p style={{ color: 'red' }}>{errorMessage?.bikeRcImage}</p>}
                       </div>
                     </>
                   )}
