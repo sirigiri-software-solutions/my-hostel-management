@@ -485,7 +485,8 @@ const TenantsBoys = () => {
   const handleEdit = (tenant) => {
     console.log(tenant,"tenantWhileEditing")
     console.log(tenant.tenantImageUrl,"tenantWhileEditing")
-    setSelectedRoom(tenant.roomNo);
+    const matchedRoom = boysRooms.find((room) => room.roomNumber == tenant.roomNo);
+    setSelectedRoom(matchedRoom ? matchedRoom.roomNumber : '');
     setSelectedBed(tenant.bedNo);
     setDateOfJoin(tenant.dateOfJoin);
     setName(tenant.name);

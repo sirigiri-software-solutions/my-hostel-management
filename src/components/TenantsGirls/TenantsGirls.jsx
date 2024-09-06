@@ -582,7 +582,8 @@ if (bikeRcImage) {
 
   const handleEdit = (tenant) => {
     console.log(tenant, "ttt")
-    setSelectedRoom(tenant.roomNo);
+    const matchedRoom = girlsRooms.find((room) => room.roomNumber == tenant.roomNo);
+    setSelectedRoom(matchedRoom ? matchedRoom.roomNumber : '');
     setSelectedBed(tenant.bedNo);
     setDateOfJoin(tenant.dateOfJoin);
     setName(tenant.name);
