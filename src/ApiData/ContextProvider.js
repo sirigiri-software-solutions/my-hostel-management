@@ -176,31 +176,36 @@ const DataProvider = ({ children }) => {
       // Extracting Boys Hostel buttons
  
       const boysHostelButtons = entireHMAdata[userUid]?.boys;
-   
-      if(boysHostelButtons){
+      console.log(entireHMAdata, 'k_0011')
+      console.log(entireHMAdata[userUid], 'k_0012')
+      console.log(userUid, 'k_0013')
+      console.log(boysHostelButtons, "k_001")
+      if(boysHostelButtons && boysHostelButtons != undefined && boysHostelButtons != null){
         const dataBoysHostelButtons = Object.keys(boysHostelButtons).map(key => ({
           id:key,
           name:boysHostelButtons[key].name
         }))
- 
+        console.log(dataBoysHostelButtons, "k_002")
+        console.log(dataBoysHostelButtons.length, "k_003")
         setActiveBoysHostelButtons(dataBoysHostelButtons)
+        
       }else{
-        setActiveBoysHostelButtons([]);
+        setActiveBoysHostelButtons([])
       }
-     
+      
  
       // Extracting Girls Hostel buttons
  
       const girlsHostelButtons = entireHMAdata[userUid]?.girls;
- 
-      if(girlsHostelButtons){
+ console.log(girlsHostelButtons , "hhh")
+      if(girlsHostelButtons && girlsHostelButtons != undefined && girlsHostelButtons != null){
         const dataGirlsHostelButtons = Object.keys(girlsHostelButtons).map(key => ({
           id:key,
           name:girlsHostelButtons[key].name
         }))
         setActiveGirlsHostelButtons(dataGirlsHostelButtons);
       }else{
-        setActiveGirlsHostelButtons([]);
+        setActiveGirlsHostelButtons([])
       }
  
  
@@ -221,13 +226,15 @@ const DataProvider = ({ children }) => {
       setGirlsExTenantsData(exTenantsGirlsFormattedData)
    
   }
-}, [entireHMAdata, activeBoysHostel, activeGirlsHostel]);
+}, [entireHMAdata, activeBoysHostel, activeGirlsHostel, area, defaultArea, userUid]);
  
  
   // end to get entireData
  
- 
- 
+  console.log(activeBoysHostelButtons, "k_004")
+  console.log(activeBoysHostelButtons.length, "k_005")
+ console.log(userUid, "k_006")
+ console.log(entireHMAdata, 'k_007')
  
   useEffect(() => {
     setFirebase(firebaseInstances[area]);
@@ -306,7 +313,7 @@ const DataProvider = ({ children }) => {
   useEffect(() => {
     fetchData();
 }, [userUid, userarea, completeData, defaultArea]);
- 
+console.log(entireHMAdata, "entire")
   return (
     <DataContext.Provider
      value={{

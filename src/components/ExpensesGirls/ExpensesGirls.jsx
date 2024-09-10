@@ -221,9 +221,7 @@ window.addEventListener('keydown',handleOutsideClick);
     if(totalExpensesOfhostel){
       const yearsMonth =  Object.keys(totalExpensesOfhostel)
 
-      const expenseYears = yearsMonth.map(item => parseInt(item.split('-')[0], 10));
-      
-      
+      const expenseYears = yearsMonth.map(item => parseInt(item.split('-')[0], 10));  
       const currentYear = new Date().getFullYear();
       const earliestYear = Math.min(currentYear, ...expenseYears);
       const latestYear = Math.max(currentYear, ...expenseYears);
@@ -231,10 +229,6 @@ window.addEventListener('keydown',handleOutsideClick);
       for (let yr = earliestYear; yr <= latestYear; yr++) {
           years.push(yr);
       }
-      
-      
-          
-       
            setYearsList(years);
       
     } 
@@ -602,7 +596,7 @@ const handleExpensesFocus = (e) => {
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputRent" className="form-label">{t('expensesPage.expenseAmount')} :</label>
-                      <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+                      <input type="text" className="form-control" name="expenseAmount" value={formData.expenseAmount} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} onChange={handleInputChange}  onFocus={handleExpensesFocus} />
                       {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
                     </div>
                     <div className="col-md-6">

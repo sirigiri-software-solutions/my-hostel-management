@@ -119,6 +119,9 @@
     flex-direction:column;
     justify-content:center;
   }
+  .close-icon{
+    display:none;
+  }
   .tenants-popup-heading{
     font-size:28px;
     font-weight:bold;
@@ -135,9 +138,18 @@
       align-items:center;
     }
     .tenants-dialog-container{
-      width:300px;
-      height:700px;
-      top:100%;
+      width:290px;
+      height:770px;
+      top:105%;
+      z-index:999;
+    }
+    .close-icon {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size:30px;
+      cursor: pointer;
+      display:inline-block;
     }
   }
   .tenants-profile-container{
@@ -172,6 +184,8 @@
   }
   .downloadPdfText{
     text-decoration:none;
+    color:#007bff;
+    cursor:pointer;
   }
 
 .Radio {

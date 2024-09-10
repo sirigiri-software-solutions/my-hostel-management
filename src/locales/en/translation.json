@@ -123,6 +123,7 @@
   "Update Room": "Update Room",
   "Delete Room": "Delete Room",
   "CreateRoom": "Create Room",
+ "updateRoom":"Update Room",
   "Last Updated:": "Last Updated:",
   "Create Rooms": "Create Rooms",
   "Are you sure you want to delete the room with number": "Are you sure you want to delete the room with number",
@@ -198,7 +199,8 @@
   "BikeRc": "Bike RC:",
   "DownloadPic": "Download Pic",
   "DownloadRc": "Download RC",
-  "NotUploaded": "Not Uploaded"
+  "NotUploaded": "Not Uploaded",
+  "downloading":"Downloading..."
 
         
     },

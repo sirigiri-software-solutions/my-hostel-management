@@ -36,7 +36,6 @@ const RoomsGirls = () => {
   const [showModal, setShowModal] = useState(false);
   const [roomToDelete, setRoomToDelete] = useState({ roomNumber: '', currentId: '' });
 
-
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (showModal && (event.target.id === "exampleModalGirls" || event.key === "Escape")) {
@@ -172,10 +171,11 @@ const RoomsGirls = () => {
   };
   const [showConfirmationPopUp, setShowConfirmationPopUp] = useState(false);
 
-  const handleDeleteRoom = (id, roomNumber) => {
-    setRoomToDelete({ roomNumber, currentId: id });
+  const handleDeleteRoom = (roomNumber, currentId) => {
+
     setShowConfirmationPopUp(true);
     setShowModal(false);
+    setRoomToDelete({ roomNumber, currentId });
   };
   
 
@@ -190,65 +190,6 @@ const RoomsGirls = () => {
     }
     return false; // No room found
   };
-
-  // const confirmDeleteYes =async  () => {
-
-  //   try {
-  //     const path = `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`;
-  //     const dbRef = ref(database, path);
-  //     const snapshot = await get(dbRef);
-  //     if (snapshot.exists()) {
-  //       const data = snapshot.val();
-  //       const exists = roomExists(data, roomNumber);
-  //       if(!exists){
-  //         const roomRef =  ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`);
-  //             remove(roomRef).then(() => {
-  //               toast.success("Room deleted successfully.", {
-  //                 position: "top-center",
-  //                 autoClose: 2000,
-  //                 hideProgressBar: false,
-  //                 closeOnClick: true,
-  //                 pauseOnHover: true,
-  //                 draggable: true,
-  //                 progress: undefined,
-  //               });
-  //               fetchData()
-  //             }).catch(error => {
-  //               toast.error("Error deleting room: " + error.message, {
-  //                 position: "top-center",
-  //                 autoClose: 2000,
-  //                 hideProgressBar: false,
-  //                 closeOnClick: true,
-  //                 pauseOnHover: true,
-  //                 draggable: true,
-  //                 progress: undefined,
-  //               });
-  //             });
-  //             setShowConfirmationPopUp(false);
-  //       }else{
-  //         toast.error("Tenants are there you can't delete room until those are trasfered to other room", {
-  //           position: "top-center",
-  //           autoClose: 5000,
-  //           hideProgressBar: false,
-  //           closeOnClick: true,
-  //           pauseOnHover: true,
-  //           draggable: true,
-  //           progress: undefined,
-  //         });
-  //         setShowConfirmationPopUp(false);
-
-  //       }
-
-  //     } else {
-  //       console.log('No data available');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-
-  // }
-
-
 
 
   const confirmDeleteYes = async () => {
@@ -278,9 +219,7 @@ const RoomsGirls = () => {
             progress: undefined,
           });
   
-          // Update the table data
-          setInitialRows(prevRows => prevRows.filter(row => row.currentId !== currentId));
-  
+          fetchData(); // Refresh data after deletion
         } else {
           toast.error("Room cannot be deleted as it has tenants. Please transfer the tenants first.", {
             position: "top-center",
@@ -306,8 +245,7 @@ const RoomsGirls = () => {
           progress: undefined,
         });
   
-        // Update the table data
-        setInitialRows(prevRows => prevRows.filter(row => row.currentId !== currentId));
+        fetchData(); // Refresh data after deletion
       }
     } catch (error) {
       console.error("Error deleting room: ", error);
@@ -324,13 +262,6 @@ const RoomsGirls = () => {
   
     setShowConfirmationPopUp(false);
   };
-  
-  
-  
-  
-  
-  
-
 
 
   const confirmDeleteNo = () => {
@@ -490,7 +421,7 @@ const RoomsGirls = () => {
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h1 className="modal-title fs-5" id="exampleModalLabel">{t('roomsPage.CreateRoom')}</h1>
+                <h1 className="modal-title fs-5" id="exampleModalLabel">{isEditing ? t('roomsPage.updateRoom') :t('roomsPage.CreateRoom')}</h1>
                 <button onClick={closePopupModal} className="btn-close" aria-label="Close"></button>
               </div>
               <div className="modal-body">
@@ -498,12 +429,12 @@ const RoomsGirls = () => {
                   <form className="row g-3" onSubmit={handleSubmit}>
                     <div className="col-md-6">
                       <label htmlFor="inputNumber" className="form-label">{t('roomsPage.floorNumber')}</label>
-                      <input type="text" className="form-control" id="inputNumber" name="floorNumber" value={floorNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+                      <input type="text" className="form-control" id="inputNumber" name="floorNumber" value={floorNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} disabled={isEditing}/>
                       {errors.floorNumber && <div style={{ color: 'red' }}>{errors.floorNumber}</div>}
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputRent" className="form-label">{t('roomsPage.roomNumber')}</label>
-                      <input type="text" placeholder='like F1, 102, ...etc' className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+                      <input type="text" placeholder='like F1, 102, ...etc' className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} disabled={isEditing}/>
 
                       {errors.roomNumber && <div style={{ color: 'red' }}>{errors.roomNumber}</div>}
                     </div>
@@ -524,7 +455,7 @@ const RoomsGirls = () => {
                       {isEditing ? (
                         <>
                           <button type="button" className="btn btn-warning roomUpdateBtn" onClick={handleSubmit}>{t('roomsPage.Update Room')}</button>
-                          <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(currentId)}>{t('roomsPage.Delete Room')}</button>
+                          <button type="button" className='btn btn-warning' onClick={() => handleDeleteRoom(roomNumber, currentId)}>{t('roomsPage.Delete Room')}</button>
                         </>
                       ) : (
                         <button type="submit" className="btn btn-warning">{t('roomsPage.CreateRoom')}</button>

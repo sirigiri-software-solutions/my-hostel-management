@@ -37,7 +37,7 @@ import Spinner from 'react-bootstrap/Spinner';
 const MainPage = () => {
   const { t } = useTranslation()
   const [isHostels, setIsHostels] = useState(false)
-  const { activeBoysHostelName, activeGirlsHostelName, activeBoysHostelButtons, activeGirlsHostelButtons, userUid, firebase, activeFlag, changeActiveFlag } = useData();
+  const { activeBoysHostelName, activeGirlsHostelName, entireHMAdata, activeBoysHostelButtons, activeGirlsHostelButtons, userUid, firebase, activeFlag, changeActiveFlag,setUserUid, setEntireHMAdata } = useData();
   const name = localStorage.getItem("username");
   const [isModalOpen1, setIsModalOpen1] = useState(true);
   const { database } = firebase;
@@ -86,7 +86,7 @@ const MainPage = () => {
     });
   }, [isModalOpen1]);
 
-
+  console.log(activeBoysHostelButtons.length,"area", "length")
   // useEffect(() => {
   //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
   //   onValue(tenantsRef, (snapshot) => {
@@ -262,7 +262,7 @@ const MainPage = () => {
   }, [navigate, flag]);
 
   const logout = () => {
-    localStorage.removeItem('username');
+    localStorage.removeItem('username'); //
     localStorage.removeItem('userarea');
     localStorage.removeItem('role');
     localStorage.removeItem('userUid');
@@ -270,8 +270,13 @@ const MainPage = () => {
     localStorage.removeItem('rememberedUserarea');
     localStorage.removeItem('rememberedPassword');
     localStorage.removeItem("accessEnd");
+    localStorage.clear();
+    setUserUid(null)
     navigate('/');
+    // setLogoutFlag(true);
   };
+  console.log(userUid, 'k_001011x')
+  console.log(entireHMAdata, 'k_00101')
 
 
   const renderWelcomeext = index => {

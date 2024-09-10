@@ -7,7 +7,7 @@ import './DashboardBoys.css'
 import SmallCard from '../../Elements/SmallCard'
 import PlusIcon from "../../images/Icons (8).png"
 import { push, ref } from "../../firebase/firebase"
-import { onValue, update } from 'firebase/database'
+import { onValue, update,set } from 'firebase/database'
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { Modal, Button } from 'react-bootstrap';
@@ -17,7 +17,7 @@ import { useData } from '../../ApiData/ContextProvider';
 import Spinner from '../../Elements/Spinner';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
-
+import { v4 as uuidv4 } from 'uuid';
 
 const DashboardBoys = () => {
 
@@ -327,7 +327,7 @@ const DashboardBoys = () => {
 
   useEffect(() => {
     const tenantIdsWithRents = boysTenantsWithRents.flatMap(tenant =>
-      tenant.rents.length > 0 ? [tenant.id] : []
+      tenant.rents?.length > 0 ? [tenant.id] : []
     );
 
     const availableTenants = boysTenants.filter(
@@ -555,9 +555,14 @@ const DashboardBoys = () => {
     setShowModal(false);
     
   };
-
-
-  const totalBeds = boysRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
+const [totalBeds, setTotalBeds] = useState(0);
+useEffect(()=>{
+  if(boysRooms){
+    const totalBeds = boysRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
+    setTotalBeds(totalBeds)
+  }
+}, [userUid, entireHMAdata, activeBoysHostel, boysRooms, boysTenants])
+  
 
 
 
@@ -840,6 +845,8 @@ const DashboardBoys = () => {
     setShowModal(false);
     setLoading(true);
 
+    const tenantUniqueId = isEditing ? currentId : uuidv4();
+
     // Helper function to upload a file and return its URL
     const uploadFile = async (file, path) => {
         try {
@@ -853,97 +860,64 @@ const DashboardBoys = () => {
     };
 
     const tasks = [];
+    const uploadResults = {};
 
-    if (tenantImage) {
-        tasks.push(
-            (async () => {
-                let fileToUpload = tenantImage;
-                console.log(tenantImage,"whatisComing")
-                if (checkImage(tenantImage.type)) {
-                    console.log("Executing compression for tenantImage");
-                    try {
-                        fileToUpload = await compressImage(tenantImage);
-                    } catch (error) {
-                        console.error("Error compressing tenant image:", error);
-                    }
-                }
-                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
-            })()
-        );
-    }
-    if (tenantId) {
+    const addUploadTask = (file, type, path) => {
       tasks.push(
           (async () => {
-              let fileToUpload = tenantId;
-
-              if (checkImage(tenantId.type)) {
-                  console.log("Executing compression for tenantId");
+              let fileToUpload = file;
+              if (checkImage(file.type)) {
+                  console.log(`Executing compression for ${type}`);
                   try {
-                      fileToUpload = await compressImage(tenantId);
+                      fileToUpload = await compressImage(file);
                   } catch (error) {
-                      console.error("Error compressing tenant ID image:", error);
+                      console.error(`Error compressing ${type}:`, error);
                   }
               }
-
-              return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
+              const url = await uploadFile(fileToUpload, path);
+              return { type, url };
           })()
       );
-  }
+  };
 
-    if (bikeImage) {
-        tasks.push(
-            (async () => {
-                let fileToUpload = bikeImage;
-                if (checkImage(bikeImage.type)) {
-                    console.log("Executing compression for bikeImage");
-                    try {
-                        fileToUpload = await compressImage(bikeImage);
-                    } catch (error) {
-                        console.error("Error compressing bike image:", error);
-                    }
-                }
-                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${bikeImage.name}`);
-            })()
-        );
-    }
+  if (tenantImage) {
+    addUploadTask(tenantImage, 'tenantImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantUniqueId}`);
+}
+if (tenantId) {
+    addUploadTask(tenantId, 'tenantId', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantUniqueId}`);
+}
+if (bikeImage) {
+    addUploadTask(bikeImage, 'bikeImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${tenantUniqueId}`);
+}
+if (bikeRcImage) {
+    addUploadTask(bikeRcImage, 'bikeRcImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${tenantUniqueId}`);
+}
 
-    if (bikeRcImage) {
-        tasks.push(
-            (async () => {
-                let fileToUpload = bikeRcImage;
-
-                if (checkImage(bikeRcImage.type)) {
-                    console.log("Executing compression for bikeRcImage");
-                    try {
-                        fileToUpload = await compressImage(bikeRcImage);
-                    } catch (error) {
-                        console.error("Error compressing bike RC image:", error);
-                    }
-                }
-                return uploadFile(fileToUpload, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${bikeRcImage.name}`);
-            })()
-        );
-    }
 
     try {
-        const [imageUrlToUpdate, idUrlToUpdate, bikeUrlToUpdate, bikeRcUrlToUpdate] = await Promise.all(tasks);
+      const results = await Promise.all(tasks);
+// Process results
+results.forEach(({ type, url }) => {
+  uploadResults[type] = url;
+});
 
-        const tenantData = {
-            roomNo: selectedRoom,
-            bedNo: selectedBed,
-            dateOfJoin,
-            name: name.charAt(0).toUpperCase() + name.slice(1),
-            mobileNo,
-            idNumber,
-            emergencyContact,
-            status,
-            tenantImageUrl: imageUrlToUpdate || tenantImageUrl,
-            tenantIdUrl: idUrlToUpdate || tenantIdUrl,
-            bikeNumber,
-            permnentAddress,
-            bikeImageUrl: bikeUrlToUpdate || bikeImageUrl,
-            bikeRcImageUrl: bikeRcUrlToUpdate || bikeRcImageUrl,
-        };
+const tenantData = {
+  roomNo: selectedRoom,
+  bedNo: selectedBed,
+  dateOfJoin,
+  name: name.charAt(0).toUpperCase() + name.slice(1),
+  mobileNo,
+  idNumber,
+  emergencyContact,
+  status,
+  tenantImageUrl: uploadResults['tenantImage'] || tenantImageUrl,
+  tenantIdUrl: uploadResults['tenantId'] || tenantIdUrl,
+  bikeNumber,
+  permnentAddress,
+  bikeImageUrl: uploadResults['bikeImage'] || bikeImageUrl,
+  bikeRcImageUrl: uploadResults['bikeRcImage'] || bikeRcImageUrl,
+ 
+};
 
         if (isEditing) {
             await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
@@ -958,7 +932,7 @@ const DashboardBoys = () => {
             });
             fetchData()
         } else {
-            await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData);
+            await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
             toast.success(t('toastMessages.tenantAddedSuccess'), {
                 position: "top-center",
                 autoClose: 2000,
@@ -1168,20 +1142,20 @@ const DashboardBoys = () => {
     {
       image: Rooms,
       heading: t('dashboard.totalRooms'),
-      number: `${boysRooms.length}`,
+      number: `${boysRooms?.length}`,
       btntext: t('dashboard.addRooms'),
     },
 
     {
       image: Tenants,
       heading: t('dashboard.totalTenants'),
-      number: `${boysTenants.length}`,
+      number: `${boysTenants?.length}`,
       btntext: t('dashboard.addTenants'),
     },
     {
       image: Beds,
       heading: t('dashboard.totalBeds'),
-      number: `${totalBeds}/${totalBeds - boysTenants.length}`,
+      number: `${totalBeds}/${totalBeds - boysTenants?.length}`,
       btntext: t('dashboard.addRent'),
     },
     {
@@ -1195,7 +1169,7 @@ const DashboardBoys = () => {
   const Buttons = ['Add Rooms', 'Add Tenants', 'Add Rent', 'Add Expenses'];
 
   const handleClick = (text) => {
-    if (activeBoysHostelButtons.length === 0) {
+    if (activeBoysHostelButtons?.length === 0) {
       toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
@@ -1342,6 +1316,31 @@ const DashboardBoys = () => {
     }));
   };
 
+  const handleResetMonthly = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee(0);
+    setPaidAmount(0);
+    setDue(0);
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+  };
+
+  const handleResetDaily = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee(0);
+    setPaidAmount(0);
+    setDue(0);
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+  };
 
   const renderFormLayout = () => {
     switch (formLayout) {
@@ -1378,12 +1377,25 @@ const DashboardBoys = () => {
         return (
           <div>
             <div className='monthlyDailyButtons'>
-              <div className={showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(true)}>
-                <text>{t('dashboard.monthly')}</text>
-              </div>
-              <div className={!showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(false)}>
-                <text>{t('dashboard.daily')}</text>
-              </div>
+            <div
+  className={showForm ? 'manageRentButton active' : 'manageRentButton'}
+  onClick={() => {
+    setShowForm(true);
+    handleResetMonthly();
+  }}
+>
+<text>{t('dashboard.monthly')}</text>
+</div>
+             
+<div
+  className={!showForm ? 'manageRentButton active' : 'manageRentButton'}
+  onClick={() => {
+    setShowForm(false);
+    handleResetDaily();
+  }}
+>
+  <text>{t('dashboard.daily')}</text> {/* Changed <text> to <span> as <text> is not a valid HTML element */}
+</div>
             </div>
             {showForm ?
               <div className='monthlyAddForm'>
@@ -1827,7 +1839,7 @@ const DashboardBoys = () => {
   return (
     <div className="dashboardboys">
       
-      {activeBoysHostelButtons.length > 0 ? (
+      {activeBoysHostelButtons?.length > 0 ? (
         <div>
           <h1 className="heading">{t('dashboard.mens')}</h1>
        
