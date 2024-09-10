@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 
 const RentPageGirls = () => {
   const { t } = useTranslation();
+  
   const {
     activeGirlsHostel,
     userUid,

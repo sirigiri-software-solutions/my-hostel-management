@@ -5,11 +5,12 @@ import './RoomsGirls.css';
 import Table from '../../Elements/Table';
 import { push, ref } from "../../firebase/firebase";
 import { DataContext } from '../../ApiData/ContextProvider';
-import { onValue, remove, update,get } from 'firebase/database';
+import { onValue, remove, update, get } from 'firebase/database';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from 'react-i18next';
 import { useData } from '../../ApiData/ContextProvider';
+
 
 const RoomsGirls = () => {
   const { t } = useTranslation();
@@ -33,6 +34,7 @@ const RoomsGirls = () => {
   const [updateDate, setUpdateDate] = useState('');
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState({ roomNumber: '', currentId: '' });
 
 
   useEffect(() => {
@@ -164,16 +166,18 @@ const RoomsGirls = () => {
     }
     setShowModal(false);
     resetForm();
-    setUpdateDate(now); 
+    setUpdateDate(now);
     setErrors({});
+
   };
   const [showConfirmationPopUp, setShowConfirmationPopUp] = useState(false);
 
-  const handleDeleteRoom = (id) => {
-
+  const handleDeleteRoom = (id, roomNumber) => {
+    setRoomToDelete({ roomNumber, currentId: id });
     setShowConfirmationPopUp(true);
     setShowModal(false);
   };
+  
 
   const roomExists = (data, targetRoomNo) => {
     for (const key in data) {
@@ -187,42 +191,98 @@ const RoomsGirls = () => {
     return false; // No room found
   };
 
-  const confirmDeleteYes =async  () => {
+  // const confirmDeleteYes =async  () => {
 
+  //   try {
+  //     const path = `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`;
+  //     const dbRef = ref(database, path);
+  //     const snapshot = await get(dbRef);
+  //     if (snapshot.exists()) {
+  //       const data = snapshot.val();
+  //       const exists = roomExists(data, roomNumber);
+  //       if(!exists){
+  //         const roomRef =  ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`);
+  //             remove(roomRef).then(() => {
+  //               toast.success("Room deleted successfully.", {
+  //                 position: "top-center",
+  //                 autoClose: 2000,
+  //                 hideProgressBar: false,
+  //                 closeOnClick: true,
+  //                 pauseOnHover: true,
+  //                 draggable: true,
+  //                 progress: undefined,
+  //               });
+  //               fetchData()
+  //             }).catch(error => {
+  //               toast.error("Error deleting room: " + error.message, {
+  //                 position: "top-center",
+  //                 autoClose: 2000,
+  //                 hideProgressBar: false,
+  //                 closeOnClick: true,
+  //                 pauseOnHover: true,
+  //                 draggable: true,
+  //                 progress: undefined,
+  //               });
+  //             });
+  //             setShowConfirmationPopUp(false);
+  //       }else{
+  //         toast.error("Tenants are there you can't delete room until those are trasfered to other room", {
+  //           position: "top-center",
+  //           autoClose: 5000,
+  //           hideProgressBar: false,
+  //           closeOnClick: true,
+  //           pauseOnHover: true,
+  //           draggable: true,
+  //           progress: undefined,
+  //         });
+  //         setShowConfirmationPopUp(false);
+
+  //       }
+
+  //     } else {
+  //       console.log('No data available');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error);
+  //   }
+
+  // }
+
+
+
+
+  const confirmDeleteYes = async () => {
+    const { roomNumber, currentId } = roomToDelete;
+  
     try {
-      const path = `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`;
-      const dbRef = ref(database, path);
-      const snapshot = await get(dbRef);
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const exists = roomExists(data, roomNumber);
-        if(!exists){
-          const roomRef =  ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`);
-              remove(roomRef).then(() => {
-                toast.success("Room deleted successfully.", {
-                  position: "top-center",
-                  autoClose: 2000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                });
-                fetchData()
-              }).catch(error => {
-                toast.error("Error deleting room: " + error.message, {
-                  position: "top-center",
-                  autoClose: 2000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                });
-              });
-              setShowConfirmationPopUp(false);
-        }else{
-          toast.error("Tenants are there you can't delete room until those are trasfered to other room", {
+      const tenantsPath = `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`;
+      const tenantsSnapshot = await get(ref(database, tenantsPath));
+  
+      if (tenantsSnapshot.exists()) {
+        const tenantsData = tenantsSnapshot.val();
+  
+        // Check if any tenant is in the room to be deleted
+        const roomHasTenants = Object.values(tenantsData).some(tenant => tenant.roomNo === roomNumber);
+  
+        if (!roomHasTenants) {
+          // Room has no tenants, proceed to delete the room
+          await remove(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`));
+  
+          toast.success("Room deleted successfully!", {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+  
+          // Update the table data
+          setInitialRows(prevRows => prevRows.filter(row => row.currentId !== currentId));
+  
+        } else {
+          toast.error("Room cannot be deleted as it has tenants. Please transfer the tenants first.", {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,
@@ -231,18 +291,46 @@ const RoomsGirls = () => {
             draggable: true,
             progress: undefined,
           });
-          setShowConfirmationPopUp(false);
-
         }
-       
       } else {
-        console.log('No data available');
+        // No tenants found, safe to delete the room
+        await remove(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`));
+  
+        toast.success("Room deleted successfully!", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+  
+        // Update the table data
+        setInitialRows(prevRows => prevRows.filter(row => row.currentId !== currentId));
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error deleting room: ", error);
+      toast.error("Failed to delete room. Please try again.", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
-   
-  }
+  
+    setShowConfirmationPopUp(false);
+  };
+  
+  
+  
+  
+  
+  
+
 
 
   const confirmDeleteNo = () => {
