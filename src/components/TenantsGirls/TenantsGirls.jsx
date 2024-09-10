@@ -20,9 +20,12 @@ import { faCamera } from '@fortawesome/free-solid-svg-icons';
 
 import Spinner from '../../Elements/Spinner'
 import { Capacitor } from '@capacitor/core';
-import { Filesystem, FilesystemDirectory } from '@capacitor/filesystem';
+import { Filesystem, FilesystemDirectory,Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 import jsPDF from 'jspdf';
+import { isPlatform } from '@ionic/react';
+import { Browser } from '@capacitor/browser';
+import { saveAs } from 'file-saver'; // For web download
 
 import imageCompression from 'browser-image-compression';
 import { v4 as uuidv4 } from 'uuid';
@@ -103,6 +106,12 @@ const TenantsGirls = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [photoUrl, setPhotoUrl] = useState(null);
   const [idUrl,setIdUrl]=useState(null);
+  const [isFileUploaded, setIsFileUploaded] = useState(false); // For disabling camera when file is uploaded
+const [isCameraUsed, setIsCameraUsed] = useState(false); // For disabling file input when camera is used
+const [isTenantIdFileUploaded, setIsTenantIdFileUploaded] = useState(false); // Disable camera if file uploaded
+const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false); 
+const [photoSource, setPhotoSource] = useState(null); // Track if photo is from file or camera
+
   useEffect(() => {
     // Check if the user agent is a mobile device
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -172,6 +181,10 @@ const TenantsGirls = () => {
         console.error("Camera access is not supported on your device.");
         return;
     }
+    if (isFileUploaded) {
+      setErrors({ tenantImage: "You've already uploaded a photo from the file manager." });
+      return;
+  }
     try {
         const photo = await Camera.getPhoto({
             quality: 90,
@@ -195,10 +208,14 @@ const TenantsGirls = () => {
       };
         const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${blob.name}`);
         setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
-
+        setIsCameraUsed(true); // Disable file input
+        setIsFileUploaded(false); // Reset file upload state
+        setPhotoSource("camera");
+        
     } catch (error) {
         console.error("Error accessing the camera", error);
-        toast.error(t('toastMessages.imageNotUploaded'));    }
+        // toast.error(t('toastMessages.imageNotUploaded'));    
+      }
 }
   // const takeidPicture = async () => {
 
@@ -264,6 +281,10 @@ const TenantsGirls = () => {
         console.error("Camera access is not supported on your device.");
         return;
     }
+    if (isTenantIdFileUploaded) {
+      setErrors({ tenantId: "You've already uploaded an ID photo from the file manager." });
+      return;
+  }
     try {
         const photo = await Camera.getPhoto({
             quality: 90,
@@ -287,9 +308,12 @@ const TenantsGirls = () => {
       };
         const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${blob.name}`);
         setIdUrl(uploadedUrl); // Set the uploaded URL to display the image
+        setIsTenantIdCameraUsed(true); // Disable file input
+        setIsTenantIdFileUploaded(false);
     } catch (error) {
         console.error("Error accessing the camera", error);
-        toast.error(t('toastMessages.imageNotUploaded'));    }
+        // toast.error(t('toastMessages.imageNotUploaded'));   
+       }
 }
 
   const handleCheckboxChange = (e) => {
@@ -545,6 +569,8 @@ const TenantsGirls = () => {
       if (validFormats.includes(file.type)) {
         setTenantImage(file);
         setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' })); 
+        setIsTenantIdCameraUsed(true); // Disable file input
+        setIsTenantIdFileUploaded(false);
       } else {
         setErrorMessage((prevErrors) => ({
           ...prevErrors,
@@ -564,6 +590,8 @@ const TenantsGirls = () => {
         if (file.size <= maxSize) {
           setTenantId(file);
           setErrorMessage((prevErrors) => ({ ...prevErrors, tenantId: '' }));
+          setIsTenantIdFileUploaded(true);  // Disable camera
+          setIsTenantIdCameraUsed(false);  
         } else {
           setErrorMessage((prevErrors) => ({
             ...prevErrors,
@@ -579,6 +607,9 @@ const TenantsGirls = () => {
         e.target.value = null;
       }
     }
+    else if (isCameraUsed) {
+      setErrors({ tenantImage: "You've already taken a photo using the camera." });
+  }
   };
 
 
@@ -1480,18 +1511,48 @@ const createPDFWithImage = async (imageUrl) => {
 };
 
 
-const handleDownload = async (url, type,tenantName) => {
-  setDownloadStatus(prev => ({ ...prev, [type]: true }));
+// const handleDownload = async (url, type,tenantName) => {
+//   setDownloadStatus(prev => ({ ...prev, [type]: true }));
   
+//   try {
+//     const response = await getContentType(url);
+//     console.log(response, "downloadIssue");
+    
+//     if (isImage(response)) {
+//       const imageUrl = await createPDFWithImage(url);
+//       const doc = new jsPDF();
+//       doc.addImage(imageUrl, "PNG", 20, 20, 100, 100);
+//       doc.save(`${tenantName} ${type}.pdf`);
+//     } else if (isPDF(response)) {
+//       const images = await pdfToImages(url);
+//       const doc = new jsPDF();
+//       images.forEach((img, index) => {
+//         if (index > 0) doc.addPage();
+//         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+//         doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+//       });
+//       doc.save(`${tenantName} ${type}.pdf`);
+//     }
+//   } catch (error) {
+//     console.error("Download error:", error);
+//   } finally {
+//     setDownloadStatus(prev => ({ ...prev, [type]: false }));
+//   }
+// };
+ 
+const handleDownload = async (url, type, tenantName) => {
+  setDownloadStatus(prev => ({ ...prev, [type]: true }));
+
   try {
     const response = await getContentType(url);
     console.log(response, "downloadIssue");
-    
+
+    let fileData;
+    let fileType;
+
     if (isImage(response)) {
-      const imageUrl = await createPDFWithImage(url);
-      const doc = new jsPDF();
-      doc.addImage(imageUrl, "PNG", 20, 20, 100, 100);
-      doc.save(`${tenantName} ${type}.pdf`);
+      fileData = await fetch(url).then(res => res.blob());
+      fileType = 'image/png';
     } else if (isPDF(response)) {
       const images = await pdfToImages(url);
       const doc = new jsPDF();
@@ -1500,16 +1561,57 @@ const handleDownload = async (url, type,tenantName) => {
         const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
         doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
       });
-      doc.save(`${tenantName} ${type}.pdf`);
+      fileData = doc.output('blob'); // Generate blob for PDF
+      fileType = 'application/pdf';
     }
+
+    const fileName = `${tenantName}_${type}.${isImage(response) ? 'png' : 'pdf'}`;
+
+    if (isPlatform('hybrid')) {
+      // Convert blob to base64 for Capacitor's Filesystem
+      const reader = new FileReader();
+      reader.readAsDataURL(fileData);
+      reader.onloadend = async () => {
+        const base64Data = reader.result.split(',')[1];
+
+        // Save the file on the mobile device
+        await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Documents,
+        });
+
+        const result = await Filesystem.getUri({
+          directory: Directory.Documents,
+          path: fileName,
+        });
+
+        // Open the file using FileOpener for local viewing
+        await FileOpener.open({
+          path: result.uri,
+          mimeType: fileType
+        })
+        .then(() => console.log("File opened successfully"))
+        .catch(e => console.error("File opening error", e));
+      };
+    } else {
+      // For web download
+      const blobUrl = URL.createObjectURL(fileData);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+    }
+
   } catch (error) {
     console.error("Download error:", error);
   } finally {
     setDownloadStatus(prev => ({ ...prev, [type]: false }));
   }
 };
- 
-
 
   return (
     <>
@@ -1869,7 +1971,8 @@ const handleDownload = async (url, type,tenantName) => {
             </div>
             <div className='popup-tenants-closeBtn'>
               <button className='btn btn-warning' onClick={tenantPopupClose}>{t('tenantsPage.close')}</button>
-              <button id="downloadPdfBtn" className='btn btn-warning' onClick={handleTenantDownload}><FaDownload /> {t('tenantsPage.downloadPdf')}</button>
+              {/* <button id="downloadPdfBtn" className='btn btn-warning' onClick={handleGirlTenantDownload}><FaDownload /> {t('tenantsPage.downloadPdf')}</button> */}
+              {downloadingTextFlag ? <button id="downloadPdfBtn" className='btn btn-warning' >{t('tenantsPage.downloading')}</button> :<button id="downloadPdfBtn" className='btn btn-warning' onClick={handleGirlTenantDownload}><FaDownload /> {t('tenantsPage.downloadPdf')}</button> }
             </div>
           </div>
         </div>
