@@ -229,7 +229,7 @@ const DefaultModal = ({ show, handleClose }) => {
     };
 
     const submitHostelData = async (hostelData, isBoys) => {
-        setIsSubmitting(true);
+        
         const name = capitalizeFirstLetter(hostelData.name);
         const address = capitalizeFirstLetter(hostelData.address);
         const hostelImage = hostelData.hostelImage;
@@ -243,7 +243,7 @@ const DefaultModal = ({ show, handleClose }) => {
             return;
         }
 
-
+        setIsSubmitting(true);
         const newHostelRef = push(ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`));
 
         const hostelDetails = {

@@ -107,7 +107,6 @@ Please note that you made your last payment on ${paidDate}.\n`;
       const matchingRoom = roomsArray.find(
         (room) => room.roomNumber === roomNumber
       );
-
       if (matchingRoom && matchingRoom.bedRent) {
         setTotalFee(matchingRoom.bedRent.toString());
       } else {
@@ -165,7 +164,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       setSelectedTenant(tenantId || "");
       setRoomNumber(rentRecord.roomNumber || "");
       setBedNumber(rentRecord.bedNumber || "");
-      setTotalFee(rentRecord.totalFee || "");
+      // setTotalFee(rentRecord.totalFee || "");
       setPaidAmount(rentRecord.paidAmount || "");
       setDue(rentRecord.due || "");
       setPaidDate(rentRecord.paidDate || "");
@@ -397,6 +396,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
           }}
           onClick={() => {
             loadRentForEditing(rent.tenantId, rent.rentId);
+            console.log(rent, "rent-00")
             setShowForm(true);
           }}
         >
@@ -552,7 +552,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
               <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">
                   {" "}
-                  {t("rentsPage.addRent")}
+                  {isEditing ? t("rentsPage.UpdateRent") :t("rentsPage.addRent")}
                 </h1>
                 <button
                   type="button"

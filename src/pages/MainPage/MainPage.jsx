@@ -272,7 +272,7 @@ const MainPage = () => {
     localStorage.removeItem("accessEnd");
     localStorage.clear();
     setUserUid(null)
-    setEntireHMAdata(null)
+    // setEntireHMAdata(null)
     console.log(entireHMAdata, 'k_00100')
     console.log(userUid, 'k_001010')
     navigate('/');
