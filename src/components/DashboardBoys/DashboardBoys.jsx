@@ -330,7 +330,7 @@ const DashboardBoys = () => {
 
   useEffect(() => {
     const tenantIdsWithRents = boysTenantsWithRents.flatMap(tenant =>
-      tenant.rents.length > 0 ? [tenant.id] : []
+      tenant.rents?.length > 0 ? [tenant.id] : []
     );
 
     const availableTenants = boysTenants.filter(
@@ -1359,20 +1359,20 @@ const tenantData = {
     {
       image: Rooms,
       heading: t('dashboard.totalRooms'),
-      number: `${boysRooms.length}`,
+      number: `${boysRooms?.length}`,
       btntext: t('dashboard.addRooms'),
     },
 
     {
       image: Tenants,
       heading: t('dashboard.totalTenants'),
-      number: `${boysTenants.length}`,
+      number: `${boysTenants?.length}`,
       btntext: t('dashboard.addTenants'),
     },
     {
       image: Beds,
       heading: t('dashboard.totalBeds'),
-      number: `${totalBeds}/${totalBeds - boysTenants.length}`,
+      number: `${totalBeds}/${totalBeds - boysTenants?.length}`,
       btntext: t('dashboard.addRent'),
     },
     {
@@ -1386,7 +1386,7 @@ const tenantData = {
   const Buttons = ['Add Rooms', 'Add Tenants', 'Add Rent', 'Add Expenses'];
 
   const handleClick = (text) => {
-    if (activeBoysHostelButtons.length === 0) {
+    if (activeBoysHostelButtons?.length === 0) {
       toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
@@ -1533,6 +1533,31 @@ const tenantData = {
     }));
   };
 
+  const handleResetMonthly = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee(0);
+    setPaidAmount(0);
+    setDue(0);
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+  };
+
+  const handleResetDaily = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee(0);
+    setPaidAmount(0);
+    setDue(0);
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+  };
 
   const renderFormLayout = () => {
     switch (formLayout) {
@@ -1569,12 +1594,25 @@ const tenantData = {
         return (
           <div>
             <div className='monthlyDailyButtons'>
-              <div className={showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(true)}>
-                <text>{t('dashboard.monthly')}</text>
-              </div>
-              <div className={!showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(false)}>
-                <text>{t('dashboard.daily')}</text>
-              </div>
+            <div
+  className={showForm ? 'manageRentButton active' : 'manageRentButton'}
+  onClick={() => {
+    setShowForm(true);
+    handleResetMonthly();
+  }}
+>
+<text>{t('dashboard.monthly')}</text>
+</div>
+             
+<div
+  className={!showForm ? 'manageRentButton active' : 'manageRentButton'}
+  onClick={() => {
+    setShowForm(false);
+    handleResetDaily();
+  }}
+>
+  <text>{t('dashboard.daily')}</text> {/* Changed <text> to <span> as <text> is not a valid HTML element */}
+</div>
             </div>
             {showForm ?
               <div className='monthlyAddForm'>
@@ -2039,7 +2077,7 @@ const tenantData = {
   return (
     <div className="dashboardboys">
       
-      {activeBoysHostelButtons.length > 0 ? (
+      {activeBoysHostelButtons?.length > 0 ? (
         <div>
           <h1 className="heading">{t('dashboard.mens')}</h1>
        

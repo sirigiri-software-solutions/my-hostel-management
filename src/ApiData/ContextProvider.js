@@ -176,17 +176,23 @@ const DataProvider = ({ children }) => {
       // Extracting Boys Hostel buttons
  
       const boysHostelButtons = entireHMAdata[userUid]?.boys;
-   
+      console.log(entireHMAdata, 'k_0011')
+      console.log(entireHMAdata[userUid], 'k_0012')
+      console.log(userUid, 'k_0013')
+      console.log(boysHostelButtons, "k_001")
       if(boysHostelButtons && boysHostelButtons != undefined && boysHostelButtons != null){
         const dataBoysHostelButtons = Object.keys(boysHostelButtons).map(key => ({
           id:key,
           name:boysHostelButtons[key].name
         }))
- 
+        console.log(dataBoysHostelButtons, "k_002")
+        console.log(dataBoysHostelButtons.length, "k_003")
         setActiveBoysHostelButtons(dataBoysHostelButtons)
+        
       }else{
         setActiveBoysHostelButtons([])
       }
+      
  
       // Extracting Girls Hostel buttons
  
@@ -225,8 +231,10 @@ const DataProvider = ({ children }) => {
  
   // end to get entireData
  
- 
- 
+  console.log(activeBoysHostelButtons, "k_004")
+  console.log(activeBoysHostelButtons.length, "k_005")
+ console.log(userUid, "k_006")
+ console.log(entireHMAdata, 'k_007')
  
   useEffect(() => {
     setFirebase(firebaseInstances[area]);

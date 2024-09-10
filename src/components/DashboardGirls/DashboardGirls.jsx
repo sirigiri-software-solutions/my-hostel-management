@@ -703,6 +703,7 @@ const takePicture = async () => {
     // }
   };
   const handleGirlsRoomsSubmit = (e) => {
+   
     e.preventDefault();
     const now = new Date().toISOString();
     const newErrors = {};
@@ -1385,20 +1386,20 @@ if (bikeRcImage) {
     {
       image: Rooms,
       heading: t('dashboard.totalRooms'),
-      number: `${girlsRooms.length}`,
+      number: `${girlsRooms?.length}`,
       btntext: t('dashboard.addRooms'),
     },
 
     {
       image: Tenants,
       heading: t('dashboard.totalTenants'),
-      number: `${girlsTenants.length}`,
+      number: `${girlsTenants?.length}`,
       btntext: t('dashboard.addTenants'),
     },
     {
       image: Beds,
       heading: t('dashboard.totalBeds'),
-      number: `${totalBeds}/${totalBeds - girlsTenants.length}`,
+      number: `${totalBeds}/${totalBeds - girlsTenants?.length}`,
       btntext: t('dashboard.addRent'),
     },
     {
@@ -1413,7 +1414,7 @@ if (bikeRcImage) {
   const Buttons = ['Add Rooms', 'Add Tenants', 'Add Rent', 'Add Expenses'];
 
   const handleClick = (text) => {
-    if (activeGirlsHostelButtons.length == 0) {
+    if (activeGirlsHostelButtons?.length == 0) {
       toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
@@ -1564,6 +1565,31 @@ if (bikeRcImage) {
     }));
   };
 
+  const handleResetMonthly = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee(0);
+    setPaidAmount(0);
+    setDue(0);
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+  };
+
+  const handleResetDaily = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee(0);
+    setPaidAmount(0);
+    setDue(0);
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+  };
 
   const renderFormLayout = () => {
     switch (formLayout) {
@@ -1600,12 +1626,20 @@ if (bikeRcImage) {
         return (
           <div >
             <div className='monthlyDailyButtons'>
-              <div className={showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(true)}>
-                <text>{t('dashboard.monthly')}</text>
-              </div>
-              <div className={!showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(false)}>
-                <text>{t('dashboard.daily')}</text>
-              </div>
+            <div
+  className={showForm ? 'manageRentButton active' : 'manageRentButton'}
+  onClick={() => {setShowForm(true);handleResetMonthly();}}
+>
+  <text>{t('dashboard.monthly')}</text> {/* Using <span> for inline text */}
+</div>
+
+<div
+  className={!showForm ? 'manageRentButton active' : 'manageRentButton'}
+  onClick={() => {setShowForm(false);handleResetDaily();}}
+>
+  <text>{t('dashboard.daily')}</text> {/* Replace <text> with <span> */}
+</div>
+
             </div>
             {showForm ?
               <div className='monthlyAddForm'>
@@ -2084,8 +2118,7 @@ if (bikeRcImage) {
 
   return (
     <div className="dashboardgirls">
-     
-      {activeGirlsHostelButtons.length > 0 ? (
+      {activeGirlsHostelButtons?.length > 0 ? (
         <div>
           <h1 className="heading1">{t('dashboard.womens')}</h1>
           <div className={"flex1"}>
