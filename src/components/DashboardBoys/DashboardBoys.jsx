@@ -510,9 +510,12 @@ const DashboardBoys = () => {
         return;
     }
     if (isFileUploaded) {
-      setErrors({ tenantImage: "You've already uploaded a photo from the file manager." });
+      setErrorMessage((prevErrors) => ({
+        ...prevErrors,
+        tenantImage: "You've already uploaded a photo from the file manager.",
+      }));
       return;
-  }
+    }
     try {
         const photo = await Camera.getPhoto({
             quality: 90,
@@ -538,11 +541,12 @@ const DashboardBoys = () => {
         setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
         setIsCameraUsed(true); // Disable file input
         setIsFileUploaded(false); // Reset file upload state
-        setPhotoSource("camera");
+        
 
     } catch (error) {
         console.error("Error accessing the camera", error);
-        toast.error(t('toastMessages.imageNotUploaded'));    }
+        // toast.error(t('toastMessages.imageNotUploaded'));    
+        }
 }
   // const takeIdPicture = async () => {
 
@@ -583,9 +587,12 @@ const DashboardBoys = () => {
         return;
     }
     if (isTenantIdFileUploaded) {
-      setErrors({ tenantId: "You've already uploaded an ID photo from the file manager." });
+      setErrorMessage((prevErrors) => ({
+        ...prevErrors,
+        tenantId: "You've already uploaded an ID photo from the file manager.",
+      }));
       return;
-  }
+    }
 
     try {
         const photo = await Camera.getPhoto({
@@ -615,7 +622,8 @@ const DashboardBoys = () => {
 
     } catch (error) {
         console.error("Error accessing the camera", error);
-        toast.error(t('toastMessages.imageNotUploaded'));     }
+        // toast.error(t('toastMessages.imageNotUploaded'));     
+        }
 }
 
   const handleCheckboxChange = (e) => {
@@ -1176,6 +1184,16 @@ const tenantData = {
         resetForm();
         setErrors({});
         // fetchData()
+
+        // Reset file and camera options after submission
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+    setTenantId(null);
+    setIsFileUploaded(false);
+    setIsCameraUsed(false);
+    setIsTenantIdFileUploaded(false);
+    setIsTenantIdCameraUsed(false);
         imageInputRef.current.value = "";
         idInputRef.current.value = "";
     }
@@ -1884,7 +1902,7 @@ const tenantData = {
               <input id="tenantUpload" class="form-control" type="file" accept=".jpg, .jpeg, .png"   onChange={handleTenantImageChange} ref={imageInputRef} 
               disabled={isCameraUsed} 
               />
-              {isMobile && (
+              {isMobile && !isFileUploaded &&   (
                   <div>
                   <p>{t('tenantsPage.or')}</p>
                   <div style={{display:'flex',flexDirection:'row'}}>
@@ -1916,12 +1934,13 @@ const tenantData = {
               )}
               <input id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png"  onChange={handleTenantIdChange} ref={idInputRef} 
               disabled={isTenantIdCameraUsed} />
-              {isMobile && (
+              {isMobile && !isTenantIdFileUploaded &&(
                     <div>
                     <p>{t('tenantsPage.or')}</p>
                     <div style={{display:'flex',flexDirection:'row'}}>
                     <p>{t('tenantsPage.takePhoto')}</p>
-                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeIdPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
+                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeIdPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                    disabled={isTenantIdFileUploaded}/>
                     {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
                     </div>
                     </div>

@@ -97,13 +97,27 @@ const TenantsBoys = () => {
   // for camera icon
   
   const [isMobile, setIsMobile] = useState(false);
-  const [photoUrl, setPhotoUrl] = useState(null);
-  const [idUrl,setIdUrl]=useState(null);
-  const [isFileUploaded, setIsFileUploaded] = useState(false); // For disabling camera when file is uploaded
-const [isCameraUsed, setIsCameraUsed] = useState(false); // For disabling file input when camera is used
-const [isTenantIdFileUploaded, setIsTenantIdFileUploaded] = useState(false); // Disable camera if file uploaded
-const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false); 
-const [photoSource, setPhotoSource] = useState(null); // Track if photo is from file or camera
+//   const [photoUrl, setPhotoUrl] = useState(null);
+//   const [idUrl,setIdUrl]=useState(null);
+//   const [isFileUploaded, setIsFileUploaded] = useState(false); // For disabling camera when file is uploaded
+// const [isCameraUsed, setIsCameraUsed] = useState(false); // For disabling file input when camera is used
+// const [isTenantIdFileUploaded, setIsTenantIdFileUploaded] = useState(false); // Disable camera if file uploaded
+// const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false); 
+// const [photoSource, setPhotoSource] = useState(null); // Track if photo is from file or camera
+
+// State for tenant image (profile photo)
+
+const [photoUrl, setPhotoUrl] = useState('');
+const [isFileUploaded, setIsFileUploaded] = useState(false);
+const [isCameraUsed, setIsCameraUsed] = useState(false);
+
+// State for tenant ID image
+
+const [idUrl, setIdUrl] = useState('');
+const [isTenantIdFileUploaded, setIsTenantIdFileUploaded] = useState(false);
+const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
+
+
 
 
   useEffect(() => {
@@ -112,105 +126,49 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
     setIsMobile(/iPhone|iPod|iPad|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent));
 }, []);
 
-  // const takePicture = async () => {
+  
+//   const takePicture = async () => {
+//     if (!isMobile) {
+//         console.error("Camera access is not supported on your device.");
+//         return;
+//     }
+//     if (isFileUploaded) {
+//       setErrors({ tenantImage: "You've already uploaded a photo from the file manager." });
+//       return;
+//   }
+//     try {
+//         const photo = await Camera.getPhoto({
+//             quality: 90,
+//             allowEditing: false,
+//             resultType: CameraResultType.Uri
+//         });
 
-  //   if (!isMobile) {
-  //     console.error("Camera access is not supported on your device.");
-  //     return;
-  // }
-  //   try {
-  //     const photo = await Camera.getPhoto({
-  //       quality: 90,
-  //       allowEditing: false,
-  //       resultType: CameraResultType.Uri
-  //     });
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setPhotoUrl(reader.result);
-  //       setTenantImage(reader.result);
-  //     };
-  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
-      
-  //     // const response = await fetch(photo.webPath);
-  //     // const blob = await response.blob();
-  //     // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-  //     // const snapshot = await uploadBytes(imageRef, blob);
-  //     // const url = await getDownloadURL(snapshot.ref);
-      
-  //     // setPhotoUrl(url); // Display in UI
-  //     // setTenantImageUrl(url); // Use in form submission
-  //     // setPhotoUrl(photo.webPath);
-  //   } catch (error) {
-  //     console.error("Error accessing the camera", error);
-  //     toast.error(t('toastMessages.Image not Uploaded'));
-  //   }
-  // };
-  // const takePicture = async () => {
-  //   if (!isMobile) {
-  //     console.error("Camera access is not supported on your device.");
-  //     return;
-  //   }
-  //   try {
-  //     const photo = await Camera.getPhoto({
-  //       quality: 90,
-  //       allowEditing: false,
-  //       resultType: CameraResultType.Uri
-  //     });
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setPhotoUrl(reader.result);
-  //       setTenantImage(reader.result);
-  //     };
-  //     fetch(photo.webPath)
-  //       .then(response => response.blob())
-  //       .then(blob => reader.readAsDataURL(blob));
-  //   } catch (error) {
-  //     console.error("Error accessing the camera", error);
-  //     toast.error(t('toastMessages.imageNotUploaded'));
-  //   }
-  // }
-  const takePicture = async () => {
-    if (!isMobile) {
-        console.error("Camera access is not supported on your device.");
-        return;
-    }
-    if (isFileUploaded) {
-      setErrors({ tenantImage: "You've already uploaded a photo from the file manager." });
-      return;
-  }
-    try {
-        const photo = await Camera.getPhoto({
-            quality: 90,
-            allowEditing: false,
-            resultType: CameraResultType.Uri
-        });
+//         const response = await fetch(photo.webPath);
+//         const blob = await response.blob();
 
-        const response = await fetch(photo.webPath);
-        const blob = await response.blob();
-
-        setTenantImage(blob); // Set the blob to tenantImage
-        const uploadFile = async (file, path) => {
-          try {
-              const imageRef = storageRef(storage, path);
-              const snapshot = await uploadBytes(imageRef, file);
-              return await getDownloadURL(snapshot.ref);
-          } catch (error) {
-              console.error(`Error uploading file ${file.name}:`, error);
-              throw error;
-          }
-      };
+//         setTenantImage(blob); // Set the blob to tenantImage
+//         const uploadFile = async (file, path) => {
+//           try {
+//               const imageRef = storageRef(storage, path);
+//               const snapshot = await uploadBytes(imageRef, file);
+//               return await getDownloadURL(snapshot.ref);
+//           } catch (error) {
+//               console.error(`Error uploading file ${file.name}:`, error);
+//               throw error;
+//           }
+//       };
    
-        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${blob.name}`);
-        setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
-        setIsCameraUsed(true); // Disable file input
-        setIsFileUploaded(false); // Reset file upload state
-        setPhotoSource("camera");
+//         const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${blob.name}`);
+//         setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
+//         setIsCameraUsed(true); // Disable file input
+//         setIsFileUploaded(false); // Reset file upload state
+//         setPhotoSource("camera");
         
-    } catch (error) {
-        console.error("Error accessing the camera", error);
-        // toast.error(t('toastMessages.imageNotUploaded'));   
-         }
-}
+//     } catch (error) {
+//         console.error("Error accessing the camera", error);
+//         // toast.error(t('toastMessages.imageNotUploaded'));   
+//          }
+// }
 
 
   // const takeidPicture = async () => {
@@ -248,47 +206,85 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
   //   }
   // };
 
-const takeidPicture = async () => {
+  const takePicture = async () => {
     if (!isMobile) {
-        console.error("Camera access is not supported on your device.");
-        return;
-    }
-    if (isTenantIdFileUploaded) {
-      setErrors({ tenantId: "You've already uploaded an ID photo from the file manager." });
+      console.error("Camera access is not supported on your device.");
       return;
-  }
+    }
+    if (isFileUploaded) {
+      setErrorMessage((prevErrors) => ({
+        ...prevErrors,
+        tenantImage: "You've already uploaded a photo from the file manager.",
+      }));
+      return;
+    }
 
     try {
-        const photo = await Camera.getPhoto({
-            quality: 90,
-            allowEditing: false,
-            resultType: CameraResultType.Uri
-        });
+      const photo = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Uri,
+      });
 
-        const response = await fetch(photo.webPath);
-        const blob = await response.blob();
+      const response = await fetch(photo.webPath);
+      const blob = await response.blob();
 
-        setTenantId(blob); // Set the blob to tenantImage
-        const uploadFile = async (file, path) => {
-          try {
-              const imageRef = storageRef(storage, path);
-              const snapshot = await uploadBytes(imageRef, file);
-              return await getDownloadURL(snapshot.ref);
-          } catch (error) {
-              console.error(`Error uploading file ${file.name}:`, error);
-              throw error;
-          }
+      const uploadFile = async (file, path) => {
+        const imageRef = storageRef(storage, path);
+        const snapshot = await uploadBytes(imageRef, file);
+        return await getDownloadURL(snapshot.ref);
       };
-   
-        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${blob.name}`);
-        setIdUrl(uploadedUrl); // Set the uploaded URL to display the image
-        setIsTenantIdCameraUsed(true); // Disable file input
-        setIsTenantIdFileUploaded(false); // Reset file upload state
+
+      const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${blob.name}`);
+      setPhotoUrl(uploadedUrl);
+      setTenantImage(blob); 
+
+      setIsCameraUsed(true);
+      setIsFileUploaded(false); // Reset file upload state
     } catch (error) {
-        console.error("Error accessing the camera", error);
-        // toast.error(t('toastMessages.imageNotUploaded'));  
-          }
-}
+      console.error("Error accessing the camera", error);
+    }
+  };
+
+
+  const takeidPicture = async () => {
+    if (!isMobile) {
+      console.error("Camera access is not supported on your device.");
+      return;
+    }
+    if (isTenantIdFileUploaded) {
+      setErrorMessage((prevErrors) => ({
+        ...prevErrors,
+        tenantId: "You've already uploaded an ID photo from the file manager.",
+      }));
+      return;
+    }
+
+    try {
+      const photo = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Uri,
+      });
+
+      const response = await fetch(photo.webPath);
+      const blob = await response.blob();
+      setTenantId(blob);
+      const uploadFile = async (file, path) => {
+        const imageRef = storageRef(storage, path);
+        const snapshot = await uploadBytes(imageRef, file);
+        return await getDownloadURL(snapshot.ref);
+      };
+
+      const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${blob.name}`);
+      setIdUrl(uploadedUrl);
+      setIsTenantIdCameraUsed(true);
+      setIsTenantIdFileUploaded(false); // Reset file upload state
+    } catch (error) {
+      console.error("Error accessing the camera", error);
+    }
+  };
+
   const [loading, setLoading] = useState(false);
 
   const [downloadingTextFlag,setDownloadingTextFlag] = useState(false);
@@ -441,60 +437,107 @@ const takeidPicture = async () => {
 
 
 
+  // const handleTenantImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const validFormats = ['image/jpeg', 'image/png'];
+  //     if (validFormats.includes(file.type)) {
+  //       setTenantImage(file);
+  //       setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' })); 
+  //       setIsFileUploaded(true);  // Disable camera
+  //       setIsCameraUsed(false);   // Reset camera state
+  //       setPhotoSource("file");
+  //     } else {
+  //       setErrorMessage((prevErrors) => ({
+  //         ...prevErrors,
+  //         tenantImage: 'Please upload a valid image file (JPG, JPEG, PNG).',
+  //       }));
+  //       e.target.value = null; 
+  //     }
+  //     }
+  //   else if (isCameraUsed) {
+  //     setErrors({ tenantImage: "You've already taken a photo using the camera." });
+  // }
+  // };
+  
   const handleTenantImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const validFormats = ['image/jpeg', 'image/png'];
       if (validFormats.includes(file.type)) {
         setTenantImage(file);
-        setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' })); 
-        setIsFileUploaded(true);  // Disable camera
-        setIsCameraUsed(false);   // Reset camera state
-        setPhotoSource("file");
+        setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' }));
+        setIsFileUploaded(true); // Disable camera for tenant image
+        setIsCameraUsed(false);  // Allow file upload only
       } else {
         setErrorMessage((prevErrors) => ({
           ...prevErrors,
           tenantImage: 'Please upload a valid image file (JPG, JPEG, PNG).',
         }));
-        e.target.value = null; 
+        e.target.value = null;  // Clear file input on invalid format
       }
-      }
-    else if (isCameraUsed) {
-      setErrors({ tenantImage: "You've already taken a photo using the camera." });
-  }
+    }
   };
-  
+
+  // const handleTenantIdChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting PDFs and images
+  //     const maxSize = 1 * 1024 * 1024; // 1 MB
+  //     if (validFormats.includes(file.type)) {
+  //       if (file.size <= maxSize) {
+  //         setTenantId(file);
+  //         setErrorMessage((prevErrors) => ({ ...prevErrors, tenantId: '' }));
+  //         setIsTenantIdFileUploaded(true);  // Disable camera
+  //         setIsTenantIdCameraUsed(false);   // Reset camera state
+  //       } else {
+  //         setErrorMessage((prevErrors) => ({
+  //           ...prevErrors,
+  //           tenantId: 'The file size exceeds the 1 MB limit. Please upload a smaller file.',
+  //         }));
+  //         e.target.value = null;
+  //       }
+  //     } else {
+  //       setErrorMessage((prevErrors) => ({
+  //         ...prevErrors,
+  //         tenantId: 'Please upload a valid PDF or image file.',
+  //       }));
+  //       e.target.value = null;
+  //     }
+  //   }
+  //   else if (isCameraUsed) {
+  //     setErrors({ tenantImage: "You've already taken a photo using the camera." });
+  // }
+  // };
+
   const handleTenantIdChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting PDFs and images
-      const maxSize = 1 * 1024 * 1024; // 1 MB
+      const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff'];
+      const maxSize = 1 * 1024 * 1024; // 1 MB size limit
+
       if (validFormats.includes(file.type)) {
         if (file.size <= maxSize) {
           setTenantId(file);
           setErrorMessage((prevErrors) => ({ ...prevErrors, tenantId: '' }));
-          setIsTenantIdFileUploaded(true);  // Disable camera
-          setIsTenantIdCameraUsed(false);   // Reset camera state
+          setIsTenantIdFileUploaded(true);  // Disable camera for tenant ID
+          setIsTenantIdCameraUsed(false);  // Only file upload allowed for tenant ID
         } else {
           setErrorMessage((prevErrors) => ({
             ...prevErrors,
             tenantId: 'The file size exceeds the 1 MB limit. Please upload a smaller file.',
           }));
-          e.target.value = null;
+          e.target.value = null;  // Clear file input on size violation
         }
       } else {
         setErrorMessage((prevErrors) => ({
           ...prevErrors,
           tenantId: 'Please upload a valid PDF or image file.',
         }));
-        e.target.value = null;
+        e.target.value = null;  // Clear file input on invalid format
       }
     }
-    else if (isCameraUsed) {
-      setErrors({ tenantImage: "You've already taken a photo using the camera." });
-  }
   };
-
 
   const handleTenantBikeChange = (e) => {
     const file = e.target.files[0];
@@ -697,6 +740,16 @@ const takeidPicture = async () => {
         resetForm();
         setErrors({});
         // fetchData()
+
+        // Reset file and camera options after submission
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+    setTenantId(null);
+    setIsFileUploaded(false);
+    setIsCameraUsed(false);
+    setIsTenantIdFileUploaded(false);
+    setIsTenantIdCameraUsed(false);
     }
 };
  
@@ -777,17 +830,25 @@ const takeidPicture = async () => {
       setShowModal(true);
       setUserDetailsTenantsPopup(false);
       setHasBike(false);
+
+      // After successfully adding a tenant, reset the photoUrl and idUrl
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+    setTenantId(null);
+
+    // Ensure camera and file upload options are available again
+    setIsFileUploaded(false);  // Reset the file upload flag for tenant image
+    setIsCameraUsed(false);    // Reset the camera flag for tenant image
+    setIsTenantIdFileUploaded(false);  // Reset the file upload flag for tenant ID
+    setIsTenantIdCameraUsed(false);    // Reset the camera flag for tenant ID
+
     }
     
       // event.preventDefault();
     // Logic for adding a tenant
 
-    // After successfully adding a tenant, reset the photoUrl and idUrl
-    setPhotoUrl(null);
-    setIdUrl(null);
-    setTenantImage(null);
-    
-  };
+      };
 
   const resetForm = () => {
     setSelectedRoom('');
@@ -1354,7 +1415,6 @@ const isImage = (contentType) => contentType.startsWith('image/');
         }
     }
 
-<<<<<<< HEAD
   // Save the PDF
   // doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
   // Convert PDF to Blob
@@ -1405,15 +1465,9 @@ const isImage = (contentType) => contentType.startsWith('image/');
     document.body.appendChild(a);
     a.click();
     URL.revokeObjectURL(url);
-  }
-    setDownloadingTextFlag(false)
-=======
-    // Save the PDF
-    doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-    setTimeout(() => {
-      setDownloadingTextFlag(false);
-    }, 800);
->>>>>>> 4065f27ff54feb6f8202034bb26b6d2b3ca7ea06
+  } setTimeout(() => {
+    setDownloadingTextFlag(false);
+  }, 800);
 };
 
 
@@ -1712,7 +1766,7 @@ const handleDownload = async (url, type, tenantName) => {
                     <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantImageChange}  
                      disabled={isCameraUsed} 
                     />
-                    {isMobile && (
+                    {isMobile && !isFileUploaded &&  (
                     <div>
                     <p>{t('tenantsPage.or')}</p>
                     <div style={{display:'flex',flexDirection:'row'}}>
@@ -1740,7 +1794,7 @@ const handleDownload = async (url, type, tenantName) => {
 
                <input ref={tenantProofIdRef} id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantIdChange} 
                 disabled={isTenantIdCameraUsed}/>
-                    {isMobile && (
+                    {isMobile && !isTenantIdFileUploaded && (
                     <div>
                     <p>{t('tenantsPage.or')}</p>
                     <div style={{display:'flex',flexDirection:'row'}}>

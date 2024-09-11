@@ -543,9 +543,12 @@ const takePicture = async () => {
       return;
   }
   if (isFileUploaded) {
-    setErrors({ tenantImage: "You've already uploaded a photo from the file manager." });
+    setErrorMessage((prevErrors) => ({
+      ...prevErrors,
+      tenantImage: "You've already uploaded a photo from the file manager.",
+    }));
     return;
-}
+  }
   try {
       const photo = await Camera.getPhoto({
           quality: 90,
@@ -571,7 +574,7 @@ const takePicture = async () => {
       setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
       setIsCameraUsed(true); // Disable file input
       setIsFileUploaded(false); // Reset file upload state
-      setPhotoSource("camera");
+      
   } catch (error) {
       console.error("Error accessing the camera", error);
       // toast.error(t('toastMessages.imageNotUploaded'));   
@@ -616,9 +619,12 @@ const takePicture = async () => {
         return;
     }
     if (isTenantIdFileUploaded) {
-      setErrors({ tenantId: "You've already uploaded an ID photo from the file manager." });
+      setErrorMessage((prevErrors) => ({
+        ...prevErrors,
+        tenantId: "You've already uploaded an ID photo from the file manager.",
+      }));
       return;
-  }
+    }
 
     try {
         const photo = await Camera.getPhoto({
@@ -1198,6 +1204,16 @@ if (bikeRcImage) {
         setLoading(false);
         resetForm();
         setErrors({});
+        // Reset file and camera options after submission
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+    setTenantId(null);
+    setIsFileUploaded(false);
+    setIsCameraUsed(false);
+    setIsTenantIdFileUploaded(false);
+    setIsTenantIdCameraUsed(false);
+
         imageInputRef.current.value = "";
     idInputRef.current.value = "";
     }
@@ -1911,7 +1927,7 @@ if (bikeRcImage) {
               disabled={isCameraUsed} 
  
               />
-              {isMobile && (
+              {isMobile && !isFileUploaded && (
                   <div>
                   <p>{t('tenantsPage.or')}</p>
                   <div style={{display:'flex',flexDirection:'row'}}>
@@ -1946,7 +1962,7 @@ if (bikeRcImage) {
               <input id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantIdChange} ref={idInputRef}  
               disabled={isTenantIdCameraUsed}
               />
-              {isMobile && (
+              {isMobile && !isTenantIdFileUploaded &&(
                   <div>
                   <p>{t('tenantsPage.or')}</p>
                   <div style={{display:'flex',flexDirection:'row'}}>

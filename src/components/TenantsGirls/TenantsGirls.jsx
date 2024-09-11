@@ -182,9 +182,12 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
         return;
     }
     if (isFileUploaded) {
-      setErrors({ tenantImage: "You've already uploaded a photo from the file manager." });
+      setErrorMessage((prevErrors) => ({
+        ...prevErrors,
+        tenantImage: "You've already uploaded a photo from the file manager.",
+      }));
       return;
-  }
+    }
     try {
         const photo = await Camera.getPhoto({
             quality: 90,
@@ -208,9 +211,10 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
       };
         const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantImage/${blob.name}`);
         setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
-        setIsCameraUsed(true); // Disable file input
+        setTenantImage(blob); 
+        setIsCameraUsed(true);
         setIsFileUploaded(false); // Reset file upload state
-        setPhotoSource("camera");
+  
         
     } catch (error) {
         console.error("Error accessing the camera", error);
@@ -282,9 +286,12 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
         return;
     }
     if (isTenantIdFileUploaded) {
-      setErrors({ tenantId: "You've already uploaded an ID photo from the file manager." });
+      setErrorMessage((prevErrors) => ({
+        ...prevErrors,
+        tenantId: "You've already uploaded an ID photo from the file manager.",
+      }));
       return;
-  }
+    }
     try {
         const photo = await Camera.getPhoto({
             quality: 90,
@@ -297,15 +304,10 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
 
         setTenantId(blob); // Set the blob to tenantImage
         const uploadFile = async (file, path) => {
-          try {
-              const imageRef = storageRef(storage, path);
-              const snapshot = await uploadBytes(imageRef, file);
-              return await getDownloadURL(snapshot.ref);
-          } catch (error) {
-              console.error(`Error uploading file ${file.name}:`, error);
-              throw error;
-          }
-      };
+          const imageRef = storageRef(storage, path);
+          const snapshot = await uploadBytes(imageRef, file);
+          return await getDownloadURL(snapshot.ref);
+        };
         const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/images/tenantId/${blob.name}`);
         setIdUrl(uploadedUrl); // Set the uploaded URL to display the image
         setIsTenantIdCameraUsed(true); // Disable file input
@@ -569,8 +571,8 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
       if (validFormats.includes(file.type)) {
         setTenantImage(file);
         setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' })); 
-        setIsTenantIdCameraUsed(true); // Disable file input
-        setIsTenantIdFileUploaded(false);
+        setIsFileUploaded(true); // Disable camera for tenant image
+        setIsCameraUsed(false);
       } else {
         setErrorMessage((prevErrors) => ({
           ...prevErrors,
@@ -607,9 +609,7 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
         e.target.value = null;
       }
     }
-    else if (isCameraUsed) {
-      setErrors({ tenantImage: "You've already taken a photo using the camera." });
-  }
+    
   };
 
 
@@ -786,6 +786,16 @@ if (bikeRcImage) {
         setLoading(false);
         resetForm();
         setErrors({});
+
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+    setTenantId(null);
+    setIsFileUploaded(false);
+    setIsCameraUsed(false);
+    setIsTenantIdFileUploaded(false);
+    setIsTenantIdCameraUsed(false);
+
     }
 };
 
@@ -858,10 +868,20 @@ if (bikeRcImage) {
       setShowModal(true);
       setUserDetailsTenantsPopup(false);
       setHasBike(false);
-    }
+
     setPhotoUrl(null);
     setIdUrl(null);
     setTenantImage(null);
+    setTenantId(null);
+
+    // Ensure camera and file upload options are available again
+    setIsFileUploaded(false);  // Reset the file upload flag for tenant image
+    setIsCameraUsed(false);    // Reset the camera flag for tenant image
+    setIsTenantIdFileUploaded(false);  // Reset the file upload flag for tenant ID
+    setIsTenantIdCameraUsed(false);    // Reset the camera flag for tenant ID
+
+    }
+    
     
   };
 
@@ -1476,15 +1496,10 @@ const isImage = (contentType) => contentType.startsWith('image/');
 
 
     // Save the PDF
-<<<<<<< HEAD
-    // doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-    setDownloadingTextFlag(false)
-=======
     doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
     setTimeout(() => {
       setDownloadingTextFlag(false);
     }, 800);
->>>>>>> 4065f27ff54feb6f8202034bb26b6d2b3ca7ea06
   };
 
   const getImageBase64 = (url) => {
@@ -1778,13 +1793,15 @@ const handleDownload = async (url, type, tenantName) => {
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
-                    <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantImageChange}  />
-                    {isMobile && (
+                    <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantImageChange}   
+                     disabled={isCameraUsed} />
+                    {isMobile && !isFileUploaded && (
                     <div>
                     <p>{t('tenantsPage.or')}</p>
                     <div style={{display:'flex',flexDirection:'row'}}>
                     <p>{t('tenantsPage.takePhoto')}</p>
-                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
+                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                    disabled={isFileUploaded} />
                     {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, maxWidth: '100px', height: '100px' }} />}
                     </div>
                     </div>
@@ -1802,13 +1819,15 @@ const handleDownload = async (url, type, tenantName) => {
                         <p>{fileName}</p>
                       </div>
                     )}
-                    <input ref={tenantProofIdRef} id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantIdChange} />
-                    {isMobile && (
+                    <input ref={tenantProofIdRef} id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantIdChange} 
+                    disabled={isTenantIdCameraUsed}/>
+                    {isMobile && !isTenantIdFileUploaded &&(
                     <div>
                     <p>{t('tenantsPage.or')}</p>
                     <div style={{display:'flex',flexDirection:'row'}}>
                     <p>{t('tenantsPage.takePhoto')}</p>
-                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeidPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}/>
+                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeidPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                    disabled={isTenantIdFileUploaded}/>
                     {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, maxWidth: '100px', height: '100px' }} />}
                     </div>
                     </div>
