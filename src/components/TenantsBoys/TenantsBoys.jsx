@@ -1669,7 +1669,7 @@ const handleDownload = async (url, type, tenantName) => {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title fs-5" id="exampleModalLabel"> {t('dashboard.addTenants')}</h5>
+              <h5 class="modal-title fs-5" id="exampleModalLabel"> {isEditing ? t('dashboard.updateTenant'):t('dashboard.addTenants')}</h5>
               <button onClick={handleClosePopUp} className="btn-close" aria-label="Close"></button>
             </div>
             <div class="modal-body">
