@@ -67,7 +67,7 @@ const Table = ({ columns, rows, onClickTentantRow }) => {
               {item.last_fee && <td data-label={t('mobileTable.lastFee')}>{item.last_fee}</td>}
               {item.created_on && <td data-label={t('mobileTable.createdOn')}>{item.created_on}</td>}
               {item.expense_name && <td data-label={t('mobileTable.expenseName')}>{item.expense_name}</td>}
-              {item.address && <td className='hosteltable' data-label={t('mobileTable.address')}>{item.address}</td>}
+              {item.address && <td className='hosteltable' data-label={t('mobileTable.address')}><text className='address'>{item.address}</text></td>}
               {item.expense_amount && <td data-label={t('mobileTable.expenseAmount')}>{item.expense_amount}</td>}
               {/* {item.created_by && <td data-label={t('mobileTable.createdBy')}>{getTranslationCreatedBy(item.created_by)}</td>} */}
               {item.last_updated_by && <td data-label={t('mobileTable.lastUpdatedDate')}>{item.last_updated_by}</td>}

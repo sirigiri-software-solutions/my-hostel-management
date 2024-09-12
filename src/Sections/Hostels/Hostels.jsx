@@ -389,19 +389,19 @@ const submitHostelEdit = async (e) => {
 
   const addNewHostel = async (e, isBoys) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    
     const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
     const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
-    // const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
+    const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
 
-    if (name.trim() === '' || address.trim() === '') {
+    if (name.trim() === '' || address.trim() === '' || !hostelImage) {
       toast.error("Hostel name, address and image cannot be empty.", {
         position: "top-center",
         autoClose: 3000,
       });
       return;
     }
-
+    setIsSubmitting(true);
     let hostelImageUrlToUpdate = hostelImageUrl;
     // console.log(isBoys ? boysHostelImage : girlsHostelImage, "kkk")
     const hostelImageFile = isBoys ? boysHostelImage : girlsHostelImage;

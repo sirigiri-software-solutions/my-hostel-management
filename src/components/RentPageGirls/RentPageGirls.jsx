@@ -213,10 +213,10 @@ Please note that you made your last payment on ${paidDate}.\n`;
     const rentRecord = tenant.rents.find((r) => r.id === rentId);
 
     if (rentRecord) {
-      setSelectedTenant(tenantId);
+      setSelectedTenant(tenantId || "");
       setRoomNumber(rentRecord.roomNumber || "");
       setBedNumber(rentRecord.bedNumber || "");
-      setTotalFee(rentRecord.totalFee || "");
+      // setTotalFee(rentRecord.totalFee || "");
       setPaidAmount(rentRecord.paidAmount || "");
       setDue(rentRecord.due || "");
       setPaidDate(rentRecord.paidDate || "");
@@ -502,6 +502,32 @@ Please note that you made your last payment on ${paidDate}.\n`;
       setNotifyUserInfo({ tenant, rentRecord });
     }
   };
+  
+  const handleResetMonthly = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee(0);
+    setPaidAmount(0);
+    setDue(0);
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+  };
+
+  const handleResetDaily = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee(0);
+    setPaidAmount(0);
+    setDue(0);
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+  };
 
   const handleFocus = (e) => {
     const { name } = e.target;
@@ -580,7 +606,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
               <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">
                   {" "}
-                  {t("rentsPage.addRent")}
+                  {isEditing ? t("rentsPage.UpdateRent") :t("rentsPage.addRent")}
                 </h1>
                 <button
                   onClick={handleClosePopUp}
@@ -600,7 +626,10 @@ Please note that you made your last payment on ${paidDate}.\n`;
                             ? "manageRentButton active"
                             : "manageRentButton"
                         }
-                        onClick={() => setShowForm(true)}
+                        onClick={() =>{
+                          setShowForm(true)
+                          handleResetMonthly();
+                        } }
                       >
                         <text>{t("dashboard.monthly")}</text>
                       </div>
@@ -610,7 +639,10 @@ Please note that you made your last payment on ${paidDate}.\n`;
                             ? "manageRentButton active"
                             : "manageRentButton"
                         }
-                        onClick={() => setShowForm(false)}
+                        onClick={() => {
+                          setShowForm(false)
+                          handleResetDaily();
+                        }}
                       >
                         <text>{t("dashboard.daily")}</text>
                       </div>

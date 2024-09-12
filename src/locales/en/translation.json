@@ -151,6 +151,7 @@
     "rentsPage": {
         "rentsManagement": "Rents Management",
         "addRent": "Add Rent",
+        "UpdateRent":"Update Rent",
         "unpaid": "Unpaid",
         "sNo": "S.No",
         "roomNo": "Room.No",
