@@ -211,10 +211,21 @@ const submitHostelEdit = async (e) => {
   };
 
   const handleImageChange = (e) => {
-    if (e.target.files[0]) {
-      setSelectedImage(e.target.files[0]);
+    const file = e.target.files[0];
+    
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png'];
+
+      if (allowedTypes.includes(file.type)) {
+        setSelectedImage(file);
+        setErrorMessage(''); // Clear error message
+      } else {
+        setErrorMessage("Only JPEG and PNG images are allowed.");
+        e.target.value = ''; // Clear the file input
+        setSelectedImage(null); // Clear selected image
+      }
     }
-  };
+  }; 
 
   const getHostelColumns = () => [
     t('tenantsPage.image'),
@@ -544,7 +555,8 @@ const submitHostelEdit = async (e) => {
 
               <div >
                 <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
-                <input type="file" className="form-control" onChange={handleImageChange} />
+                <input type="file" className="form-control" accept="image/jpeg, image/png" onChange={handleImageChange} />
+                {errorMessage && <div style={{ color: 'red', marginTop: '5px' }}>{errorMessage}</div>}
                 <img src={isEditing.hostelImage} alt='hostel image' style={{ width: '100px', borderRadius: '8px', margin: '10px 0' }} />
               </div>
             </div>

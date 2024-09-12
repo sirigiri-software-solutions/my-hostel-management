@@ -37,6 +37,9 @@ const RoomsBoys = () => {
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [roomToDelete, setRoomToDelete] = useState({ roomNumber: '', currentId: '' });
+  const [previousNumberOfBeds, setPreviousNumberOfBeds] = useState(0);
+ 
+
 
 
   // console.log(fetchData, "fetchData")
@@ -79,6 +82,9 @@ const RoomsBoys = () => {
     }
   };
 
+  
+  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const now = new Date().toISOString();
@@ -87,86 +93,98 @@ const RoomsBoys = () => {
     // Validation checks
     if (!floorNumber.trim()) newErrors.floorNumber = 'Floor number is required';
     if (!roomNumber.trim()) newErrors.roomNumber = 'Room number is required';
-    else if (boysRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) { 
-      newErrors.roomNumber = 'Room number already exists';
+    else if (boysRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
+        newErrors.roomNumber = 'Room number already exists';
     }
     if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
     if (!bedRent) newErrors.bedRent = 'Bed rent is required';
 
+
+    if (isEditing && parseInt(numberOfBeds) < parseInt(previousNumberOfBeds)) {
+      newErrors.numberOfBeds = `Number of beds must be greater than or equal to ${previousNumberOfBeds}`;
+  }
+
+   
+
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+        setErrors(newErrors);
+        return;
     }
+
+    // Proceed with update or creation based on isEditing flag
     if (isEditing) {
-      const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
-      update(roomRef, {
-        floorNumber,
-        roomNumber,
-        numberOfBeds,
-        bedRent,
-        createdBy,
-        updateDate: now
-      }).then(() => {
-        toast.success("Room updated successfully.", {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
+        const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
+        update(roomRef, {
+            floorNumber,
+            roomNumber,
+            numberOfBeds,
+            bedRent,
+            createdBy,
+            updateDate: now
+        }).then(() => {
+            toast.success("Room updated successfully.", {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            fetchData();
+            setIsEditing(false);
+        }).catch(error => {
+            toast.error("Error updating room: " + error.message, {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
         });
-        fetchData()
-        setIsEditing(false);
-      }).catch(error => {
-        toast.error("Error updating room: " + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
     } else {
-      const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-      push(roomsRef, {
-        floorNumber,
-        roomNumber,
-        numberOfBeds,
-        bedRent,
-        createdBy,
-        updateDate: now
-      }).then(() => {
-        toast.success("Room added successfully.", {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
+        const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+        push(roomsRef, {
+            floorNumber,
+            roomNumber,
+            numberOfBeds,
+            bedRent,
+            createdBy,
+            updateDate: now
+        }).then(() => {
+            toast.success("Room added successfully.", {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            fetchData();
+        }).catch(error => {
+            toast.error("Error adding room: " + error.message, {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
         });
-        fetchData()
-      }).catch(error => {
-        toast.error("Error adding room: " + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
     }
 
     setShowModal(false);
     resetForm();
     setUpdateDate(now);
     setErrors({});
-  };
+};
+
+
+
 
   const [showConfirmationPopUp, setShowConfirmationPopUp] = useState(false);
 
@@ -194,70 +212,7 @@ const RoomsBoys = () => {
     return false; // No room found
   };
 
-  // const confirmDeleteYes =async () => {
 
-  //   try {
-  //     const path = `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`;
-  //     const dbRef = ref(database, path);
-  //     const snapshot = await get(dbRef);
-  //     console.log(snapshot,"roomsData")
-  //     if (snapshot.exists()) {
-  //       const data = snapshot.val();
-  //       console.log(data,"roomsData")
-
-
-
-
-
-  //       const exists = roomExists(data, roomNumber);
-  //       if(!exists){
-  //         const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
-  //             remove(roomRef).then(() => {
-  //               toast.success("Room deleted successfully.", {
-  //                 position: "top-center",
-  //                 autoClose: 2000,
-  //                 hideProgressBar: false,
-  //                 closeOnClick: true,
-  //                 pauseOnHover: true,
-  //                 draggable: true,
-  //                 progress: undefined,
-  //               });
-  //               fetchData()
-  //             }).catch(error => {
-  //               toast.error("Error deleting room: " + error.message, {
-  //                 position: "top-center",
-  //                 autoClose: 2000,
-  //                 hideProgressBar: false,
-  //                 closeOnClick: true,
-  //                 pauseOnHover: true,
-  //                 draggable: true,
-  //                 progress: undefined,
-  //               });
-  //             });
-  //             setShowConfirmationPopUp(false);
-  //       }else{
-  //         toast.error("Tenants are there you can't delete room until those are trasfered to other room", {
-  //           position: "top-center",
-  //           autoClose: 5000,
-  //           hideProgressBar: false,
-  //           closeOnClick: true,
-  //           pauseOnHover: true,
-  //           draggable: true,
-  //           progress: undefined,
-  //         });
-  //         setShowConfirmationPopUp(false);
-
-  //       }
-       
-  //     } else {
-  //       console.log('No data available');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-   
-
-  // }
 
 
 
@@ -351,9 +306,13 @@ const RoomsBoys = () => {
     setIsEditing(true);
     setCurrentId(room.id);
     setShowModal(true);
-    const formatedDate = formatDate(room.updateDate)
+    setErrors({});
+    setPreviousNumberOfBeds(room.numberOfBeds);
+
+    const formatedDate = formatDate(room.updateDate);
     setUpdateDate(formatedDate);
-  };
+};
+
 
   const handleAddNew = () => {
     if (activeBoysHostelButtons.length == 0) {
@@ -375,6 +334,7 @@ const RoomsBoys = () => {
 
   const closePopupModal = () => {
     setShowModal(false);
+    setErrors({});
   }
 
   const resetForm = () => {
@@ -384,6 +344,9 @@ const RoomsBoys = () => {
     setBedRent('');
     setCurrentId('');
     setErrors({});
+    setPreviousNumberOfBeds('');
+   
+
   };
 
   

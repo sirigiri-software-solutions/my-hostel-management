@@ -775,8 +775,11 @@ const isImageFile = (file) => {
       <div className='mt-4 mb-4'>
         {
           activeBoysHostelButtons.length > 0 ? '' :
-            <div className='d-flex  align-items-center'>
-              <h5 className="addHostelTextBtn">{t('settings.addboysHostel')}</h5><button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button>
+          <div className='d-flex align-items-center' style={{ marginBottom: '8px' }}>
+         
+      
+              <h5 className="addHostelTextBtn">{t('settings.addboysHostel')}</h5>
+              <div><button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button></div>
             </div>
         }
         {
