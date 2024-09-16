@@ -22,7 +22,7 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import Popup from 'reactjs-popup'
 import { AiOutlineClose } from 'react-icons/ai'
 import { DataContext } from '../../ApiData/ContextProvider'
-import { useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { useTranslation } from 'react-i18next'
 import { useData } from '../../ApiData/ContextProvider';
@@ -38,6 +38,7 @@ const MainPage = () => {
   const { t } = useTranslation()
   const [isHostels, setIsHostels] = useState(false)
   const { activeBoysHostelName, activeGirlsHostelName, entireHMAdata, activeBoysHostelButtons, activeGirlsHostelButtons, userUid, firebase, activeFlag, changeActiveFlag,setUserUid, setEntireHMAdata } = useData();
+  const navigate = useNavigate();
   const name = localStorage.getItem("username");
   const [isModalOpen1, setIsModalOpen1] = useState(true);
   const { database } = firebase;
@@ -103,7 +104,7 @@ const MainPage = () => {
   const menuItems = [
     {
       id: 1,
-      path: "/",
+      path: "/dashboard",
       name: t("menuItems.dashboard"),
       icon: DashboardImage,
     },
@@ -127,7 +128,7 @@ const MainPage = () => {
     },
     {
       id: 5,
-      path: "/rent",
+      path: "/rents",
       name: t("menuItems.rent"),
       icon: RentImage,
     },
@@ -228,14 +229,17 @@ const MainPage = () => {
   }
 
 
-  const handleSidebarItemClick = (itemId, close) => {
+  const handleSidebarItemClick = (itemId, path) => {
+    console.log(path, "pathhh")
+    // navigate(path);
     handlesideBar(itemId);
-    close();
+   
+    // close();
     // setActiveTab('boys');
   }
 
 
-  const navigate = useNavigate();
+ 
 
 
   useEffect(() => {
@@ -280,7 +284,7 @@ const MainPage = () => {
 
 
   const renderWelcomeext = index => {
-    console.log(Components.length, "index")
+    // console.log(Components.length, "index")
     // if (index === Components.length) {
     //   return null;
     // }
@@ -319,7 +323,7 @@ const MainPage = () => {
         <div style={sidebarItems}>
           {
             menuItems.map((item, index) => (
-              <div key={index} className="link" style={flag === item.id ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() => handlesideBar(item.id)}>
+              <div key={index} className="link" style={flag === item.id ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() =>  handleSidebarItemClick(item.id, item.path)}>
                 <img src={item.icon} alt={item.name} className='icon' />
                 <label className='link-text'>{item.name}</label>
               </div>
@@ -341,7 +345,7 @@ const MainPage = () => {
               <div style={{ display: "flex", flexDirection: "Column" }}>
                 {
                   menuItems.map((item, index) => (
-                    <div key={index} className="link" style={flag === item.id ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() => handleSidebarItemClick(item.id, close)}>
+                    <div key={index} className="link" style={flag === item.id ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() => handleSidebarItemClick(item.id, item.path)}>
                       <img src={item.icon} alt={item.name} className='icon' />
                       <label className='link-text'>{item.name}</label>
                     </div>
@@ -400,11 +404,14 @@ const MainPage = () => {
               <DefaultModal show={isModalOpen1} handleClose={handleCloseModal} />
             </div>
           ) : (
-            Components && Components.map((item, index) => (
-              <div key={index} style={flag === index + 1 ? { display: 'block' } : { display: 'none' }}>
-                {item}
-              </div>
-            ))
+            // Components && Components.map((item, index) => (
+            //   <div key={index} style={flag === index + 1 ? { display: 'block' } : { display: 'none' }}>
+            //     {item}
+            //   </div>
+            // ))
+            <>
+            <Outlet/>
+            </>
           )
         }
 
