@@ -186,7 +186,7 @@ const Login = () => {
             setUserUid(singleLoginUser.uid);
             fetchData()
             
-            navigate("/mainPage");
+            navigate("/dashboard");
 
             toast.success("You are logged in successfully.", {
               position: "bottom-right",
