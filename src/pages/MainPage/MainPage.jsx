@@ -231,7 +231,7 @@ const MainPage = () => {
 
   const handleSidebarItemClick = (itemId, path) => {
     console.log(path, "pathhh")
-    // navigate(path);
+    navigate(path);
     handlesideBar(itemId);
    
     // close();
