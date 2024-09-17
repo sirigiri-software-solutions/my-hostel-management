@@ -315,33 +315,8 @@ const submitHostelEdit = async (e) => {
     }
   };
 
-  // const handleHostelChange = (e, isBoys) => {
-  //   const file = e.target.files[0];
-  //   if (!file) {
-  //     toast.error("Please select a file.", {
-  //       position: "top-center",
-  //       autoClose: 3000,
-  //     });
-  //     return;
-  //   }
-
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     const dataUrl = reader.result;
-  //     if (isBoys) {
-  //       setBoysHostelImage(dataUrl);
-  //     } else {
-  //       setGirlsHostelImage(dataUrl);
-  //     }
-  //   };
-  //   reader.onerror = () => {
-  //     toast.error("Failed to read file.", {
-  //       position: "top-center",
-  //       autoClose: 3000,
-  //     });
-  //   };
-  //   reader.readAsDataURL(file);
-  // };
+ 
+ 
 
   const isImageFile = (file) => {
     const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
