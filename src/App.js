@@ -16,9 +16,9 @@ import Rents from './Sections/Rents/Rents';
 import Expenses from './Sections/Expenses/Expenses';
 import Hostels from './Sections/Hostels/Hostels';
 import Settings from './Sections/Settings/Settings';
-
+ 
 const App = () => {
-
+ 
   return (
     <BrowserRouter>
       <DataProvider>
@@ -46,5 +46,7 @@ const App = () => {
     </BrowserRouter>
   );
 };
-
+ 
 export default App;
+ 
+ 

@@ -1402,6 +1402,7 @@ if (bikeRcImage) {
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const handleResetDaily = () => {
@@ -1415,6 +1416,7 @@ if (bikeRcImage) {
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const renderFormLayout = () => {
@@ -1492,10 +1494,47 @@ if (bikeRcImage) {
                     <input id="TotalFee" class="form-control" type="number" value={totalFee} readOnly />
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                    <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} name="paidAmount" onFocus={handleFocus} />
-                    {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                  </div>
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                            }
+                            name="paidAmount"
+                            onFocus={handleFocus}
+                          />
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor="Due" class="form-label">{t('dashboard.due')}:</label>
                     <input id="Due" class="form-control" type="number" value={due} readOnly />
@@ -1579,10 +1618,47 @@ if (bikeRcImage) {
                     <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')}/>
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}</label>
-                    <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} name="paidAmount" onFocus={handleFocus} />
-                    {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                  </div>
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                            }
+                            name="paidAmount"
+                            onFocus={handleFocus}
+                          />
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor="Due" class="form-label">{t('dashboard.due')}</label>
                     <input id="Due" class="form-control" type="number" value={due} readOnly />

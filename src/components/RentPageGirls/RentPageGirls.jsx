@@ -459,6 +459,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
           onClick={() => {
             loadRentForEditing(rent.tenantId, rent.rentId);
             setShowForm(true);
+            setErrors({});
           }}
         >
           Update
@@ -523,6 +524,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const handleResetDaily = () => {
@@ -536,6 +538,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const handleFocus = (e) => {

@@ -7,7 +7,7 @@ import './DashboardBoys.css'
 import SmallCard from '../../Elements/SmallCard'
 import PlusIcon from "../../images/Icons (8).png"
 import { push, ref } from "../../firebase/firebase"
-import { onValue, update,set } from 'firebase/database'
+import { onValue, update, set } from 'firebase/database'
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { Modal, Button } from 'react-bootstrap';
@@ -30,10 +30,10 @@ const DashboardBoys = () => {
     adminRole = "Sub-admin"
   }
   const isUneditable = role === 'admin' || role === 'subAdmin';
-  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag, boysRooms, fetchData, boysTenants, boysTenantsWithRents, entireHMAdata} = useData();
+  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag, boysRooms, fetchData, boysTenants, boysTenantsWithRents, entireHMAdata } = useData();
   const { database, storage } = firebase;
 
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [modelText, setModelText] = useState('');
   const [formLayout, setFormLayout] = useState('');
@@ -219,20 +219,20 @@ const DashboardBoys = () => {
   //   });
   // }, [activeBoysHostel]);
   useEffect(() => {
-    if (!entireHMAdata || !activeBoysHostel ) return;
-  
+    if (!entireHMAdata || !activeBoysHostel) return;
+
     const formattedMonth = month.slice(0, 3).toLowerCase(); // Make sure the month is formatted correctly
     const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`];
-  
+
     if (!expensesData) {
       setCurrentMonthExpenses([]); // Set to empty array if no expenses data is available
       setTotalExpenses(0); // Reset total expenses
       return;
     }
-  
+
     const loadedExpenses = [];
     let totalExpenses = 0;
-  
+
     for (const key in expensesData) {
       const expense = {
         id: key,
@@ -242,11 +242,11 @@ const DashboardBoys = () => {
       totalExpenses += expense.expenseAmount || 0; // Ensure expenseAmount exists
       loadedExpenses.push(expense);
     }
-  
+
     setCurrentMonthExpenses(loadedExpenses); // Update the current month's expenses
     setTotalExpenses(totalExpenses); // Update the total expenses for the current month
   }, [entireHMAdata, activeBoysHostel, month, year, userUid]);
-  
+
 
   // useEffect(() => {
   //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
@@ -408,7 +408,7 @@ const DashboardBoys = () => {
   }, [boysRooms, boysTenants]);
 
 
-  
+
 
 
 
@@ -554,16 +554,16 @@ const DashboardBoys = () => {
     setUpdateDate(now);
     setErrors({});
     setShowModal(false);
-    
+
   };
-const [totalBeds, setTotalBeds] = useState(0);
-useEffect(()=>{
-  if(boysRooms){
-    const totalBeds = boysRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
-    setTotalBeds(totalBeds)
-  }
-}, [userUid, entireHMAdata, activeBoysHostel, boysRooms, boysTenants])
-  
+  const [totalBeds, setTotalBeds] = useState(0);
+  useEffect(() => {
+    if (boysRooms) {
+      const totalBeds = boysRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
+      setTotalBeds(totalBeds)
+    }
+  }, [userUid, entireHMAdata, activeBoysHostel, boysRooms, boysTenants])
+
 
 
 
@@ -601,9 +601,9 @@ useEffect(()=>{
     } else if (!phoneRegexWithCountryCode.test(mobileNo) && !phoneRegexWithoutCountryCode.test(mobileNo)) {
       tempErrors.mobileNo = t('errors.mobileNumberInvalid');
     }
-    if(!idNumber){
+    if (!idNumber) {
       tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
-    } else if(idNumber.length < 6){
+    } else if (idNumber.length < 6) {
       tempErrors.idNumber = 'Id should be min 6 characters';
     } else if (!/^[a-zA-Z0-9]+$/.test(idNumber)) {
       tempErrors.idNumber = 'It does not allow special charecters';
@@ -631,7 +631,7 @@ useEffect(()=>{
       } else {
         // Remove spaces for validation
         const bikeNumberWithoutSpaces = bikeNumber.replace(/\s+/g, '');
-        
+
         if (!/^[A-Za-z0-9]{6,10}$/.test(bikeNumberWithoutSpaces)) {
           tempErrors.bikeNumber = 'Enter a valid bike number (letters and numbers only)';
         }
@@ -648,17 +648,17 @@ useEffect(()=>{
       const validFormats = ['image/jpeg', 'image/png'];
       if (validFormats.includes(file.type)) {
         setTenantImage(file);
-        setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' })); 
+        setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' }));
       } else {
         setErrorMessage((prevErrors) => ({
           ...prevErrors,
           tenantImage: 'Please upload a valid image file (JPG, JPEG, PNG).',
         }));
-        e.target.value = null; 
+        e.target.value = null;
       }
     }
   };
-  
+
   const handleTenantIdChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -685,7 +685,7 @@ useEffect(()=>{
     }
   };
 
-  
+
   const handleTenantBikeChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -761,20 +761,20 @@ useEffect(()=>{
   // const handleTenantBikeChange = (e) => {
   //   const file = e.target.files[0];
   //   if (file) {
-      
+
   //     const validFormats = ['image/jpeg', 'image/png'];
 
-     
+
   //     if (validFormats.includes(file.type)) {
-        
+
   //       setBikeImage(file);
   //       setErrorMessage('');
-        
+
   //     } else {
   //       setErrorMessage('Please upload a valid  file.');
-        
 
-        
+
+
   //       e.target.value = null;
   //     }
   //   }
@@ -784,24 +784,24 @@ useEffect(()=>{
   //   const file = e.target.files[0];
 
   //   if (file) {
-     
+
   //     const validFormat = 'application/pdf';
   //     const maxSize = 1 * 1024 * 1024; 
 
-      
+
   //     if (file.type === validFormat) {
-        
+
   //       if (file.size <= maxSize) {
-          
+
   //         setBikeRcImage(file);
   //         setErrorMessage('');
   //       } else {
-          
+
   //         setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
   //         e.target.value = null; 
   //       }
   //     } else {
-        
+
   //       setErrorMessage('Please upload a valid  file.');
   //       e.target.value = null; 
   //     }
@@ -810,12 +810,12 @@ useEffect(()=>{
 
   const compressImage = async (file) => {
     const options = {
-      maxSizeMB:0.6, // Compress to a maximum of 1 MB (adjust as needed)
-      maxWidthOrHeight: 1920, 
+      maxSizeMB: 0.6, // Compress to a maximum of 1 MB (adjust as needed)
+      maxWidthOrHeight: 1920,
       useWebWorker: true, // Use a web worker for better performance
       fileType: 'image/jpeg',
     };
-  
+
     try {
       const compressedFile = await imageCompression(file, options);
       return compressedFile;
@@ -824,23 +824,23 @@ useEffect(()=>{
     }
   };
 
-  const checkImage = (type) =>  {
+  const checkImage = (type) => {
     return type === "image/jpeg"
   }
 
 
-  
+
   const handleTenantSubmit = async (e) => {
     e.preventDefault();
 
     if (!isEditing) {
-        e.target.querySelector('button[type="submit"]').disabled = true;
-        if (!validate()) {
-            e.target.querySelector('button[type="submit"]').disabled = false;
-            return;
-        }
+      e.target.querySelector('button[type="submit"]').disabled = true;
+      if (!validate()) {
+        e.target.querySelector('button[type="submit"]').disabled = false;
+        return;
+      }
     } else {
-        if (!validate()) return;
+      if (!validate()) return;
     }
 
     setShowModal(false);
@@ -850,14 +850,14 @@ useEffect(()=>{
 
     // Helper function to upload a file and return its URL
     const uploadFile = async (file, path) => {
-        try {
-            const imageRef = storageRef(storage, path);
-            const snapshot = await uploadBytes(imageRef, file);
-            return await getDownloadURL(snapshot.ref);
-        } catch (error) {
-            console.error(`Error uploading file ${file.name}:`, error);
-            throw error;
-        }
+      try {
+        const imageRef = storageRef(storage, path);
+        const snapshot = await uploadBytes(imageRef, file);
+        return await getDownloadURL(snapshot.ref);
+      } catch (error) {
+        console.error(`Error uploading file ${file.name}:`, error);
+        throw error;
+      }
     };
 
     const tasks = [];
@@ -865,98 +865,98 @@ useEffect(()=>{
 
     const addUploadTask = (file, type, path) => {
       tasks.push(
-          (async () => {
-              let fileToUpload = file;
-              if (checkImage(file.type)) {
-                  console.log(`Executing compression for ${type}`);
-                  try {
-                      fileToUpload = await compressImage(file);
-                  } catch (error) {
-                      console.error(`Error compressing ${type}:`, error);
-                  }
-              }
-              const url = await uploadFile(fileToUpload, path);
-              return { type, url };
-          })()
+        (async () => {
+          let fileToUpload = file;
+          if (checkImage(file.type)) {
+            console.log(`Executing compression for ${type}`);
+            try {
+              fileToUpload = await compressImage(file);
+            } catch (error) {
+              console.error(`Error compressing ${type}:`, error);
+            }
+          }
+          const url = await uploadFile(fileToUpload, path);
+          return { type, url };
+        })()
       );
-  };
+    };
 
-  if (tenantImage) {
-    addUploadTask(tenantImage, 'tenantImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantUniqueId}`);
-}
-if (tenantId) {
-    addUploadTask(tenantId, 'tenantId', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantUniqueId}`);
-}
-if (bikeImage) {
-    addUploadTask(bikeImage, 'bikeImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${tenantUniqueId}`);
-}
-if (bikeRcImage) {
-    addUploadTask(bikeRcImage, 'bikeRcImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${tenantUniqueId}`);
-}
+    if (tenantImage) {
+      addUploadTask(tenantImage, 'tenantImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantUniqueId}`);
+    }
+    if (tenantId) {
+      addUploadTask(tenantId, 'tenantId', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantUniqueId}`);
+    }
+    if (bikeImage) {
+      addUploadTask(bikeImage, 'bikeImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${tenantUniqueId}`);
+    }
+    if (bikeRcImage) {
+      addUploadTask(bikeRcImage, 'bikeRcImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${tenantUniqueId}`);
+    }
 
 
     try {
       const results = await Promise.all(tasks);
-// Process results
-results.forEach(({ type, url }) => {
-  uploadResults[type] = url;
-});
+      // Process results
+      results.forEach(({ type, url }) => {
+        uploadResults[type] = url;
+      });
 
-const tenantData = {
-  roomNo: selectedRoom,
-  bedNo: selectedBed,
-  dateOfJoin,
-  name: name.charAt(0).toUpperCase() + name.slice(1),
-  mobileNo,
-  idNumber,
-  emergencyContact,
-  status,
-  tenantImageUrl: uploadResults['tenantImage'] || tenantImageUrl,
-  tenantIdUrl: uploadResults['tenantId'] || tenantIdUrl,
-  bikeNumber,
-  permnentAddress,
-  bikeImageUrl: uploadResults['bikeImage'] || bikeImageUrl,
-  bikeRcImageUrl: uploadResults['bikeRcImage'] || bikeRcImageUrl,
- 
-};
+      const tenantData = {
+        roomNo: selectedRoom,
+        bedNo: selectedBed,
+        dateOfJoin,
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        mobileNo,
+        idNumber,
+        emergencyContact,
+        status,
+        tenantImageUrl: uploadResults['tenantImage'] || tenantImageUrl,
+        tenantIdUrl: uploadResults['tenantId'] || tenantIdUrl,
+        bikeNumber,
+        permnentAddress,
+        bikeImageUrl: uploadResults['bikeImage'] || bikeImageUrl,
+        bikeRcImageUrl: uploadResults['bikeRcImage'] || bikeRcImageUrl,
 
-        if (isEditing) {
-            await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
-            toast.success(t('toastMessages.tenantUpdated'), {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
-            fetchData()
-        } else {
-            await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
-            toast.success(t('toastMessages.tenantAddedSuccess'), {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
-            fetchData();
-            e.target.querySelector('button[type="submit"]').disabled = false;
-        }
-    } catch (error) {
-        console.error("Error submitting form:", error);
-        toast.error(t('toastMessages.errorSubmitting') + error.message, {
-            position: "top-center",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
+      };
+
+      if (isEditing) {
+        await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
+        toast.success(t('toastMessages.tenantUpdated'), {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
         });
+        fetchData()
+      } else {
+        await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
+        toast.success(t('toastMessages.tenantAddedSuccess'), {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        fetchData();
+        e.target.querySelector('button[type="submit"]').disabled = false;
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error(t('toastMessages.errorSubmitting') + error.message, {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     } finally {
         setLoading(false);
         resetForm();
@@ -966,9 +966,9 @@ const tenantData = {
         imageInputRef.current.value = "";
         idInputRef.current.value = "";
     }
-};
+  };
 
- 
+
 
 
   const validateRentForm = () => {
@@ -1185,7 +1185,7 @@ const tenantData = {
     } else {
       setModelText(text);
       setFormLayout(text);
-      setShowModal(true); 
+      setShowModal(true);
     }
   };
 
@@ -1330,6 +1330,7 @@ const tenantData = {
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const handleResetDaily = () => {
@@ -1343,6 +1344,7 @@ const tenantData = {
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const renderFormLayout = () => {
@@ -1380,25 +1382,25 @@ const tenantData = {
         return (
           <div>
             <div className='monthlyDailyButtons'>
-            <div
-  className={showForm ? 'manageRentButton active' : 'manageRentButton'}
-  onClick={() => {
-    setShowForm(true);
-    handleResetMonthly();
-  }}
->
-<text>{t('dashboard.monthly')}</text>
-</div>
-             
-<div
-  className={!showForm ? 'manageRentButton active' : 'manageRentButton'}
-  onClick={() => {
-    setShowForm(false);
-    handleResetDaily();
-  }}
->
-  <text>{t('dashboard.daily')}</text> {/* Changed <text> to <span> as <text> is not a valid HTML element */}
-</div>
+              <div
+                className={showForm ? 'manageRentButton active' : 'manageRentButton'}
+                onClick={() => {
+                  setShowForm(true);
+                  handleResetMonthly();
+                }}
+              >
+                <text>{t('dashboard.monthly')}</text>
+              </div>
+
+              <div
+                className={!showForm ? 'manageRentButton active' : 'manageRentButton'}
+                onClick={() => {
+                  setShowForm(false);
+                  handleResetDaily();
+                }}
+              >
+                <text>{t('dashboard.daily')}</text> {/* Changed <text> to <span> as <text> is not a valid HTML element */}
+              </div>
             </div>
             {showForm ?
               <div className='monthlyAddForm'>
@@ -1424,11 +1426,54 @@ const tenantData = {
                     <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}:</label>
                     <input id="TotalFee" class="form-control" type="number" value={totalFee} readOnly />
                   </div>
-                  <div class="col-md-6 mb-3">
+                  {/* <div class="col-md-6 mb-3">
                     <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
                     <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} name="paidAmount" onFocus={handleFocus} />
                     {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                  </div>
+                  </div> */}
+                   <div class="col-md-6 mb-3">
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                            }
+                            name="paidAmount"
+                            onFocus={handleFocus}
+                          />
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
+
                   <div class="col-md-6 mb-3">
                     <label htmlFor="Due" class="form-label">{t('dashboard.due')}:</label>
                     <input id="Due" class="form-control" type="number" value={due} readOnly />
@@ -1510,13 +1555,50 @@ const tenantData = {
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}</label>
-                    <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')}/>
+                    <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} />
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}</label>
-                    <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} name="paidAmount" onFocus={handleFocus} />
-                    {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                  </div>
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                            }
+                            name="paidAmount"
+                            onFocus={handleFocus}
+                          />
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor="Due" class="form-label">{t('dashboard.due')}</label>
                     <input id="Due" class="form-control" type="number" value={due} readOnly />
@@ -1685,7 +1767,7 @@ const tenantData = {
                   <a href={tenantId}>{t('dashboard.downloadPdf')}</a>
                 </object>
               )}
-              <input id="tenantUploadId" class="form-control" type="file"   accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantIdChange} ref={idInputRef} multiple />
+              <input id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantIdChange} ref={idInputRef} multiple />
               {errorMessage.tenantId && <p style={{ color: 'red' }}>{errorMessage.tenantId}</p>}
             </div>
             <div className='col-md-12'>
@@ -1734,7 +1816,7 @@ const tenantData = {
             )
             }
 
-            {tenatErrors.bikeNumber && <p style={{ color: 'red',marginLeft:"4px" }}>{tenatErrors.bikeNumber}</p>}
+            {tenatErrors.bikeNumber && <p style={{ color: 'red', marginLeft: "4px" }}>{tenatErrors.bikeNumber}</p>}
 
             {hasBike && (
               <>
@@ -1841,42 +1923,42 @@ const tenantData = {
 
   return (
     <div className="dashboardboys">
-      
+
       {activeBoysHostelButtons?.length > 0 ? (
         <div>
           <h1 className="heading">{t('dashboard.mens')}</h1>
-       
-        <div className={"flex"}>
-          {activeBoysHostelButtons.map((button, index) => (
-            <button
-              className={`btn m-1 ${activeBoysHostel === button.id ? 'active-button' : 'inactive-button'}`}
-              onClick={() => { setActiveBoysHostel(button.id); setActiveBoysHostelName(button.name) ; changeActiveFlag('boys')}}
-              key={button.id}
-              style={{
-                backgroundColor: activeBoysHostel === button.id ? '#FF8A00' : '#fac38c',
-                color: activeBoysHostel === button.id ? 'white' : '#333333'
-              }}
-            >
-              {button.name}
-            </button>
-          ))}
-        </div>
-        <br/>
-        <div className="menu">
-        {menu.map((item, index) => (
-          <div key={index} className='cardWithBtnsContainer'>
-            <SmallCard key={index} index={index} item={item} handleClick={handleCardClick} />
-            <button id="mbladdButton" type="button" onClick={() => { handleClick(item.btntext) }}><img src={PlusIcon} alt="plusIcon" className='plusIconProperties' /> {item.btntext}</button>
-          </div>
-        ))}
 
-      </div>
+          <div className={"flex"}>
+            {activeBoysHostelButtons.map((button, index) => (
+              <button
+                className={`btn m-1 ${activeBoysHostel === button.id ? 'active-button' : 'inactive-button'}`}
+                onClick={() => { setActiveBoysHostel(button.id); setActiveBoysHostelName(button.name); changeActiveFlag('boys') }}
+                key={button.id}
+                style={{
+                  backgroundColor: activeBoysHostel === button.id ? '#FF8A00' : '#fac38c',
+                  color: activeBoysHostel === button.id ? 'white' : '#333333'
+                }}
+              >
+                {button.name}
+              </button>
+            ))}
+          </div>
+          <br />
+          <div className="menu">
+            {menu.map((item, index) => (
+              <div key={index} className='cardWithBtnsContainer'>
+                <SmallCard key={index} index={index} item={item} handleClick={handleCardClick} />
+                <button id="mbladdButton" type="button" onClick={() => { handleClick(item.btntext) }}><img src={PlusIcon} alt="plusIcon" className='plusIconProperties' /> {item.btntext}</button>
+              </div>
+            ))}
+
+          </div>
         </div>
       ) : (
         ''
       )}
 
-     
+
       <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalRoomsBoys" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal} >
         <div className="modal-dialog ">
           <div className="modal-content">
@@ -1888,7 +1970,7 @@ const tenantData = {
               <div className="container-fluid">
                 {renderFormLayout()}
               </div>
-             
+
             </div>
           </div>
         </div>

@@ -53,32 +53,32 @@ const MainPage = () => {
   // useEffect(() => {
   //   setActiveTab("boys")
   // }, [])
-
+ 
   // useEffect(() => {
   //   setIsHostels(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
   //   setIsModalOpen1(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
-
+ 
   // }, [activeBoysHostelButtons, activeGirlsHostelButtons, isModalOpen1])
-
+ 
   useEffect(() => {
     const userId = localStorage.getItem('userUid');
     const dataref = ref(database, `Hostel/${userId}`);
-
+ 
     onValue(dataref, (snapshot) => {
       const data = snapshot.val();
-
+ 
       if (data) {
         const boys = data.boys || [];
         const girls = data.girls || [];
-
+ 
         // Check if boys and girls are arrays before accessing length
         if (Array.isArray(boys) || Array.isArray(girls)) {
           setIsHostels(boys.length === 0 && girls.length === 0);
           setIsModalOpen1(boys.length === 0 && girls.length === 0);
-
-
+ 
+ 
         }
-
+ 
         setWelcomeText(true);
         setLoading(false);
       } else {
@@ -86,11 +86,11 @@ const MainPage = () => {
         setIsModalOpen1(true)
         setWelcomeText(false);
         setLoading(false);
-
+ 
       }
     });
   }, [isModalOpen1]);
-
+ 
   console.log(activeBoysHostelButtons.length,"area", "length")
   // useEffect(() => {
   //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
@@ -102,9 +102,9 @@ const MainPage = () => {
   //     })) : [];
   //     setTotalTenantData(loadedTenants)
   //   })
-
+ 
   // }, [selectedTenant])
-
+ 
   const menuItems = [
     {
       id: 1,
@@ -154,24 +154,24 @@ const MainPage = () => {
       name: t("menuItems.settings"),
       icon: SettingsImage,
     },
-
+ 
   ];
-
+ 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+ 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
-
-  const Components = [<Dashboard />, <Rooms />, <Beds />, <Tenants />, <Rents />, <Expenses />, <Hostels />, <Settings />]
-
+ 
+  // const Components = [<Dashboard />, <Rooms />, <Beds />, <Tenants />, <Rents />, <Expenses />, <Hostels />, <Settings />]
+ 
   const [flag, setFlag] = useState(1);
-
+ 
   const handlesideBar = (value) => {
     setFlag(value);
     // setActiveTab("boys")
   }
-
+ 
   useEffect(() => {
     const handleClickOutsideModal = (event) => {
       const popup = document.getElementById('poplogoutbtn');
@@ -180,15 +180,15 @@ const MainPage = () => {
         setIsModalOpen(false);
       }
     };
-
+ 
     document.addEventListener('mousedown', handleClickOutsideModal);
-
+ 
     return () => {
       document.removeEventListener('mousedown', handleClickOutsideModal);
     };
   }, []);
-
-
+ 
+ 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -208,31 +208,31 @@ const MainPage = () => {
         setHamburgerMenuItems(false);
       }
     };
-
+ 
     // Call handleResize initially
     handleResize();
-
+ 
     // Add event listener for window resize
     window.addEventListener('resize', handleResize);
-
+ 
     // Cleanup the event listener
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-
-
+ 
+ 
+ 
   const [mainBackgroundContainerStyle, setMainBackgroundContainerStyle] = useState({})
   const [sidebarStyle, setSidebarStyle] = useState({})
   const [sidebarItems, setSidebarItems] = useState({})
   const [rightSectionMainContainer, setrightSectionMainContainer] = useState({})
   const [hamburgerMenu, setHamburgerMenu] = useState(false)
   const [hamburgerMenuItems, setHamburgerMenuItems] = useState(false)
-
+ 
   const handleHamburgerMenu = () => {
     setHamburgerMenuItems(!hamburgerMenuItems)
   }
-
-
+ 
+ 
   const handleSidebarItemClick = (itemId, path) => {
     console.log(path, "pathhh")
     navigate(path);
@@ -241,34 +241,34 @@ const MainPage = () => {
     // close();
     // setActiveTab('boys');
   }
-
-
  
-
-
+ 
+ 
+ 
+ 
   useEffect(() => {
     const checkSession = async () => {
       const uid = localStorage.getItem('userUid');
       const accessEnd = localStorage.getItem('accessEnd');
-
+ 
       if (uid && accessEnd) {
         const now = moment();
         const endTime = moment(accessEnd);
-
+ 
         if (now.isAfter(endTime)) {
           navigate('/subscribe');
         }
       } else {
-
+ 
         navigate('/subscribe');
       }
     };
-
+ 
     checkSession();
-
-
+ 
+ 
   }, [navigate, flag]);
-
+ 
   const logout = () => {
     localStorage.removeItem('username'); //
     localStorage.removeItem('userarea');
@@ -285,8 +285,8 @@ const MainPage = () => {
   };
   console.log(userUid, 'k_001011x')
   console.log(entireHMAdata, 'k_00101')
-
-
+ 
+ 
   const renderWelcomeext = index => {
     // console.log(Components.length, "index")
     // if (index === Components.length) {
@@ -302,18 +302,18 @@ const MainPage = () => {
  const handleOpenModal = () => {
     setIsModalOpen1(true);
   };
-
+ 
   const handleCloseModal = () => {
     setIsModalOpen1(false);
   };
-
+ 
   return (
     <div className='bg-container' style={mainBackgroundContainerStyle}>
       <div className='sidebar' style={sidebarStyle}>
         <div className='top-section' >
           <img src={logo} alt="logo" className='logo' />
         </div>
-
+ 
         <div className='nav-div' >
           <div className='menufontchange'>
             <img src={Admin} alt="admin" className='mbl-dashboard-icon' />
@@ -323,7 +323,7 @@ const MainPage = () => {
             <RiLogoutCircleRLine />
           </div>
         </div>
-
+ 
         <div style={sidebarItems}>
           {
             menuItems.map((item, index) => (
@@ -367,11 +367,11 @@ const MainPage = () => {
           )}
         </Popup>
       </div>
-
-
-
+ 
+ 
+ 
       <div style={rightSectionMainContainer} >
-
+ 
         <div >
           <div className='dashboardHead'>
             <div className='dashBoarWelcome'>
@@ -385,7 +385,7 @@ const MainPage = () => {
               </div>
             </div>
           </div>
-
+ 
           {isModalOpen && (
             <div id="poplogoutbtn" className="mainPagepPopup">
               <div>
@@ -397,12 +397,12 @@ const MainPage = () => {
             </div>
           )}
         </div>
-
+ 
         {loading && <div className="spinnerContainer"> <Spinner animation="border" variant="info" role="status" size="lg">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
         </div>}
-        {loading ? '': 
+        {loading ? '':
           isHostels ? (
             <div>
               <DefaultModal show={isModalOpen1} handleClose={handleCloseModal} />
@@ -418,10 +418,10 @@ const MainPage = () => {
             </>
           )
         }
-
+ 
       </div>
     </div>
   )
 }
-
+ 
 export default MainPage;
