@@ -135,8 +135,8 @@ const BedsPageBoys = () => {
     );
   });
  
-  console.log(rows,"bedsPageData")
-  console.log(filteredRows,"bedsPageData")
+  // console.log(rows,"bedsPageData")
+  // console.log(filteredRows,"bedsPageData")
 
 
   return (
@@ -191,7 +191,7 @@ const BedsPageBoys = () => {
           <Table columns={columns} rows={filteredRows} />
         </div>
 
-        <div className="modal fade" id="exampleModalBedsBoys" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div className="modal fade" id="exampleModalBedsBoys" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
@@ -206,8 +206,8 @@ const BedsPageBoys = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" className="btn btn-primary">Save changes</button>
               </div>
             </div>
           </div>
