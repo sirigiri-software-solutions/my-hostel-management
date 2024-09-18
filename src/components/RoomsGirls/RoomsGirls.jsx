@@ -94,6 +94,7 @@ const RoomsGirls = () => {
       newErrors.roomNumber = 'Room number already exists';
     }
     if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
+    else if (numberOfBeds > 20) newErrors.numberOfBeds = "No.of beds can't exceed 20";
     if (!bedRent) newErrors.bedRent = 'Bed rent is required';
     // New check: if editing, ensure the new number of beds is greater than or equal to the previous number
     if (isEditing && parseInt(numberOfBeds) < parseInt(previousNumberOfBeds)) {

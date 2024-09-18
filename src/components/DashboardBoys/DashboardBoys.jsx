@@ -508,6 +508,7 @@ const DashboardBoys = () => {
       newErrors.roomNumber = t('errors.roomNumberExists');
     }
     if (!numberOfBeds) newErrors.numberOfBeds = t('errors.numberOfBedsRequired');
+    else if (numberOfBeds > 20) newErrors.numberOfBeds = "No.of beds can't exceed 20";
     if (!bedRent) newErrors.bedRent = t('errors.bedRentRequired');
 
     if (Object.keys(newErrors).length > 0) {
@@ -957,12 +958,13 @@ const DashboardBoys = () => {
         progress: undefined,
       });
     } finally {
-      setLoading(false);
-      resetForm();
-      setErrors({});
-      // fetchData()
-      imageInputRef.current.value = "";
-      idInputRef.current.value = "";
+        setLoading(false);
+        resetForm();
+        setErrors({});
+        setTenantErrors({});
+        // fetchData()
+        imageInputRef.current.value = "";
+        idInputRef.current.value = "";
     }
   };
 
@@ -1135,6 +1137,7 @@ const DashboardBoys = () => {
     setBikeNumber('NA')
     setBikeImage(null);
     setBikeRcImage(null);
+    setTenantErrors({});
   };
 
 

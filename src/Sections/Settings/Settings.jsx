@@ -119,6 +119,7 @@ const Settings = () => {
     const regex = /^[A-Za-z\s]*$/;
     return regex.test(input);
   };
+  
 
   const handleHostelNameChange = (e, isBoys) => {
     const value = e.target.value;
