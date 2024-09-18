@@ -961,6 +961,7 @@ const tenantData = {
         setLoading(false);
         resetForm();
         setErrors({});
+        setTenantErrors({});
         // fetchData()
         imageInputRef.current.value = "";
         idInputRef.current.value = "";
@@ -1136,6 +1137,7 @@ const tenantData = {
     setBikeNumber('NA')
     setBikeImage(null);
     setBikeRcImage(null);
+    setTenantErrors({});
   };
 
 
