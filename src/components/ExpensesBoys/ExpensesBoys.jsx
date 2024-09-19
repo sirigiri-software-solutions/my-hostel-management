@@ -208,7 +208,7 @@ const ExpensesBoys = () => {
     if (!entireHMAdata || !activeBoysHostel) return;
  
     const formattedMonth = month.slice(0, 3);
-    const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`] ;
+    const expensesData = entireHMAdata?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`] ;
     const loadedExpenses = [];
     for (const key in expensesData) {
       loadedExpenses.push({
@@ -221,7 +221,7 @@ const ExpensesBoys = () => {
     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
     setTotal(totalExpenses);
      
-    const totalExpensesOfhostel = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses
+    const totalExpensesOfhostel = entireHMAdata?.boys?.[activeBoysHostel]?.expenses
    if(totalExpensesOfhostel){
     const yearsMonth = Object.keys(totalExpensesOfhostel)
  
@@ -240,7 +240,7 @@ const ExpensesBoys = () => {
    }
       
  
-  }, [entireHMAdata, activeBoysHostel, month, year, userUid]);
+  }, [entireHMAdata, activeBoysHostel, month, year]);
 
   const columns = [
     t('expensesPage.sNo'),
@@ -501,7 +501,7 @@ const ExpensesBoys = () => {
     let totalAnnualExpenses = 0;
   
     monthNames.forEach(month => {
-        const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${month}`];
+        const expensesData = entireHMAdata?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${month}`];
         
         if (expensesData) {
             const monthlyTotal = Object.values(expensesData).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);

@@ -225,7 +225,7 @@ const DashboardGirls = () => {
     if (!entireHMAdata || !activeGirlsHostel ) return;
   
     const formattedMonth = month.slice(0, 3).toLowerCase(); // Make sure the month is formatted correctly
-    const expensesData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`];
+    const expensesData = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`];
   
     if (!expensesData) {
       setCurrentMonthExpenses([]); // Set to empty array if no expenses data is available
@@ -248,7 +248,7 @@ const DashboardGirls = () => {
   
     setCurrentMonthExpenses(loadedExpenses); // Update the current month's expenses
     setTotalExpenses(totalExpenses); // Update the total expenses for the current month
-  }, [entireHMAdata, activeGirlsHostel, month, year, userUid]);
+  }, [entireHMAdata, activeGirlsHostel, month, year]);
   
 
 
@@ -595,7 +595,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       const totalBeds = girlsRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
       setTotalBeds(totalBeds)
     }
-  }, [userUid, entireHMAdata, activeGirlsHostel,girlsRooms, girlsTenants])
+  }, [entireHMAdata, activeGirlsHostel,girlsRooms, girlsTenants])
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

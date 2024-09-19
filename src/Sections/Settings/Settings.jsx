@@ -76,7 +76,7 @@ const Settings = () => {
     const entireYearData = [];
   
     monthNames.forEach(month => {
-      const hostelData = entireHMAdata?.[userUid]?.[hostelType]?.[hostel];
+      const hostelData = entireHMAdata?.[hostelType]?.[hostel];
       if (!hostelData || !hostelData.expenses) {
         entireYearData.push(0);
         return;
