@@ -204,7 +204,7 @@ window.addEventListener('keydown',handleOutsideClick);
     if (!entireHMAdata || !activeGirlsHostel) return;
 
     const formattedMonth = month.slice(0, 3);
-    const expensesData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`] ; 
+    const expensesData = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`] ; 
     const loadedExpenses = [];
     for (const key in expensesData) {
       loadedExpenses.push({
@@ -217,7 +217,7 @@ window.addEventListener('keydown',handleOutsideClick);
 
     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
     setTotal(totalExpenses);
-    const totalExpensesOfhostel = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses
+    const totalExpensesOfhostel = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses
     if(totalExpensesOfhostel){
       const yearsMonth =  Object.keys(totalExpensesOfhostel)
 
@@ -235,7 +235,7 @@ window.addEventListener('keydown',handleOutsideClick);
     
 
 
-  }, [entireHMAdata, activeGirlsHostel, month, year, userUid]);
+  }, [entireHMAdata, activeGirlsHostel, month, year]);
 
 
   const columns = [
@@ -492,7 +492,7 @@ useEffect(() => {
   let totalAnnualExpenses = 0;
 
   monthNames.forEach(month => {
-      const expensesData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${month}`];
+      const expensesData = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${month}`];
       
       if (expensesData) {
           const monthlyTotal = Object.values(expensesData).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);

@@ -222,7 +222,7 @@ const DashboardBoys = () => {
     if (!entireHMAdata || !activeBoysHostel) return;
 
     const formattedMonth = month.slice(0, 3).toLowerCase(); // Make sure the month is formatted correctly
-    const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`];
+    const expensesData = entireHMAdata?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`];
 
     if (!expensesData) {
       setCurrentMonthExpenses([]); // Set to empty array if no expenses data is available
@@ -245,7 +245,7 @@ const DashboardBoys = () => {
 
     setCurrentMonthExpenses(loadedExpenses); // Update the current month's expenses
     setTotalExpenses(totalExpenses); // Update the total expenses for the current month
-  }, [entireHMAdata, activeBoysHostel, month, year, userUid]);
+  }, [entireHMAdata, activeBoysHostel, month, year]);
 
 
   // useEffect(() => {
@@ -562,7 +562,7 @@ const DashboardBoys = () => {
       const totalBeds = boysRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
       setTotalBeds(totalBeds)
     }
-  }, [userUid, entireHMAdata, activeBoysHostel, boysRooms, boysTenants])
+  }, [ entireHMAdata, activeBoysHostel, boysRooms, boysTenants])
 
 
 
