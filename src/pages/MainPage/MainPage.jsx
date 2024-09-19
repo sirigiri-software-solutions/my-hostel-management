@@ -47,6 +47,15 @@ const MainPage = () => {
   const [loading, setLoading] = useState(true);
 
   const location = useLocation(); 
+
+
+  useEffect(()=>{
+    const isAuthenticated = localStorage.getItem('userUid');
+    if(!isAuthenticated){
+      navigate("/login")
+    }
+
+  },[])
   
 
 
@@ -280,7 +289,7 @@ const MainPage = () => {
     localStorage.removeItem("accessEnd");
     localStorage.clear();
     setUserUid(null)
-    navigate('/');
+    navigate('/login');
     // setLogoutFlag(true);
   };
   console.log(userUid, 'k_001011x')
