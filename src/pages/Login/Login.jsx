@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import ImageOne from "../../images/Vector 1 (1).png";
 import ImageTwo from "../../images/Vector 3 (2).png";
 import moment from 'moment';
-
+import { useLocation } from "react-router-dom";
 import Logo from "../../images/HMLogo3.png"
 import newLogo from "../../images/favicon (2).jpg"
 import './Login.css';
@@ -86,6 +86,17 @@ const Login = () => {
   const toggleSignUpPasswordConfirmVisibility = () => {
     setHideConfirmPassword(!hideconfirmPassword)
   }
+
+  const location = useLocation();
+
+  useEffect(()=>{
+    const isAuthenticated = localStorage.getItem('userUid');
+    if(isAuthenticated){
+      navigate("/dashboard")
+    }
+
+  },[location.pathname])
+  
 
 
   useEffect(() => {
