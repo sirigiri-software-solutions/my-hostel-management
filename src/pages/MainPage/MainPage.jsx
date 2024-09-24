@@ -53,6 +53,8 @@ const MainPage = () => {
     const isAuthenticated = localStorage.getItem('userUid');
     if(!isAuthenticated){
       navigate("/login")
+    }else{
+      navigate("/dashboard")
     }
 
   },[])
@@ -279,6 +281,7 @@ const MainPage = () => {
   }, [navigate, flag]);
  
   const logout = () => {
+    setEntireHMAdata([])
     localStorage.removeItem('username'); //
     localStorage.removeItem('userarea');
     localStorage.removeItem('role');

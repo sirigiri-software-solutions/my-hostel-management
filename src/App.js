@@ -19,23 +19,37 @@ import Settings from './Sections/Settings/Settings';
 const App = () => {
   return (
     <BrowserRouter>
-      <DataProvider>
-        <ToastContainer />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path='/' element={<ProtectedRoute><MainPage /></ProtectedRoute>}>
-            <Route path='dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path='rooms' element={<ProtectedRoute><Rooms /></ProtectedRoute>} />
-            <Route path='beds' element={<ProtectedRoute><Beds /></ProtectedRoute>} />
-            <Route path='tenants' element={<ProtectedRoute><Tenants /></ProtectedRoute>} />
-            <Route path='rents' element={<ProtectedRoute><Rents /></ProtectedRoute>} />
-            <Route path='expenses' element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
-            <Route path='hostels' element={<ProtectedRoute><Hostels /></ProtectedRoute>} />
-            <Route path='settings' element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          </Route>
-          <Route path="/subscribe" element={<SubscriptionPage />} />
-        </Routes>
-      </DataProvider>
+      <ToastContainer />
+
+      <Routes>
+        {/* Route outside of DataProvider */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Wrap all other routes inside DataProvider */}
+        <Route
+          path="/"
+          element={
+            <DataProvider>
+              <ProtectedRoute>
+                <MainPage />
+              </ProtectedRoute>
+            </DataProvider>
+          }
+        >
+          {/* Nested Routes inside MainPage */}
+          <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="rooms" element={<ProtectedRoute><Rooms /></ProtectedRoute>} />
+          <Route path="beds" element={<ProtectedRoute><Beds /></ProtectedRoute>} />
+          <Route path="tenants" element={<ProtectedRoute><Tenants /></ProtectedRoute>} />
+          <Route path="rents" element={<ProtectedRoute><Rents /></ProtectedRoute>} />
+          <Route path="expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
+          <Route path="hostels" element={<ProtectedRoute><Hostels /></ProtectedRoute>} />
+          <Route path="settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        </Route>
+
+        {/* Subscription route can also be outside DataProvider if needed */}
+        <Route path="/subscribe" element={<SubscriptionPage />} />
+      </Routes>
     </BrowserRouter>
   );
 };
