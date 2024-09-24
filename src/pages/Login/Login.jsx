@@ -1,8 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import ImageOne from "../../images/Vector 1 (1).png";
-import ImageTwo from "../../images/Vector 3 (2).png";
 import moment from 'moment';
 import { useLocation } from "react-router-dom";
 import Logo from "../../images/HMLogo3.png"
@@ -11,22 +9,34 @@ import './Login.css';
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useData } from "../../ApiData/ContextProvider";
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-
 import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { FirebaseError } from 'firebase/app';
 import { ref, set, get,update} from 'firebase/database';
+import { firebaseInstances } from "../../firebase/firebase";
 
 
-
-
-export const loginContext = createContext();
 
 const Login = () => {
   const navigate = useNavigate();
-  const { areaToApiEndpoint, setUserArea, setUserUid, firebase, setArea, fetchData, setDefaultArea} = useData();
+
+  const areaToApiEndpoint = {
+    // hyderabad: "https://ameerpet-588ee-default-rtdb.firebaseio.com/register.json",
+    ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
+    srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
+    // secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
+    default:"https://defaulthostel-default-rtdb.firebaseio.com/register.json",
+    kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
+    gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
+    ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
+    dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
+    himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
+    madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
+    madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
+    lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
+    nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/register.json"
+  };
 
   const initialState = { Id: "", email: "", area: "", password: "" };
   const [loginData, setLoginData] = useState(initialState);
@@ -60,7 +70,7 @@ const Login = () => {
     password: "",
   });
 
-  const [uniqueforgotUserId, setUniqueForgotUserId] = useState(null);
+
 
   const areaOptions = [ "default", "ameerpet", "srnagar", "kukatpally", "gachibouli", "ashoknagar", "dhilshuknagar", "himayathnagar", "madhuranagar", "madhapur", "lbnagar", "nanakramguda"];
 
@@ -73,7 +83,7 @@ const Login = () => {
   const [hideconfirmPassword, setHideConfirmPassword] = useState(true);
 
 
-  const { auth, database, setFirstLogin  } = firebase;
+ 
 
 
   const togglePasswordVisibility = () => {
@@ -108,7 +118,6 @@ const Login = () => {
 
         });
     }
-    setUserArea(loginData.area)
   }, [loginData.area, areaToApiEndpoint]);
 
 
@@ -117,16 +126,15 @@ const Login = () => {
       ...loginData,
       [event.target.name]: event.target.value,
     });
-    if (event.target.name === "area") {
-      setArea(event.target.value)
-      // setDefaultArea(event.target.value)
-    }
+    
 
   };
 
 
   const checkData = async (event) => {
     event.preventDefault();
+    const firebase = firebaseInstances[loginData.area]
+    const { auth, database  } = firebase;
 
     if (validateForm()) {
       try {
@@ -136,6 +144,7 @@ const Login = () => {
           loginData.password
         );
         const user = userCredential.user;
+       
 
         console.log(user,"user")
 
@@ -163,10 +172,8 @@ const Login = () => {
             localStorage.setItem("username", singleLoginUser.firstname);
             localStorage.setItem("userarea", singleLoginUser.area);
             localStorage.setItem("userUid", singleLoginUser.uid);
-            setDefaultArea(singleLoginUser.area)
-            setUserUid(singleLoginUser.uid);
+           
 
-            await fetchData(); 
             const now = moment();
             const accessEnd = singleLoginUser.accessEnd ? moment(singleLoginUser.accessEnd) : null;
 
@@ -194,8 +201,8 @@ const Login = () => {
               localStorage.setItem('accessEnd', accessEnd.toISOString());
             }
 
-            setUserUid(singleLoginUser.uid);
-            fetchData()
+           
+           
             
             navigate("/dashboard");
 
@@ -213,7 +220,7 @@ const Login = () => {
           } else {
             console.log("User not found in data array.");
           }
-          await fetchData();
+ 
         } else {
           toast.error("Email is not verified.", {
             position: "bottom-right",
@@ -278,10 +285,7 @@ const Login = () => {
       ...forgotPasswordData,
       [event.target.name]: event.target.value,
     });
-    if (event.target.name === "area") {
-      setArea(event.target.value);
-      // setDefaultArea(event.target.value);
-    }
+    
   };
 
 
@@ -291,6 +295,8 @@ const Login = () => {
     event.preventDefault();
 
     const { email, area } = forgotPasswordData;
+    const firebase = firebaseInstances[area]
+    const { auth, database  } = firebase;
 
     if (!email || !area) {
       toast.error("Please fill in all fields.", {
@@ -442,10 +448,7 @@ const Login = () => {
     setSignupData({ ...signupData, [e.target.name]: e.target.value });
 
     setSignupErrors({ ...signupErrors, [e.target.name]: "" });
-    if (e.target.name === "area") {
-      setArea(e.target.value)
-      // setDefaultArea(e.target.value)
-    }
+   
   };
 
   const clearErrorOnFocus = (fieldName) => {
@@ -515,7 +518,8 @@ const Login = () => {
       accessEnd:null
     };
 
-
+    const firebase = firebaseInstances[area]
+    const { auth, database  } = firebase;
 
     const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
 

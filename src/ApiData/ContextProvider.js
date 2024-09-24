@@ -20,19 +20,18 @@ const DataProvider = ({ children }) => {
   const [activeGirlsHostel, setActiveGirlsHostel] = useState(null);
   const [activeGirlsHostelName, setActiveGirlsHostelName] = useState(null);
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
-  const [userarea, setUserArea] = useState();
-  const [userUid, setUserUid] = useState(localStorage.getItem('userUid' || ''));
+
+  const [userUid, setUserUid] = useState(localStorage.getItem('userUid'));
   const [ boysExTenantsData, setBoysExTenantsData] = useState([])
   const [girlsExTenantsData, setGirlsExTenantsData] = useState([]);
  
   // new code to implement multiple configuration
-  const [area, setArea] = useState(localStorage.getItem('userarea') || 'default');
-  const [firebase, setFirebase] = useState(firebaseInstances[area]);
+
   const [activeFlag, setActiveFlag] = useState("");
  
   const [expensesInteracted,setExpensesInteracted] = useState(false);
  
-  const { database } = firebase;
+  
  
  
   // trying to fetch entire data from context
@@ -40,7 +39,8 @@ const DataProvider = ({ children }) => {
  
   const [defaultArea, setDefaultArea] = useState(localStorage.getItem('userarea'))
   const [entireHMAdata, setEntireHMAdata] = useState([]);
- 
+  const [firebase, setFirebase] = useState(firebaseInstances[defaultArea]);
+  
   const areaToApiEndPointEntireData = {
     ameerpet:`https://ameerpet-c73e9-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
     srnagar:`https://sr-nagar-4426a-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
@@ -176,15 +176,12 @@ const DataProvider = ({ children }) => {
       // Extracting Boys Hostel buttons
  
       const boysHostelButtons = entireHMAdata?.boys;
-      console.log(entireHMAdata, 'k_0011')
-      console.log(boysHostelButtons, "k_001")
       if(boysHostelButtons && boysHostelButtons != undefined && boysHostelButtons != null){
         const dataBoysHostelButtons = Object.keys(boysHostelButtons).map(key => ({
           id:key,
           name:boysHostelButtons[key].name
         }))
-        console.log(dataBoysHostelButtons, "k_002")
-        console.log(dataBoysHostelButtons.length, "k_003")
+
         setActiveBoysHostelButtons(dataBoysHostelButtons)
         
       }else{
@@ -195,7 +192,7 @@ const DataProvider = ({ children }) => {
       // Extracting Girls Hostel buttons
  
       const girlsHostelButtons = entireHMAdata?.girls;
- console.log(girlsHostelButtons , "hhh")
+
       if(girlsHostelButtons && girlsHostelButtons != undefined && girlsHostelButtons != null){
         const dataGirlsHostelButtons = Object.keys(girlsHostelButtons).map(key => ({
           id:key,
@@ -224,20 +221,15 @@ const DataProvider = ({ children }) => {
       setGirlsExTenantsData(exTenantsGirlsFormattedData)
    
   }
-}, [entireHMAdata, activeBoysHostel, activeGirlsHostel, area, defaultArea]);
+}, [entireHMAdata, activeBoysHostel, activeGirlsHostel, defaultArea]);
  
  
   // end to get entireData
  
-  console.log(activeBoysHostelButtons, "k_004")
-  console.log(activeBoysHostelButtons.length, "k_005")
- console.log(userUid, "k_006")
- console.log(entireHMAdata, 'k_007')
+  
+
  
-  useEffect(() => {
-    setFirebase(firebaseInstances[area]);
  
-  }, [area]);
  
  
   const areaToApiEndpoint = {
@@ -262,7 +254,7 @@ const DataProvider = ({ children }) => {
   useEffect(() => {
     const userId = localStorage.getItem('userUid')
     setUserUid(userId);
-  }, [userUid, area])
+  }, [userUid])
  
  
  
@@ -308,10 +300,11 @@ const DataProvider = ({ children }) => {
  
  
   const [completeData, setCompleteData] = useState(false);
+
   useEffect(() => {
     fetchData();
-}, [userUid, userarea, completeData, defaultArea]);
-console.log(entireHMAdata, "entireee")
+}, [userUid, completeData, defaultArea]);
+
   return (
     <DataContext.Provider
      value={{
@@ -326,10 +319,9 @@ console.log(entireHMAdata, "entireee")
       setActiveGirlsHostel,
       activeGirlsHostelButtons,
       areaToApiEndpoint,
-      setUserArea,
       userUid,
       firebase,
-      setArea,
+    
       setUserUid,
       activeFlag,  
       changeActiveFlag,
@@ -347,6 +339,7 @@ console.log(entireHMAdata, "entireee")
       entireHMAdata,
       setCompleteData,
       setDefaultArea,
+      setEntireHMAdata,
       }}>
       {children}
     </DataContext.Provider>
