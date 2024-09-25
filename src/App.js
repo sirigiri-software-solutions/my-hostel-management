@@ -20,11 +20,9 @@ const App = () => {
   return (
     <BrowserRouter>
       <ToastContainer />
-
       <Routes>
         {/* Route outside of DataProvider */}
         <Route path="/login" element={<Login />} />
-
         {/* Wrap all other routes inside DataProvider */}
         <Route
           path="/"
