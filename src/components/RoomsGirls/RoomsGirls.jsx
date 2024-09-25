@@ -5,11 +5,12 @@ import './RoomsGirls.css';
 import Table from '../../Elements/Table';
 import { push, ref } from "../../firebase/firebase";
 import { DataContext } from '../../ApiData/ContextProvider';
-import { onValue, remove, update,get } from 'firebase/database';
+import { onValue, remove, update, get } from 'firebase/database';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from 'react-i18next';
 import { useData } from '../../ApiData/ContextProvider';
+
 
 const RoomsGirls = () => {
   const { t } = useTranslation();
@@ -34,6 +35,8 @@ const RoomsGirls = () => {
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [roomToDelete, setRoomToDelete] = useState({ roomNumber: '', currentId: '' });
+  const [previousNumberOfBeds, setPreviousNumberOfBeds] = useState(0);
+  // Store the previous number of beds
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -92,6 +95,10 @@ const RoomsGirls = () => {
     }
     if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
     if (!bedRent) newErrors.bedRent = 'Bed rent is required';
+    // New check: if editing, ensure the new number of beds is greater than or equal to the previous number
+    if (isEditing && parseInt(numberOfBeds) < parseInt(previousNumberOfBeds)) {
+      newErrors.numberOfBeds = `Number of beds must be greater than or equal to ${previousNumberOfBeds}`;
+  }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -164,8 +171,9 @@ const RoomsGirls = () => {
     }
     setShowModal(false);
     resetForm();
-    setUpdateDate(now); 
+    setUpdateDate(now);
     setErrors({});
+
   };
   const [showConfirmationPopUp, setShowConfirmationPopUp] = useState(false);
 
@@ -175,6 +183,7 @@ const RoomsGirls = () => {
     setShowModal(false);
     setRoomToDelete({ roomNumber, currentId });
   };
+  
 
   const roomExists = (data, targetRoomNo) => {
     for (const key in data) {
@@ -187,7 +196,6 @@ const RoomsGirls = () => {
     }
     return false; // No room found
   };
-
 
 
   const confirmDeleteYes = async () => {
@@ -276,7 +284,9 @@ const RoomsGirls = () => {
     setCurrentId(room.id);
     // Open the modal
     setShowModal(true);
-    const formatedDate = formatDate(room.updateDate)
+    const formatedDate = formatDate(room.updateDate);
+    setPreviousNumberOfBeds(room.numberOfBeds);
+    // Set previous number of beds
     setUpdateDate(formatedDate);
   };
 
@@ -305,22 +315,11 @@ const RoomsGirls = () => {
     setBedRent('');
     setCurrentId('');
     setErrors({});
+    setPreviousNumberOfBeds('');
+   
   };
 
-  // useEffect(() => {
-  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-  //   onValue(roomsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedRooms = [];
-  //     for (const key in data) {
-  //       loadedRooms.push({
-  //         id: key,
-  //         ...data[key]
-  //       });
-  //     }
-  //     setRooms(loadedRooms);
-  //   });
-  // }, [activeGirlsHostel]);
+
 
   const columns = [
     t('roomsPage.S.No'),

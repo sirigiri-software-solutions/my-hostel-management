@@ -143,13 +143,13 @@
   }
   
   .addHostelBtn {
-    width: 100px;
+    width: 80px;
     padding: 5px;
     border-radius: 5px;
     border: 1px solid #FF8A00;
     background: #FF8A00;
     color: white;
-    margin-left:20px;
+    margin-left:8px;
   }
   
   .confirmation-dialog {
@@ -209,7 +209,9 @@
 
   
 .addHostelTextBtn{
-  margin-right:15px;
+  margin-right:10px;
+  font-size: 20px;
+  font-weight: bold;
   margin-top:5px;
 }
 .hostelTypeDropDown{
@@ -246,24 +248,41 @@
   color:#fff;
   margin-right:8px;
 }
-@media screen and (max-width:578px){
-  .settingsHeading{
-    font-size:17px;
+
+@media screen and (max-width: 578px) {
+  .settingsHeading {
+    font-size: 17px;
   }
-  .settingsSideHeading{
-    font-size:13px;
+  .settingsSideHeading {
+    font-size: 13px;
   }
-  .reportsButton{
-    font-size:10px;
-    margin-bottom:10px;
+  .reportsButton {
+    font-size: 10px;
+    margin-bottom: 10px;
   }
-  .selectTypeText{
-    font-size:15px;
+  .selectTypeText {
+    font-size: 15px;
   }
-  .selectTypeDropDown{
-    width:80px;
+  .selectTypeDropDown {
+    width: 80px;
+  }
+  .addHostelTextBtn {
+    font-size: 14px;
+    font-weight: bold;
+    text-wrap: wrap;
+
+  }
+  .addHostelBtn {
+    font-size: 10px;
+    margin-bottom: 10px;
+  }
+
+  /* Ensure heading and button stay in the same row */
+  .d-flex {
+    flex-wrap: nowrap; /* Prevents wrapping of the text and button */
   }
 }
+
 
 .expensesBtn{
   margin-top:10px;

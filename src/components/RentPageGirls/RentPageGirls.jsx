@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 
 const RentPageGirls = () => {
   const { t } = useTranslation();
+  
   const {
     activeGirlsHostel,
     userUid,
@@ -49,6 +50,8 @@ const RentPageGirls = () => {
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [showForm, setShowForm] = useState(true);
   const [filterOption, setFilterOption] = useState("all");
+  
+
 
   // Function to send WhatsApp message
   const sendMessage = (tenant, rentRecord) => {
@@ -253,19 +256,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
     return formIsValid;
   };
 
-  // useEffect(() => {
-  //   if (selectedTenant) {
-  //     const tenant = girlsTenants.find(t => t.id === selectedTenant);
-  //     if (tenant) {
 
-  //       setDateOfJoin(tenant.dateOfJoin || '');
-  //       const currentDate = new Date(tenant.dateOfJoin);
-  //       const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1));
-  //       const formattedDueDate = dueDate.toISOString().split('T')[0];
-  //       setDueDate(formattedDueDate);
-  //     }
-  //   }
-  // }, [selectedTenant, girlsTenants]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
