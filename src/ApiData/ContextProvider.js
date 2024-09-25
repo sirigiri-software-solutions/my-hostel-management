@@ -20,19 +20,18 @@ const DataProvider = ({ children }) => {
   const [activeGirlsHostel, setActiveGirlsHostel] = useState(null);
   const [activeGirlsHostelName, setActiveGirlsHostelName] = useState(null);
   const [activeGirlsHostelButtons, setActiveGirlsHostelButtons] = useState([]);
-  const [userarea, setUserArea] = useState();
-  const [userUid, setUserUid] = useState(localStorage.getItem('userUid' || ''));
+
+  const [userUid, setUserUid] = useState(localStorage.getItem('userUid'));
   const [ boysExTenantsData, setBoysExTenantsData] = useState([])
   const [girlsExTenantsData, setGirlsExTenantsData] = useState([]);
  
   // new code to implement multiple configuration
-  const [area, setArea] = useState(localStorage.getItem('userarea') || 'default');
-  const [firebase, setFirebase] = useState(firebaseInstances[area]);
+
   const [activeFlag, setActiveFlag] = useState("");
  
   const [expensesInteracted,setExpensesInteracted] = useState(false);
  
-  const { database } = firebase;
+  
  
  
   // trying to fetch entire data from context
@@ -40,21 +39,22 @@ const DataProvider = ({ children }) => {
  
   const [defaultArea, setDefaultArea] = useState(localStorage.getItem('userarea'))
   const [entireHMAdata, setEntireHMAdata] = useState([]);
- 
+  const [firebase, setFirebase] = useState(firebaseInstances[defaultArea]);
+  
   const areaToApiEndPointEntireData = {
-    ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/Hostel.json",
-    srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/Hostel.json",
-    secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/Hostel.json",
-    default:"https://defaulthostel-default-rtdb.firebaseio.com/Hostel.json",
-    kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/Hostel.json",
-    gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/Hostel.json",
-    ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/Hostel.json",
-    dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/Hostel.json",
-    himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/Hostel.json",
-    madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/Hostel.json",
-    madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/Hostel.json",
-    lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/Hostel.json",
-    nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/Hostel.json",
+    ameerpet:`https://ameerpet-c73e9-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    srnagar:`https://sr-nagar-4426a-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    secunderabad: `https://sr-nagar-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    default:`https://defaulthostel-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    kukatpally:`https://kukatpally-76219-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    gachibouli:`https://gachibouli-fc19f-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    ashoknagar:`https://ashoknagar-385c1-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    dhilshuknagar:`https://dhilshuknagar-85672-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    himayathnagar:`https://himayathnagar-43760-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    madhuranagar:`https://madhuranagar-4da77-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    madhapur:`https://madharpur-221df-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    lbnagar:`https://lbnagar-86ba7-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    nanakramguda:`https://nanakramguda-ebe50-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
   }
  
   const fetchData = async () => {
@@ -92,9 +92,9 @@ const DataProvider = ({ children }) => {
  // Extract and assign data from entireHMAdata
  
  useEffect(() => {
-  if (entireHMAdata && userUid) {
+  if (entireHMAdata ) {
  
-    const boysRoomsData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.rooms || {};
+    const boysRoomsData = entireHMAdata?.boys?.[activeBoysHostel]?.rooms || {};
     const loadedBoysRooms = [];
     for (const key in boysRoomsData) {
       loadedBoysRooms.push({
@@ -104,7 +104,7 @@ const DataProvider = ({ children }) => {
     }
     setBoysRooms(loadedBoysRooms);  
  
-    const girlsRoomsData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.rooms || {};
+    const girlsRoomsData = entireHMAdata?.girls?.[activeGirlsHostel]?.rooms || {};
     const loadedGirlsRooms = [];
     for (const key in girlsRoomsData) {
       loadedGirlsRooms.push({
@@ -116,7 +116,7 @@ const DataProvider = ({ children }) => {
  
  
       // Extract boys tenants
-      const boysTenantsData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.tenants || {};
+      const boysTenantsData = entireHMAdata?.boys?.[activeBoysHostel]?.tenants || {};
       const loadedBoysTenants = [];
       for (const key in boysTenantsData) {
         loadedBoysTenants.push({
@@ -145,7 +145,7 @@ const DataProvider = ({ children }) => {
  
  
       // Extract girls tenants
-      const girlsTenantsData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.tenants || {};
+      const girlsTenantsData = entireHMAdata?.girls?.[activeGirlsHostel]?.tenants || {};
       const loadedGirlsTenants = [];
       for (const key in girlsTenantsData) {
         loadedGirlsTenants.push({
@@ -175,18 +175,13 @@ const DataProvider = ({ children }) => {
  
       // Extracting Boys Hostel buttons
  
-      const boysHostelButtons = entireHMAdata[userUid]?.boys;
-      console.log(entireHMAdata, 'k_0011')
-      console.log(entireHMAdata[userUid], 'k_0012')
-      console.log(userUid, 'k_0013')
-      console.log(boysHostelButtons, "k_001")
+      const boysHostelButtons = entireHMAdata?.boys;
       if(boysHostelButtons && boysHostelButtons != undefined && boysHostelButtons != null){
         const dataBoysHostelButtons = Object.keys(boysHostelButtons).map(key => ({
           id:key,
           name:boysHostelButtons[key].name
         }))
-        console.log(dataBoysHostelButtons, "k_002")
-        console.log(dataBoysHostelButtons.length, "k_003")
+
         setActiveBoysHostelButtons(dataBoysHostelButtons)
         
       }else{
@@ -196,8 +191,8 @@ const DataProvider = ({ children }) => {
  
       // Extracting Girls Hostel buttons
  
-      const girlsHostelButtons = entireHMAdata[userUid]?.girls;
- console.log(girlsHostelButtons , "hhh")
+      const girlsHostelButtons = entireHMAdata?.girls;
+
       if(girlsHostelButtons && girlsHostelButtons != undefined && girlsHostelButtons != null){
         const dataGirlsHostelButtons = Object.keys(girlsHostelButtons).map(key => ({
           id:key,
@@ -210,7 +205,7 @@ const DataProvider = ({ children }) => {
  
  
       // extract ex-tenants boys data
-      const exTenantsBoysData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.extenants || {};
+      const exTenantsBoysData = entireHMAdata?.boys?.[activeBoysHostel]?.extenants || {};
       const exTenantsBoysFormattedData = Object.entries(exTenantsBoysData).map(([key,value]) => ({
         id:key,
         ...value,
@@ -218,7 +213,7 @@ const DataProvider = ({ children }) => {
       setBoysExTenantsData(exTenantsBoysFormattedData)
  
       // extract ex-tenants girls data
-      const exTenantsGirlsData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.extenants || {};
+      const exTenantsGirlsData = entireHMAdata?.girls?.[activeGirlsHostel]?.extenants || {};
       const exTenantsGirlsFormattedData = Object.entries(exTenantsGirlsData).map(([key,value]) => ({
         id:key,
         ...value,
@@ -226,20 +221,15 @@ const DataProvider = ({ children }) => {
       setGirlsExTenantsData(exTenantsGirlsFormattedData)
    
   }
-}, [entireHMAdata, activeBoysHostel, activeGirlsHostel, area, defaultArea, userUid]);
+}, [entireHMAdata, activeBoysHostel, activeGirlsHostel, defaultArea]);
  
  
   // end to get entireData
  
-  console.log(activeBoysHostelButtons, "k_004")
-  console.log(activeBoysHostelButtons.length, "k_005")
- console.log(userUid, "k_006")
- console.log(entireHMAdata, 'k_007')
+  
+
  
-  useEffect(() => {
-    setFirebase(firebaseInstances[area]);
  
-  }, [area]);
  
  
   const areaToApiEndpoint = {
@@ -264,7 +254,7 @@ const DataProvider = ({ children }) => {
   useEffect(() => {
     const userId = localStorage.getItem('userUid')
     setUserUid(userId);
-  }, [userUid, area])
+  }, [userUid])
  
  
  
@@ -310,10 +300,11 @@ const DataProvider = ({ children }) => {
  
  
   const [completeData, setCompleteData] = useState(false);
+
   useEffect(() => {
     fetchData();
-}, [userUid, userarea, completeData, defaultArea]);
-console.log(entireHMAdata, "entire")
+}, [userUid, completeData, defaultArea]);
+
   return (
     <DataContext.Provider
      value={{
@@ -328,10 +319,9 @@ console.log(entireHMAdata, "entire")
       setActiveGirlsHostel,
       activeGirlsHostelButtons,
       areaToApiEndpoint,
-      setUserArea,
       userUid,
       firebase,
-      setArea,
+    
       setUserUid,
       activeFlag,  
       changeActiveFlag,
@@ -349,6 +339,7 @@ console.log(entireHMAdata, "entire")
       entireHMAdata,
       setCompleteData,
       setDefaultArea,
+      setEntireHMAdata,
       }}>
       {children}
     </DataContext.Provider>

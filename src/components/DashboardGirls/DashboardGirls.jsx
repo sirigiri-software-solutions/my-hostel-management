@@ -225,7 +225,7 @@ const DashboardGirls = () => {
     if (!entireHMAdata || !activeGirlsHostel ) return;
   
     const formattedMonth = month.slice(0, 3).toLowerCase(); // Make sure the month is formatted correctly
-    const expensesData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`];
+    const expensesData = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`];
   
     if (!expensesData) {
       setCurrentMonthExpenses([]); // Set to empty array if no expenses data is available
@@ -248,7 +248,7 @@ const DashboardGirls = () => {
   
     setCurrentMonthExpenses(loadedExpenses); // Update the current month's expenses
     setTotalExpenses(totalExpenses); // Update the total expenses for the current month
-  }, [entireHMAdata, activeGirlsHostel, month, year, userUid]);
+  }, [entireHMAdata, activeGirlsHostel, month, year]);
   
 
 
@@ -542,6 +542,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       newErrors.roomNumber = t('errors.roomNumberExists');
     }
     if (!numberOfBeds) newErrors.numberOfBeds = t('errors.numberOfBedsRequired');
+    else if (numberOfBeds > 20) newErrors.numberOfBeds = "No.of beds can't exceed 20";
     if (!bedRent) newErrors.bedRent = t('errors.bedRentRequired');
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -594,7 +595,7 @@ Please note that you made your last payment on ${paidDate}.\n`
       const totalBeds = girlsRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
       setTotalBeds(totalBeds)
     }
-  }, [userUid, entireHMAdata, activeGirlsHostel,girlsRooms, girlsTenants])
+  }, [entireHMAdata, activeGirlsHostel,girlsRooms, girlsTenants])
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -1401,6 +1402,7 @@ if (bikeRcImage) {
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const handleResetDaily = () => {
@@ -1414,6 +1416,7 @@ if (bikeRcImage) {
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const renderFormLayout = () => {
@@ -1491,10 +1494,47 @@ if (bikeRcImage) {
                     <input id="TotalFee" class="form-control" type="number" value={totalFee} readOnly />
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                    <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} name="paidAmount" onFocus={handleFocus} />
-                    {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                  </div>
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                            }
+                            name="paidAmount"
+                            onFocus={handleFocus}
+                          />
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor="Due" class="form-label">{t('dashboard.due')}:</label>
                     <input id="Due" class="form-control" type="number" value={due} readOnly />
@@ -1578,10 +1618,47 @@ if (bikeRcImage) {
                     <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')}/>
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}</label>
-                    <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} name="paidAmount" onFocus={handleFocus} />
-                    {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                  </div>
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                            }
+                            name="paidAmount"
+                            onFocus={handleFocus}
+                          />
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor="Due" class="form-label">{t('dashboard.due')}</label>
                     <input id="Due" class="form-control" type="number" value={due} readOnly />

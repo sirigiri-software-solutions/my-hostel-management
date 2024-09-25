@@ -398,6 +398,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             loadRentForEditing(rent.tenantId, rent.rentId);
             console.log(rent, "rent-00")
             setShowForm(true);
+            setErrors({});
           }}
         >
           Update
@@ -461,6 +462,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const handleResetDaily = () => {
@@ -474,16 +476,16 @@ Please note that you made your last payment on ${paidDate}.\n`;
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const handleFocus = (e) => {
     const { name } = e.target;
     setErrors((prevErrors) => ({
       ...prevErrors,
-      [name]: "",
+      [name]: "", // Clear the error for the specific input field
     }));
   };
-
   return (
     <div className="h-100">
       <>
@@ -552,7 +554,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
               <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">
                   {" "}
-                  {isEditing ? t("rentsPage.UpdateRent") :t("rentsPage.addRent")}
+                  {isEditing ? t("rentsPage.UpdateRent") : t("rentsPage.addRent")}
                 </h1>
                 <button
                   type="button"
@@ -574,6 +576,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                         }
                         onClick={() => {
                           setShowForm(true);
+                          
                           handleResetMonthly();
                         }}
                       >
@@ -672,6 +675,8 @@ Please note that you made your last payment on ${paidDate}.\n`;
                           />
                         </div>
 
+
+
                         <div class="col-md-6 mb-3">
                           <label htmlFor="PaidAmount" class="form-label">
                             {t("dashboard.paidAmount")}:
@@ -682,10 +687,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                             type="text"
                             value={paidAmount}
                             onChange={(e) => {
-                              const value = e.target.value.replace(
-                                /[^0-9 ]/g,
-                                ""
-                              );
+                              const value = e.target.value.replace(/[^0-9 ]/g, "");
                               if (parseFloat(value) > totalFee) {
                                 setErrors((prevErrors) => ({
                                   ...prevErrors,
@@ -699,21 +701,17 @@ Please note that you made your last payment on ${paidDate}.\n`;
                                 setPaidAmount(value);
                               }
                             }}
-                            onInput={(e) =>
-                              (e.target.value = e.target.value.replace(
-                                /[^0-9 ]/g,
-                                ""
-                              ))
-                            }
+                            onInput={(e) => (e.target.value = e.target.value.replace(/[^0-9 ]/g, ""))}
                             name="paidAmount"
-                            onFocus={handleFocus}
+                            onFocus={handleFocus} // Clear the error message when the input gains focus
                           />
                           {errors.paidAmount && (
-                            <div style={{ color: "red" }}>
-                              {errors.paidAmount}
-                            </div>
+                            <div style={{ color: "red" }}>{errors.paidAmount}</div>
                           )}
                         </div>
+
+
+
 
                         <div class="col-md-6 mb-3">
                           <label htmlFor="Due" class="form-label">
@@ -784,7 +782,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                               type="checkbox"
                               checked={notify}
                               onChange={onClickCheckbox}
-                              // Toggle the state on change
+                            // Toggle the state on change
                             />
                             <label
                               className="form-check-label"
@@ -882,7 +880,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                           <label htmlFor="TotalFee" class="form-label">
                             {t("dashboard.totalFee")}:
                           </label>
-                          <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')}/>
+                          <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} />
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -913,10 +911,10 @@ Please note that you made your last payment on ${paidDate}.\n`;
                               }
                             }}
                             onInput={(e) =>
-                              (e.target.value = e.target.value.replace(
-                                /[^0-9 ]/g,
-                                ""
-                              ))
+                            (e.target.value = e.target.value.replace(
+                              /[^0-9 ]/g,
+                              ""
+                            ))
                             }
                             name="paidAmount"
                             onFocus={handleFocus}

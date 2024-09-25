@@ -97,6 +97,7 @@ const RoomsBoys = () => {
         newErrors.roomNumber = 'Room number already exists';
     }
     if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
+    else if (numberOfBeds > 20) newErrors.numberOfBeds = "No.of beds can't exceed 20";
     if (!bedRent) newErrors.bedRent = 'Bed rent is required';
 
 
@@ -522,4 +523,4 @@ const RoomsBoys = () => {
   )
 }
 
-export default RoomsBoys
+export default RoomsBoys;

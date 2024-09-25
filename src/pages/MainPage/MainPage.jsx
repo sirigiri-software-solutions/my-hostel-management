@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
+import { useLocation } from 'react-router-dom';
 import DashboardImage from '../../images/Icons (11).png'
 import RoomsImage from '../../images/Icons (2).png'
 import BedsImage from '../../images/Icons (3).png'
@@ -22,7 +23,7 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import Popup from 'reactjs-popup'
 import { AiOutlineClose } from 'react-icons/ai'
 import { DataContext } from '../../ApiData/ContextProvider'
-import { useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { useTranslation } from 'react-i18next'
 import { useData } from '../../ApiData/ContextProvider';
@@ -38,42 +39,57 @@ const MainPage = () => {
   const { t } = useTranslation()
   const [isHostels, setIsHostels] = useState(false)
   const { activeBoysHostelName, activeGirlsHostelName, entireHMAdata, activeBoysHostelButtons, activeGirlsHostelButtons, userUid, firebase, activeFlag, changeActiveFlag,setUserUid, setEntireHMAdata } = useData();
+  const navigate = useNavigate();
   const name = localStorage.getItem("username");
   const [isModalOpen1, setIsModalOpen1] = useState(true);
   const { database } = firebase;
   const [welcomeText, setWelcomeText] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const location = useLocation(); 
+
+
+  useEffect(()=>{
+    const isAuthenticated = localStorage.getItem('userUid');
+    if(!isAuthenticated){
+      navigate("/login")
+    }else{
+      navigate("/dashboard")
+    }
+
+  },[])
+  
+
 
   // useEffect(() => {
   //   setActiveTab("boys")
   // }, [])
-
+ 
   // useEffect(() => {
   //   setIsHostels(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
   //   setIsModalOpen1(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
-
+ 
   // }, [activeBoysHostelButtons, activeGirlsHostelButtons, isModalOpen1])
-
+ 
   useEffect(() => {
     const userId = localStorage.getItem('userUid');
     const dataref = ref(database, `Hostel/${userId}`);
-
+ 
     onValue(dataref, (snapshot) => {
       const data = snapshot.val();
-
+ 
       if (data) {
         const boys = data.boys || [];
         const girls = data.girls || [];
-
+ 
         // Check if boys and girls are arrays before accessing length
         if (Array.isArray(boys) || Array.isArray(girls)) {
           setIsHostels(boys.length === 0 && girls.length === 0);
           setIsModalOpen1(boys.length === 0 && girls.length === 0);
-
-
+ 
+ 
         }
-
+ 
         setWelcomeText(true);
         setLoading(false);
       } else {
@@ -81,11 +97,11 @@ const MainPage = () => {
         setIsModalOpen1(true)
         setWelcomeText(false);
         setLoading(false);
-
+ 
       }
     });
   }, [isModalOpen1]);
-
+ 
   console.log(activeBoysHostelButtons.length,"area", "length")
   // useEffect(() => {
   //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
@@ -97,13 +113,13 @@ const MainPage = () => {
   //     })) : [];
   //     setTotalTenantData(loadedTenants)
   //   })
-
+ 
   // }, [selectedTenant])
-
+ 
   const menuItems = [
     {
       id: 1,
-      path: "/",
+      path: "/dashboard",
       name: t("menuItems.dashboard"),
       icon: DashboardImage,
     },
@@ -127,7 +143,7 @@ const MainPage = () => {
     },
     {
       id: 5,
-      path: "/rent",
+      path: "/rents",
       name: t("menuItems.rent"),
       icon: RentImage,
     },
@@ -149,24 +165,24 @@ const MainPage = () => {
       name: t("menuItems.settings"),
       icon: SettingsImage,
     },
-
+ 
   ];
-
+ 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+ 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
-
-  const Components = [<Dashboard />, <Rooms />, <Beds />, <Tenants />, <Rents />, <Expenses />, <Hostels />, <Settings />]
-
+ 
+  // const Components = [<Dashboard />, <Rooms />, <Beds />, <Tenants />, <Rents />, <Expenses />, <Hostels />, <Settings />]
+ 
   const [flag, setFlag] = useState(1);
-
+ 
   const handlesideBar = (value) => {
     setFlag(value);
     // setActiveTab("boys")
   }
-
+ 
   useEffect(() => {
     const handleClickOutsideModal = (event) => {
       const popup = document.getElementById('poplogoutbtn');
@@ -175,15 +191,15 @@ const MainPage = () => {
         setIsModalOpen(false);
       }
     };
-
+ 
     document.addEventListener('mousedown', handleClickOutsideModal);
-
+ 
     return () => {
       document.removeEventListener('mousedown', handleClickOutsideModal);
     };
   }, []);
-
-
+ 
+ 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -203,65 +219,69 @@ const MainPage = () => {
         setHamburgerMenuItems(false);
       }
     };
-
+ 
     // Call handleResize initially
     handleResize();
-
+ 
     // Add event listener for window resize
     window.addEventListener('resize', handleResize);
-
+ 
     // Cleanup the event listener
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-
-
+ 
+ 
+ 
   const [mainBackgroundContainerStyle, setMainBackgroundContainerStyle] = useState({})
   const [sidebarStyle, setSidebarStyle] = useState({})
   const [sidebarItems, setSidebarItems] = useState({})
   const [rightSectionMainContainer, setrightSectionMainContainer] = useState({})
   const [hamburgerMenu, setHamburgerMenu] = useState(false)
   const [hamburgerMenuItems, setHamburgerMenuItems] = useState(false)
-
+ 
   const handleHamburgerMenu = () => {
     setHamburgerMenuItems(!hamburgerMenuItems)
   }
-
-
-  const handleSidebarItemClick = (itemId, close) => {
+ 
+ 
+  const handleSidebarItemClick = (itemId, path) => {
+    console.log(path, "pathhh")
+    navigate(path);
     handlesideBar(itemId);
-    close();
+   
+    // close();
     // setActiveTab('boys');
   }
-
-
-  const navigate = useNavigate();
-
-
+ 
+ 
+ 
+ 
+ 
   useEffect(() => {
     const checkSession = async () => {
       const uid = localStorage.getItem('userUid');
       const accessEnd = localStorage.getItem('accessEnd');
-
+ 
       if (uid && accessEnd) {
         const now = moment();
         const endTime = moment(accessEnd);
-
+ 
         if (now.isAfter(endTime)) {
           navigate('/subscribe');
         }
       } else {
-
+ 
         navigate('/subscribe');
       }
     };
-
+ 
     checkSession();
-
-
+ 
+ 
   }, [navigate, flag]);
-
+ 
   const logout = () => {
+    setEntireHMAdata([])
     localStorage.removeItem('username'); //
     localStorage.removeItem('userarea');
     localStorage.removeItem('role');
@@ -272,15 +292,15 @@ const MainPage = () => {
     localStorage.removeItem("accessEnd");
     localStorage.clear();
     setUserUid(null)
-    navigate('/');
+    navigate('/login');
     // setLogoutFlag(true);
   };
   console.log(userUid, 'k_001011x')
   console.log(entireHMAdata, 'k_00101')
-
-
+ 
+ 
   const renderWelcomeext = index => {
-    console.log(Components.length, "index")
+    // console.log(Components.length, "index")
     // if (index === Components.length) {
     //   return null;
     // }
@@ -294,18 +314,18 @@ const MainPage = () => {
  const handleOpenModal = () => {
     setIsModalOpen1(true);
   };
-
+ 
   const handleCloseModal = () => {
     setIsModalOpen1(false);
   };
-
+ 
   return (
     <div className='bg-container' style={mainBackgroundContainerStyle}>
       <div className='sidebar' style={sidebarStyle}>
         <div className='top-section' >
           <img src={logo} alt="logo" className='logo' />
         </div>
-
+ 
         <div className='nav-div' >
           <div className='menufontchange'>
             <img src={Admin} alt="admin" className='mbl-dashboard-icon' />
@@ -315,11 +335,11 @@ const MainPage = () => {
             <RiLogoutCircleRLine />
           </div>
         </div>
-
+ 
         <div style={sidebarItems}>
           {
             menuItems.map((item, index) => (
-              <div key={index} className="link" style={flag === item.id ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() => handlesideBar(item.id)}>
+              <div key={index} className="link" style={item.path === location.pathname ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() =>  handleSidebarItemClick(item.id, item.path)}>
                 <img src={item.icon} alt={item.name} className='icon' />
                 <label className='link-text'>{item.name}</label>
               </div>
@@ -341,7 +361,7 @@ const MainPage = () => {
               <div style={{ display: "flex", flexDirection: "Column" }}>
                 {
                   menuItems.map((item, index) => (
-                    <div key={index} className="link" style={flag === item.id ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() => handleSidebarItemClick(item.id, close)}>
+                    <div key={index} className="link" style={flag === item.id ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() =>{ handleSidebarItemClick(item.id, item.path); close()}}>
                       <img src={item.icon} alt={item.name} className='icon' />
                       <label className='link-text'>{item.name}</label>
                     </div>
@@ -359,11 +379,11 @@ const MainPage = () => {
           )}
         </Popup>
       </div>
-
-
-
+ 
+ 
+ 
       <div style={rightSectionMainContainer} >
-
+ 
         <div >
           <div className='dashboardHead'>
             <div className='dashBoarWelcome'>
@@ -377,7 +397,7 @@ const MainPage = () => {
               </div>
             </div>
           </div>
-
+ 
           {isModalOpen && (
             <div id="poplogoutbtn" className="mainPagepPopup">
               <div>
@@ -389,28 +409,31 @@ const MainPage = () => {
             </div>
           )}
         </div>
-
+ 
         {loading && <div className="spinnerContainer"> <Spinner animation="border" variant="info" role="status" size="lg">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
         </div>}
-        {loading ? '': 
+        {loading ? '':
           isHostels ? (
             <div>
               <DefaultModal show={isModalOpen1} handleClose={handleCloseModal} />
             </div>
           ) : (
-            Components && Components.map((item, index) => (
-              <div key={index} style={flag === index + 1 ? { display: 'block' } : { display: 'none' }}>
-                {item}
-              </div>
-            ))
+            // Components && Components.map((item, index) => (
+            //   <div key={index} style={flag === index + 1 ? { display: 'block' } : { display: 'none' }}>
+            //     {item}
+            //   </div>
+            // ))
+            <>
+            <Outlet/>
+            </>
           )
         }
-
+ 
       </div>
     </div>
   )
 }
-
+ 
 export default MainPage;
