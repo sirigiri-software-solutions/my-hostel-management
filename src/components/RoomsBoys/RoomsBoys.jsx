@@ -10,9 +10,14 @@ import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useData } from '../../ApiData/ContextProvider';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Popup from 'reactjs-popup';
 
 
 const RoomsBoys = () => {
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { t } = useTranslation();
   const role = localStorage.getItem('role');
@@ -38,17 +43,27 @@ const RoomsBoys = () => {
   const [showModal, setShowModal] = useState(false);
   const [roomToDelete, setRoomToDelete] = useState({ roomNumber: '', currentId: '' });
   let activeToastId = null;
+  const [previousNumberOfBeds, setPreviousNumberOfBeds] = useState(0);
+ 
+
 
 
   // console.log(fetchData, "fetchData")
   useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (showModal && (event.target.id === "exampleModalRoomsBoys" || event.key === "Escape")) {
-        setShowModal(false);
-      }
-    };
-    window.addEventListener('click', handleOutsideClick);
-    window.addEventListener("keydown", handleOutsideClick)
+
+      const handleOutsideClick = (event) => {
+        if (showModal && (event.target.id === "exampleModalRoomsBoys" || event.key === "Escape")) {
+          setShowModal(false);
+          navigate(-1);
+        }
+      };
+      window.addEventListener('click', handleOutsideClick);
+      window.addEventListener("keydown", handleOutsideClick)
+      return () => {
+        window.removeEventListener('click', handleOutsideClick);
+        window.removeEventListener("keydown", handleOutsideClick);
+      };
+    
   }, [showModal]);
 
   const handleRoomsIntegerChange = (event) => {
@@ -80,6 +95,9 @@ const RoomsBoys = () => {
     }
   };
 
+  
+  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const now = new Date().toISOString();
@@ -88,16 +106,26 @@ const RoomsBoys = () => {
     // Validation checks
     if (!floorNumber.trim()) newErrors.floorNumber = 'Floor number is required';
     if (!roomNumber.trim()) newErrors.roomNumber = 'Room number is required';
-    else if (boysRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) { 
-      newErrors.roomNumber = 'Room number already exists';
+    else if (boysRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
+        newErrors.roomNumber = 'Room number already exists';
     }
     if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
+    else if (numberOfBeds > 20) newErrors.numberOfBeds = "No.of beds can't exceed 20";
     if (!bedRent) newErrors.bedRent = 'Bed rent is required';
 
+
+    if (isEditing && parseInt(numberOfBeds) < parseInt(previousNumberOfBeds)) {
+      newErrors.numberOfBeds = `Number of beds must be greater than or equal to ${previousNumberOfBeds}`;
+  }
+
+   
+
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+        setErrors(newErrors);
+        return;
     }
+
+    // Proceed with update or creation based on isEditing flag
     if (isEditing) {
       const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
       update(roomRef, {
@@ -187,10 +215,14 @@ const RoomsBoys = () => {
     }
 
     setShowModal(false);
+    navigate(-1)
     resetForm();
     setUpdateDate(now);
     setErrors({});
-  };
+};
+
+
+
 
   const [showConfirmationPopUp, setShowConfirmationPopUp] = useState(false);
 
@@ -218,70 +250,7 @@ const RoomsBoys = () => {
     return false; // No room found
   };
 
-  // const confirmDeleteYes =async () => {
 
-  //   try {
-  //     const path = `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`;
-  //     const dbRef = ref(database, path);
-  //     const snapshot = await get(dbRef);
-  //     console.log(snapshot,"roomsData")
-  //     if (snapshot.exists()) {
-  //       const data = snapshot.val();
-  //       console.log(data,"roomsData")
-
-
-
-
-
-  //       const exists = roomExists(data, roomNumber);
-  //       if(!exists){
-  //         const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
-  //             remove(roomRef).then(() => {
-  //               toast.success("Room deleted successfully.", {
-  //                 position: "top-center",
-  //                 autoClose: 2000,
-  //                 hideProgressBar: false,
-  //                 closeOnClick: true,
-  //                 pauseOnHover: true,
-  //                 draggable: true,
-  //                 progress: undefined,
-  //               });
-  //               fetchData()
-  //             }).catch(error => {
-  //               toast.error("Error deleting room: " + error.message, {
-  //                 position: "top-center",
-  //                 autoClose: 2000,
-  //                 hideProgressBar: false,
-  //                 closeOnClick: true,
-  //                 pauseOnHover: true,
-  //                 draggable: true,
-  //                 progress: undefined,
-  //               });
-  //             });
-  //             setShowConfirmationPopUp(false);
-  //       }else{
-  //         toast.error("Tenants are there you can't delete room until those are trasfered to other room", {
-  //           position: "top-center",
-  //           autoClose: 5000,
-  //           hideProgressBar: false,
-  //           closeOnClick: true,
-  //           pauseOnHover: true,
-  //           draggable: true,
-  //           progress: undefined,
-  //         });
-  //         setShowConfirmationPopUp(false);
-
-  //       }
-       
-  //     } else {
-  //       console.log('No data available');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-   
-
-  // }
 
 
 
@@ -374,6 +343,7 @@ const RoomsBoys = () => {
     }
   
     setShowConfirmationPopUp(false);
+    navigate(-1)
   };
   
   
@@ -384,6 +354,7 @@ const RoomsBoys = () => {
 
   const confirmDeleteNo = () => {
     setShowConfirmationPopUp(false);
+    navigate(-1);
   }
 
 
@@ -395,9 +366,14 @@ const RoomsBoys = () => {
     setIsEditing(true);
     setCurrentId(room.id);
     setShowModal(true);
-    const formatedDate = formatDate(room.updateDate)
+    window.history.pushState(null, null, location.pathname);
+    setErrors({});
+    setPreviousNumberOfBeds(room.numberOfBeds);
+
+    const formatedDate = formatDate(room.updateDate);
     setUpdateDate(formatedDate);
-  };
+};
+
 
   const handleAddNew = () => {
     if (activeBoysHostelButtons.length == 0) {
@@ -420,12 +396,34 @@ const RoomsBoys = () => {
       resetForm();
       setIsEditing(false);
       setShowModal(true);
+      window.history.pushState(null, null, location.pathname);
     }
   };
 
   const closePopupModal = () => {
     setShowModal(false);
+    setErrors({});
+    navigate(-1);
   }
+
+  useEffect(() => {
+    
+      const handlePopState = () => {
+        if (showModal) {
+          setShowModal(false); // Close the popup
+          
+        }
+        if(showConfirmationPopUp){
+          setShowConfirmationPopUp(false)
+        }
+      };
+  
+      window.addEventListener('popstate', handlePopState);
+  
+   
+
+
+  }, [showModal,showConfirmationPopUp, location.pathname]);
 
   const resetForm = () => {
     setFloorNumber('');
@@ -434,6 +432,9 @@ const RoomsBoys = () => {
     setBedRent('');
     setCurrentId('');
     setErrors({});
+    setPreviousNumberOfBeds('');
+   
+
   };
 
   
@@ -609,4 +610,4 @@ const RoomsBoys = () => {
   )
 }
 
-export default RoomsBoys
+export default RoomsBoys;

@@ -84,7 +84,7 @@ const Settings = () => {
     const entireYearData = [];
   
     monthNames.forEach(month => {
-      const hostelData = entireHMAdata?.[userUid]?.[hostelType]?.[hostel];
+      const hostelData = entireHMAdata?.[hostelType]?.[hostel];
       if (!hostelData || !hostelData.expenses) {
         entireYearData.push(0);
         return;
@@ -127,6 +127,7 @@ const Settings = () => {
     const regex = /^[A-Za-z\s]*$/;
     return regex.test(input);
   };
+  
 
   const handleHostelNameChange = (e, isBoys) => {
     const value = e.target.value;
@@ -2148,8 +2149,11 @@ const handleVacatedBtnExcel = async () => {
       <div className='mt-4 mb-4'>
         {
           activeBoysHostelButtons.length > 0 ? '' :
-            <div className='d-flex  align-items-center'>
-              <h5 className="addHostelTextBtn">{t('settings.addboysHostel')}</h5><button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button>
+          <div className='d-flex align-items-center' style={{ marginBottom: '8px' }}>
+         
+      
+              <h5 className="addHostelTextBtn">{t('settings.addboysHostel')}</h5>
+              <div><button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button></div>
             </div>
         }
         {

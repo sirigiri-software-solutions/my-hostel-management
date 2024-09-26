@@ -9,8 +9,11 @@ import { toast } from "react-toastify";
 import './ExpensesGirls.css';
 import { useTranslation } from 'react-i18next';
 import { useData } from '../../ApiData/ContextProvider';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const ExpensesGirls = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { activeGirlsHostel , userUid, activeGirlsHostelButtons,firebase,setExpensesInteracted,expensesInteracted, entireHMAdata, fetchData} = useData();
   const {database} = firebase;
@@ -81,11 +84,17 @@ const ExpensesGirls = () => {
       console.log("Triggering")
         if (showModal && (event.target.id === "exampleModalExpensesGirls" || event.key === "Escape")) {
   setShowModal(false);
+  navigate(-1)
       }
 
       };
 window.addEventListener('click', handleOutsideClick);
 window.addEventListener('keydown',handleOutsideClick);
+
+return () => {
+  window.removeEventListener('click', handleOutsideClick);
+  window.removeEventListener("keydown", handleOutsideClick);
+};
 
   }, [showModal]);
 
@@ -173,6 +182,7 @@ window.addEventListener('keydown',handleOutsideClick);
       }
       });
       setShowModal(false);
+      navigate(-1)
       setFormErrors({
         number: '',
         rent: '',
@@ -218,7 +228,7 @@ window.addEventListener('keydown',handleOutsideClick);
     if (!entireHMAdata || !activeGirlsHostel) return;
 
     const formattedMonth = month.slice(0, 3);
-    const expensesData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`] ; 
+    const expensesData = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`] ; 
     const loadedExpenses = [];
     for (const key in expensesData) {
       loadedExpenses.push({
@@ -231,7 +241,7 @@ window.addEventListener('keydown',handleOutsideClick);
 
     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
     setTotal(totalExpenses);
-    const totalExpensesOfhostel = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses
+    const totalExpensesOfhostel = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses
     if(totalExpensesOfhostel){
       const yearsMonth =  Object.keys(totalExpensesOfhostel)
 
@@ -249,7 +259,7 @@ window.addEventListener('keydown',handleOutsideClick);
     
 
 
-  }, [entireHMAdata, activeGirlsHostel, month, year, userUid]);
+  }, [entireHMAdata, activeGirlsHostel, month, year]);
 
 
   const columns = [
@@ -294,6 +304,7 @@ window.addEventListener('keydown',handleOutsideClick);
       createdBy: adminRole,
     });
     setShowModal(true);
+    window.history.pushState(null, null, location.pathname);
     setFormErrors({
       number: '',
       rent: '',
@@ -378,6 +389,7 @@ window.addEventListener('keydown',handleOutsideClick);
         });
 
       setShowModal(false);
+      navigate(-1)
       setFormData({
         expenseName: '',
         expenseAmount: '',
@@ -431,6 +443,7 @@ window.addEventListener('keydown',handleOutsideClick);
       console.error("Error deleting document: ", error);
     });
     setShowModal(false);
+    navigate(-1)
     setFormData({
       expenseName: '',
       expenseAmount: '',
@@ -470,6 +483,7 @@ window.addEventListener('keydown',handleOutsideClick);
     }
     } else {
     setShowModal(true);
+    window.history.pushState(null, null, location.pathname);
     setFormData({
       expenseName: '',
       expenseAmount: '',
@@ -488,6 +502,7 @@ window.addEventListener('keydown',handleOutsideClick);
 
   const onClickClose = () => {
     setShowModal(false);
+    navigate(-1);
     setFormData({
       expenseName: '',
       expenseAmount: '',
@@ -495,6 +510,19 @@ window.addEventListener('keydown',handleOutsideClick);
       createdBy: adminRole
     });
   }
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (showModal) {
+        setShowModal(false); // Close the popup
+        
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+
+  }, [showModal, location.pathname]);
 
   
 const [totalAnnualExpenses, setTotalAnnualExpenses] = useState(0);
@@ -536,7 +564,7 @@ useEffect(() => {
   let totalAnnualExpenses = 0;
 
   monthNames.forEach(month => {
-      const expensesData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${month}`];
+      const expensesData = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${month}`];
       
       if (expensesData) {
           const monthlyTotal = Object.values(expensesData).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);

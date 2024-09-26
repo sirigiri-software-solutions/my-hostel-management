@@ -23,48 +23,13 @@ import Spinner from '../../Elements/Spinner';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
 import { v4 as uuidv4 } from 'uuid';
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const DashboardGirls = () => {
-
-  // const [run, setRun] = useState(true);
-  // const [steps] = useState([
-  //   {
-  //     target: '.hamburger-menu',
-  //     content: 'Click here to open the menu.',
-  //   },
-  //   {
-  //     target: '.menu-item-1',
-  //     content: 'This is the first menu item. Click to navigate.',
-  //   },
-  //   {
-  //     target: '.menu-item-2',
-  //     content: 'This is the second menu item. Click to navigate.',
-  //   },
-  //   // Add more steps as needed
-  //   {
-  //     target: '.total-rooms-card',
-  //     content: 'Here you can see the total rooms. Click to add rooms.',
-  //   },
-  //   {
-  //     target: '.total-tenants-card',
-  //     content: 'Here you can see the total tenants. Click to add tenants.',
-  //   },
-  //   {
-  //     target: '.total-beds-card',
-  //     content: 'Here you can see the total beds. Click to manage rent.',
-  //   }
-  // ]);
-
-  // const handleJoyrideCallback = (data) => {
-  //   const { status, type } = data;
-  //   if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
-  //     setRun(false);
-  //   }
-  // };
-
-
+  const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
-  // created by admin or subAdmin 
+ 
   const role = localStorage.getItem('role');
   let adminRole = "";
   if (role === "admin") {
@@ -227,6 +192,11 @@ const DashboardGirls = () => {
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener('keydown', handleOutsideClick)
 
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
+
   }, [showModal]);
 
 
@@ -270,7 +240,7 @@ const DashboardGirls = () => {
     if (!entireHMAdata || !activeGirlsHostel ) return;
   
     const formattedMonth = month.slice(0, 3).toLowerCase(); // Make sure the month is formatted correctly
-    const expensesData = entireHMAdata[userUid]?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`];
+    const expensesData = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`];
   
     if (!expensesData) {
       setCurrentMonthExpenses([]); // Set to empty array if no expenses data is available
@@ -293,7 +263,7 @@ const DashboardGirls = () => {
   
     setCurrentMonthExpenses(loadedExpenses); // Update the current month's expenses
     setTotalExpenses(totalExpenses); // Update the total expenses for the current month
-  }, [entireHMAdata, activeGirlsHostel, month, year, userUid]);
+  }, [entireHMAdata, activeGirlsHostel, month, year]);
   
 
 
@@ -429,9 +399,15 @@ const DashboardGirls = () => {
         setPopupOpen(false)
         setHasBike(false);
         setBikeNumber('NA');
+        navigate(-1)
       }
     };
     window.addEventListener('click', handleOutsideClick)
+    window.addEventListener('keydown',handleOutsideClick)
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
   }, [popupOpen])
 
   useEffect(() => {
@@ -721,6 +697,7 @@ const takePicture = async () => {
       newErrors.roomNumber = t('errors.roomNumberExists');
     }
     if (!numberOfBeds) newErrors.numberOfBeds = t('errors.numberOfBedsRequired');
+    else if (numberOfBeds > 20) newErrors.numberOfBeds = "No.of beds can't exceed 20";
     if (!bedRent) newErrors.bedRent = t('errors.bedRentRequired');
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -776,6 +753,7 @@ const takePicture = async () => {
     setUpdateDate(now);
     setErrors({});
     setShowModal(false);
+    navigate(-1)
   };
   const [totalBeds, setTotalBeds] = useState(0);
   useEffect(()=>{
@@ -783,7 +761,7 @@ const takePicture = async () => {
       const totalBeds = girlsRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
       setTotalBeds(totalBeds)
     }
-  }, [userUid, entireHMAdata, activeGirlsHostel,girlsRooms, girlsTenants])
+  }, [entireHMAdata, activeGirlsHostel,girlsRooms, girlsTenants])
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -1099,6 +1077,7 @@ const takePicture = async () => {
     }
 
     setShowModal(false);
+    navigate(-1)
     setLoading(true);
 
     const tenantUniqueId = isEditing ? currentId : uuidv4();
@@ -1385,7 +1364,7 @@ if (bikeRcImage) {
       });
     }
     setShowModal(false);
-
+navigate(-1)
     resetForm();
 
   };
@@ -1501,15 +1480,29 @@ if (bikeRcImage) {
       setModelText(text);
       setFormLayout(text);
       setShowModal(true);
+      window.history.pushState(null, null, location.pathname);
     }
 
   };
+  useEffect(() => {
+    const handlePopState = () => {
+      if (showModal) {
+        setShowModal(false); // Close the popup
+        
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+
+  }, [showModal, location.pathname]);
 
   const handleCloseModal = () => {
     setModelText('');
     setFormLayout('');
     resetForm();
     setShowModal(false);
+    navigate(-1)
     setHasBike(false);
     setBikeNumber("NA");
   };
@@ -1597,6 +1590,7 @@ if (bikeRcImage) {
       }
       });
       setShowModal(false);
+      navigate(-1)
       setFormErrors({
         number: '',
         rent: '',
@@ -1662,6 +1656,7 @@ if (bikeRcImage) {
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const handleResetDaily = () => {
@@ -1675,6 +1670,7 @@ if (bikeRcImage) {
     setPaidDate("");
     setDueDate("");
     setNotify(false);
+    setErrors({}); 
   };
 
   const renderFormLayout = () => {
@@ -1752,10 +1748,47 @@ if (bikeRcImage) {
                     <input id="TotalFee" class="form-control" type="number" value={totalFee} readOnly />
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                    <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} name="paidAmount" onFocus={handleFocus} />
-                    {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                  </div>
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                            }
+                            name="paidAmount"
+                            onFocus={handleFocus}
+                          />
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor="Due" class="form-label">{t('dashboard.due')}:</label>
                     <input id="Due" class="form-control" type="number" value={due} readOnly />
@@ -1839,10 +1872,47 @@ if (bikeRcImage) {
                     <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')}/>
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}</label>
-                    <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} name="paidAmount" onFocus={handleFocus} />
-                    {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                  </div>
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                            }
+                            name="paidAmount"
+                            onFocus={handleFocus}
+                          />
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor="Due" class="form-label">{t('dashboard.due')}</label>
                     <input id="Due" class="form-control" type="number" value={due} readOnly />

@@ -8,9 +8,13 @@ import { toast } from "react-toastify";
 import './ExpensesBoys.css';
 import { useTranslation } from 'react-i18next';
 import { useData } from '../../ApiData/ContextProvider';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const ExpensesBoys = () => {
   const { t } = useTranslation();
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const role = localStorage.getItem('role');
   let adminRole = "";
@@ -85,11 +89,15 @@ const ExpensesBoys = () => {
     const handleOutsideClick = (event) => {
       if (showModal && (event.target.id === "exampleModalExpensesBoys" || event.key === "Escape")) {
         setShowModal(false);
+        navigate(-1);
       }
     };
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener('keydown', handleOutsideClick)
-
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
   }, [showModal]);
 
   const getMonthYearKey = (dateString) => {
@@ -176,6 +184,7 @@ const ExpensesBoys = () => {
       }
       });
       setShowModal(false);
+      navigate(-1)
       setFormErrors({
         number: '',
         rent: '',
@@ -219,7 +228,7 @@ const ExpensesBoys = () => {
     if (!entireHMAdata || !activeBoysHostel) return;
  
     const formattedMonth = month.slice(0, 3);
-    const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`] ;
+    const expensesData = entireHMAdata?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`] ;
     const loadedExpenses = [];
     for (const key in expensesData) {
       loadedExpenses.push({
@@ -232,7 +241,7 @@ const ExpensesBoys = () => {
     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
     setTotal(totalExpenses);
      
-    const totalExpensesOfhostel = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses
+    const totalExpensesOfhostel = entireHMAdata?.boys?.[activeBoysHostel]?.expenses
    if(totalExpensesOfhostel){
     const yearsMonth = Object.keys(totalExpensesOfhostel)
  
@@ -251,7 +260,7 @@ const ExpensesBoys = () => {
    }
       
  
-  }, [entireHMAdata, activeBoysHostel, month, year, userUid]);
+  }, [entireHMAdata, activeBoysHostel, month, year]);
 
   const columns = [
     t('expensesPage.sNo'),
@@ -295,6 +304,7 @@ const ExpensesBoys = () => {
       createdBy: adminRole
     });
     setShowModal(true);
+    window.history.pushState(null, null, location.pathname);
     setFormErrors({
       number: '',
       rent: '',
@@ -383,6 +393,7 @@ const ExpensesBoys = () => {
         });
 
       setShowModal(false);
+      navigate(-1)
       setFormData({
         expenseName: '',
         expenseAmount: '',
@@ -437,6 +448,7 @@ const ExpensesBoys = () => {
     }
     });
     setShowModal(false);
+    navigate(-1)
     setFormData({
       expenseName: '',
       expenseAmount: '',
@@ -476,6 +488,7 @@ const ExpensesBoys = () => {
     }
     } else {
       setShowModal(true);
+      window.history.pushState(null, null, location.pathname);
       setFormData({
         expenseName: '',
         expenseAmount: '',
@@ -494,6 +507,7 @@ const ExpensesBoys = () => {
 
   const handleCLoseModal = () => {
     setShowModal(false);
+    navigate(-1);
 
     setFormData({
       expenseName: '',
@@ -502,6 +516,18 @@ const ExpensesBoys = () => {
       createdBy: adminRole
     });
   }
+  useEffect(() => {
+    const handlePopState = () => {
+      if (showModal) {
+        setShowModal(false); // Close the popup
+        
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+
+  }, [showModal, location.pathname]);
 
   const [totalAnnualExpenses, setTotalAnnualExpenses] = useState(0);
   // useEffect(() => {
@@ -541,7 +567,7 @@ const ExpensesBoys = () => {
     let totalAnnualExpenses = 0;
   
     monthNames.forEach(month => {
-        const expensesData = entireHMAdata[userUid]?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${month}`];
+        const expensesData = entireHMAdata?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${month}`];
         
         if (expensesData) {
             const monthlyTotal = Object.values(expensesData).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);
