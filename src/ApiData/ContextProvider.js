@@ -31,8 +31,7 @@ const DataProvider = ({ children }) => {
  
   const [expensesInteracted,setExpensesInteracted] = useState(false);
  
-  
- 
+
  
   // trying to fetch entire data from context
  

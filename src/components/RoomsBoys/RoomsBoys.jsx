@@ -10,9 +10,14 @@ import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useData } from '../../ApiData/ContextProvider';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Popup from 'reactjs-popup';
 
 
 const RoomsBoys = () => {
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { t } = useTranslation();
   const role = localStorage.getItem('role');
@@ -44,13 +49,20 @@ const RoomsBoys = () => {
 
   // console.log(fetchData, "fetchData")
   useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (showModal && (event.target.id === "exampleModalRoomsBoys" || event.key === "Escape")) {
-        setShowModal(false);
-      }
-    };
-    window.addEventListener('click', handleOutsideClick);
-    window.addEventListener("keydown", handleOutsideClick)
+
+      const handleOutsideClick = (event) => {
+        if (showModal && (event.target.id === "exampleModalRoomsBoys" || event.key === "Escape")) {
+          setShowModal(false);
+          navigate(-1);
+        }
+      };
+      window.addEventListener('click', handleOutsideClick);
+      window.addEventListener("keydown", handleOutsideClick)
+      return () => {
+        window.removeEventListener('click', handleOutsideClick);
+        window.removeEventListener("keydown", handleOutsideClick);
+      };
+    
   }, [showModal]);
 
   const handleRoomsIntegerChange = (event) => {
@@ -179,6 +191,7 @@ const RoomsBoys = () => {
     }
 
     setShowModal(false);
+    navigate(-1)
     resetForm();
     setUpdateDate(now);
     setErrors({});
@@ -286,6 +299,7 @@ const RoomsBoys = () => {
     }
   
     setShowConfirmationPopUp(false);
+    navigate(-1)
   };
   
   
@@ -296,6 +310,7 @@ const RoomsBoys = () => {
 
   const confirmDeleteNo = () => {
     setShowConfirmationPopUp(false);
+    navigate(-1);
   }
 
 
@@ -307,6 +322,7 @@ const RoomsBoys = () => {
     setIsEditing(true);
     setCurrentId(room.id);
     setShowModal(true);
+    window.history.pushState(null, null, location.pathname);
     setErrors({});
     setPreviousNumberOfBeds(room.numberOfBeds);
 
@@ -330,13 +346,34 @@ const RoomsBoys = () => {
       resetForm();
       setIsEditing(false);
       setShowModal(true);
+      window.history.pushState(null, null, location.pathname);
     }
   };
 
   const closePopupModal = () => {
     setShowModal(false);
     setErrors({});
+    navigate(-1);
   }
+
+  useEffect(() => {
+    
+      const handlePopState = () => {
+        if (showModal) {
+          setShowModal(false); // Close the popup
+          
+        }
+        if(showConfirmationPopUp){
+          setShowConfirmationPopUp(false)
+        }
+      };
+  
+      window.addEventListener('popstate', handlePopState);
+  
+   
+
+
+  }, [showModal,showConfirmationPopUp, location.pathname]);
 
   const resetForm = () => {
     setFloorNumber('');

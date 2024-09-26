@@ -11,8 +11,11 @@ import Table from '../../Elements/Table';
 import './Hostels.css'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Hostels = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { userUid, firebase, activeFlag,  changeActiveFlag, activeBoysHostelButtons, activeGirlsHostelButtons,fetchData } = useData();
   const { database, storage } = firebase;
@@ -137,6 +140,7 @@ const submitHostelEdit = async (e) => {
   const deleteHostel = (id) => {
     const isBoys = activeFlag === 'boys';
     setIsDeleteConfirmationOpen(true);
+    window.history.pushState(null, null, location.pathname);
     setHostelToDelete({ isBoys, id });
   };
 
@@ -160,6 +164,7 @@ const submitHostelEdit = async (e) => {
           });
           fetchData();
           setIsDeleteConfirmationOpen(false);
+          
           setHostelToDelete(null);
         }else{
           toast.error("Hostel cannot be deleted as it has tenants,extenants.Please transfer the tenants first.",{
@@ -172,10 +177,12 @@ const submitHostelEdit = async (e) => {
             progress: undefined,
           })
           setIsDeleteConfirmationOpen(false);
+          
           setHostelToDelete(null);
         }
-
+        navigate(-1)
       }
+      
     }catch(error){
       const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
 
@@ -186,6 +193,7 @@ const submitHostelEdit = async (e) => {
           autoClose: 3000,
         });
         setIsDeleteConfirmationOpen(false);
+        navigate(-1)
         setHostelToDelete(null);
     }
    
@@ -194,16 +202,19 @@ const submitHostelEdit = async (e) => {
   const cancelDeleteHostel = () => {
     setIsDeleteConfirmationOpen(false);
     setHostelToDelete(null);
+    navigate(-1)
   };
 
   const cancelEdit = () => {
     setIsEditing(null);
     setSelectedImage(null);
+    navigate(-1)
   };
 
   const startEdit = (id, name, address, hostelImage, isBoys) => {
     setIsEditing({ id, name, originalName: name, address, hostelImage, isBoys });
     setSelectedImage(null); 
+    window.history.pushState(null, null, location.pathname);
   };
 
   const handleEditChange = (field, value) => {
@@ -420,6 +431,7 @@ const submitHostelEdit = async (e) => {
           setNewGirlsHostelAddress('');
           setIsGirlsModalOpen(false);
         }
+        navigate(-1)
       })
       .catch(error => {
         toast.error("Failed to add new hostel: " + error.message, {
@@ -443,8 +455,30 @@ const submitHostelEdit = async (e) => {
       setNewGirlsHostelAddress('');
       setGirlsHostelImage('');
       setIsGirlsModalOpen(false);
+      
     }
+    navigate(-1)
   };
+  useEffect(() => {
+    const handlePopState = () => {
+      if (isBoysModalOpen) {
+        setIsBoysModalOpen(false); // Close the popup
+      }
+      if(isGirlsModalOpen){
+        setIsGirlsModalOpen(false)
+      }
+      if(isDeleteConfirmationOpen){
+        setIsDeleteConfirmationOpen(false)
+      }
+      if(isEditing !== null){
+        setIsEditing(null)
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+
+  }, [isEditing,isBoysModalOpen,isGirlsModalOpen,isDeleteConfirmationOpen, location.pathname]);
 
 
   return (
@@ -463,7 +497,7 @@ const submitHostelEdit = async (e) => {
                 <text className='management-heading2'>{t('roomsPage.HostelsManagement')}</text>
             </div>
             <div className='col-6 col-md-6 d-flex justify-content-end'>
-                <button className="add-button" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button>
+                <button className="add-button" onClick={() => {setIsBoysModalOpen(true); window.history.pushState(null, null, location.pathname);}}>{t("settings.addHostel")}</button>
               </div>
           </div>
           <div>
@@ -490,7 +524,7 @@ const submitHostelEdit = async (e) => {
              
             </div>
             <div className='col-6 col-md-6 d-flex justify-content-end'>
-                <button className="add-button" onClick={() => setIsGirlsModalOpen(true)}>{t("settings.addHostel")}</button>
+                <button className="add-button" onClick={() => {setIsGirlsModalOpen(true); window.history.pushState(null, null, location.pathname);}}>{t("settings.addHostel")}</button>
               </div>
           </div>
 

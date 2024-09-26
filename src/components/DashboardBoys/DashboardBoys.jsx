@@ -18,8 +18,12 @@ import Spinner from '../../Elements/Spinner';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
 import { v4 as uuidv4 } from 'uuid';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const DashboardBoys = () => {
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const { t } = useTranslation();
   const role = localStorage.getItem('role');
@@ -174,12 +178,22 @@ const DashboardBoys = () => {
         setShowModal(false);
         setHasBike(false);
         setBikeNumber('NA');
-        handleCloseModal()
+        setModelText('');
+        setFormLayout('');
+        resetForm();
+        setNotify(false)
+        navigate(-1);
       }
 
     };
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener("keydown", handleOutsideClick)
+
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
+  
 
   }, [showModal]);
 
@@ -376,10 +390,17 @@ const DashboardBoys = () => {
         setPopupOpen(false)
         setHasBike(false);
         setBikeNumber('NA');
+        navigate(-1);
       }
     };
     window.addEventListener('click', handleOutsideClick)
     window.addEventListener('keydown', handleOutsideClick)
+
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
+  
   }, [popupOpen])
 
 
@@ -554,6 +575,7 @@ const DashboardBoys = () => {
     setUpdateDate(now);
     setErrors({});
     setShowModal(false);
+    navigate(-1)
 
   };
   const [totalBeds, setTotalBeds] = useState(0);
@@ -844,6 +866,7 @@ const DashboardBoys = () => {
     }
 
     setShowModal(false);
+    navigate(-1)
     setLoading(true);
 
     const tenantUniqueId = isEditing ? currentId : uuidv4();
@@ -1080,6 +1103,7 @@ const DashboardBoys = () => {
       });
     }
     setShowModal(false);
+    navigate(-1)
     resetForm();
 
   };
@@ -1186,8 +1210,23 @@ const DashboardBoys = () => {
       setModelText(text);
       setFormLayout(text);
       setShowModal(true);
+      window.history.pushState(null, null, location.pathname);
     }
   };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (showModal) {
+        setShowModal(false); // Close the popup
+        
+        
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+
+  }, [showModal, location.pathname]);
 
   const handleCloseModal = () => {
     setModelText('');
@@ -1197,6 +1236,7 @@ const DashboardBoys = () => {
     setHasBike(false);
     setBikeNumber("NA");
     setNotify(false)
+    navigate(-1);
   };
 
   const getMonthYearKey = (dateString) => {
@@ -1277,6 +1317,7 @@ const DashboardBoys = () => {
         });
       });
       setShowModal(false);
+      navigate(-1);
       setFormErrors({
         number: '',
         rent: '',
