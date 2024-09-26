@@ -35,7 +35,7 @@ const Hostels = () => {
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
   const [hostelImageUrl, setHostelImageUrl] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  
+  let activeToastId = null;
 
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
@@ -106,10 +106,15 @@ const submitHostelEdit = async (e) => {
       const snapshot = await uploadBytes(imageRef, compressedImage);
       updatedImageUrl = await getDownloadURL(snapshot.ref);
     } catch (error) {
-      toast.error("Error uploading image: " + error.message, {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.error("Error uploading image: " + error.message, {
         position: "top-center",
         autoClose: 3000,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
       return;
     }
   }
@@ -119,18 +124,28 @@ const submitHostelEdit = async (e) => {
 
   update(hostelRef, updateData)
     .then(() => {
-      toast.success("Hostel updated successfully.", {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.success("Hostel updated successfully.", {
         position: "top-center",
         autoClose: 3000,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
       cancelEdit();
       fetchData();
     })
     .catch(error => {
-      toast.error("Failed to update hostel: " + error.message, {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.error("Failed to update hostel: " + error.message, {
         position: "top-center",
         autoClose: 3000,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
     });
 };
 
@@ -154,23 +169,33 @@ const submitHostelEdit = async (e) => {
         if(!hasTenants && !hasExTenants){
           await remove(ref(database, path))
      
-          toast.success("Hostel deleted successfully.", {
-            position: "top-center",
-            autoClose: 3000,
-          });
+          if (!toast.isActive(activeToastId)) {
+            activeToastId = toast.success("Hostel deleted successfully.", {
+              position: "top-center",
+              autoClose: 3000,
+              onClose: () => {
+                activeToastId = null; // Reset activeToastId when the toast is closed
+              },
+            });
+          }
           fetchData();
           setIsDeleteConfirmationOpen(false);
           setHostelToDelete(null);
         }else{
-          toast.error("Hostel cannot be deleted as it has tenants,extenants.Please transfer the tenants first.",{
+          if (!toast.isActive(activeToastId)) {
+            activeToastId = toast.error("Hostel cannot be deleted as it has tenants,extenants.Please transfer the tenants first.",{
             position: "top-center",
-            autoClose: 5000,
+            autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           })
+        }
           setIsDeleteConfirmationOpen(false);
           setHostelToDelete(null);
         }
@@ -181,10 +206,15 @@ const submitHostelEdit = async (e) => {
 
       await remove(ref(database, path))
      
-        toast.success("Hostel deleted successfully.", {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId = toast.error("An error occurred while trying to delete the hostel.", {
           position: "top-center",
           autoClose: 3000,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
         setIsDeleteConfirmationOpen(false);
         setHostelToDelete(null);
     }
@@ -297,10 +327,15 @@ const submitHostelEdit = async (e) => {
         setNewGirlsHostelName(value);
       }
     } else {
-      toast.error("Hostel name must contain only alphabets.", {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId =toast.error("Hostel name must contain only alphabets.", {
         position: "top-center",
         autoClose: 3000,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
     }
   };
 
@@ -342,17 +377,28 @@ const submitHostelEdit = async (e) => {
     
     if (!file) {
         // No file selected
-        toast.error("Please select a file.", {
+        if (!toast.isActive(activeToastId)) {
+          activeToastId =toast.error("Please select a file.", {
             position: "top-center",
             autoClose: 3000,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
+
         });
+      }
         return;
     }
     if (!isImageFile(file)) {
-      toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId =toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
         position: "top-center",
         autoClose: 3000,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
       e.target.value = ''; // Clear the input
       return;
     }
@@ -375,6 +421,7 @@ const submitHostelEdit = async (e) => {
 
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
 
   const addNewHostel = async (e, isBoys) => {
     e.preventDefault();
@@ -384,10 +431,15 @@ const submitHostelEdit = async (e) => {
     const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
 
     if (name.trim() === '' || address.trim() === '' || !hostelImage) {
-      toast.error("Hostel name, address and image cannot be empty.", {
-        position: "top-center",
-        autoClose: 3000,
-      });
+      if (!toast.isActive(activeToastId)) {
+        activeToastId = toast.error("Hostel name, address, and image cannot be empty.", {
+          position: "top-center",
+          autoClose: 3000,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
+        });
+      }
       return;
     }
     setIsSubmitting(true);
@@ -418,10 +470,15 @@ const submitHostelEdit = async (e) => {
 
     set(newHostelRef, hostelDetails)
       .then(() => {
-        toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
-          position: "top-center",
-          autoClose: 3000,
-        });
+        if (!toast.isActive(activeToastId)) {
+          activeToastId = toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
+            position: "top-center",
+            autoClose: 3000,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
+          });
+        }
         fetchData()
         if (isBoys) {
           setNewBoysHostelName('');
@@ -436,10 +493,15 @@ const submitHostelEdit = async (e) => {
         }
       })
       .catch(error => {
-        toast.error("Failed to add new hostel: " + error.message, {
-          position: "top-center",
-          autoClose: 3000,
-        });
+        if (!toast.isActive(activeToastId)) {
+          activeToastId = toast.error("Failed to add new hostel: " + error.message, {
+            position: "top-center",
+            autoClose: 3000,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
+          });
+        }
       })
       .finally(() => {
         setIsSubmitting(false); // Reset isSubmitting to false when submission completes

@@ -71,6 +71,8 @@ const Login = () => {
   const [hidePassword, setHidePassword] = useState(true);
   const [hideSingupPassword, sethideSingupPassword] = useState(true);
   const [hideconfirmPassword, setHideConfirmPassword] = useState(true);
+  let activeToastId = null;
+
 
 
   const { auth, database, setFirstLogin  } = firebase;
@@ -187,8 +189,8 @@ const Login = () => {
             fetchData()
             
             navigate("/mainPage");
-
-            toast.success("You are logged in successfully.", {
+            if (!toast.isActive(activeToastId)) {
+              activeToastId= toast.success("You are logged in successfully.", {
               position: "bottom-right",
               autoClose: 2000,
               hideProgressBar: false,
@@ -197,14 +199,20 @@ const Login = () => {
               draggable: true,
               progress: undefined,
               theme: "light",
+              onClose: () => {
+                activeToastId = null; // Reset activeToastId when the toast is closed
+              },
             });
+          }
             
           } else {
             console.log("User not found in data array.");
           }
           await fetchData();
         } else {
-          toast.error("Email is not verified.", {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.error("Email is not verified.", {
             position: "bottom-right",
             autoClose: 2000,
             hideProgressBar: false,
@@ -213,10 +221,16 @@ const Login = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
         }
+        }
       } catch (error) {
-        toast.error("Invalid credentials.", {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error("Invalid credentials.", {
           position: "bottom-right",
           autoClose: 2000,
           hideProgressBar: false,
@@ -225,8 +239,11 @@ const Login = () => {
           draggable: true,
           progress: undefined,
           theme: "light",
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
-
+        }
 
       }
     }
@@ -513,8 +530,9 @@ const Login = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, signUpEmail, signUpPassword);
       await sendEmailVerification(userCredential.user);
 
+      if (!toast.isActive(activeToastId)) {
 
-      toast.success("A verification link has been sent to your email", {
+        activeToastId=toast.success("A verification link has been sent to your email", {
         position: "bottom-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -523,8 +541,11 @@ const Login = () => {
         draggable: true,
         progress: undefined,
         theme: "light",
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
-
+    }
       const response = await axios.post(apiEndpoint, formData);
       setData(response.data);
 
@@ -540,8 +561,9 @@ const Login = () => {
 
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        if (!toast.isActive(activeToastId)) {
 
-        toast.error(
+          activeToastId=toast.error(
           "An error occurred while submitting the form. Please try again.",
           {
             position: "bottom-right",
@@ -552,8 +574,12 @@ const Login = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           }
         );
+      }
       } else if (error instanceof FirebaseError && error.code === 'auth/email-already-in-use') {
         setSignUpError("Email already in use");
         setSignUp(true);

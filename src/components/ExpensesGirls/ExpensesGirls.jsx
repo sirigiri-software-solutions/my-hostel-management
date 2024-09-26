@@ -31,6 +31,8 @@ const ExpensesGirls = () => {
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  let activeToastId = null;
+
 
   const getCurrentMonth = () => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
@@ -137,7 +139,9 @@ window.addEventListener('keydown',handleOutsideClick);
         expenseAmount: parseFloat(formData.expenseAmount),
         expenseDate: new Date(formData.expenseDate).toISOString() 
       }).then(() => {
-        toast.success(t('toastMessages.expenseAddedSuccessfully'), {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.success(t('toastMessages.expenseAddedSuccessfully'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -145,10 +149,16 @@ window.addEventListener('keydown',handleOutsideClick);
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
         fetchData();
       }).catch(error => {
-        toast.error(t('toastMessages.errorAddingExpense') + error.message, {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error(t('toastMessages.errorAddingExpense') + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -156,7 +166,11 @@ window.addEventListener('keydown',handleOutsideClick);
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
       });
       setShowModal(false);
       setFormErrors({
@@ -328,7 +342,9 @@ window.addEventListener('keydown',handleOutsideClick);
       const expenseRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}/${editingExpense.id}`);
       set(expenseRef, updatedFormData)
         .then(() => {
-          toast.success(t('toastMessages.expensesUpdatedSuccessfully'), {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.success(t('toastMessages.expensesUpdatedSuccessfully'), {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -336,11 +352,17 @@ window.addEventListener('keydown',handleOutsideClick);
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
+        }
           setEditingExpense(null);
           fetchData();
         }).catch(error => {
-          toast.error(t('toastMessages.errorUpdatinExpense')+ error.message, {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.error(t('toastMessages.errorUpdatinExpense')+ error.message, {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -348,7 +370,11 @@ window.addEventListener('keydown',handleOutsideClick);
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
+        }
         });
 
       setShowModal(false);
@@ -369,7 +395,9 @@ window.addEventListener('keydown',handleOutsideClick);
     const monthYear = getMonthYearKey(formData.expenseDate);
     const expenseRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}/${editingExpense.id}`);
     remove(expenseRef).then(() => {
-      toast.success(t('toastMessages.expenseDeteledSuccessfully'), {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.success(t('toastMessages.expenseDeteledSuccessfully'), {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -377,11 +405,17 @@ window.addEventListener('keydown',handleOutsideClick);
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
       fetchData();
       setEditingExpense(null);
     }).catch(error => {
-      toast.error(t('toastMessages.errorDeletingExpense') + error.message, {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.error(t('toastMessages.errorDeletingExpense') + error.message, {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -389,7 +423,11 @@ window.addEventListener('keydown',handleOutsideClick);
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
       console.error("Error deleting document: ", error);
     });
     setShowModal(false);
@@ -415,7 +453,9 @@ window.addEventListener('keydown',handleOutsideClick);
 
   const handleAddNew = () => {
     if (activeGirlsHostelButtons.length == 0) {
-      toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -423,7 +463,11 @@ window.addEventListener('keydown',handleOutsideClick);
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       })
+    }
     } else {
     setShowModal(true);
     setFormData({

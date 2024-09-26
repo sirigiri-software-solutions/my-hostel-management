@@ -43,6 +43,7 @@ const Settings = () => {
   const [entireBoysYearExpensesData, setEntireBoysYearExpensesData] = useState([])
   const [entireGirlsYearExpensesData, setEntireGirlsYearExpensesData] = useState([]);
   const [hostelImageUrl, setHostelImageUrl] = useState('');
+  let activeToastId=null;
 
   const getCurrentMonth = () => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
@@ -136,10 +137,15 @@ const Settings = () => {
         setNewGirlsHostelName(value);
       }
     } else {
-      toast.error("Hostel name must contain only alphabets.", {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.error("Hostel name must contain only alphabets.", {
         position: "top-center",
         autoClose: 3000,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
     }
   };
 
@@ -168,17 +174,27 @@ const isImageFile = (file) => {
   const handleHostelChange = (e, isBoys) => {
     const file = e.target.files[0];
     if (!file) {
-      toast.error("Please select a file.", {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.error("Please select a file.", {
         position: "top-center",
         autoClose: 3000,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        }
       });
+    }
       return;
     }
     if (!isImageFile(file)) {
-      toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
         position: "top-center",
         autoClose: 3000,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        }
       });
+    }
       e.target.value = ''; // Clear the input
       return;
     }
@@ -200,10 +216,15 @@ const isImageFile = (file) => {
     const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
 
     if (name.trim() === '' || address.trim() === '' || !hostelImage ) {
-      toast.error("Hostel name, address and image cannot be empty.", {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.error("Hostel name, address and image cannot be empty.", {
         position: "top-center",
         autoClose: 3000,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        }
       });
+    }
       return;
     }
     setIsSubmitting(true);
@@ -233,10 +254,15 @@ const isImageFile = (file) => {
 
     set(newHostelRef, hostelDetails)
       .then(() => {
-        toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
+        if (!toast.isActive(activeToastId)) {
+          activeToastId=toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
           position: "top-center",
           autoClose: 3000,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          }
         });
+      }
         fetchData()
         if (isBoys) {
           setNewBoysHostelName('');
@@ -251,10 +277,15 @@ const isImageFile = (file) => {
         }
       })
       .catch(error => {
-        toast.error("Failed to add new hostel: " + error.message, {
+        if (!toast.isActive(activeToastId)) {
+          activeToastId=toast.error("Failed to add new hostel: " + error.message, {
           position: "top-center",
           autoClose: 3000,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          }
         });
+      }
       })
       .finally(() => {
         setIsSubmitting(false); // Reset isSubmitting to false when submission completes

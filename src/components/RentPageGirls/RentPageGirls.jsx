@@ -49,6 +49,8 @@ const RentPageGirls = () => {
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [showForm, setShowForm] = useState(true);
   const [filterOption, setFilterOption] = useState("all");
+  let activeToastId=null;
+
 
   // Function to send WhatsApp message
   const sendMessage = (tenant, rentRecord) => {
@@ -293,7 +295,8 @@ Please note that you made your last payment on ${paidDate}.\n`;
       );
       await update(rentRef, rentData)
         .then(() => {
-          toast.success(t("toastMessages.rentAddedSuccess"), {
+          if (!toast.isActive(activeToastId)) {
+            activeToastId=toast.success(t("toastMessages.rentAddedSuccess"), {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -301,7 +304,11 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
+        }
           setIsEditing(false);
           if (notify) {
             handleNotifyCheckbox(rentData);
@@ -309,7 +316,9 @@ Please note that you made your last payment on ${paidDate}.\n`;
           fetchData();
         })
         .catch((error) => {
-          toast.error(t("toastMessages.errorAddingRent") + error.message, {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.error(t("toastMessages.errorAddingRent") + error.message, {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -317,7 +326,11 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
+        }
         });
     } else {
       const rentRef = ref(
@@ -326,7 +339,9 @@ Please note that you made your last payment on ${paidDate}.\n`;
       );
       await push(rentRef, rentData)
         .then(() => {
-          toast.success(t("toastMessages.rentAddedSuccess"), {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.success(t("toastMessages.rentAddedSuccess"), {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -334,7 +349,11 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
+        }
           setIsEditing(false);
           if (notify) {
             handleNotifyCheckbox(rentData);
@@ -342,7 +361,9 @@ Please note that you made your last payment on ${paidDate}.\n`;
           fetchData();
         })
         .catch((error) => {
-          toast.error(t("toastMessages.errorAddingRent") + error.message, {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.error(t("toastMessages.errorAddingRent") + error.message, {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -350,7 +371,11 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
+        }
         });
     }
     resetForm();
@@ -359,7 +384,9 @@ Please note that you made your last payment on ${paidDate}.\n`;
 
   const handleAddNew = () => {
     if (activeGirlsHostelButtons.length === 0) {
-      toast.warn(
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.warn(
         "You have not added any girls hostel, please add your first Hostel in Settings",
         {
           position: "top-center",
@@ -369,8 +396,13 @@ Please note that you made your last payment on ${paidDate}.\n`;
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId=null;
+            
+          },
         }
       );
+    }
     } else {
       resetForm();
       setIsEditing(false);

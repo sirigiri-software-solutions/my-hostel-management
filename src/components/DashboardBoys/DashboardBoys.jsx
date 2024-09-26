@@ -123,6 +123,8 @@ const DashboardBoys = () => {
   const [popupOpen, setPopupOpen] = useState(false);
   const [expensePopupOpen, setExpensePopupOpen] = useState(false);
   const [bedsData, setBedsData] = useState([]);
+  let activeToastId=null;
+
 
 
   const getCurrentMonth = () => {
@@ -701,7 +703,8 @@ const DashboardBoys = () => {
       createdBy,
       updateDate: now
     }).then(() => {
-      toast.success(t('toastMessages.roomAddedSuccessfully'), {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.success(t('toastMessages.roomAddedSuccessfully'), {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -709,10 +712,15 @@ const DashboardBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
       fetchData()
     }).catch(error => {
-      toast.error(t('toastMessages.errorAddingRoom') + error.message, {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.error(t('toastMessages.errorAddingRoom') + error.message, {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -720,7 +728,11 @@ const DashboardBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
     });
     setFloorNumber('');
     setRoomNumber('');
@@ -1144,7 +1156,9 @@ const tenantData = {
 
         if (isEditing) {
             await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
-            toast.success(t('toastMessages.tenantUpdated'), {
+            if (!toast.isActive(activeToastId)) {
+
+              activeToastId= toast.success(t('toastMessages.tenantUpdated'), {
                 position: "top-center",
                 autoClose: 2000,
                 hideProgressBar: false,
@@ -1152,11 +1166,17 @@ const tenantData = {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                onClose: () => {
+                  activeToastId = null; // Reset activeToastId when the toast is closed
+                },
             });
+          }
             fetchData()
         } else {
             await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
-            toast.success(t('toastMessages.tenantAddedSuccess'), {
+            if (!toast.isActive(activeToastId)) {
+
+              activeToastId=toast.success(t('toastMessages.tenantAddedSuccess'), {
                 position: "top-center",
                 autoClose: 2000,
                 hideProgressBar: false,
@@ -1164,13 +1184,19 @@ const tenantData = {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                onClose: () => {
+                  activeToastId = null; // Reset activeToastId when the toast is closed
+                },
             });
+          }
             fetchData();
             e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
         console.error("Error submitting form:", error);
-        toast.error(t('toastMessages.errorSubmitting') + error.message, {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error(t('toastMessages.errorSubmitting') + error.message, {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -1178,7 +1204,11 @@ const tenantData = {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
         });
+      }
     } finally {
         setLoading(false);
         resetForm();
@@ -1254,7 +1284,9 @@ const tenantData = {
     if (isEditing) {
       const rentRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${selectedTenant}/rents/${editingRentId}`);
       await update(rentRef, rentData).then(() => {
-        toast.success(t('toastMessages.rentUpdatedSuccess'), {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId= toast.success(t('toastMessages.rentUpdatedSuccess'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -1262,7 +1294,11 @@ const tenantData = {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
         fetchData();
         setIsEditing(false);
         if (notify) {
@@ -1270,7 +1306,9 @@ const tenantData = {
         }
         setNotify(false)
       }).catch(error => {
-        toast.error(t('toastMessages.errorUpdatingRent') + error.message, {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error(t('toastMessages.errorUpdatingRent') + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -1278,12 +1316,19 @@ const tenantData = {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
+
         });
+      }
       });
     } else {
       const rentRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${selectedTenant}/rents`);
       await push(rentRef, rentData).then(() => {
-        toast.success(t('toastMessages.rentAddedSuccess'), {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.success(t('toastMessages.rentAddedSuccess'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -1291,7 +1336,11 @@ const tenantData = {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
         fetchData();
         setIsEditing(false);
         if (notify) {
@@ -1299,7 +1348,8 @@ const tenantData = {
         }
         setNotify(false)
       }).catch(error => {
-        toast.error(t('toastMessages.errorAddingRent') + error.message, {
+        if (!toast.isActive(activeToastId)) {
+          activeToastId=toast.error(t('toastMessages.errorAddingRent') + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -1307,7 +1357,12 @@ const tenantData = {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
+
         });
+      }
       });
     }
     setShowModal(false);
@@ -1405,7 +1460,9 @@ const tenantData = {
 
   const handleClick = (text) => {
     if (activeBoysHostelButtons?.length === 0) {
-      toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -1413,7 +1470,11 @@ const tenantData = {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       })
+    }
     } else {
       setModelText(text);
       setFormLayout(text);
@@ -1487,7 +1548,9 @@ const tenantData = {
         expenseAmount: parseFloat(formData.expenseAmount),
         expenseDate: new Date(formData.expenseDate).toISOString()
       }).then(() => {
-        toast.success(t('toastMessages.expenseAddedSuccessfully'), {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.success(t('toastMessages.expenseAddedSuccessfully'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -1495,10 +1558,16 @@ const tenantData = {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
         fetchData();
-      }).catch(error => {
-        toast.error(t('toastMessages.errorAddingExpense') + error.message, {
+      }).catch(error => {        
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error(t('toastMessages.errorAddingExpense') + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -1506,7 +1575,11 @@ const tenantData = {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
       });
       setShowModal(false);
       setFormErrors({

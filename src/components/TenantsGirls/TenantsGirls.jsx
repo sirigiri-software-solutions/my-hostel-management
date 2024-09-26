@@ -72,6 +72,8 @@ const TenantsGirls = () => {
   const [bikeNumber, setBikeNumber] = useState('NA');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [showBikeFilter, setShowBikeFilter] = useState(true);
+  let activeToastId = null;
+
 
   const tenantImageInputRef = useRef(null);
   const tenantProofIdRef = useRef(null);
@@ -747,7 +749,8 @@ if (bikeRcImage) {
 
         if (isEditing) {
             await update(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${currentId}`), tenantData);
-            toast.success(t('toastMessages.tenantUpdated'), {
+            if (!toast.isActive(activeToastId)) {
+              activeToastId=toast.success(t('toastMessages.tenantUpdated'), {
                 position: "top-center",
                 autoClose: 2000,
                 hideProgressBar: false,
@@ -755,11 +758,16 @@ if (bikeRcImage) {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                onClose: () => {
+                  activeToastId = null; // Reset activeToastId when the toast is closed
+                },
             });
+          }
             fetchData()
         } else {
             await set(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantUniqueId}`), tenantData);
-            toast.success(t('toastMessages.tenantAddedSuccess'), {
+            if (!toast.isActive(activeToastId)) {
+              activeToastId=toast.success(t('toastMessages.tenantAddedSuccess'), {
                 position: "top-center",
                 autoClose: 2000,
                 hideProgressBar: false,
@@ -767,13 +775,19 @@ if (bikeRcImage) {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                onClose: () => {
+                  activeToastId = null; // Reset activeToastId when the toast is closed
+                },
             });
+          }
             fetchData()
             e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
         console.error("Error submitting form:", error);
-        toast.error(t('toastMessages.errorSubmitting') + error.message, {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error(t('toastMessages.errorSubmitting') + error.message, {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -781,7 +795,11 @@ if (bikeRcImage) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
         });
+      }
     } finally {
         setLoading(false);
         resetForm();
@@ -852,7 +870,9 @@ if (bikeRcImage) {
 
   const handleAddNew = () => {
     if (activeGirlsHostelButtons.length === 0) {
-      toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -860,7 +880,11 @@ if (bikeRcImage) {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       })
+    }
     } else {
 
       resetForm();
@@ -1080,7 +1104,9 @@ if (bikeRcImage) {
       if (data) {
         await set(newTenantRef, data);
         await remove(tenantRef).then(() => {
-          toast.success("Tenant Vacated", {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.success("Tenant Vacated", {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -1088,10 +1114,16 @@ if (bikeRcImage) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
+        }
           fetchData();
         }).catch(error => {
-          toast.error("Error Tenant Vacate " + error.message, {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.error("Error Tenant Vacate " + error.message, {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -1099,7 +1131,11 @@ if (bikeRcImage) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
+        }
         });
         // fetchExTenants()
       }
@@ -1136,7 +1172,9 @@ if (bikeRcImage) {
     const removeRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants/${tenantIdToDelete}`);
     remove(removeRef)
       .then(() => {
-        toast.success('Tenant Deleted', {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.success('Tenant Deleted', {
           position: 'top-center',
           autoClose: 2000,
           hideProgressBar: false,
@@ -1144,10 +1182,16 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
       })
       .catch((error) => {
-        toast.error('Error Deleting Tenant: ' + error.message, {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error('Error Deleting Tenant: ' + error.message, {
           position: 'top-center',
           autoClose: 2000,
           hideProgressBar: false,
@@ -1155,7 +1199,11 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
       });
     setShowConfirmation(false);
   };

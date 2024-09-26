@@ -28,7 +28,7 @@ const ExpensesBoys = () => {
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
   const [showModal, setShowModal] = useState(false);
-
+  let activeToastId = null;
 
 
   const getCurrentMonth = () => {
@@ -143,7 +143,8 @@ const ExpensesBoys = () => {
         expenseAmount: parseFloat(formData.expenseAmount),
         expenseDate: new Date(formData.expenseDate).toISOString()
       }).then(() => {
-        toast.success(t('toastMessages.expenseAddedSuccessfully'), {
+        if (!toast.isActive(activeToastId)) {
+          activeToastId=toast.success(t('toastMessages.expenseAddedSuccessfully'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -151,10 +152,16 @@ const ExpensesBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
         fetchData();
       }).catch(error => {
-        toast.error(t('toastMessages.errorAddingExpense') + error.message, {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error(t('toastMessages.errorAddingExpense') + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -162,7 +169,11 @@ const ExpensesBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
       });
       setShowModal(false);
       setFormErrors({
@@ -337,7 +348,8 @@ const ExpensesBoys = () => {
       const expenseRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${monthYear}/${editingExpense.id}`);
       set(expenseRef, updatedFormData)
         .then(() => {
-          toast.success(t('toastMessages.expensesUpdatedSuccessfully'), {
+          if (!toast.isActive(activeToastId)) {
+            activeToastId=toast.success(t('toastMessages.expensesUpdatedSuccessfully'), {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -345,11 +357,17 @@ const ExpensesBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
+        }
           fetchData();
           setEditingExpense(null);
         }).catch(error => {
-          toast.error(t('toastMessages.errorUpdatinExpense') + error.message, {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.error(t('toastMessages.errorUpdatinExpense') + error.message, {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -357,7 +375,11 @@ const ExpensesBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
+        }
         });
 
       setShowModal(false);
@@ -380,7 +402,9 @@ const ExpensesBoys = () => {
     const monthYear = getMonthYearKey(formData.expenseDate);
     const expenseRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${monthYear}/${editingExpense.id}`);
     remove(expenseRef).then(() => {
-      toast.success(t('toastMessages.expenseDeteledSuccessfully'), {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.success(t('toastMessages.expenseDeteledSuccessfully'), {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -388,11 +412,17 @@ const ExpensesBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
       fetchData();
       setEditingExpense(null);
     }).catch(error => {
-      toast.error(t('toastMessages.errorDeletingExpense') + error.message, {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.error(t('toastMessages.errorDeletingExpense') + error.message, {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -400,7 +430,11 @@ const ExpensesBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
     });
     setShowModal(false);
     setFormData({
@@ -425,7 +459,9 @@ const ExpensesBoys = () => {
 
   const handleAddNew = () => {
     if (activeBoysHostelButtons.length === 0) {
-      toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -433,7 +469,11 @@ const ExpensesBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       })
+    }
     } else {
       setShowModal(true);
       setFormData({

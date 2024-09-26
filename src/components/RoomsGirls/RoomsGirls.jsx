@@ -34,6 +34,8 @@ const RoomsGirls = () => {
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [roomToDelete, setRoomToDelete] = useState({ roomNumber: '', currentId: '' });
+  let activeToastId = null;
+
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -108,7 +110,8 @@ const RoomsGirls = () => {
         createdBy,
         updateDate: now
       }).then(() => {
-        toast.success("Room updated successfully.", {
+        if (!toast.isActive(activeToastId)) {
+          activeToastId=toast.success("Room updated successfully.", {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -116,11 +119,17 @@ const RoomsGirls = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
         fetchData()
         setIsEditing(false);
       }).catch(error => {
-        toast.error("Error updating room: " + error.message, {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error("Error updating room: " + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -128,7 +137,11 @@ const RoomsGirls = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
       });
     } else {
       const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
@@ -140,7 +153,9 @@ const RoomsGirls = () => {
         createdBy,
         updateDate: now
       }).then(() => {
-        toast.success("Room added successfully.", {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.success("Room added successfully.", {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -148,10 +163,16 @@ const RoomsGirls = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
         fetchData()
       }).catch(error => {
-        toast.error("Error adding room: " + error.message, {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error("Error adding room: " + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -159,7 +180,11 @@ const RoomsGirls = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
+      }
       });
     }
     setShowModal(false);
@@ -206,8 +231,9 @@ const RoomsGirls = () => {
         if (!roomHasTenants) {
           // Room has no tenants, proceed to delete the room
           await remove(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`));
-  
-          toast.success("Room deleted successfully!", {
+
+          if (!toast.isActive(activeToastId)) {
+            activeToastId=toast.success("Room deleted successfully!", {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -215,11 +241,16 @@ const RoomsGirls = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
-  
+        }
           fetchData(); // Refresh data after deletion
         } else {
-          toast.error("Room cannot be deleted as it has tenants. Please transfer the tenants first.", {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.error("Room cannot be deleted as it has tenants. Please transfer the tenants first.", {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,
@@ -227,13 +258,17 @@ const RoomsGirls = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            onClose: () => {
+              activeToastId = null; // Reset activeToastId when the toast is closed
+            },
           });
+        }
         }
       } else {
         // No tenants found, safe to delete the room
         await remove(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`));
-  
-        toast.success("Room deleted successfully!", {
+        if (!toast.isActive(activeToastId)) {
+          activeToastId=toast.success("Room deleted successfully!", {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -241,13 +276,18 @@ const RoomsGirls = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          onClose: () => {
+            activeToastId = null; // Reset activeToastId when the toast is closed
+          },
         });
-  
+      }
         fetchData(); // Refresh data after deletion
       }
     } catch (error) {
       console.error("Error deleting room: ", error);
-      toast.error("Failed to delete room. Please try again.", {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.error("Failed to delete room. Please try again.", {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -255,7 +295,11 @@ const RoomsGirls = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
       });
+    }
     }
   
     setShowConfirmationPopUp(false);
@@ -282,7 +326,8 @@ const RoomsGirls = () => {
 
   const handleAddNew = () => {
     if (activeGirlsHostelButtons.length == 0) {
-      toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -290,7 +335,11 @@ const RoomsGirls = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-      })
+        onClose: () => {
+          activeToastId = null; // Reset activeToastId when the toast is closed
+        },
+      });
+    }
     } else {
       resetForm();
       setIsEditing(false);
