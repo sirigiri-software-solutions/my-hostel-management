@@ -8,9 +8,13 @@ import { toast } from "react-toastify";
 import './ExpensesBoys.css';
 import { useTranslation } from 'react-i18next';
 import { useData } from '../../ApiData/ContextProvider';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const ExpensesBoys = () => {
   const { t } = useTranslation();
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const role = localStorage.getItem('role');
   let adminRole = "";
@@ -85,11 +89,15 @@ const ExpensesBoys = () => {
     const handleOutsideClick = (event) => {
       if (showModal && (event.target.id === "exampleModalExpensesBoys" || event.key === "Escape")) {
         setShowModal(false);
+        navigate(-1);
       }
     };
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener('keydown', handleOutsideClick)
-
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
   }, [showModal]);
 
   const getMonthYearKey = (dateString) => {
@@ -165,6 +173,7 @@ const ExpensesBoys = () => {
         });
       });
       setShowModal(false);
+      navigate(-1)
       setFormErrors({
         number: '',
         rent: '',
@@ -284,6 +293,7 @@ const ExpensesBoys = () => {
       createdBy: adminRole
     });
     setShowModal(true);
+    window.history.pushState(null, null, location.pathname);
     setFormErrors({
       number: '',
       rent: '',
@@ -361,6 +371,7 @@ const ExpensesBoys = () => {
         });
 
       setShowModal(false);
+      navigate(-1)
       setFormData({
         expenseName: '',
         expenseAmount: '',
@@ -403,6 +414,7 @@ const ExpensesBoys = () => {
       });
     });
     setShowModal(false);
+    navigate(-1)
     setFormData({
       expenseName: '',
       expenseAmount: '',
@@ -436,6 +448,7 @@ const ExpensesBoys = () => {
       })
     } else {
       setShowModal(true);
+      window.history.pushState(null, null, location.pathname);
       setFormData({
         expenseName: '',
         expenseAmount: '',
@@ -454,6 +467,7 @@ const ExpensesBoys = () => {
 
   const handleCLoseModal = () => {
     setShowModal(false);
+    navigate(-1);
 
     setFormData({
       expenseName: '',
@@ -462,6 +476,18 @@ const ExpensesBoys = () => {
       createdBy: adminRole
     });
   }
+  useEffect(() => {
+    const handlePopState = () => {
+      if (showModal) {
+        setShowModal(false); // Close the popup
+        
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+
+  }, [showModal, location.pathname]);
 
   const [totalAnnualExpenses, setTotalAnnualExpenses] = useState(0);
   // useEffect(() => {

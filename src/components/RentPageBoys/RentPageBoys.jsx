@@ -12,9 +12,13 @@ import { FaWhatsapp } from "react-icons/fa";
 import "../../App.css";
 import { useTranslation } from "react-i18next";
 import { useData } from "../../ApiData/ContextProvider";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const RentPageBoys = () => {
   const { t } = useTranslation();
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     activeBoysHostel,
@@ -95,10 +99,16 @@ Please note that you made your last payment on ${paidDate}.\n`;
         (event.target.id === "exampleModalRentsBoys" || event.key === "Escape")
       ) {
         setShowModal(false);
+        navigate(-1);
+       
       }
     };
     window.addEventListener("click", handleOutsideClick);
     window.addEventListener("keydown", handleOutsideClick);
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
   }, [showModal]);
 
   useEffect(() => {
@@ -173,7 +183,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       setEditingRentId(rentId);
     }
     setShowModal(true);
-
+    window.history.pushState(null, null, location.pathname);
     setNotifyUserInfo({ tenant, rentRecord });
   };
 
@@ -292,6 +302,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
         });
     }
     setShowModal(false);
+    navigate(-1)
     resetForm();
   };
   const handleAddNew = () => {
@@ -312,6 +323,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       resetForm();
       setIsEditing(false);
       setShowModal(true);
+      window.history.pushState(null, null, location.pathname);
     }
   };
 
@@ -439,7 +451,20 @@ Please note that you made your last payment on ${paidDate}.\n`;
   const handleClosePopUp = () => {
     setShowModal(false);
     setNotify(false);
+    navigate(-1);
   };
+  useEffect(() => {
+    const handlePopState = () => {
+      if (showModal) {
+        setShowModal(false); // Close the popup
+        
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+
+  }, [showModal, location.pathname]);
 
   const onClickCheckbox = async () => {
     setNotify(!notify);

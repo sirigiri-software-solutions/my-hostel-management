@@ -18,10 +18,13 @@ import Spinner from '../../Elements/Spinner';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
 import { v4 as uuidv4 } from 'uuid';
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const DashboardGirls = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
-
+ 
   const role = localStorage.getItem('role');
   let adminRole = "";
   if (role === "admin") {
@@ -181,6 +184,11 @@ const DashboardGirls = () => {
     };
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener('keydown', handleOutsideClick)
+
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
 
   }, [showModal]);
 
@@ -384,9 +392,15 @@ const DashboardGirls = () => {
         setPopupOpen(false)
         setHasBike(false);
         setBikeNumber('NA');
+        navigate(-1)
       }
     };
     window.addEventListener('click', handleOutsideClick)
+    window.addEventListener('keydown',handleOutsideClick)
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
   }, [popupOpen])
 
   useEffect(() => {
@@ -588,6 +602,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     setUpdateDate(now);
     setErrors({});
     setShowModal(false);
+    navigate(-1)
   };
   const [totalBeds, setTotalBeds] = useState(0);
   useEffect(()=>{
@@ -905,6 +920,7 @@ Please note that you made your last payment on ${paidDate}.\n`
     }
 
     setShowModal(false);
+    navigate(-1)
     setLoading(true);
 
     const tenantUniqueId = isEditing ? currentId : uuidv4();
@@ -1148,7 +1164,7 @@ if (bikeRcImage) {
       });
     }
     setShowModal(false);
-
+navigate(-1)
     resetForm();
 
   };
@@ -1254,15 +1270,29 @@ if (bikeRcImage) {
       setModelText(text);
       setFormLayout(text);
       setShowModal(true);
+      window.history.pushState(null, null, location.pathname);
     }
 
   };
+  useEffect(() => {
+    const handlePopState = () => {
+      if (showModal) {
+        setShowModal(false); // Close the popup
+        
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+
+  }, [showModal, location.pathname]);
 
   const handleCloseModal = () => {
     setModelText('');
     setFormLayout('');
     resetForm();
     setShowModal(false);
+    navigate(-1)
     setHasBike(false);
     setBikeNumber("NA");
   };
@@ -1337,6 +1367,7 @@ if (bikeRcImage) {
         });
       });
       setShowModal(false);
+      navigate(-1)
       setFormErrors({
         number: '',
         rent: '',

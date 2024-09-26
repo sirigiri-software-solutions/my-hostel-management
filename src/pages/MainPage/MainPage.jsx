@@ -55,6 +55,7 @@ const MainPage = () => {
       navigate("/login")
     }else{
       navigate("/dashboard")
+      
     }
 
   },[])

@@ -19,8 +19,11 @@ import { jsPDF } from "jspdf";
 
 import imageCompression from 'browser-image-compression';
 import { v4 as uuidv4 } from 'uuid';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const TenantsGirls = () => {
+  const navigate= useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, fetchData, girlsTenants, girlsRooms, entireHMAdata, girlsExTenantsData} = useData();
   const role = localStorage.getItem('role');
@@ -130,11 +133,17 @@ const TenantsGirls = () => {
       if (showModal && (event.target.id === "exampleModalTenantsGirls" || event.key === "Escape")) {
         setShowModal(false);
         setTenantId('')
+        navigate(-1);
       }
     };
 
     window.addEventListener('click', handleOutsideClick);
     window.addEventListener('keydown', handleOutsideClick)
+
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
   }, [showModal]);
 
   useEffect(() => {
@@ -147,6 +156,11 @@ const TenantsGirls = () => {
     };
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleClickOutside)
+    return () => {
+      window.removeEventListener('click', handleClickOutside);
+      window.removeEventListener("keydown", handleClickOutside);
+    };
+  
   }, []);
 
   // useEffect(() => {
@@ -460,6 +474,7 @@ const TenantsGirls = () => {
     }
 
     setShowModal(false);
+    navigate(-1)
     setLoading(true);
     const tenantUniqueId = isEditing ? currentId : uuidv4();
     // Helper function to upload a file and return its URL
@@ -618,6 +633,7 @@ if (bikeRcImage) {
     setFileName(tenant.fileName || '');
     setHasBike(false);
     setShowModal(true);
+    window.history.pushState(null, null, location.pathname);
     setBikeNumber(tenant.bikeNumber);
     setPermnentAddress(tenant.permnentAddress);
     if (tenant.bikeNumber === 'NA') {
@@ -646,6 +662,7 @@ if (bikeRcImage) {
       resetForm();
       setIsEditing(false);
       setShowModal(true);
+      window.history.pushState(null, null, location.pathname);
       setUserDetailsTenantsPopup(false);
       setHasBike(false);
     }
@@ -766,14 +783,29 @@ if (bikeRcImage) {
     setHasBike(false);
     setBikeNumber("");
     setFileName('');
+    navigate(-1);
   }
+  useEffect(() => {
+    const handlePopState = () => {
+      if (showModal) {
+        setShowModal(false); // Close the popup
+        
+      }
+      if(userDetailsTenantPopup){
+        setUserDetailsTenantsPopup(false)
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+
+
+  }, [showModal,userDetailsTenantPopup, location.pathname]);
 
   const handleTentantRow = (tenant) => {
 
     setUserDetailsTenantsPopup(true);
     setShowModal(false);
     setSingleTenantDetails(tenant);
-
+    window.history.pushState(null, null, location.pathname);
 
 
     const [roomNo, bedNo] = tenant.room_bed_no.split('/');
@@ -826,6 +858,7 @@ if (bikeRcImage) {
 
   const tenantPopupClose = () => {
     setUserDetailsTenantsPopup(false);
+    navigate(-1)
     setDueDateOfTenant("")
     setSingleTenantProofId("")
   }
@@ -866,6 +899,7 @@ if (bikeRcImage) {
     });
 
     setShowModal(false);
+    navigate(-1);
     resetForm();
     setErrors({});
 
