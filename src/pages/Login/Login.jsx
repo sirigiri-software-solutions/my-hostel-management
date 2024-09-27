@@ -133,10 +133,11 @@ const Login = () => {
 
   const checkData = async (event) => {
     event.preventDefault();
-    const firebase = firebaseInstances[loginData.area]
-    const { auth, database  } = firebase;
+    
 
     if (validateForm()) {
+      const firebase = firebaseInstances[loginData.area]
+    const { auth, database  } = firebase;
       try {
         const userCredential = await signInWithEmailAndPassword(
           auth,

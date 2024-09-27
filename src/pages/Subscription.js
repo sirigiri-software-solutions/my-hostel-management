@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ref, update } from 'firebase/database';
 import { useData } from '../ApiData/ContextProvider';
 import moment from 'moment';
@@ -7,15 +7,28 @@ import './SubscriptionPage.css'; // Importing the CSS file for styling
 
 const SubscriptionPage = () => {
   const navigate = useNavigate();
-  const { firebase } = useData();
-  const { database } = firebase;
+  const location = useLocation();
+  
+  useEffect(() => {
+    let area = localStorage.getItem('userarea')
+  
+    if (!area) {
+      navigate('/login');
+    }
+  }, [location.pathname]);
+
+  const CallUseData = () => {
+    useData();
+  }
 
   const handleSubscription = (days) => {
     const uid = localStorage.getItem('userUid');
     if (!uid) {
-      navigate('/');
+      navigate('/login');
       return;
     }
+    const { firebase } = CallUseData();
+    const { database } = firebase;
 
     const newAccessEnd = moment().add(days, 'days').toISOString();
 
@@ -24,18 +37,18 @@ const SubscriptionPage = () => {
       subscriptionPlan: days,
       accessEnd: newAccessEnd,
     })
-    .then(() => {
-      localStorage.setItem('accessEnd', newAccessEnd);
-      navigate('/mainPage');
-    })
-    .catch((error) => {
-      console.error('Error updating subscription:', error);
-      // Handle the error appropriately
-    });
+      .then(() => {
+        localStorage.setItem('accessEnd', newAccessEnd);
+        navigate('/dashboard');
+      })
+      .catch((error) => {
+        console.error('Error updating subscription:', error);
+        // Handle the error appropriately
+      });
   };
 
   const handleOnClickBackBtn = () => {
-    navigate('/')
+    navigate('/login')
   }
 
   return (
@@ -60,7 +73,7 @@ const SubscriptionPage = () => {
         </div>
       </div>
       <div className="backBtnContainer">
-      <button onClick={handleOnClickBackBtn} className='backBtn'>Back</button>
+        <button onClick={handleOnClickBackBtn} className='backBtn'>Back</button>
       </div>
     </div>
   );
