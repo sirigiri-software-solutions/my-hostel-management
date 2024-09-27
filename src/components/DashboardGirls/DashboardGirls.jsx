@@ -580,6 +580,7 @@ Please note that you made your last payment on ${paidDate}.\n`
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
       fetchData()
     }).catch(error => {
@@ -591,6 +592,7 @@ Please note that you made your last payment on ${paidDate}.\n`
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
     });
 
@@ -1007,6 +1009,7 @@ if (bikeRcImage) {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                toastId: "empty-fields-error",
             });
             fetchData();
         } else {
@@ -1019,6 +1022,7 @@ if (bikeRcImage) {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                toastId: "empty-fields-error",
             });
             fetchData();
             e.target.querySelector('button[type="submit"]').disabled = false;
@@ -1033,6 +1037,7 @@ if (bikeRcImage) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
         });
     } finally {
         setLoading(false);
@@ -1114,6 +1119,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData()
         setIsEditing(false);
@@ -1130,6 +1136,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
     } else {
@@ -1144,6 +1151,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData();
         setIsEditing(false);
@@ -1160,6 +1168,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
     }
@@ -1265,6 +1274,7 @@ navigate(-1)
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       })
     } else {
       setModelText(text);
@@ -1353,6 +1363,7 @@ navigate(-1)
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData();
       }).catch(error => {
@@ -1364,6 +1375,7 @@ navigate(-1)
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
       setShowModal(false);

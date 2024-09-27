@@ -154,6 +154,7 @@ return () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData();
       }).catch(error => {
@@ -165,6 +166,7 @@ return () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
       setShowModal(false);
@@ -347,6 +349,7 @@ return () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
           setEditingExpense(null);
           fetchData();
@@ -359,6 +362,7 @@ return () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
         });
 
@@ -389,6 +393,7 @@ return () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
       fetchData();
       setEditingExpense(null);
@@ -401,6 +406,7 @@ return () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
       console.error("Error deleting document: ", error);
     });
@@ -436,6 +442,7 @@ return () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       })
     } else {
     setShowModal(true);

@@ -461,6 +461,7 @@ const TenantsBoys = () => {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                toastId: "empty-fields-error",
             });
             fetchData();
         } else {
@@ -473,6 +474,7 @@ const TenantsBoys = () => {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                toastId: "empty-fields-error",
             });
             fetchData();
             e.target.querySelector('button[type="submit"]').disabled = false;
@@ -487,6 +489,7 @@ const TenantsBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
         });
         e.target.querySelector('button[type="submit"]').disabled = false;
     } finally {
@@ -566,6 +569,7 @@ const TenantsBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       })
     } else {
       resetForm();
@@ -785,6 +789,7 @@ const TenantsBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
           fetchData();
         }).catch(error => {
@@ -796,6 +801,7 @@ const TenantsBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
         });
         
@@ -842,6 +848,7 @@ const TenantsBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       })
       .catch((error) => {
@@ -853,6 +860,7 @@ const TenantsBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
     setShowConfirmation(false);

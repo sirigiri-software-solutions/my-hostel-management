@@ -554,6 +554,7 @@ const DashboardBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
       fetchData()
     }).catch(error => {
@@ -565,6 +566,7 @@ const DashboardBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
     });
     setFloorNumber('');
@@ -953,6 +955,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData()
       } else {
@@ -965,6 +968,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData();
         e.target.querySelector('button[type="submit"]').disabled = false;
@@ -979,6 +983,7 @@ const DashboardBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
     } finally {
         setLoading(false);
@@ -1054,6 +1059,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData();
         setIsEditing(false);
@@ -1070,6 +1076,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
     } else {
@@ -1083,6 +1090,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData();
         setIsEditing(false);
@@ -1099,6 +1107,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
     }
@@ -1205,6 +1214,7 @@ const DashboardBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       })
     } else {
       setModelText(text);
@@ -1303,6 +1313,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData();
       }).catch(error => {
@@ -1314,6 +1325,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
       setShowModal(false);

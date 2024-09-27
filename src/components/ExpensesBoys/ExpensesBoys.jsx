@@ -159,6 +159,7 @@ const ExpensesBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData();
       }).catch(error => {
@@ -170,6 +171,7 @@ const ExpensesBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
       setShowModal(false);
@@ -355,6 +357,7 @@ const ExpensesBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
           fetchData();
           setEditingExpense(null);
@@ -367,6 +370,7 @@ const ExpensesBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
         });
 
@@ -399,6 +403,7 @@ const ExpensesBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
       fetchData();
       setEditingExpense(null);
@@ -411,6 +416,7 @@ const ExpensesBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
     });
     setShowModal(false);
@@ -445,6 +451,7 @@ const ExpensesBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       })
     } else {
       setShowModal(true);
