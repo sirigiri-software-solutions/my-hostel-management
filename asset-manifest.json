@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/my-hostel-management/static/css/main.9156a159.css",
-    "main.js": "/my-hostel-management/static/js/main.ad0c7c5b.js",
+    "main.js": "/my-hostel-management/static/js/main.a21a05d1.js",
     "static/js/581.b80fa3e4.chunk.js": "/my-hostel-management/static/js/581.b80fa3e4.chunk.js",
     "static/js/239.b6e47f06.chunk.js": "/my-hostel-management/static/js/239.b6e47f06.chunk.js",
     "static/js/213.5a95ca2c.chunk.js": "/my-hostel-management/static/js/213.5a95ca2c.chunk.js",
@@ -10,7 +10,7 @@
     "static/media/HMLogo3.png": "/my-hostel-management/static/media/HMLogo3.ccbeb8eed19273e61eee.png",
     "index.html": "/my-hostel-management/index.html",
     "main.9156a159.css.map": "/my-hostel-management/static/css/main.9156a159.css.map",
-    "main.ad0c7c5b.js.map": "/my-hostel-management/static/js/main.ad0c7c5b.js.map",
+    "main.a21a05d1.js.map": "/my-hostel-management/static/js/main.a21a05d1.js.map",
     "581.b80fa3e4.chunk.js.map": "/my-hostel-management/static/js/581.b80fa3e4.chunk.js.map",
     "239.b6e47f06.chunk.js.map": "/my-hostel-management/static/js/239.b6e47f06.chunk.js.map",
     "213.5a95ca2c.chunk.js.map": "/my-hostel-management/static/js/213.5a95ca2c.chunk.js.map",
@@ -19,6 +19,6 @@
   },
   "entrypoints": [
     "static/css/main.9156a159.css",
-    "static/js/main.ad0c7c5b.js"
+    "static/js/main.a21a05d1.js"
   ]
 }
