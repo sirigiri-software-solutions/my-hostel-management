@@ -609,6 +609,7 @@ const DashboardBoys = () => {
     tempErrors.selectedRoom = selectedRoom ? "" : t('errors.roomNumberRequired');
     tempErrors.selectedBed = selectedBed ? "" : t('errors.bedNumberRequired');
     tempErrors.dateOfJoin = dateOfJoin ? "" : t('errors.dateOfJoinRequired');
+    tempErrors.permnentAddress = permnentAddress ? "" : t('errors.permanentAddress')
 
     const phoneRegexWithCountryCode = /^\+\d{12}$/;
     const phoneRegexWithoutCountryCode = /^\d{10}$/;
@@ -1046,6 +1047,7 @@ const DashboardBoys = () => {
       paidDate,
       dueDate,
       status: parseFloat(due) <= 0 ? 'Paid' : 'Unpaid',
+      monthly:showForm
     };
 
     if (isEditing) {
@@ -1825,7 +1827,8 @@ const DashboardBoys = () => {
             </div>
             <div className='col-md-12'>
               <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
-              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' />
+              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' onFocus={handleTenantFocus} />
+              {tenatErrors.permnentAddress && <p style={{ color: 'red' }}>{tenatErrors.permnentAddress}</p>}
             </div>
 
             <div className="col-12 col-sm-12 col-md-12" style={{ marginTop: '20px' }}>
