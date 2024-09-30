@@ -46,7 +46,7 @@ const App = () => {
         </Route>
 
         {/* Subscription route can also be outside DataProvider if needed */}
-        <Route path="/subscribe" element={<SubscriptionPage />} />
+        <Route path="/subscribe" element={<DataProvider><SubscriptionPage /></DataProvider>} />
       </Routes>
     </BrowserRouter>
   );
