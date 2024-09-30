@@ -1095,7 +1095,7 @@ const takePicture = async () => {
     };
 
     const tasks = [];
-    const uploadResults = {};
+  const uploadResults = {};
 
     const addUploadTask = (file, type, path) => {
       tasks.push(

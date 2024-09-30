@@ -1155,9 +1155,9 @@ const DashboardBoys = () => {
 
     try {
       const results = await Promise.all(tasks);
-      // Process results
-      results.forEach(({ type, url }) => {
-        uploadResults[type] = url;
+         // Process results
+         results.forEach(({ type, url }) => {
+          uploadResults[type] = url;
       });
 
       const tenantData = {
@@ -1175,12 +1175,14 @@ const DashboardBoys = () => {
         permnentAddress,
         bikeImageUrl: uploadResults['bikeImage'] || bikeImageUrl,
         bikeRcImageUrl: uploadResults['bikeRcImage'] || bikeRcImageUrl,
+       
+    };
 
         if (isEditing) {
             await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
             if (!toast.isActive(activeToastId)) {
 
-              activeToastId= toast.success(t('toastMessages.tenantUpdated'), {
+              activeToastId=toast.success(t('toastMessages.tenantUpdated'), {
                 position: "top-center",
                 autoClose: 2000,
                 hideProgressBar: false,
@@ -1193,9 +1195,9 @@ const DashboardBoys = () => {
                 },
             });
           }
-            fetchData()
-          } else {
-            await set(ref(database, `Hostel/${userUid}/girls/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
+            fetchData();
+        } else {
+            await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
             if (!toast.isActive(activeToastId)) {
               activeToastId=toast.success(t('toastMessages.tenantAddedSuccess'), {
                 position: "top-center",
@@ -1216,8 +1218,7 @@ const DashboardBoys = () => {
     } catch (error) {
         console.error("Error submitting form:", error);
         if (!toast.isActive(activeToastId)) {
-
-          activeToastId=toast.error(t('toastMessages.errorSubmitting') + error.message, {
+          activeToastId= toast.error(t('toastMessages.errorSubmitting') + error.message, {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -1230,14 +1231,10 @@ const DashboardBoys = () => {
             },
         });
       }
-    
     } finally {
         setLoading(false);
         resetForm();
         setErrors({});
-        setTenantErrors({});
-        // fetchData()
-
         // Reset file and camera options after submission
     setPhotoUrl(null);
     setIdUrl(null);
@@ -1247,12 +1244,12 @@ const DashboardBoys = () => {
     setIsCameraUsed(false);
     setIsTenantIdFileUploaded(false);
     setIsTenantIdCameraUsed(false);
+
         imageInputRef.current.value = "";
-        idInputRef.current.value = "";
+    idInputRef.current.value = "";
     }
-  };
-
-
+};
+   
 
 
   const validateRentForm = () => {
@@ -2422,6 +2419,7 @@ const DashboardBoys = () => {
 
   );
 };
+
 
 export default DashboardBoys;
 

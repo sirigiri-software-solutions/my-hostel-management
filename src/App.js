@@ -15,10 +15,13 @@ import Rents from './Sections/Rents/Rents';
 import Expenses from './Sections/Expenses/Expenses';
 import Hostels from './Sections/Hostels/Hostels';
 import Settings from './Sections/Settings/Settings';
+// import BackButtonHandler from './BackButtonHandler';  // Import the handler
+
 
 const App = () => {
   return (
     <BrowserRouter>
+    {/* <BackButtonHandler/> */}
       <ToastContainer />
       <Routes>
         {/* Route outside of DataProvider */}

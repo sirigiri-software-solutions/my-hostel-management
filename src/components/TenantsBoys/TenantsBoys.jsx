@@ -1838,13 +1838,14 @@ const handleDownload = async (url, type, tenantName) => {
                       <option value="unoccupied">{t('dashboard.unoccupied')}</option>
                     </select>
                   </div>
+                  
                   <div class="col-md-6">
                     <label htmlFor='tenantUpload' class="form-label">
                       {t('dashboard.uploadImage')}
                     </label>
-                    {isEditing && tenantImageUrl && (
+                    {isEditing && tenantImage && (
                       <div>
-                        <img src={tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
+                        <img src={tenantImage} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
                         <p>{t('dashboard.currentImage')}</p>
                       </div>
                     )}
@@ -1867,6 +1868,8 @@ const handleDownload = async (url, type, tenantName) => {
                     {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
                     {errorMessage?.tenantImage && <p style={{ color: 'red' }}>{errorMessage?.tenantImage}</p>}
                   </div>
+
+
                   <div className="col-md-6">
                     <label htmlFor='tenantUploadId' className="form-label">
                       {t('dashboard.uploadId')}:

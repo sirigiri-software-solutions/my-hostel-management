@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useData } from '../../ApiData/ContextProvider';
 import { set, ref, remove, onValue, update, get, push } from 'firebase/database';
-
+ 
 import { toast } from 'react-toastify';
 import './Hostels.css';
 import { Modal, Button, Tab, Tabs } from 'react-bootstrap';
@@ -12,7 +12,7 @@ import './Hostels.css'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
 import { useLocation, useNavigate } from 'react-router-dom';
-
+ 
 const Hostels = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const Hostels = () => {
   const [newBoysHostelAddress, setNewBoysHostelAddress] = useState('');
   const [newGirlsHostelName, setNewGirlsHostelName] = useState('');
   const [newGirlsHostelAddress, setNewGirlsHostelAddress] = useState('');
-
+ 
   const [isBoysModalOpen, setIsBoysModalOpen] = useState(false);
   const [isGirlsModalOpen, setIsGirlsModalOpen] = useState(false);
   const [boysHostels, setBoysHostels] = useState([]);
@@ -38,12 +38,12 @@ const Hostels = () => {
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
   const [hostelImageUrl, setHostelImageUrl] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  let activeToastId = null;
-
+ 
+ 
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
     const girlsRef = ref(database, `Hostel/${userUid}/girls`);
-
+ 
     const fetchBoysHostels = onValue(boysRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -58,7 +58,7 @@ const Hostels = () => {
         setHostels(prev => ({ ...prev, boys: [] }));
       }
     });
-
+ 
     const fetchGirlsHostels = onValue(girlsRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -73,13 +73,13 @@ const Hostels = () => {
         setHostels(prev => ({ ...prev, girls: [] }));
       }
     });
-
+ 
     return () => {
       fetchBoysHostels();
       fetchGirlsHostels();
     };
   }, [userUid, database]);
-
+ 
   const compressImage = async (file) => {
     const options = {
         maxSizeMB: 0.6, // Compress to a maximum of 600 KB
@@ -87,7 +87,7 @@ const Hostels = () => {
         useWebWorker: true, // Use a web worker for better performance
         fileType: 'image/jpeg',
     };
-
+ 
     try {
         const compressedFile = await imageCompression(file, options);
         return compressedFile;
@@ -96,7 +96,7 @@ const Hostels = () => {
         return null;
     }
 };
-
+ 
 const submitHostelEdit = async (e) => {
   e.preventDefault();
   const { id, name, address, hostelImage, isBoys } = isEditing;
@@ -109,59 +109,44 @@ const submitHostelEdit = async (e) => {
       const snapshot = await uploadBytes(imageRef, compressedImage);
       updatedImageUrl = await getDownloadURL(snapshot.ref);
     } catch (error) {
-      if (!toast.isActive(activeToastId)) {
-        activeToastId=toast.error("Error uploading image: " + error.message, {
+      toast.error("Error uploading image: " + error.message, {
         position: "top-center",
         autoClose: 3000,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
       });
-    }
       return;
     }
   }
-
+ 
   const updateData = { name, address, hostelImage: updatedImageUrl };
   const hostelRef = ref(database, basePath);
-
+ 
   update(hostelRef, updateData)
     .then(() => {
-      if (!toast.isActive(activeToastId)) {
-        activeToastId=toast.success("Hostel updated successfully.", {
+      toast.success("Hostel updated successfully.", {
         position: "top-center",
         autoClose: 3000,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
       });
-    }
       cancelEdit();
       fetchData();
     })
     .catch(error => {
-      if (!toast.isActive(activeToastId)) {
-        activeToastId=toast.error("Failed to update hostel: " + error.message, {
+      toast.error("Failed to update hostel: " + error.message, {
         position: "top-center",
         autoClose: 3000,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
       });
-    }
     });
 };
-
+ 
   const deleteHostel = (id) => {
     const isBoys = activeFlag === 'boys';
     setIsDeleteConfirmationOpen(true);
     window.history.pushState(null, null, location.pathname);
     setHostelToDelete({ isBoys, id });
   };
-
+ 
   const confirmDeleteHostel =async () => {
     const { isBoys, id } = hostelToDelete;
-
+ 
     try{
       const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
       const hostelSnapshot = await get(ref(database,path));
@@ -173,90 +158,75 @@ const submitHostelEdit = async (e) => {
         if(!hasTenants && !hasExTenants){
           await remove(ref(database, path))
      
-          if (!toast.isActive(activeToastId)) {
-            activeToastId = toast.success("Hostel deleted successfully.", {
-              position: "top-center",
-              autoClose: 3000,
-              onClose: () => {
-                activeToastId = null; // Reset activeToastId when the toast is closed
-              },
-            });
-          }
-          fetchData();
-          setIsDeleteConfirmationOpen(false);
-          
-          setHostelToDelete(null);
-        }else{
-          if (!toast.isActive(activeToastId)) {
-            activeToastId = toast.error("Hostel cannot be deleted as it has tenants,extenants.Please transfer the tenants first.",{
+          toast.success("Hostel deleted successfully.", {
             position: "top-center",
             autoClose: 3000,
+          });
+          fetchData();
+          setIsDeleteConfirmationOpen(false);
+         
+          setHostelToDelete(null);
+        }else{
+          toast.error("Hostel cannot be deleted as it has tenants,extenants.Please transfer the tenants first.",{
+            position: "top-center",
+            autoClose: 5000,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
           })
-        }
           setIsDeleteConfirmationOpen(false);
-          
+         
           setHostelToDelete(null);
         }
         navigate(-1)
       }
-      
+     
     }catch(error){
       const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
-
+ 
       await remove(ref(database, path))
      
-      if (!toast.isActive(activeToastId)) {
-        activeToastId = toast.error("An error occurred while trying to delete the hostel.", {
+        toast.success("Hostel deleted successfully.", {
           position: "top-center",
           autoClose: 3000,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
         });
-      }
         setIsDeleteConfirmationOpen(false);
         navigate(-1)
         setHostelToDelete(null);
     }
    
   };
-
+ 
   const cancelDeleteHostel = () => {
     setIsDeleteConfirmationOpen(false);
     setHostelToDelete(null);
     navigate(-1)
   };
-
+ 
   const cancelEdit = () => {
     setIsEditing(null);
     setSelectedImage(null);
     navigate(-1)
   };
-
+ 
   const startEdit = (id, name, address, hostelImage, isBoys) => {
     setIsEditing({ id, name, originalName: name, address, hostelImage, isBoys });
-    setSelectedImage(null); 
+    setSelectedImage(null);
     window.history.pushState(null, null, location.pathname);
   };
-
+ 
   const handleEditChange = (field, value) => {
     setIsEditing(prev => ({ ...prev, [field]: value }));
   };
-
+ 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    
+   
     if (file) {
       const allowedTypes = ['image/jpeg', 'image/png'];
-
+ 
       if (allowedTypes.includes(file.type)) {
         setSelectedImage(file);
         setErrorMessage(''); // Clear error message
@@ -266,8 +236,8 @@ const submitHostelEdit = async (e) => {
         setSelectedImage(null); // Clear selected image
       }
     }
-  }; 
-
+  };
+ 
   const getHostelColumns = () => [
     t('tenantsPage.image'),
     t("hostels.name"),
@@ -275,7 +245,7 @@ const submitHostelEdit = async (e) => {
     t("hostels.actions"),
     t("hostels.deleteData")
   ];
-
+ 
   const getHostelRows = (hostels, isBoys) => hostels.map(hostel => {
     return {
       image: hostel.hostelImage,
@@ -291,16 +261,16 @@ const submitHostelEdit = async (e) => {
       >Delete</button>
     };
   });
-
+ 
   const handleTabSelect = (tab) => {
-
+ 
     changeActiveFlag(tab)
   };
-
+ 
   console.log(handleTabSelect , "aaaff")
   // ================================
-
-
+ 
+ 
   useEffect(() => {
     if (userUid) {
       // Fetch boys hostels
@@ -315,7 +285,7 @@ const submitHostelEdit = async (e) => {
         });
         setBoysHostels(hostels);
       });
-
+ 
       // Fetch girls hostels
       const girlsHostelsRef = ref(database, `Hostel/${userUid}/girls`);
       onValue(girlsHostelsRef, (snapshot) => {
@@ -330,16 +300,16 @@ const submitHostelEdit = async (e) => {
       });
     }
   }, []);
-
+ 
   const capitalizeFirstLetter = (string) => {
     return string.replace(/\b\w/g, char => char.toUpperCase());
   };
-
+ 
   const validateAlphanumeric = (input) => {
     const regex = /^[A-Za-z\s]*$/;
     return regex.test(input);
   };
-
+ 
   const handleHostelNameChange = (e, isBoys) => {
     const value = e.target.value;
     if (validateAlphanumeric(value)) {
@@ -349,94 +319,73 @@ const submitHostelEdit = async (e) => {
         setNewGirlsHostelName(value);
       }
     } else {
-      if (!toast.isActive(activeToastId)) {
-        activeToastId =toast.error("Hostel name must contain only alphabets.", {
+      toast.error("Hostel name must contain only alphabets.", {
         position: "top-center",
         autoClose: 3000,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
       });
     }
-    }
   };
-
  
  
-
+ 
+ 
   const isImageFile = (file) => {
     const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
     return file && allowedImageTypes.includes(file.type);
   };
-
+ 
   const handleHostelChange = (e, isBoys) => {
+    e.preventDefault();
     const file = e.target.files[0];
-    
+   
     if (!file) {
         // No file selected
-        if (!toast.isActive(activeToastId)) {
-          activeToastId =toast.error("Please select a file.", {
+        toast.error("Please select a file.", {
             position: "top-center",
             autoClose: 3000,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
-
         });
-      }
         return;
     }
     if (!isImageFile(file)) {
-      if (!toast.isActive(activeToastId)) {
-        activeToastId =toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
+      toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
         position: "top-center",
         autoClose: 3000,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
       });
-    }
       e.target.value = ''; // Clear the input
       return;
     }
-
+ 
     const validFormats = ['image/jpeg', 'image/png'];
     if (validFormats.includes(file.type)) {
-        
+       
         if (isBoys) {
-            setBoysHostelImage(file); 
+            setBoysHostelImage(file);
         } else {
-            setGirlsHostelImage(file); 
+            setGirlsHostelImage(file);
         }
-        setErrorMessage(''); 
+        setErrorMessage('');
     } else {
-        
+       
         setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
-        e.target.value = null; 
+        e.target.value = null;
     }
 };
-
-
+ 
+ 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-
+ 
   const addNewHostel = async (e, isBoys) => {
     e.preventDefault();
-    
+   
     const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
     const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
     const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
-
+ 
     if (name.trim() === '' || address.trim() === '' || !hostelImage) {
-      if (!toast.isActive(activeToastId)) {
-        activeToastId = toast.error("Hostel name, address, and image cannot be empty.", {
-          position: "top-center",
-          autoClose: 3000,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
-        });
-      }
+      toast.error("Hostel name, address and image cannot be empty.", {
+        position: "top-center",
+        autoClose: 3000,
+      });
       return;
     }
     setIsSubmitting(true);
@@ -454,8 +403,8 @@ const submitHostelEdit = async (e) => {
         console.error("Error uploading tenant image:", error);
       }
     }
-    
-
+   
+ 
     // Create a new reference with a unique ID
     const newHostelRef = push(ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`));
     const hostelDetails = {
@@ -464,18 +413,13 @@ const submitHostelEdit = async (e) => {
       address,
       hostelImage: hostelImageUrlToUpdate
     };
-
+ 
     set(newHostelRef, hostelDetails)
       .then(() => {
-        if (!toast.isActive(activeToastId)) {
-          activeToastId = toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
-            position: "top-center",
-            autoClose: 3000,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
-          });
-        }
+        toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
+          position: "top-center",
+          autoClose: 3000,
+        });
         fetchData()
         if (isBoys) {
           setNewBoysHostelName('');
@@ -491,21 +435,16 @@ const submitHostelEdit = async (e) => {
         navigate(-1)
       })
       .catch(error => {
-        if (!toast.isActive(activeToastId)) {
-          activeToastId = toast.error("Failed to add new hostel: " + error.message, {
-            position: "top-center",
-            autoClose: 3000,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
-          });
-        }
+        toast.error("Failed to add new hostel: " + error.message, {
+          position: "top-center",
+          autoClose: 3000,
+        });
       })
       .finally(() => {
         setIsSubmitting(false); // Reset isSubmitting to false when submission completes
       });
   };
-
+ 
   const handleModalClose = (isBoys) => {
     if (isBoys) {
       setNewBoysHostelName('');
@@ -517,7 +456,7 @@ const submitHostelEdit = async (e) => {
       setNewGirlsHostelAddress('');
       setGirlsHostelImage('');
       setIsGirlsModalOpen(false);
-      
+     
     }
     navigate(-1)
   };
@@ -536,13 +475,13 @@ const submitHostelEdit = async (e) => {
         setIsEditing(null)
       }
     };
-
+ 
     window.addEventListener('popstate', handlePopState);
-
-
+ 
+ 
   }, [isEditing,isBoysModalOpen,isGirlsModalOpen,isDeleteConfirmationOpen, location.pathname]);
-
-
+ 
+ 
   return (
     <div className='h-100'>
     <div className='container'>
@@ -571,25 +510,25 @@ const submitHostelEdit = async (e) => {
           </div>
         </Tab> : ''
         }
-        
+       
         {
           activeGirlsHostelButtons.length > 0 ?
           <Tab eventKey="girls" title={t('dashboard.womens')} className={activeFlag === 'girls' ? 'active-tab' : ''}>
           <div className="row d-flex flex-wrap align-items-center justify-content-between">
             <div className="col-6 col-md-6 d-flex align-items-center mr-5 mb-2">
-    
+   
                 <div className='roomlogo-container'>
                   <img src={RoomsIcon} alt="RoomsIcon" className='roomlogo' />
                 </div>
                 <text className='management-heading2'>{t('roomsPage.HostelsManagement')}</text>
-              
+             
              
             </div>
             <div className='col-6 col-md-6 d-flex justify-content-end'>
                 <button className="add-button" onClick={() => {setIsGirlsModalOpen(true); window.history.pushState(null, null, location.pathname);}}>{t("settings.addHostel")}</button>
               </div>
           </div>
-
+ 
           <div>
             <Table
               columns={getHostelColumns()}
@@ -599,7 +538,7 @@ const submitHostelEdit = async (e) => {
           </div>
         </Tab>: ''
         }
-        
+       
       </Tabs>
       <Modal show={isEditing !== null} onHide={cancelEdit}>
         <Modal.Header closeButton>
@@ -623,7 +562,7 @@ const submitHostelEdit = async (e) => {
                 onChange={(e) => handleEditChange('address', e.target.value)}
                 className="edit-hostel-input"
               />
-
+ 
               <div >
                 <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
                 <input type="file" className="form-control" accept="image/jpeg, image/png" onChange={handleImageChange} />
@@ -632,7 +571,7 @@ const submitHostelEdit = async (e) => {
               </div>
             </div>
           )}
-
+ 
           <div className='mt-3 d-flex justify-content-between'>
             <Button variant="primary" onClick={submitHostelEdit}>
               {t("hostels.save")}
@@ -640,7 +579,7 @@ const submitHostelEdit = async (e) => {
             <Button variant="secondary" onClick={cancelEdit}>
               {t("hostels.cancel")}
             </Button>
-
+ 
           </div>
         </Modal.Body>
       </Modal>
@@ -658,9 +597,9 @@ const submitHostelEdit = async (e) => {
           </Button>
         </Modal.Footer>
       </Modal>
-
+ 
       {/* ================== */}
-
+ 
       <Modal show={isBoysModalOpen} onHide={() => handleModalClose(true)}>
         <Modal.Header closeButton>
           <Modal.Title>{t("settings.addboysHostel")}</Modal.Title>
@@ -702,7 +641,7 @@ const submitHostelEdit = async (e) => {
           </form>
         </Modal.Body>
       </Modal>
-
+ 
       <Modal show={isGirlsModalOpen} onHide={() => handleModalClose(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{t("settings.addGirlsHostel")}</Modal.Title>
@@ -748,5 +687,5 @@ const submitHostelEdit = async (e) => {
     </div>
   );
 };
-
+ 
 export default Hostels;
