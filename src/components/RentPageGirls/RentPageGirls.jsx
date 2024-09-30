@@ -307,6 +307,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
           setIsEditing(false);
           if (notify) {
@@ -323,6 +324,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
         });
     } else {
@@ -340,6 +342,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
           setIsEditing(false);
           if (notify) {
@@ -356,6 +359,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
         });
     }
@@ -376,6 +380,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         }
       );
     } else {

@@ -216,6 +216,7 @@ const Login = () => {
               draggable: true,
               progress: undefined,
               theme: "light",
+              toastId: "empty-fields-error",
             });
             
           } else {
@@ -232,6 +233,7 @@ const Login = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
+            toastId: "empty-fields-error",
           });
         }
       } catch (error) {
@@ -244,6 +246,7 @@ const Login = () => {
           draggable: true,
           progress: undefined,
           theme: "light",
+          toastId: "empty-fields-error",
         });
 
 
@@ -304,6 +307,7 @@ const Login = () => {
         position: "bottom-right",
         autoClose: 2000,
         theme: "light",
+        toastId: "empty-fields-error",
       });
       return;
     }
@@ -314,6 +318,7 @@ const Login = () => {
         position: "bottom-right",
         autoClose: 2000,
         theme: "light",
+        toastId: "empty-fields-error",
       });
       return;
     }
@@ -337,6 +342,7 @@ const Login = () => {
           position: "bottom-right",
           autoClose: 2000,
           theme: "light",
+          toastId: "empty-fields-error",
         });
         setForgotPasswordData({
           email: '',
@@ -351,6 +357,7 @@ const Login = () => {
           position: "bottom-right",
           autoClose: 2000,
           theme: "light",
+          toastId: "empty-fields-error",
         });
 
       }
@@ -360,6 +367,7 @@ const Login = () => {
         position: "bottom-right",
         autoClose: 2000,
         theme: "light",
+        toastId: "empty-fields-error",
       });
     }
 
@@ -539,6 +547,7 @@ const Login = () => {
         draggable: true,
         progress: undefined,
         theme: "light",
+        toastId: "empty-fields-error",
       });
 
       const response = await axios.post(apiEndpoint, formData);
@@ -568,6 +577,7 @@ const Login = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
+            toastId: "empty-fields-error",
           }
         );
       } else if (error instanceof FirebaseError && error.code === 'auth/email-already-in-use') {

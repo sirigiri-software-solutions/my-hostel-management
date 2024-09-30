@@ -560,6 +560,7 @@ if (bikeRcImage) {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                toastId: "empty-fields-error",
             });
             fetchData()
         } else {
@@ -572,6 +573,7 @@ if (bikeRcImage) {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                toastId: "empty-fields-error",
             });
             fetchData()
             e.target.querySelector('button[type="submit"]').disabled = false;
@@ -586,6 +588,7 @@ if (bikeRcImage) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
         });
     } finally {
         setLoading(false);
@@ -656,6 +659,7 @@ if (bikeRcImage) {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       })
     } else {
 
@@ -879,6 +883,7 @@ if (bikeRcImage) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
           fetchData();
         }).catch(error => {
@@ -890,6 +895,7 @@ if (bikeRcImage) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
         });
         // fetchExTenants()
@@ -936,6 +942,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       })
       .catch((error) => {
@@ -947,6 +954,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
     setShowConfirmation(false);
