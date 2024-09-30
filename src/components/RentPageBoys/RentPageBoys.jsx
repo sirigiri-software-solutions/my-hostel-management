@@ -53,6 +53,7 @@ const RentPageBoys = () => {
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [showForm, setShowForm] = useState(true);
   const [filterOption, setFilterOption] = useState("all");
+  const [tenantMonthly, setTenantMonthly] = useState(showForm)
 
   // Function to send WhatsApp message
   const sendMessage = (tenant, rentRecord) => {
@@ -117,17 +118,17 @@ Please note that you made your last payment on ${paidDate}.\n`;
       const matchingRoom = roomsArray.find(
         (room) => room.roomNumber === roomNumber
       );
-      if (matchingRoom && matchingRoom.bedRent) {
+      
+      if (tenantMonthly && matchingRoom && matchingRoom.bedRent) {
         setTotalFee(matchingRoom.bedRent.toString());
-      } else {
-        setTotalFee("");
-      }
+      } 
+      
     };
 
     if (roomNumber) {
       updateTotalFeeFromRoom();
     }
-  }, [roomNumber, boysRooms]);
+  }, [roomNumber, boysRooms,showModal]);
 
   useEffect(() => {
     if (selectedTenant) {
@@ -169,12 +170,18 @@ Please note that you made your last payment on ${paidDate}.\n`;
   const loadRentForEditing = (tenantId, rentId) => {
     const tenant = boysTenantsWithRents.find((t) => t.id === tenantId);
     const rentRecord = tenant.rents.find((r) => r.id === rentId);
-
+    const roomsArray = Object.values(boysRooms);
+    const matchingRoom = roomsArray.find(
+      (room) => room.roomNumber === rentRecord?.roomNumber
+    );
+   
     if (rentRecord) {
+
       setSelectedTenant(tenantId || "");
       setRoomNumber(rentRecord.roomNumber || "");
       setBedNumber(rentRecord.bedNumber || "");
-      // setTotalFee(rentRecord.totalFee || "");
+      setTenantMonthly(rentRecord.monthly)
+      setTotalFee(rentRecord.monthly ? matchingRoom.bedRent :  rentRecord.totalFee);
       setPaidAmount(rentRecord.paidAmount || "");
       setDue(rentRecord.due || "");
       setPaidDate(rentRecord.paidDate || "");
@@ -231,6 +238,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       paidDate,
       dueDate,
       status: parseFloat(due) <= 0 ? "Paid" : "Unpaid",
+      monthly:showForm
     };
 
     if (isEditing) {
@@ -339,6 +347,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
     setIsEditing(false);
     setEditingRentId(null);
     setErrors({});
+    setTenantMonthly(showForm)
   };
 
   const handleSearch = (e) => {
@@ -691,13 +700,14 @@ Please note that you made your last payment on ${paidDate}.\n`;
                           <label htmlFor="TotalFee" class="form-label">
                             {t("dashboard.totalFee")}:
                           </label>
-                          <input
+                          {/* <input
                             id="TotalFee"
                             class="form-control"
                             type="number"
                             value={totalFee}
-                            readOnly
-                          />
+                            readOnly = {tenantMonthly}
+                          /> */}
+                          <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} readOnly = {tenantMonthly}/>
                         </div>
 
 

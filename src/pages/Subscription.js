@@ -14,6 +14,22 @@ const SubscriptionPage = () => {
   
     if (!area) {
       navigate('/login');
+    }else{
+      let accessEnd = localStorage.getItem('accessEnd');
+      let time = new Date();
+  
+      if (accessEnd) {
+        let accessEndDate = new Date(accessEnd);
+        if (time < accessEndDate) {
+          navigate('/dashboard');
+        } else {
+         
+          navigate('/subscribe');
+        }
+      } else {
+       
+        navigate('/subscribe');
+      }
     }
   }, [location.pathname]);
 

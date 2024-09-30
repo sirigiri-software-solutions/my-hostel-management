@@ -1041,6 +1041,7 @@ const DashboardBoys = () => {
       paidDate,
       dueDate,
       status: parseFloat(due) <= 0 ? 'Paid' : 'Unpaid',
+      monthly:showForm
     };
 
     if (isEditing) {
