@@ -35,7 +35,7 @@ const App = () => {
           }
         >
           {/* Nested Routes inside MainPage */}
-          <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="rooms" element={<ProtectedRoute><Rooms /></ProtectedRoute>} />
           <Route path="beds" element={<ProtectedRoute><Beds /></ProtectedRoute>} />
           <Route path="tenants" element={<ProtectedRoute><Tenants /></ProtectedRoute>} />

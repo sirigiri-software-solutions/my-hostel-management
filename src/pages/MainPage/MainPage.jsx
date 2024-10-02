@@ -54,7 +54,7 @@ const MainPage = () => {
     if(!isAuthenticated){
       navigate("/login")
     }else{
-      navigate("/dashboard")
+      navigate("/")
       
     }
 
@@ -120,7 +120,7 @@ const MainPage = () => {
   const menuItems = [
     {
       id: 1,
-      path: "/dashboard",
+      path: "/",
       name: t("menuItems.dashboard"),
       icon: DashboardImage,
     },
@@ -319,6 +319,10 @@ const MainPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen1(false);
   };
+
+  useEffect(() =>{
+    console.log(location.pathname,"getPthname")
+  })
  
   return (
     <div className='bg-container' style={mainBackgroundContainerStyle}>

@@ -21,7 +21,7 @@ const SubscriptionPage = () => {
       if (accessEnd) {
         let accessEndDate = new Date(accessEnd);
         if (time < accessEndDate) {
-          navigate('/dashboard');
+          navigate('/');
         } else {
          
           navigate('/subscribe');
@@ -55,7 +55,7 @@ const SubscriptionPage = () => {
     })
       .then(() => {
         localStorage.setItem('accessEnd', newAccessEnd);
-        navigate('/dashboard');
+        navigate('/');
       })
       .catch((error) => {
         console.error('Error updating subscription:', error);
