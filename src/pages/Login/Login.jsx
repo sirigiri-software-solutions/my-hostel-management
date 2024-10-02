@@ -104,7 +104,7 @@ const Login = () => {
   useEffect(()=>{
     const isAuthenticated = localStorage.getItem('userUid');
     if(isAuthenticated){
-      navigate("/dashboard")
+      navigate("/")
     }
 
   },[location.pathname])
@@ -207,7 +207,7 @@ const Login = () => {
            
            
             
-            navigate("/dashboard");
+        navigate("/");
             if (!toast.isActive(activeToastId)) {
               activeToastId=toast.success("You are logged in successfully.", {
               position: "bottom-right",
