@@ -54,7 +54,7 @@ const RentPageBoys = () => {
   const [showForm, setShowForm] = useState(true);
   const [filterOption, setFilterOption] = useState("all");
   const [tenantMonthly, setTenantMonthly] = useState(showForm)
-
+  let  activeToastId=null;
   // Function to send WhatsApp message
   const sendMessage = (tenant, rentRecord) => {
     const totalFee = rentRecord.totalFee;

@@ -54,6 +54,7 @@ const RentPageGirls = () => {
   const [showForm, setShowForm] = useState(true);
   const [filterOption, setFilterOption] = useState("all");
   const [tenantMonthly, setTenantMonthly] = useState(showForm)
+  let activeToastId = null;
 
 
   // Function to send WhatsApp message
