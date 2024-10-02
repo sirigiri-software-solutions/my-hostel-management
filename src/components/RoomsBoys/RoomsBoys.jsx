@@ -143,6 +143,7 @@ const RoomsBoys = () => {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                toastId: "empty-fields-error",
             });
             fetchData();
             setIsEditing(false);
@@ -155,6 +156,7 @@ const RoomsBoys = () => {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                toastId: "empty-fields-error",
             });
         });
     } else {
@@ -175,6 +177,7 @@ const RoomsBoys = () => {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                toastId: "empty-fields-error",
             });
             fetchData();
         }).catch(error => {
@@ -186,6 +189,7 @@ const RoomsBoys = () => {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
+                toastId: "empty-fields-error",
             });
         });
     }
@@ -255,6 +259,7 @@ const RoomsBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
   
           fetchData(); // Refresh data after deletion
@@ -267,6 +272,7 @@ const RoomsBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
         }
       } else {
@@ -281,6 +287,7 @@ const RoomsBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
   
         fetchData(); // Refresh data after deletion
@@ -295,6 +302,7 @@ const RoomsBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
     }
   
@@ -341,6 +349,7 @@ const RoomsBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       })
     } else {
       resetForm();

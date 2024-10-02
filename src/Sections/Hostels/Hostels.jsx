@@ -112,6 +112,7 @@ const submitHostelEdit = async (e) => {
       toast.error("Error uploading image: " + error.message, {
         position: "top-center",
         autoClose: 3000,
+        toastId: "empty-fields-error",
       });
       return;
     }
@@ -125,6 +126,7 @@ const submitHostelEdit = async (e) => {
       toast.success("Hostel updated successfully.", {
         position: "top-center",
         autoClose: 3000,
+        toastId: "empty-fields-error",
       });
       cancelEdit();
       fetchData();
@@ -133,6 +135,7 @@ const submitHostelEdit = async (e) => {
       toast.error("Failed to update hostel: " + error.message, {
         position: "top-center",
         autoClose: 3000,
+        toastId: "empty-fields-error",
       });
     });
 };
@@ -161,6 +164,7 @@ const submitHostelEdit = async (e) => {
           toast.success("Hostel deleted successfully.", {
             position: "top-center",
             autoClose: 3000,
+            toastId: "empty-fields-error",
           });
           fetchData();
           setIsDeleteConfirmationOpen(false);
@@ -175,6 +179,7 @@ const submitHostelEdit = async (e) => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           })
           setIsDeleteConfirmationOpen(false);
           
@@ -191,6 +196,7 @@ const submitHostelEdit = async (e) => {
         toast.success("Hostel deleted successfully.", {
           position: "top-center",
           autoClose: 3000,
+          toastId: "empty-fields-error",
         });
         setIsDeleteConfirmationOpen(false);
         navigate(-1)
@@ -322,6 +328,7 @@ const submitHostelEdit = async (e) => {
       toast.error("Hostel name must contain only alphabets.", {
         position: "top-center",
         autoClose: 3000,
+        toastId: "empty-fields-error",
       });
     }
   };
@@ -342,6 +349,7 @@ const submitHostelEdit = async (e) => {
         toast.error("Please select a file.", {
             position: "top-center",
             autoClose: 3000,
+            toastId: "empty-fields-error",
         });
         return;
     }
@@ -349,6 +357,7 @@ const submitHostelEdit = async (e) => {
       toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
         position: "top-center",
         autoClose: 3000,
+        toastId: "empty-fields-error",
       });
       e.target.value = ''; // Clear the input
       return;
@@ -384,6 +393,7 @@ const submitHostelEdit = async (e) => {
       toast.error("Hostel name, address and image cannot be empty.", {
         position: "top-center",
         autoClose: 3000,
+        toastId: "empty-fields-error",
       });
       return;
     }
@@ -418,6 +428,7 @@ const submitHostelEdit = async (e) => {
         toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
           position: "top-center",
           autoClose: 3000,
+          toastId: "empty-fields-error",
         });
         fetchData()
         if (isBoys) {
@@ -437,6 +448,7 @@ const submitHostelEdit = async (e) => {
         toast.error("Failed to add new hostel: " + error.message, {
           position: "top-center",
           autoClose: 3000,
+          toastId: "empty-fields-error",
         });
       })
       .finally(() => {

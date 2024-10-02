@@ -133,6 +133,7 @@ const RoomsGirls = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData()
         setIsEditing(false);
@@ -145,6 +146,7 @@ const RoomsGirls = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
     } else {
@@ -165,6 +167,7 @@ const RoomsGirls = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
         fetchData()
       }).catch(error => {
@@ -176,6 +179,7 @@ const RoomsGirls = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
       });
     }
@@ -234,6 +238,7 @@ const RoomsGirls = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
   
           fetchData(); // Refresh data after deletion
@@ -246,6 +251,7 @@ const RoomsGirls = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
         }
       } else {
@@ -260,6 +266,7 @@ const RoomsGirls = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
   
         fetchData(); // Refresh data after deletion
@@ -274,6 +281,7 @@ const RoomsGirls = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
     }
   
@@ -314,6 +322,7 @@ const RoomsGirls = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       })
     } else {
       resetForm();
