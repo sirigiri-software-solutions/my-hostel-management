@@ -1503,9 +1503,14 @@ const DashboardBoys = () => {
       }
       
       console.log("runningWhiile","firstTime")
+      console.log("triggering","popstate")
     };
 
     window.addEventListener('popstate', handlePopState);
+
+    return ()=>{
+      window.removeEventListener('popstate',handlePopState)
+    }
 
 
     return () => {

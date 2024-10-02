@@ -512,7 +512,9 @@ const ExpensesBoys = () => {
 
     window.addEventListener('popstate', handlePopState);
 
-
+    return () => {
+      window.removeEventListener('popstate',handlePopState)
+    }
   }, [showModal, location.pathname]);
 
   const [totalAnnualExpenses, setTotalAnnualExpenses] = useState(0);

@@ -1052,6 +1052,9 @@ if (bikeRcImage) {
     window.addEventListener('popstate', handlePopState);
 
 
+    return () => {
+      window.removeEventListener('popstate',handlePopState)
+    }
   }, [showModal,userDetailsTenantPopup, location.pathname]);
 
   const handleTentantRow = (tenant) => {
