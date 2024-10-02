@@ -1233,9 +1233,14 @@ const DashboardBoys = () => {
         
         
       }
+      console.log("triggering","popstate")
     };
 
     window.addEventListener('popstate', handlePopState);
+
+    return ()=>{
+      window.removeEventListener('popstate',handlePopState)
+    }
 
 
   }, [showModal, location.pathname]);

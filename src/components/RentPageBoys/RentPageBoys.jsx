@@ -478,6 +478,9 @@ Please note that you made your last payment on ${paidDate}.\n`;
     window.addEventListener('popstate', handlePopState);
 
 
+    return () => {
+      window.removeEventListener('popstate',handlePopState)
+    }
   }, [showModal, location.pathname]);
 
   const onClickCheckbox = async () => {
