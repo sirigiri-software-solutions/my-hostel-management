@@ -22,6 +22,9 @@ import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage
 import imageCompression from 'browser-image-compression';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { App as CapacitorApp } from '@capacitor/app';
+import { isPlatform } from '@ionic/react';
+import { Capacitor } from '@capacitor/core';
 
 const DashboardBoys = () => {
 
@@ -188,6 +191,7 @@ const DashboardBoys = () => {
         resetForm();
         setNotify(false)
         navigate(-1);
+        console.log("Exceuting Every time","know")
       }
 
     };
@@ -1509,12 +1513,27 @@ const DashboardBoys = () => {
     const handlePopState = () => {
       if (showModal) {
         setShowModal(false); // Close the popup
+        console.log("popup close")
         
-        
+      }else{
+        if (!showModal && (location.pathname === '/dashboard' || location.pathname === "/") ) {
+          if (Capacitor.getPlatform() === 'android') {
+            CapacitorApp.exitApp(); 
+          }
+          console.log(Capacitor.getPlatform(),"firstTime")
+         }
+         
       }
+      
+      console.log("runningWhiile","firstTime")
     };
 
     window.addEventListener('popstate', handlePopState);
+
+
+    return () => {
+      window.removeEventListener('popstate',handlePopState)
+    }
 
 
   }, [showModal, location.pathname]);
@@ -2102,7 +2121,7 @@ const DashboardBoys = () => {
                   <div style={{display:'flex',flexDirection:'row'}}>
                   <p>{t('tenantsPage.takePhoto')}</p>
                   <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
-                  disabled={isTenantIdFileUploaded}
+                  disabled={isFileUploaded}
                   />
                   {photoUrl && <img src={photoUrl} alt="Captured" style={{  marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
                   </div>

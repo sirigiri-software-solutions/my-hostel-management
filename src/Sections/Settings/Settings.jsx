@@ -411,47 +411,89 @@ const handleReportBtn = async () => {
     });
 
     // Convert the PDF to a Blob
-    const pdfOutput = doc.output('blob');
+    const pdfBlob = doc.output('blob');
+    const fileName = `${nameToUse} Tenants_Report.pdf`;
 
-    if (Capacitor.isNativePlatform()) {
-        // Convert Blob to base64
-        const reader = new FileReader();
-        reader.readAsDataURL(pdfOutput);
-        reader.onloadend = async () => {
-            const base64String = reader.result.split(',')[1]; // Remove the prefix
+    // if (Capacitor.isNativePlatform()) {
+    //     // Convert Blob to base64
+    //     const reader = new FileReader();
+    //     reader.readAsDataURL(pdfOutput);
+    //     reader.onloadend = async () => {
+    //         const base64String = reader.result.split(',')[1]; // Remove the prefix
 
-            try {
-                // Write the file to the filesystem
-                const result = await Filesystem.writeFile({
-                    path: 'Tenants_Report.pdf',
-                    data: base64String,
-                    directory: Directory.Documents,
-                    encoding: Encoding.Base64
-                });
-                console.log('File saved successfully:', result.uri);
+    //         try {
+    //             // Write the file to the filesystem
+    //             const result = await Filesystem.writeFile({
+    //                 path: 'Tenants_Report.pdf',
+    //                 data: base64String,
+    //                 directory: Directory.Documents,
+    //                 encoding: Encoding.Base64
+    //             });
+    //             console.log('File saved successfully:', result.uri);
 
-                // Optionally open the file using the FileOpener plugin
-                await FileOpener.open({
-                    filePath: result.uri,
-                    fileMimeType: 'application/pdf'
-                });
-            } catch (error) {
-                console.error('Error saving file:', error);
-            }
-        };
-        reader.onerror = (error) => {
-            console.error('Error converting PDF to base64:', error);
-        };
-    } else {
-        // For web environment, use the default download method
-        const url = URL.createObjectURL(pdfOutput);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${nameToUse} Tenants_Report.pdf`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+    //             // Optionally open the file using the FileOpener plugin
+    //             await FileOpener.open({
+    //                 filePath: result.uri,
+    //                 fileMimeType: 'application/pdf'
+    //             });
+    //         } catch (error) {
+    //             console.error('Error saving file:', error);
+    //         }
+    //     };
+    //     reader.onerror = (error) => {
+    //         console.error('Error converting PDF to base64:', error);
+    //     };
+    // } else {
+    //     // For web environment, use the default download method
+    //     const url = URL.createObjectURL(pdfOutput);
+    //     const link = document.createElement('a');
+    //     link.href = url;
+    //     link.setAttribute('download', `${nameToUse} Tenants_Report.pdf`);
+    //     document.body.appendChild(link);
+    //     link.click();
+    //     document.body.removeChild(link);
+    // }
+    const saveAndOpenPDF = (fileName) => {
+      if (Capacitor.isNativePlatform()) {
+          const reader = new FileReader();
+          reader.readAsDataURL(pdfBlob);
+          reader.onloadend = async () => {
+              const base64String = reader.result.split(',')[1]; // Remove the prefix
+
+              try {
+                  const result = await Filesystem.writeFile({
+                      path: fileName,
+                      data: base64String,
+                      directory: Directory.Documents,
+                      encoding: Encoding.Base64
+                  });
+                  console.log('File saved successfully:', result.uri);
+
+                  await FileOpener.open({
+                      filePath: result.uri,
+                      fileMimeType: 'application/pdf'
+                  });
+              } catch (error) {
+                  console.error('Error saving file:', error);
+              }
+          };
+          reader.onerror = (error) => {
+              console.error('Error converting PDF to base64:', error);
+          };
+      } else {
+          const url = URL.createObjectURL(pdfBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', fileName);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      }
+  };
+
+  // Call the function to save and open the PDF
+  saveAndOpenPDF(fileName);
+
 };
 
 //  const handleVacatedReportBtn =() => {
@@ -563,6 +605,8 @@ const handleReportBtn = async () => {
 //   }
 
 
+// 
+
 const handleVacatedReportBtn = async () => {
     const doc = new jsPDF();
 
@@ -593,10 +637,9 @@ const handleVacatedReportBtn = async () => {
       { header: 'Unpaid Amount', dataKey: 'unpaidAmount' }
     ];
 
-    // Determine the data source based on the selected hostel type
     const dataToUse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData;
     const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + " Mens " : activeGirlsHostelName + " Womens ";
-    // Filter and map data
+
     const dataWithBike = dataToUse.filter(tenant => tenant.bikeNumber && tenant.bikeNumber !== 'NA').map((tenant, index) => {
       const rents = tenant.rents || {};
       const rentsData = Object.values(rents)[0] || {};
@@ -632,17 +675,14 @@ const handleVacatedReportBtn = async () => {
       };
     });
 
-    // Add title for the report
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.text(`${nameToUse} Vacated Tenants Report`, doc.internal.pageSize.width / 2, 10, { align: 'center' });
 
-    // Add title for tenants with bikes
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.text('Tenants with Bike', 14, 25);
 
-    // Generate the table for tenants with bikes
     doc.autoTable({
       startY: 30,
       margin: { top: 20 },
@@ -652,11 +692,9 @@ const handleVacatedReportBtn = async () => {
       body: dataWithBike,
     });
 
-    // Add a space between the tables
     const lastY = doc.lastAutoTable.finalY;
     doc.text('Tenants without Bike', 14, lastY + 10);
 
-    // Generate the table for tenants without bikes
     doc.autoTable({
       startY: lastY + 15,
       margin: { top: 20 },
@@ -666,48 +704,49 @@ const handleVacatedReportBtn = async () => {
       body: dataWithoutBike,
     });
 
-    // Convert the PDF to a Blob
-    const pdfOutput = doc.output('blob');
+    const pdfBlob = doc.output('blob');
+    const fileName = `${nameToUse} VacatedTenants_Report.pdf`;
 
-    if (Capacitor.isNativePlatform()) {
-        // Convert Blob to base64
-        const reader = new FileReader();
-        reader.readAsDataURL(pdfOutput);
-        reader.onloadend = async () => {
-            const base64String = reader.result.split(',')[1]; // Remove the prefix
+    const saveAndOpenPDF = (fileName) => {
+        if (Capacitor.isNativePlatform()) {
+            const reader = new FileReader();
+            reader.readAsDataURL(pdfBlob);
+            reader.onloadend = async () => {
+                const base64String = reader.result.split(',')[1]; // Remove the prefix
 
-            try {
-                // Write the file to the filesystem
-                const result = await Filesystem.writeFile({
-                    path: 'VacatedTenants_Report.pdf',
-                    data: base64String,
-                    directory: Directory.Documents,
-                    encoding: Encoding.Base64
-                });
-                console.log('File saved successfully:', result.uri);
+                try {
+                    const result = await Filesystem.writeFile({
+                        path: fileName,
+                        data: base64String,
+                        directory: Directory.Documents,
+                        encoding: Encoding.Base64
+                    });
+                    console.log('File saved successfully:', result.uri);
 
-                // Optionally open the file using the FileOpener plugin
-                await FileOpener.open({
-                    filePath: result.uri,
-                    fileMimeType: 'application/pdf'
-                });
-            } catch (error) {
-                console.error('Error saving file:', error);
-            }
-        };
-        reader.onerror = (error) => {
-            console.error('Error converting PDF to base64:', error);
-        };
-    } else {
-        // For web environment, use the default download method
-        const url = URL.createObjectURL(pdfOutput);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${nameToUse} VacatedTenants_Report.pdf`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+                    await FileOpener.open({
+                        filePath: result.uri,
+                        fileMimeType: 'application/pdf'
+                    });
+                } catch (error) {
+                    console.error('Error saving file:', error);
+                }
+            };
+            reader.onerror = (error) => {
+                console.error('Error converting PDF to base64:', error);
+            };
+        } else {
+            const url = URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+    // Call the function to save and open the PDF
+    saveAndOpenPDF(fileName);
 };
 
 
@@ -720,996 +759,9 @@ const handleVacatedReportBtn = async () => {
     'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11
   };
 
-// const handleExpensesGenerateBtn = () => {
-//   const doc = new jsPDF();
-
-//   // Define columns for monthly and yearly views
-//   const monthlyColumns = [
-//       { header: 'S.No', dataKey: 'sNo' },
-//       { header: 'Expense Name', dataKey: 'expensename' },
-//       { header: 'Expense Amount', dataKey: 'expenseamount' },
-//       { header: 'Date', dataKey: 'date' }
-//   ];
-
-//   const yearlyColumns = [
-//       { header: 'S.No', dataKey: 'sNo' },
-//       { header: 'Expense Name', dataKey: 'expensename' },
-//       { header: 'Expense Amount', dataKey: 'expenseamount' },
-//       { header: 'Date', dataKey: 'date' }
-//   ];
-
-//   // Determine the data source based on the selected hostel type
-//   const dataToUse = selectedHostelType === "mens" ? entireBoysYearExpensesData : entireGirlsYearExpensesData;
-
-//   // Convert month name to number
-//   const newMonth = monthMapping[month.toLowerCase()];
-
-//   if (month !== "" && year) {
-//       // Monthly Report
-//       const filteredData = [];
-//       dataToUse.forEach(item => {
-//           if (typeof(item) === 'object' && item !== null) {
-//               Object.keys(item).forEach(key => {
-//                   const expenseData = item[key];
-//                   if (expenseData && expenseData.expenseDate) {
-//                       const expenseDate = new Date(expenseData.expenseDate);
-//                       if (expenseDate.getFullYear() === parseInt(year) && expenseDate.getMonth() === newMonth) {
-//                           filteredData.push({
-//                               expensename: expenseData.expenseName,
-//                               expenseamount: expenseData.expenseAmount,
-//                               date: expenseDate.toLocaleDateString()
-//                           });
-//                       }
-//                   }
-//               });
-//           }
-//       });
-
-//       console.log("Filtered Data:", filteredData); // Check the filtered data
-
-//       if (filteredData.length > 0) {
-//           // Add heading for monthly report
-//           const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-//           doc.setFontSize(16);
-//           doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
-
-//           // Create table for specific month
-//           doc.autoTable({
-//               startY: 30, // Adjust starting Y position to leave space for heading
-//               head: [monthlyColumns.map(col => col.header)],
-//               body: filteredData.map((row, index) => ([
-//                   index + 1,
-//                   row.expensename,
-//                   row.expenseamount,
-//                   row.date
-//               ])),
-//               theme: 'grid'
-//           });
-
-//           const totalAmount = filteredData.reduce((acc, item) => acc + item.expenseamount, 0);
-//           doc.text(`Total Expenses: ${totalAmount}`, 10, doc.lastAutoTable.finalY + 10);
-
-//           // Save file with month in filename
-//           doc.save(`${monthName}_expenses.pdf`);
-//       } else {
-//           doc.setFontSize(16);
-//           const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-//           doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
-
-//           // Create an empty table
-//           doc.autoTable({
-//               startY: 30, // Adjust starting Y position to leave space for heading
-//               head: [monthlyColumns.map(col => col.header)],
-//               body: [['', '', '', '']],
-//               theme: 'grid'
-//           });
-
-//           doc.text('No expenses found for the selected month and year.', 10, doc.lastAutoTable.finalY + 10);
-//           doc.save(`${monthName}_expenses.pdf`);
-//       }
-//   } else if (year) {
-//       // Yearly Report
-//       const expensesByMonth = {};
-//       const months = Object.keys(monthMapping);
-
-//       dataToUse.forEach(item => {
-//           if (typeof(item) === 'object' && item !== null) {
-//               Object.keys(item).forEach(key => {
-//                   const expenseData = item[key];
-//                   if (expenseData && expenseData.expenseDate) {
-//                       const expenseDate = new Date(expenseData.expenseDate);
-//                       if (expenseDate.getFullYear() === parseInt(year)) {
-//                           const month = months[expenseDate.getMonth()];
-//                           if (!expensesByMonth[month]) {
-//                               expensesByMonth[month] = [];
-//                           }
-//                           expensesByMonth[month].push({
-//                               expenseName: expenseData.expenseName,
-//                               expenseAmount: expenseData.expenseAmount,
-//                               date: expenseDate.toLocaleDateString()
-//                           });
-//                       }
-//                   }
-//               });
-//           }
-//       });
-
-//       // Add heading for yearly report
-//       doc.setFontSize(16);
-//       doc.text('Yearly Expenses', 105, 20, { align: 'center' });
-
-//       let grandTotal = 0;
-//       let startY = 30;
-
-//       months.forEach((month, index) => {
-//           let monthTotal = 0;
-
-//           // Add heading for each month's table
-//           doc.setFontSize(14);
-//           doc.text(`${month.charAt(0).toUpperCase() + month.slice(1)} Expenses`, 10, startY);
-
-//           if (expensesByMonth[month] && expensesByMonth[month].length > 0) {
-//               // Create table for each month with expenses
-//               doc.autoTable({
-//                   startY: startY + 10,
-//                   head: [yearlyColumns.map(col => col.header)],
-//                   body: expensesByMonth[month].map((item, itemIndex) => ([
-//                       itemIndex + 1,
-//                       item.expenseName,
-//                       item.expenseAmount,
-//                       item.date
-//                   ])),
-//                   theme: 'grid'
-//               });
-
-//               monthTotal = expensesByMonth[month].reduce((acc, item) => acc + item.expenseAmount, 0);
-//               doc.text(`Total for ${month}: ${monthTotal}`, 10, doc.lastAutoTable.finalY + 10);
-//               grandTotal += monthTotal;
-//               startY = doc.lastAutoTable.finalY + 20;
-//           } else {
-//               // Create an empty table for months with no expenses
-//               doc.autoTable({
-//                   startY: startY + 10,
-//                   head: [yearlyColumns.map(col => col.header)],
-//                   body: [['', '', '', '']],
-//                   theme: 'grid'
-//               });
-//               doc.setFontSize(8);
-//               doc.text('No expenses found for this month.', 10, doc.lastAutoTable.finalY + 10);
-//               startY = doc.lastAutoTable.finalY + 20;
-//           }
-//       });
-
-//       // Add grand total
-//       doc.setFontSize(14);
-//       doc.text(`Grand Total: ${grandTotal}`, 10, startY + 2);
-
-//       // Save file with year in filename
-//       doc.save(`${year}_expenses.pdf`);
-//   }
-// };
-
-// const savePDF = async (doc, filename) => {
-//   if (Capacitor.isNativePlatform()) {
-//     const base64String = doc.output('datauristring').split(',')[1];
-
-//     try {
-//       const result = await Filesystem.writeFile({
-//         path: filename,
-//         data: base64String,
-//         directory: Directory.Documents,
-//         encoding: Encoding.UTF8
-//       });
-
-//       await FileOpener.open({
-//         filePath: result.uri,
-//         fileMimeType: 'application/pdf'
-//       });
-//     } catch (error) {
-//       console.error('Error saving file on mobile:', error);
-//     }
-//   } else {
-//     // For web, save the PDF as a blob and trigger download
-//     const blob = doc.output('blob');
-//     saveAs(blob, filename);
-//   }
-// };
-
-// const savePDF = async (doc, filename) => {
-//       // Save the PDF as a Blob
-//       const pdfBlob = doc.output('blob');
-
-//   if (Capacitor.isNativePlatform()) {
-
-//     // Convert Blob to Base64
-//     const reader = new FileReader();
-//     reader.onloadend = async () => {
-//       const base64String = reader.result.split(',')[1]; // Get Base64 string without data URI part
-
-//       try {
-//         const result = await Filesystem.writeFile({
-//           path: 'Expenses_Generate.pdf',
-//           data: base64String,
-//           directory: Directory.Documents,
-//           encoding: Encoding.UTF8
-//         });
-
-//         await FileOpener.open({
-//           filePath: result.uri,
-//           fileMimeType: 'application/pdf'
-//         });
-//       } catch (error) {
-//         console.error('Error saving file on mobile:', error);
-//       }
-//     };
-    
-//     reader.readAsDataURL(pdfBlob); // Convert Blob to Data URL to extract Base64 string
-
-//   } else {
-//     // For web, save the PDF as a blob and trigger download
-//   //   const blob = doc.output('blob');
-//   //   saveAs(blob, 'Expenses_Generate.pdf');
-  
-//     // For web environment, use the default download method
-//     const url = URL.createObjectURL(pdfBlob);
-//     const link = document.createElement('a');
-//     link.href = url;
-//     link.setAttribute('download', 'Expenses_Generate.pdf');
-//     document.body.appendChild(link);
-//     link.click();
-//     document.body.removeChild(link);
-
-
-//    }
-// };
-// const { Filesystem,FilesystemDirectory,FilesystemEncoding } = Plugins;
-// const handleExpensesGenerateBtn = async () => {
-//   const doc = new jsPDF();
-//   setExpensesDataTrigger(true);
-
-//   // Define columns for monthly and yearly views
-//   const columns = [
-//     { header: 'S.No', dataKey: 'sNo' },
-//     { header: 'Expense Name', dataKey: 'expensename' },
-//     { header: 'Expense Amount', dataKey: 'expenseamount' },
-//     { header: 'Date', dataKey: 'date' }
-//   ];
-
-//   // Determine the data source based on the selected hostel type
-//   const dataToUse = selectedHostelType === "mens" ? entireBoysYearExpensesData : entireGirlsYearExpensesData;
-
-//   // Convert month name to number
-//   const newMonth = monthMapping[month.toLowerCase()];
-
-//   if (month !== "" && year) {
-//     // Monthly Report
-//     const filteredData = [];
-//     dataToUse.forEach(item => {
-//       if (typeof item === 'object' && item !== null) {
-//         Object.keys(item).forEach(key => {
-//           const expenseData = item[key];
-//           if (expenseData && expenseData.expenseDate) {
-//             const expenseDate = new Date(expenseData.expenseDate);
-//             if (expenseDate.getFullYear() === parseInt(year) && expenseDate.getMonth() === newMonth) {
-//               filteredData.push({
-//                 expensename: expenseData.expenseName,
-//                 expenseamount: parseFloat(expenseData.expenseAmount) || 0,
-//                 date: expenseDate.toLocaleDateString()
-//               });
-//             }
-//           }
-//         });
-//       }
-//     });
-
-//     if (filteredData.length > 0) {
-//       // Add heading for monthly report
-//       const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-//       doc.setFontSize(16);
-//       doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
-
-//       // Create table for specific month
-//       doc.autoTable({
-//         startY: 30, // Adjust starting Y position to leave space for heading
-//         head: [columns.map(col => col.header)],
-//         body: filteredData.map((row, index) => ([
-//           index + 1,
-//           row.expensename,
-//           row.expenseamount.toFixed(2),
-//           row.date
-//         ])),
-//         theme: 'grid'
-//       });
-
-//       const totalAmount = filteredData.reduce((acc, item) => acc + item.expenseamount, 0);
-//       doc.text(`Total Expenses: ${totalAmount.toFixed(2)}`, 10, doc.lastAutoTable.finalY + 10);
-
-//       // Save file with month in filename
-//       await savePDF(doc, `${monthName}_expenses.pdf`);
-//     } else {
-//       doc.setFontSize(16);
-//       const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-//       doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
-
-//       // Create an empty table
-//       doc.autoTable({
-//         startY: 30, // Adjust starting Y position to leave space for heading
-//         head: [columns.map(col => col.header)],
-//         body: [['', '', '', '']],
-//         theme: 'grid'
-//       });
-
-//       doc.text('No expenses found for the selected month and year.', 10, doc.lastAutoTable.finalY + 10);
-//       await savePDF(doc, `${monthName}_expenses.pdf`);
-//     }
-//   } else if (year) {
-//     // Yearly Report
-//     const expensesByMonth = {};
-//     const months = Object.keys(monthMapping);
-
-//     dataToUse.forEach(item => {
-//       if (typeof item === 'object' && item !== null) {
-//         Object.keys(item).forEach(key => {
-//           const expenseData = item[key];
-//           if (expenseData && expenseData.expenseDate) {
-//             const expenseDate = new Date(expenseData.expenseDate);
-//             if (expenseDate.getFullYear() === parseInt(year)) {
-//               const month = months[expenseDate.getMonth()];
-//               if (!expensesByMonth[month]) {
-//                 expensesByMonth[month] = [];
-//               }
-//               expensesByMonth[month].push({
-//                 expenseName: expenseData.expenseName,
-//                 expenseAmount: parseFloat(expenseData.expenseAmount) || 0,
-//                 date: expenseDate.toLocaleDateString()
-//               });
-//             }
-//           }
-//         });
-//       }
-//     });
-
-//     // Add heading for yearly report
-//     doc.setFontSize(16);
-//     doc.text('Yearly Expenses', 105, 20, { align: 'center' });
-
-//     let grandTotal = 0;
-//     let startY = 30;
-
-//     months.forEach((month, index) => {
-//       let monthTotal = 0;
-
-//       // Add heading for each month's table
-//       doc.setFontSize(14);
-//       doc.text(`${month.charAt(0).toUpperCase() + month.slice(1)} Expenses`, 10, startY);
-
-//       if (expensesByMonth[month] && expensesByMonth[month].length > 0) {
-//         // Create table for each month with expenses
-//         doc.autoTable({
-//           startY: startY + 10,
-//           head: [columns.map(col => col.header)],
-//           body: expensesByMonth[month].map((item, itemIndex) => ([
-//             itemIndex + 1,
-//             item.expenseName,
-//             item.expenseAmount.toFixed(2),
-//             item.date
-//           ])),
-//           theme: 'grid'
-//         });
-
-//         monthTotal = expensesByMonth[month].reduce((acc, item) => acc + item.expenseAmount, 0);
-//         doc.text(`Total for ${month}: ${monthTotal.toFixed(2)}`, 10, doc.lastAutoTable.finalY + 10);
-//         grandTotal += monthTotal;
-//         startY = doc.lastAutoTable.finalY + 20;
-//       } else {
-//         // Create an empty table for months with no expenses
-//         doc.autoTable({
-//           startY: startY + 10,
-//           head: [columns.map(col => col.header)],
-//           body: [['', '', '', '']],
-//           theme: 'grid'
-//         });
-//         doc.setFontSize(8);
-//         doc.text('No expenses found for this month.', 10, doc.lastAutoTable.finalY + 10);
-//         startY = doc.lastAutoTable.finalY + 20;
-//       }
-//     });
-
-//     // Add grand total
-//     doc.setFontSize(14);
-//     doc.text(`Grand Total: ${grandTotal.toFixed(2)}`, 10, startY + 2);
-
-//     // Save file with year in filename
-//     await savePDF(doc, `${year}_expenses.pdf`);
-//     setExpensesDataTrigger(false);
-//   }
-// };
-
-// const handleExpensesGenerateBtn = async () => {
-
-//   const doc = new jsPDF();
-//     setExpensesDataTrigger(true)
-
-//   // Define columns for monthly and yearly views
-//   const columns = [
-//       { header: 'S.No', dataKey: 'sNo' },
-//       { header: 'Expense Name', dataKey: 'expensename' },
-//       { header: 'Expense Amount', dataKey: 'expenseamount' },
-//       { header: 'Date', dataKey: 'date' }
-//     ];
-
-//     // Determine the data source based on the selected hostel type
-//     const dataToUse = selectedHostelType === "mens" ? entireBoysYearExpensesData : entireGirlsYearExpensesData;
-
-//     // Convert month name to number
-//     const newMonth = monthMapping[month.toLowerCase()];
-
-//     if (month !== "" && year) {
-//       // Monthly Report
-//       const filteredData = [];
-//       dataToUse.forEach(item => {
-//           if (typeof item === 'object' && item !== null) {
-//               Object.keys(item).forEach(key => {
-//                   const expenseData = item[key];
-//                   if (expenseData && expenseData.expenseDate) {
-//                       const expenseDate = new Date(expenseData.expenseDate);
-//                       if (expenseDate.getFullYear() === parseInt(year) && expenseDate.getMonth() === newMonth) {
-//                           filteredData.push({
-//                               expensename: expenseData.expenseName,
-//                               expenseamount: parseFloat(expenseData.expenseAmount) || 0,
-//                               date: expenseDate.toLocaleDateString()
-//                           });
-//                       }
-//                   }
-//               });
-//           }
-//       });
-
-//       if (filteredData.length > 0) {
-//         // Add heading for monthly report
-//         const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-//         doc.setFontSize(16);
-//         doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
-
-//           // Create table for specific month
-//           doc.autoTable({
-//               startY: 30, // Adjust starting Y position to leave space for heading
-//               head: [columns.map(col => col.header)],
-//               body: filteredData.map((row, index) => ([
-//                   index + 1,
-//                   row.expensename,
-//                   row.expenseamount.toFixed(2),
-//                   row.date
-//               ])),
-//               theme: 'grid'
-//           });
-
-//           const totalAmount = filteredData.reduce((acc, item) => acc + item.expenseamount, 0);
-//           doc.text(`Total Expenses: ${totalAmount.toFixed(2)}`, 10, doc.lastAutoTable.finalY + 10);
-
-//           // Save file with month in filename
-//           await savePDF(doc, `${monthName}_expenses.pdf`);
-//       } else {
-//         doc.setFontSize(16);
-//         const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-//         doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
-
-//           // Create an empty table
-//           doc.autoTable({
-//               startY: 30, // Adjust starting Y position to leave space for heading
-//               head: [columns.map(col => col.header)],
-//               body: [['', '', '', '']],
-//               theme: 'grid'
-//           });
-
-//           doc.text('No expenses found for the selected month and year.', 10, doc.lastAutoTable.finalY + 10);
-//           await savePDF(doc, `${monthName}_expenses.pdf`);
-//       }
-//     } else if (year) {
-//       // Yearly Report
-//       const expensesByMonth = {};
-//       const months = Object.keys(monthMapping);
-
-//       dataToUse.forEach(item => {
-//           if (typeof item === 'object' && item !== null) {
-//               Object.keys(item).forEach(key => {
-//                   const expenseData = item[key];
-//                   if (expenseData && expenseData.expenseDate) {
-//                       const expenseDate = new Date(expenseData.expenseDate);
-//                       if (expenseDate.getFullYear() === parseInt(year)) {
-//                           const month = months[expenseDate.getMonth()];
-//                           if (!expensesByMonth[month]) {
-//                               expensesByMonth[month] = [];
-//                           }
-//                           expensesByMonth[month].push({
-//                               expenseName: expenseData.expenseName,
-//                               expenseAmount: parseFloat(expenseData.expenseAmount) || 0,
-//                               date: expenseDate.toLocaleDateString()
-//                           });
-//                       }
-//                   }
-//               });
-//           }
-//       });
-
-//       // Add heading for yearly report
-//       doc.setFontSize(16);
-//       doc.text('Yearly Expenses', 105, 20, { align: 'center' });
-
-//       let grandTotal = 0;
-//       let startY = 30;
-
-//       months.forEach((month, index) => {
-//         let monthTotal = 0;
-
-//         // Add heading for each month's table
-//         doc.setFontSize(14);
-//         doc.text(`${month.charAt(0).toUpperCase() + month.slice(1)} Expenses`, 10, startY);
-
-//           if (expensesByMonth[month] && expensesByMonth[month].length > 0) {
-//               // Create table for each month with expenses
-//               doc.autoTable({
-//                   startY: startY + 10,
-//                   head: [columns.map(col => col.header)],
-//                   body: expensesByMonth[month].map((item, itemIndex) => ([
-//                       itemIndex + 1,
-//                       item.expenseName,
-//                       item.expenseAmount.toFixed(2),
-//                       item.date
-//                   ])),
-//                   theme: 'grid'
-//               });
-
-//               monthTotal = expensesByMonth[month].reduce((acc, item) => acc + item.expenseAmount, 0);
-//               doc.text(`Total for ${month}: ${monthTotal.toFixed(2)}`, 10, doc.lastAutoTable.finalY + 10);
-//               grandTotal += monthTotal;
-//               startY = doc.lastAutoTable.finalY + 20;
-//           } else {
-//               // Create an empty table for months with no expenses
-//               doc.autoTable({
-//                   startY: startY + 10,
-//                   head: [columns.map(col => col.header)],
-//                   body: [['', '', '', '']],
-//                   theme: 'grid'
-//               });
-//               doc.setFontSize(8);
-//               doc.text('No expenses found for this month.', 10, doc.lastAutoTable.finalY + 10);
-//               startY = doc.lastAutoTable.finalY + 20;
-//           }
-//       });
-
-//       // Add grand total
-//       doc.setFontSize(14);
-//       doc.text(`Grand Total: ${grandTotal.toFixed(2)}`, 10, startY + 2);
-
-//       // Save file with year in filename
-//       await savePDF(doc, `${year}_expenses.pdf`);
-//       setExpensesDataTrigger(false)
-//   }
-// };
-
-// const handleExpensesGenerateBtn = async () => {
-//   const doc = new jsPDF();
-//   setExpensesDataTrigger(true);
-
-//   // Define columns for monthly and yearly views
-//   const columns = [
-//     { header: 'S.No', dataKey: 'sNo' },
-//     { header: 'Expense Name', dataKey: 'expensename' },
-//     { header: 'Expense Amount', dataKey: 'expenseamount' },
-//     { header: 'Date', dataKey: 'date' }
-//   ];
-
-//   // Determine the data source based on the selected hostel type
-//   const dataToUse = selectedHostelType === "mens" ? entireBoysYearExpensesData : entireGirlsYearExpensesData;
-
-//   // Convert month name to number
-//   const newMonth = monthMapping[month.toLowerCase()];
-
-//   if (month !== "" && year) {
-//     // Monthly Report
-//     const filteredData = [];
-//     dataToUse.forEach(item => {
-//       if (typeof item === 'object' && item !== null) {
-//         Object.keys(item).forEach(key => {
-//           const expenseData = item[key];
-//           if (expenseData && expenseData.expenseDate) {
-//             const expenseDate = new Date(expenseData.expenseDate);
-//             if (expenseDate.getFullYear() === parseInt(year) && expenseDate.getMonth() === newMonth) {
-//               filteredData.push({
-//                 expensename: expenseData.expenseName,
-//                 expenseamount: parseFloat(expenseData.expenseAmount) || 0,
-//                 date: expenseDate.toLocaleDateString()
-//               });
-//             }
-//           }
-//         });
-//       }
-//     });
-
-//     if (filteredData.length > 0) {
-//       // Add heading for monthly report
-//       const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-//       doc.setFontSize(16);
-//       doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
-
-//       // Create table for specific month
-//       doc.autoTable({
-//         startY: 30, // Adjust starting Y position to leave space for heading
-//         head: [columns.map(col => col.header)],
-//         body: filteredData.map((row, index) => ([
-//           index + 1,
-//           row.expensename,
-//           row.expenseamount.toFixed(2),
-//           row.date
-//         ])),
-//         theme: 'grid'
-//       });
-
-//       const totalAmount = filteredData.reduce((acc, item) => acc + item.expenseamount, 0);
-//       doc.text(`Total Expenses: ${totalAmount.toFixed(2)}`, 10, doc.lastAutoTable.finalY + 10);
-
-//       // Save file with month in filename
-//       savePDF(doc, `${monthName}_expenses.pdf`);
-//     } else {
-//       doc.setFontSize(16);
-//       const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-//       doc.text(`${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
-
-//       // Create an empty table
-//       doc.autoTable({
-//         startY: 30, // Adjust starting Y position to leave space for heading
-//         head: [columns.map(col => col.header)],
-//         body: [['', '', '', '']],
-//         theme: 'grid'
-//       });
-
-//       doc.text('No expenses found for the selected month and year.', 10, doc.lastAutoTable.finalY + 10);
-//       savePDF(doc, `${monthName}_expenses.pdf`);
-//     }
-//   } else if (year) {
-//     // Yearly Report
-//     const expensesByMonth = {};
-//     const months = Object.keys(monthMapping);
-
-//     dataToUse.forEach(item => {
-//       if (typeof item === 'object' && item !== null) {
-//         Object.keys(item).forEach(key => {
-//           const expenseData = item[key];
-//           if (expenseData && expenseData.expenseDate) {
-//             const expenseDate = new Date(expenseData.expenseDate);
-//             if (expenseDate.getFullYear() === parseInt(year)) {
-//               const month = months[expenseDate.getMonth()];
-//               if (!expensesByMonth[month]) {
-//                 expensesByMonth[month] = [];
-//               }
-//               expensesByMonth[month].push({
-//                 expenseName: expenseData.expenseName,
-//                 expenseAmount: parseFloat(expenseData.expenseAmount) || 0,
-//                 date: expenseDate.toLocaleDateString()
-//               });
-//             }
-//           }
-//         });
-//       }
-//     });
-
-//     // Add heading for yearly report
-//     doc.setFontSize(16);
-//     doc.text('Yearly Expenses', 105, 20, { align: 'center' });
-
-//     let grandTotal = 0;
-//     let startY = 30;
-
-//     months.forEach((month, index) => {
-//       let monthTotal = 0;
-
-//       // Add heading for each month's table
-//       doc.setFontSize(14);
-//       doc.text(`${month.charAt(0).toUpperCase() + month.slice(1)} Expenses`, 10, startY);
-
-//       if (expensesByMonth[month] && expensesByMonth[month].length > 0) {
-//         // Create table for each month with expenses
-//         doc.autoTable({
-//           startY: startY + 10,
-//           head: [columns.map(col => col.header)],
-//           body: expensesByMonth[month].map((item, itemIndex) => ([
-//             itemIndex + 1,
-//             item.expenseName,
-//             item.expenseAmount.toFixed(2),
-//             item.date
-//           ])),
-//           theme: 'grid'
-//         });
-
-//         monthTotal = expensesByMonth[month].reduce((acc, item) => acc + item.expenseAmount, 0);
-//         doc.text(`Total for ${month}: ${monthTotal.toFixed(2)}`, 10, doc.lastAutoTable.finalY + 10);
-//         grandTotal += monthTotal;
-//         startY = doc.lastAutoTable.finalY + 20;
-//       } else {
-//         // Create an empty table for months with no expenses
-//         doc.autoTable({
-//           startY: startY + 10,
-//           head: [columns.map(col => col.header)],
-//           body: [['', '', '', '']],
-//           theme: 'grid'
-//         });
-//         doc.setFontSize(8);
-//         doc.text('No expenses found for this month.', 10, doc.lastAutoTable.finalY + 10);
-//         startY = doc.lastAutoTable.finalY + 20;
-//       }
-//     });
-
-//     // Add grand total
-//     doc.setFontSize(14);
-//     doc.text(`Grand Total: ${grandTotal.toFixed(2)}`, 10, startY + 2);
-
-//     // Save file with year in filename
-//     savePDF(doc, `${year}_expenses.pdf`);
-//     setExpensesDataTrigger(false);
-//   }
-// };
-
-
-// const savePDF = async (doc, filename) => {
-
-//   const isMobile = Capacitor.isNativePlatform();
-
-//   if (isMobile) {
-//       // Generate PDF as Blob
-//       const pdfData = doc.output('blob');
-//       const reader = new FileReader();
-
-//       reader.onload = async () => {
-//           const base64Data = reader.result.split(',')[1];
-
-//           await Filesystem.writeFile({
-//               path: filename,
-//               data: base64Data,
-//               directory: FilesystemDirectory.Documents,
-//               recursive: true
-//           });
-
-//           // Optionally, you can open the file after saving
-//           await Filesystem.getUri({
-//               directory: FilesystemDirectory.Documents,
-//               path: filename
-//           }).then(result => {
-//               const path = result.uri;
-//               Capacitor.Plugins.FileOpener.open({
-//                   path,
-//                   mimeType: 'application/pdf'
-//               });
-//           });
-//       };
-
-//       reader.readAsDataURL(pdfData);
-//   } else {
-//       // For web
-//       doc.save(filename);
-//   }
-// };
-
-
-
-
-
-
-  // excel code 
 
   const { Filesystem,FilesystemDirectory,FilesystemEncoding } = Plugins;
-  // const handleExpensesGenerateBtn = () => {
-
- 
- 
-  //   const doc = new jsPDF();
- 
-  //   // Define columns for monthly and yearly views
-  //   const monthlyColumns = [
-  //     { header: 'S.No', dataKey: 'sNo' },
-  //     { header: 'Expense Name', dataKey: 'expensename' },
-  //     { header: 'Expense Amount', dataKey: 'expenseamount' },
-  //     { header: 'Date', dataKey: 'date' }
-  //   ];
- 
-  //   const yearlyColumns = [
-  //     { header: 'S.No', dataKey: 'sNo' },
-  //     { header: 'Expense Name', dataKey: 'expensename' },
-  //     { header: 'Expense Amount', dataKey: 'expenseamount' },
-  //     { header: 'Date', dataKey: 'date' }
-  //   ];
- 
-  //   // Determine the data source based on the selected hostel type
-  //   const dataToUse = selectedHostelType === "mens" ? entireBoysYearExpensesData : entireGirlsYearExpensesData;
-  //   const nameToUse = selectedHostelType === "mens" ? activeBoysHostelName + " Mens" : activeGirlsHostelName + "Womens";
-  //   // Convert month name to number
-  //   const newMonth = monthMapping[month.toLowerCase()];
- 
-  //   if (month !== "" && year) {
-  //     // Monthly Report
-  //     const filteredData = [];
-  //     dataToUse.forEach(item => {
-  //       if (typeof (item) === 'object' && item !== null) {
-  //         Object.keys(item).forEach(key => {
-  //           const expenseData = item[key];
-  //           if (expenseData && expenseData.expenseDate) {
-  //             const expenseDate = new Date(expenseData.expenseDate);
-  //             if (expenseDate.getFullYear() === parseInt(year) && expenseDate.getMonth() === newMonth) {
-  //               filteredData.push({
-  //                 expensename: expenseData.expenseName,
-  //                 expenseamount: expenseData.expenseAmount,
-  //                 date: expenseDate.toLocaleDateString()
-  //               });
-  //             }
-  //           }
-  //         });
-  //       }
-  //     });
- 
-  //     console.log("Filtered Data:", filteredData); // Check the filtered data
- 
-  //     if (filteredData.length > 0) {
-  //       // Add heading for monthly report
-  //       const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-  //       doc.setFontSize(16);
-  //       doc.text(`${nameToUse} ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
- 
-  //       // Create table for specific month
-  //       doc.autoTable({
-  //         startY: 30, // Adjust starting Y position to leave space for heading
-  //         head: [monthlyColumns.map(col => col.header)],
-  //         body: filteredData.map((row, index) => ([
-  //           index + 1,
-  //           row.expensename,
-  //           row.expenseamount,
-  //           row.date
-  //         ])),
-  //         theme: 'grid'
-  //       });
- 
-  //       const totalAmount = filteredData.reduce((acc, item) => acc + item.expenseamount, 0);
-  //       doc.text(`Total Expenses: ${totalAmount}`, 10, doc.lastAutoTable.finalY + 10);
- 
-  //       // Save file with month in filename
-  //       doc.save(`${nameToUse} ${monthName}_expenses.pdf`);
-  //     } else {
-  //       doc.setFontSize(16);
-  //       const monthName = Object.keys(monthMapping).find(key => monthMapping[key] === newMonth);
-  //       doc.text(`${nameToUse} ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} Expenses`, 105, 20, { align: 'center' });
- 
-  //       // Create an empty table
-  //       doc.autoTable({
-  //         startY: 30, // Adjust starting Y position to leave space for heading
-  //         head: [monthlyColumns.map(col => col.header)],
-  //         body: [['', '', '', '']],
-  //         theme: 'grid'
-  //       });
- 
-  //       doc.text('No expenses found for the selected month and year.', 10, doc.lastAutoTable.finalY + 10);
-  //       doc.save(`${nameToUse} ${monthName}_expenses.pdf`);
-  //     }
-  //   } else if (year) {
-  //     // Yearly Report
-  //     const expensesByMonth = {};
-  //     const months = Object.keys(monthMapping);
- 
-  //     dataToUse.forEach(item => {
-  //       if (typeof (item) === 'object' && item !== null) {
-  //         Object.keys(item).forEach(key => {
-  //           const expenseData = item[key];
-  //           if (expenseData && expenseData.expenseDate) {
-  //             const expenseDate = new Date(expenseData.expenseDate);
-  //             if (expenseDate.getFullYear() === parseInt(year)) {
-  //               const month = months[expenseDate.getMonth()];
-  //               if (!expensesByMonth[month]) {
-  //                 expensesByMonth[month] = [];
-  //               }
-  //               expensesByMonth[month].push({
-  //                 expenseName: expenseData.expenseName,
-  //                 expenseAmount: expenseData.expenseAmount,
-  //                 date: expenseDate.toLocaleDateString()
-  //               });
-  //             }
-  //           }
-  //         });
-  //       }
-  //     });
- 
-  //     // Add heading for yearly report
-  //     doc.setFontSize(16);
-  //     doc.text(`${nameToUse} Yearly Expenses`, 105, 20, { align: 'center' });
- 
-  //     let grandTotal = 0;
-  //     let startY = 30;
- 
-  //     months.forEach((month, index) => {
-  //       let monthTotal = 0;
- 
-  //       // Add heading for each month's table
-  //       doc.setFontSize(14);
-  //       doc.text(`${month.charAt(0).toUpperCase() + month.slice(1)} Expenses`, 10, startY);
- 
-  //       if (expensesByMonth[month] && expensesByMonth[month].length > 0) {
-  //         // Create table for each month with expenses
-  //         doc.autoTable({
-  //           startY: startY + 10,
-  //           head: [yearlyColumns.map(col => col.header)],
-  //           body: expensesByMonth[month].map((item, itemIndex) => ([
-  //             itemIndex + 1,
-  //             item.expenseName,
-  //             item.expenseAmount,
-  //             item.date
-  //           ])),
-  //           theme: 'grid'
-  //         });
- 
-  //         monthTotal = expensesByMonth[month].reduce((acc, item) => acc + item.expenseAmount, 0);
-  //         doc.text(`Total for ${month}: ${monthTotal}`, 10, doc.lastAutoTable.finalY + 10);
-  //         grandTotal += monthTotal;
-  //         startY = doc.lastAutoTable.finalY + 20;
-  //       } else {
-  //         // Create an empty table for months with no expenses
-  //         doc.autoTable({
-  //           startY: startY + 10,
-  //           head: [yearlyColumns.map(col => col.header)],
-  //           body: [['', '', '', '']],
-  //           theme: 'grid'
-  //         });
-  //         doc.setFontSize(8);
-  //         doc.text('No expenses found for this month.', 10, doc.lastAutoTable.finalY + 10);
-  //         startY = doc.lastAutoTable.finalY + 20;
-  //       }
-  //     });
- 
-  //     // Add grand total
-  //     doc.setFontSize(14);
-  //     doc.text(`Grand Total: ${grandTotal}`, 10, startY + 2);
- 
-  //     // Save file with year in filename
-  //     // doc.save(`${nameToUse} ${year}_expenses.pdf`);
-  //     // Save the PDF
-  //   const pdfBlob = doc.output('blob');
-
-  //   if (Capacitor.isNativePlatform()) {
-  //       const reader = new FileReader();
-  //       reader.readAsDataURL(pdfBlob);
-  //       reader.onloadend = async () => {
-  //           const base64String = reader.result.split(',')[1]; // Remove the prefix
-
-  //           try {
-  //               const result = await Filesystem.writeFile({
-  //                   path: 'Expenses_Generate.pdf',
-  //                   data: base64String,
-  //                   directory: Directory.Documents,
-  //                   encoding: Encoding.Base64
-  //               });
-  //               console.log('File saved successfully:', result.uri);
-
-  //               await FileOpener.open({
-  //                   filePath: result.uri,
-  //                   fileMimeType: 'application/pdf'
-  //               });
-  //           } catch (error) {
-  //               console.error('Error saving file:', error);
-  //           }
-  //       };
-  //       reader.onerror = (error) => {
-  //           console.error('Error converting PDF to base64:', error);
-  //       };
-  //   } else {
-  //       const url = URL.createObjectURL(pdfBlob);
-  //       const link = document.createElement('a');
-  //       link.href = url;
-  //       link.setAttribute('download', `${nameToUse} ${year}_expenses.pdf`);
-  //       document.body.appendChild(link);
-  //       link.click();
-  //       document.body.removeChild(link);
-  //   }
-
-  //   }
- 
- 
-  // };
+  
 
   const handleExpensesGenerateBtn = () => {
     const doc = new jsPDF();
@@ -1902,94 +954,11 @@ const handleVacatedReportBtn = async () => {
 };
 
 
-const handleTenantBtnExcel = async () => {
-    const dataToUse = selectedHostelType === "mens" ? boysTenants : girlsTenants;
-
-    const flatData = dataToUse.map(item => {
-        const flatRents = Object.entries(item.rents || { NA: {} }).map(([rentId, rent]) => ({
-            PaidAmount: rent.paidAmount || "NA",
-            Due: rent.due || "NA",
-            DueDate: rent.dueDate || "NA",
-            PaidDate: rent.paidDate || "NA",
-            Status: rent.status || "NA",
-            TotalFee: rent.totalFee || "NA",
-        }));
-
-        return flatRents.map(flatRent => ({
-            Room: item.roomNo || "NA",
-            Bed: item.bedNo || "NA",
-            Name: item.name || "NA",
-            Address: item.permnentAddress || "NA",
-            bikeNumber: item.bikeNumber || "NA",
-            DateOfJoin: item.dateOfJoin || "NA",
-            Emergency: item.emergencyContact || "NA",
-            Id: item.idNumber || "NA",
-            Mobile: item.mobileNo || "NA",
-            Status: item.status || "NA",
-            ...flatRent // Spread the flattened rent information
-        }));
-    }).flat();
-
-    // Create a new workbook and a worksheet
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(flatData);
-
-    // Add the worksheet to the workbook only if it doesn't already exist
-    if (!workbook.SheetNames.includes('Tenants')) {
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
-    }
-    // Generate a binary Excel file
-    const fileData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
-
-    if (Capacitor.isNativePlatform()) {
-        // Convert array buffer to base64
-        const reader = new FileReader();
-        reader.readAsDataURL(new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
-        reader.onloadend = async () => {
-            const base64String = reader.result.split(',')[1]; // Remove the prefix
-
-            try {
-                // Write the file to the filesystem
-                const result = await Filesystem.writeFile({
-                    path: 'tenants_data.xlsx',
-                    data: base64String,
-                    directory: Directory.Documents,
-                    encoding: Encoding.Base64
-                });
-                console.log('File saved successfully:', result.uri);
-
-                // Optionally open the file using the FileOpener plugin
-                await FileOpener.open({
-                    filePath: result.uri,
-                    fileMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                });
-            } catch (error) {
-                console.error('Error saving file:', error);
-            }
-        };
-        reader.onerror = (error) => {
-            console.error('Error converting Excel to base64:', error);
-        };
-    } else {
-        // For web environment, use the default download method
-        try {
-            // Convert array buffer to blob
-            const blob = new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            
-            // Use FileSaver to trigger download
-            saveAs(blob, 'tenants_data.xlsx');
-        } catch (error) {
-            console.error('Error saving file:', error);
-        }
-    }
-};
-
-
 // const handleTenantBtnExcel = async () => {
-//     const dataToUse = selectedHostelType === "mens" ? boysTenantsData : girlsTenantsData;
+//     const dataToUse = selectedHostelType === "mens" ? boysTenants : girlsTenants;
 
 //     const flatData = dataToUse.map(item => {
-//         const flatRents = Object.entries(item.rents || {NA:{}}).map(([rentId, rent]) => ({
+//         const flatRents = Object.entries(item.rents || { NA: {} }).map(([rentId, rent]) => ({
 //             PaidAmount: rent.paidAmount || "NA",
 //             Due: rent.due || "NA",
 //             DueDate: rent.dueDate || "NA",
@@ -2017,113 +986,318 @@ const handleTenantBtnExcel = async () => {
 //     const workbook = XLSX.utils.book_new();
 //     const worksheet = XLSX.utils.json_to_sheet(flatData);
 
-//     // Add the worksheet to the workbook
-//     XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
-
+//     // Add the worksheet to the workbook only if it doesn't already exist
+//     if (!workbook.SheetNames.includes('Tenants')) {
+//         XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
+//     }
 //     // Generate a binary Excel file
 //     const fileData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
 
-//     // Use file-saver to download the file
-//     try {
-//         // Convert array buffer to blob
-//         const blob = new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        
-//         // Use FileSaver to trigger download
-//         saveAs(blob, 'tenants_data.xlsx');
-//     } catch (error) {
-//         console.error('Error saving file:', error);
+//     if (Capacitor.isNativePlatform()) {
+//         // Convert array buffer to base64
+//         const reader = new FileReader();
+//         reader.readAsDataURL(new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+//         reader.onloadend = async () => {
+//             const base64String = reader.result.split(',')[1]; // Remove the prefix
+
+//             try {
+//                 // Write the file to the filesystem
+//                 const result = await Filesystem.writeFile({
+//                     path: 'tenants_data.xlsx',
+//                     data: base64String,
+//                     directory: Directory.ExternalStorage,
+//                     encoding: Encoding.Base64
+//                 });
+//                 console.log('File saved successfully:', result.uri);
+
+//                 // Optionally open the file using the FileOpener plugin
+//                 await FileOpener.open({
+//                     filePath: result.uri,
+//                     fileMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+//                 });
+//             } catch (error) {
+//                 console.error('Error saving file:', error);
+//             }
+//         };
+//         reader.onerror = (error) => {
+//             console.error('Error converting Excel to base64:', error);
+//         };
+//     } else {
+//         // For web environment, use the default download method
+//         try {
+//             // Convert array buffer to blob
+//             const blob = new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            
+//             // Use FileSaver to trigger download
+//             saveAs(blob, 'tenants_data.xlsx');
+//         } catch (error) {
+//             console.error('Error saving file:', error);
+//         }
+//     }
+// };
+
+const handleTenantBtnExcel = async () => {
+  const dataToUse = selectedHostelType === "mens" ? boysTenants : girlsTenants;
+
+  const flatData = dataToUse.map(item => {
+      const flatRents = Object.entries(item.rents || { NA: {} }).map(([rentId, rent]) => ({
+          PaidAmount: rent.paidAmount || "NA",
+          Due: rent.due || "NA",
+          DueDate: rent.dueDate || "NA",
+          PaidDate: rent.paidDate || "NA",
+          Status: rent.status || "NA",
+          TotalFee: rent.totalFee || "NA",
+      }));
+
+      return flatRents.map(flatRent => ({
+          Room: item.roomNo || "NA",
+          Bed: item.bedNo || "NA",
+          Name: item.name || "NA",
+          Address: item.permnentAddress || "NA",
+          bikeNumber: item.bikeNumber || "NA",
+          DateOfJoin: item.dateOfJoin || "NA",
+          Emergency: item.emergencyContact || "NA",
+          Id: item.idNumber || "NA",
+          Mobile: item.mobileNo || "NA",
+          Status: item.status || "NA",
+          ...flatRent // Spread the flattened rent information
+      }));
+  }).flat();
+
+  // Create a new workbook and a worksheet
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.json_to_sheet(flatData);
+
+  // Add the worksheet to the workbook
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
+
+  // Generate a binary Excel file
+  const fileData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+  const fileName = `tenants_data.xlsx`;
+
+  const saveAndOpenExcel = (fileName) => {
+      const excelBlob = new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+      if (Capacitor.isNativePlatform()) {
+          // Convert blob to base64
+          const reader = new FileReader();
+          reader.readAsDataURL(excelBlob);
+          reader.onloadend = async () => {
+              const base64String = reader.result.split(',')[1]; // Remove the prefix
+
+              try {
+                  // Write the file to the filesystem
+                  const result = await Filesystem.writeFile({
+                      path: fileName,
+                      data: base64String,
+                      directory: Directory.Documents,
+                      encoding: Encoding.Base64
+                  });
+                  console.log('File saved successfully:', result.uri);
+
+                  // Open the Excel file using FileOpener plugin
+                  await FileOpener.open({
+                      filePath: result.uri,
+                      fileMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                  });
+              } catch (error) {
+                  console.error('Error saving file:', error);
+              }
+          };
+          reader.onerror = (error) => {
+              console.error('Error converting Excel to base64:', error);
+          };
+      } else {
+          // For web environment, trigger download directly
+          const url = URL.createObjectURL(excelBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', fileName);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      }
+  };
+
+  saveAndOpenExcel(fileName);
+};
+
+
+
+// const handleVacatedBtnExcel = async () => {
+//     const dataToUse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData;
+
+//     const flatData = dataToUse.map(item => {
+//         const flatRents = Object.entries(item.rents || { NA: {} }).map(([rentId, rent]) => ({
+//             PaidAmount: rent.paidAmount || "NA",
+//             Due: rent.due || "NA",
+//             DueDate: rent.dueDate || "NA",
+//             PaidDate: rent.paidDate || "NA",
+//             Status: rent.status || "NA",
+//             TotalFee: rent.totalFee || "NA",
+//         }));
+
+//         return flatRents.map(flatRent => ({
+//             Room: item.roomNo || "NA",
+//             Bed: item.bedNo || "NA",
+//             Name: item.name || "NA",
+//             Address: item.permnentAddress || "NA",
+//             bikeNumber: item.bikeNumber || "NA",
+//             DateOfJoin: item.dateOfJoin || "NA",
+//             Emergency: item.emergencyContact || "NA",
+//             Id: item.idNumber || "NA",
+//             Mobile: item.mobileNo || "NA",
+//             Status: item.status || "NA",
+//             ...flatRent // Spread the flattened rent information
+//         }));
+//     }).flat();
+
+//     // Create a new workbook and a worksheet
+//     const workbook = XLSX.utils.book_new();
+//     const worksheet = XLSX.utils.json_to_sheet(flatData);
+
+//     // Add the worksheet to the workbook only if it doesn't already exist
+//     if (!workbook.SheetNames.includes('Tenants')) {
+//         XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
+//     }
+//     // Generate a binary Excel file
+//     const fileData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+//     // const handleChangeHostelType = (e) => {
+//     //   console.log(e.target.value, "e.target")
+//     //   if (e.target.value === "mens") {
+//     //     changeActiveFlag("boys")
+//     //   } else if (e.target.value === "girls") {
+//     //     changeActiveFlag("girls")
+//     //   }
+
+//     if (Capacitor.isNativePlatform()) {
+//         // Convert array buffer to base64
+//         const reader = new FileReader();
+//         reader.readAsDataURL(new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+//         reader.onloadend = async () => {
+//             const base64String = reader.result.split(',')[1]; // Remove the prefix
+
+//             try {
+//                 // Write the file to the filesystem
+//                 const result = await Filesystem.writeFile({
+//                     path: 'vacated_tenants_data.xlsx',
+//                     data: base64String,
+//                     directory: Directory.ExternalStorage,
+//                     encoding: Encoding.Base64
+//                 });
+//                 console.log('File saved successfully:', result.uri);
+
+//                 // Optionally open the file using the FileOpener plugin
+//                 await FileOpener.open({
+//                     filePath: result.uri,
+//                     fileMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+//                 });
+//             } catch (error) {
+//                 console.error('Error saving file:', error);
+//             }
+//         };
+//         reader.onerror = (error) => {
+//             console.error('Error converting Excel to base64:', error);
+//         };
+//     } else {
+//         // For web environment, use the default download method
+//         try {
+//             // Convert array buffer to blob
+//             const blob = new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            
+//             // Use FileSaver to trigger download
+//             saveAs(blob, 'vacated_tenants_data.xlsx');
+//         } catch (error) {
+//             console.error('Error saving file:', error);
+//         }
 //     }
 // };
 
 const handleVacatedBtnExcel = async () => {
-    const dataToUse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData;
+  const dataToUse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData;
 
-    const flatData = dataToUse.map(item => {
-        const flatRents = Object.entries(item.rents || { NA: {} }).map(([rentId, rent]) => ({
-            PaidAmount: rent.paidAmount || "NA",
-            Due: rent.due || "NA",
-            DueDate: rent.dueDate || "NA",
-            PaidDate: rent.paidDate || "NA",
-            Status: rent.status || "NA",
-            TotalFee: rent.totalFee || "NA",
-        }));
+  const flatData = dataToUse.map(item => {
+      const flatRents = Object.entries(item.rents || { NA: {} }).map(([rentId, rent]) => ({
+          PaidAmount: rent.paidAmount || "NA",
+          Due: rent.due || "NA",
+          DueDate: rent.dueDate || "NA",
+          PaidDate: rent.paidDate || "NA",
+          Status: rent.status || "NA",
+          TotalFee: rent.totalFee || "NA",
+      }));
 
-        return flatRents.map(flatRent => ({
-            Room: item.roomNo || "NA",
-            Bed: item.bedNo || "NA",
-            Name: item.name || "NA",
-            Address: item.permnentAddress || "NA",
-            bikeNumber: item.bikeNumber || "NA",
-            DateOfJoin: item.dateOfJoin || "NA",
-            Emergency: item.emergencyContact || "NA",
-            Id: item.idNumber || "NA",
-            Mobile: item.mobileNo || "NA",
-            Status: item.status || "NA",
-            ...flatRent // Spread the flattened rent information
-        }));
-    }).flat();
+      return flatRents.map(flatRent => ({
+          Room: item.roomNo || "NA",
+          Bed: item.bedNo || "NA",
+          Name: item.name || "NA",
+          Address: item.permnentAddress || "NA",
+          bikeNumber: item.bikeNumber || "NA",
+          DateOfJoin: item.dateOfJoin || "NA",
+          Emergency: item.emergencyContact || "NA",
+          Id: item.idNumber || "NA",
+          Mobile: item.mobileNo || "NA",
+          Status: item.status || "NA",
+          ...flatRent // Spread the flattened rent information
+      }));
+  }).flat();
 
-    // Create a new workbook and a worksheet
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(flatData);
+  // Create a new workbook and a worksheet
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.json_to_sheet(flatData);
 
-    // Add the worksheet to the workbook only if it doesn't already exist
-    if (!workbook.SheetNames.includes('Tenants')) {
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
-    }
-    // Generate a binary Excel file
-    const fileData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
-    // const handleChangeHostelType = (e) => {
-    //   console.log(e.target.value, "e.target")
-    //   if (e.target.value === "mens") {
-    //     changeActiveFlag("boys")
-    //   } else if (e.target.value === "girls") {
-    //     changeActiveFlag("girls")
-    //   }
+  // Add the worksheet to the workbook
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Vacated Tenants');
 
-    if (Capacitor.isNativePlatform()) {
-        // Convert array buffer to base64
-        const reader = new FileReader();
-        reader.readAsDataURL(new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
-        reader.onloadend = async () => {
-            const base64String = reader.result.split(',')[1]; // Remove the prefix
+  // Generate a binary Excel file
+  const fileData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+  const fileName =`vacated_tenants_data.xlsx`;
+  const saveAndOpenExcel = async (fileName) => {
+      // Convert the array buffer to a blob
+      const excelBlob = new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-            try {
-                // Write the file to the filesystem
-                const result = await Filesystem.writeFile({
-                    path: 'vacated_tenants_data.xlsx',
-                    data: base64String,
-                    directory: Directory.Documents,
-                    encoding: Encoding.Base64
-                });
-                console.log('File saved successfully:', result.uri);
+      if (Capacitor.isNativePlatform()) {
+          const reader = new FileReader();
+          reader.readAsDataURL(excelBlob);
+          reader.onloadend = async () => {
+              const base64String = reader.result.split(',')[1]; // Remove the prefix
 
-                // Optionally open the file using the FileOpener plugin
-                await FileOpener.open({
-                    filePath: result.uri,
-                    fileMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                });
-            } catch (error) {
-                console.error('Error saving file:', error);
-            }
-        };
-        reader.onerror = (error) => {
-            console.error('Error converting Excel to base64:', error);
-        };
-    } else {
-        // For web environment, use the default download method
-        try {
-            // Convert array buffer to blob
-            const blob = new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            
-            // Use FileSaver to trigger download
-            saveAs(blob, 'vacated_tenants_data.xlsx');
-        } catch (error) {
-            console.error('Error saving file:', error);
-        }
-    }
+              try {
+                  // Write the file to the filesystem
+                  const result = await Filesystem.writeFile({
+                      path: fileName,
+                      data: base64String,
+                      directory: Directory.Documents,
+                      encoding: Encoding.Base64
+                  });
+                  console.log('File saved successfully:', result.uri);
+
+                  // Open the file using the FileOpener plugin
+                  await FileOpener.open({
+                      filePath: result.uri,
+                      fileMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                  });
+              } catch (error) {
+                  console.error('Error saving file:', error);
+              }
+          };
+          reader.onerror = (error) => {
+              console.error('Error converting Excel to base64:', error);
+          };
+      } else {
+          // For web environment, use the default download method
+          const url = URL.createObjectURL(excelBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', fileName);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      }
+  };
+
+  // Save and open the file
+  saveAndOpenExcel('vacated_tenants_data.xlsx');
 };
-
 
   const handleChangeHostelType = (e) => {
     console.log(e.target.value, "e.target")

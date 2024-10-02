@@ -59,7 +59,7 @@ const MainPage = () => {
       navigate("/dashboard")
       
     }
-
+    console.log("every Route change working")
   },[])
   
 
@@ -248,6 +248,10 @@ const MainPage = () => {
   const handleHamburgerMenu = () => {
     setHamburgerMenuItems(!hamburgerMenuItems)
   }
+
+  useEffect(()=>{
+    console.log(location.pathname,"path2")
+  },[location.pathname,navigate])
  
  
   const handleSidebarItemClick = (itemId, path) => {
@@ -258,20 +262,20 @@ const MainPage = () => {
     // close();
     // setActiveTab('boys');
   }
-  useEffect(() => {
-    const handleAppStateChange = (state) => {
-      if (state.isActive) {
-        // Navigate to the dashboard when app comes to foreground
-        navigate('/dashboard');
-      }
-    };
+  // useEffect(() => {
+  //   const handleAppStateChange = (state) => {
+  //     if (state.isActive) {
+  //       // Navigate to the dashboard when app comes to foreground
+  //       navigate('/dashboard');
+  //     }
+  //   };
 
-    CapacitorApp.addListener('appStateChange', handleAppStateChange);
+  //   CapacitorApp.addListener('appStateChange', handleAppStateChange);
 
-    return () => {
-      CapacitorApp.removeAllListeners('appStateChange');
-    };
-  }, [navigate]);
+  //   return () => {
+  //     CapacitorApp.removeAllListeners('appStateChange');
+  //   };
+  // }, [navigate]);
  
  
  
