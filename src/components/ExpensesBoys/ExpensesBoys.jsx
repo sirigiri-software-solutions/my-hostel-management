@@ -160,9 +160,7 @@ const ExpensesBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
         fetchData();
@@ -177,9 +175,7 @@ const ExpensesBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
       });
@@ -367,9 +363,7 @@ const ExpensesBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
           fetchData();
@@ -385,9 +379,7 @@ const ExpensesBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
         });
@@ -423,9 +415,7 @@ const ExpensesBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       });
     }
       fetchData();
@@ -441,9 +431,7 @@ const ExpensesBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       });
     }
     });
@@ -481,9 +469,7 @@ const ExpensesBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       })
     }
     } else {

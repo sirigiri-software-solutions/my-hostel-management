@@ -395,6 +395,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     tempErrors.selectedRoom = selectedRoom ? "" : t('errors.roomNumberRequired');
     tempErrors.selectedBed = selectedBed ? "" : t('errors.bedNumberRequired');
     tempErrors.dateOfJoin = dateOfJoin ? "" : t('errors.dateOfJoinRequired');
+    tempErrors.permnentAddress = permnentAddress ? "" : t('errors.permanentAddress')
 
     const phoneRegexWithCountryCode = /^\+\d{12}$/;
     const phoneRegexWithoutCountryCode = /^\d{10}$/;
@@ -435,6 +436,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     if (!tenantImage && !tenantImageUrl) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
+
     
     if (hasBike) {
       if (!bikeNumber) {
@@ -732,9 +734,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
-                onClose: () => {
-                  activeToastId = null; // Reset activeToastId when the toast is closed
-                },
+                toastId: "empty-fields-error",
             });
           }
             fetchData();
@@ -749,9 +749,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
-                onClose: () => {
-                  activeToastId = null; // Reset activeToastId when the toast is closed
-                },
+                toastId: "empty-fields-error",
             });
           }
             fetchData();
@@ -768,9 +766,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
         });
       }
         e.target.querySelector('button[type="submit"]').disabled = false;
@@ -866,9 +862,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       })
     }
     } else {
@@ -1116,9 +1110,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
           fetchData();
@@ -1133,9 +1125,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
         });
@@ -1185,9 +1175,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
       })
@@ -1202,9 +1190,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
       });
@@ -1749,10 +1735,9 @@ const handleDownload = async (url, type, tenantName) => {
       <div>
         {showExTenants ? <Table columns={columnsEx} rows={exTenantRows} onClickTentantRow={handleTentantRow} /> : 
         <>
-       { console.log("beforeRendering")}
-         {console.log(filteredRows)}
+       
         <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />
-        {console.log("RenderingCompleted")}
+       
         </>
         }
       </div>
@@ -1904,7 +1889,8 @@ const handleDownload = async (url, type, tenantName) => {
             </div>
             <div className='col-md-12'>
               <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
-              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' />
+              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' onFocus={handleTenantFocus}/>
+              {errors.permnentAddress && <p style={{ color: 'red' }}>{errors.permnentAddress}</p>}
             </div>
 
             <div className="col-12 col-sm-12 col-md-12" style={{ marginTop: '20px' }}>

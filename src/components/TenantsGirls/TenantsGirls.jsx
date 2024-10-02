@@ -462,7 +462,7 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
     tempErrors.selectedRoom = selectedRoom ? "" : t('errors.roomNumberRequired');
     tempErrors.selectedBed = selectedBed ? "" : t('errors.bedNumberRequired');
     tempErrors.dateOfJoin = dateOfJoin ? "" : t('errors.dateOfJoinRequired');
-
+    tempErrors.permnentAddress = permnentAddress ? "" : t('errors.permanentAddress')
 
     const phoneRegexWithCountryCode = /^\+\d{12}$/;
     const phoneRegexWithoutCountryCode = /^\d{10}$/;
@@ -773,9 +773,7 @@ if (bikeRcImage) {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
-                onClose: () => {
-                  activeToastId = null; // Reset activeToastId when the toast is closed
-                },
+                toastId: "empty-fields-error",
             });
           }
             fetchData()
@@ -790,9 +788,7 @@ if (bikeRcImage) {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
-                onClose: () => {
-                  activeToastId = null; // Reset activeToastId when the toast is closed
-                },
+                toastId: "empty-fields-error",
             });
           }
             fetchData()
@@ -810,9 +806,7 @@ if (bikeRcImage) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
         });
       }
     } finally {
@@ -896,9 +890,7 @@ if (bikeRcImage) {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       })
     }
     } else {
@@ -1147,9 +1139,7 @@ if (bikeRcImage) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
           fetchData();
@@ -1164,9 +1154,7 @@ if (bikeRcImage) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
         });
@@ -1216,9 +1204,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
       })
@@ -1233,9 +1219,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
       });
@@ -1921,7 +1905,8 @@ const handleDownload = async (url, type, tenantName) => {
                   </div>
                   <div className='col-md-12'>
                     <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
-                    <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' />
+                    <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' onFocus={handleTenantFocus} />
+                    {errors.permnentAddress && <p style={{ color: 'red' }}>{errors.permnentAddress}</p>}
                   </div>
 
 

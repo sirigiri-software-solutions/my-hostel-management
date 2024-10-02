@@ -127,92 +127,79 @@ const RoomsBoys = () => {
 
     // Proceed with update or creation based on isEditing flag
     if (isEditing) {
-      const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
-      update(roomRef, {
-        floorNumber,
-        roomNumber,
-        numberOfBeds,
-        bedRent,
-        createdBy,
-        updateDate: now
-      }).then(() => {
-        if (!toast.isActive(activeToastId)) {
-
-          activeToastId=toast.success("Room updated successfully.", {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+        const roomRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`);
+        update(roomRef, {
+            floorNumber,
+            roomNumber,
+            numberOfBeds,
+            bedRent,
+            createdBy,
+            updateDate: now
+        }).then(() => {
+            toast.success("Room updated successfully.", {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                toastId: "empty-fields-error",
+            });
+            fetchData();
+            setIsEditing(false);
+        }).catch(error => {
+            toast.error("Error updating room: " + error.message, {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                toastId: "empty-fields-error",
+            })
+          })
+        
+    
+        
+      }
+    else {
+        const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+        push(roomsRef, {
+            floorNumber,
+            roomNumber,
+            numberOfBeds,
+            bedRent,
+            createdBy,
+            updateDate: now
+        }).then(() => {
+            toast.success("Room added successfully.", {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                toastId: "empty-fields-error",
+            });
+            fetchData();
+        }).catch(error => {
+            toast.error("Error adding room: " + error.message, {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                toastId: "empty-fields-error",
+            });
         });
       }
-        fetchData()
-        setIsEditing(false);
-      }).catch(error => {
-        if (!toast.isActive(activeToastId)) {
-
-          activeToastId=toast.error("Error updating room: " + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
-        });
-      }
-      });
-    } else {
-      const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-      push(roomsRef, {
-        floorNumber,
-        roomNumber,
-        numberOfBeds,
-        bedRent,
-        createdBy,
-        updateDate: now
-      }).then(() => {
-        if (!toast.isActive(activeToastId)) {
-
-          activeToastId=toast.success("Room added successfully.", {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          onClose:() => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
-        });
-      }
-        fetchData()
-      }).catch(error => {
-        if (!toast.isActive(activeToastId)) {
-          activeToastId=toast.error("Error adding room: " + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          onClose: () =>{
-            activeToastId=null;
-          }
-        });
-      }
-      });
-    }
+        
+   
 
     setShowModal(false);
     navigate(-1)
@@ -280,9 +267,7 @@ const RoomsBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId=null;
-            }
+            toastId: "empty-fields-error",
           });
         }
           fetchData(); // Refresh data after deletion
@@ -297,9 +282,7 @@ const RoomsBoys = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId=null;
-            }
+            toastId: "empty-fields-error",
           });
         }
         }
@@ -316,9 +299,7 @@ const RoomsBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-             activeToastId=null;
-          },
+          toastId: "empty-fields-error",
         });
       }
         fetchData(); // Refresh data after deletion
@@ -335,9 +316,7 @@ const RoomsBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-            activeToastId=null;
-        },
+        toastId: "empty-fields-error",
       });
     }
     }
@@ -387,9 +366,7 @@ const RoomsBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId=null;
-       },
+        toastId: "empty-fields-error",
       })
     }
     } else {

@@ -158,9 +158,7 @@ return () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
         fetchData();
@@ -175,9 +173,7 @@ return () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
       });
@@ -363,9 +359,7 @@ return () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
           setEditingExpense(null);
@@ -381,9 +375,7 @@ return () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
         });
@@ -417,9 +409,7 @@ return () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       });
     }
       fetchData();
@@ -435,9 +425,7 @@ return () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       });
     }
       console.error("Error deleting document: ", error);
@@ -476,9 +464,7 @@ return () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       })
     }
     } else {

@@ -738,9 +738,7 @@ const DashboardBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       });
     }
       fetchData()
@@ -754,9 +752,7 @@ const DashboardBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       });
     }
     });
@@ -839,6 +835,7 @@ const DashboardBoys = () => {
     tempErrors.selectedRoom = selectedRoom ? "" : t('errors.roomNumberRequired');
     tempErrors.selectedBed = selectedBed ? "" : t('errors.bedNumberRequired');
     tempErrors.dateOfJoin = dateOfJoin ? "" : t('errors.dateOfJoinRequired');
+    tempErrors.permnentAddress = permnentAddress ? "" : t('errors.permanentAddress')
 
     const phoneRegexWithCountryCode = /^\+\d{12}$/;
     const phoneRegexWithoutCountryCode = /^\d{10}$/;
@@ -1182,59 +1179,50 @@ const DashboardBoys = () => {
        
     };
 
-        if (isEditing) {
-            await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
-            if (!toast.isActive(activeToastId)) {
+        // if (isEditing) {
+        //     await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
+        //     if (!toast.isActive(activeToastId)) {
 
-              activeToastId=toast.success(t('toastMessages.tenantUpdated'), {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                onClose: () => {
-                  activeToastId = null; // Reset activeToastId when the toast is closed
-                },
-            });
-          }
-            fetchData();
-        } else {
-            await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
-            if (!toast.isActive(activeToastId)) {
-              activeToastId=toast.success(t('toastMessages.tenantAddedSuccess'), {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                onClose: () => {
-                  activeToastId = null; // Reset activeToastId when the toast is closed
-                },
-            });
-          }
-            fetchData();
-            e.target.querySelector('button[type="submit"]').disabled = false;
-        }
-    } catch (error) {
-        console.error("Error submitting form:", error);
-        if (!toast.isActive(activeToastId)) {
-          activeToastId= toast.error(t('toastMessages.errorSubmitting') + error.message, {
-            position: "top-center",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+      if (isEditing) {
+        await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
+        toast.success(t('toastMessages.tenantUpdated'), {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          toastId: "empty-fields-error",
         });
+        fetchData()
+      } else {
+        await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
+        toast.success(t('toastMessages.tenantAddedSuccess'), {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          toastId: "empty-fields-error",
+        });
+        fetchData();
+        e.target.querySelector('button[type="submit"]').disabled = false;
       }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error(t('toastMessages.errorSubmitting') + error.message, {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        toastId: "empty-fields-error",
+      });
     } finally {
         setLoading(false);
         resetForm();
@@ -1303,6 +1291,7 @@ const DashboardBoys = () => {
       paidDate,
       dueDate,
       status: parseFloat(due) <= 0 ? 'Paid' : 'Unpaid',
+      monthly:showForm
     };
 
     if (isEditing) {
@@ -1318,9 +1307,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
         fetchData();
@@ -1340,10 +1327,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
-
+          toastId: "empty-fields-error",
         });
       }
       });
@@ -1360,9 +1344,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
         fetchData();
@@ -1381,10 +1363,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
-
+          toastId: "empty-fields-error",
         });
       }
       });
@@ -1496,9 +1475,7 @@ const DashboardBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       })
     }
     } else {
@@ -1615,9 +1592,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
         fetchData();
@@ -1632,9 +1607,7 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
       });
@@ -2163,7 +2136,8 @@ const DashboardBoys = () => {
             </div>
             <div className='col-md-12'>
               <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
-              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' />
+              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' onFocus={handleTenantFocus} />
+              {tenatErrors.permnentAddress && <p style={{ color: 'red' }}>{tenatErrors.permnentAddress}</p>}
             </div>
 
             <div className="col-12 col-sm-12 col-md-12" style={{ marginTop: '20px' }}>

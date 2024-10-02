@@ -53,7 +53,7 @@ const RentPageGirls = () => {
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [showForm, setShowForm] = useState(true);
   const [filterOption, setFilterOption] = useState("all");
-  let activeToastId=null;
+  const [tenantMonthly, setTenantMonthly] = useState(showForm)
 
 
   // Function to send WhatsApp message
@@ -140,17 +140,15 @@ Please note that you made your last payment on ${paidDate}.\n`;
         (room) => room.roomNumber === roomNumber
       );
 
-      if (matchingRoom && matchingRoom.bedRent) {
+      if (tenantMonthly && matchingRoom && matchingRoom.bedRent) {
         setTotalFee(matchingRoom.bedRent.toString());
-      } else {
-        setTotalFee("");
-      }
+      } 
     };
 
     if (roomNumber) {
       updateTotalFeeFromRoom();
     }
-  }, [roomNumber, girlsRooms]);
+  }, [roomNumber, girlsRooms, showForm]);
 
   useEffect(() => {
     if (selectedTenant) {
@@ -220,12 +218,18 @@ Please note that you made your last payment on ${paidDate}.\n`;
   const loadRentForEditing = (tenantId, rentId) => {
     const tenant = girlsTenantsWithRents.find((t) => t.id === tenantId);
     const rentRecord = tenant.rents.find((r) => r.id === rentId);
-
+    const roomsArray = Object.values(girlsRooms);
+    const matchingRoom = roomsArray.find(
+      (room) => room.roomNumber === rentRecord?.roomNumber
+    );
     if (rentRecord) {
+    
       setSelectedTenant(tenantId || "");
       setRoomNumber(rentRecord.roomNumber || "");
       setBedNumber(rentRecord.bedNumber || "");
       // setTotalFee(rentRecord.totalFee || "");
+      setTenantMonthly(rentRecord.monthly)
+      setTotalFee(rentRecord.monthly ? matchingRoom.bedRent :  rentRecord.totalFee);
       setPaidAmount(rentRecord.paidAmount || "");
       setDue(rentRecord.due || "");
       setPaidDate(rentRecord.paidDate || "");
@@ -285,6 +289,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       paidDate,
       dueDate,
       status: parseFloat(due) <= 0 ? "Paid" : "Unpaid",
+      monthly:showForm
     };
 
     if (isEditing) {
@@ -303,9 +308,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
           setIsEditing(false);
@@ -325,9 +328,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
         });
@@ -348,9 +349,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
           setIsEditing(false);
@@ -370,9 +369,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
         });
@@ -396,10 +393,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId=null;
-            
-          },
+          toastId: "empty-fields-error",
         }
       );
     }
@@ -422,6 +416,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
     setIsEditing(false);
     setEditingRentId(null);
     setErrors({});
+    setTenantMonthly(showForm)
   };
 
   const handleSearch = (e) => {
@@ -776,13 +771,14 @@ Please note that you made your last payment on ${paidDate}.\n`;
                           <label htmlFor="TotalFee" class="form-label">
                             {t("dashboard.totalFee")}:
                           </label>
-                          <input
+                          {/* <input
                             id="TotalFee"
                             class="form-control"
                             type="number"
                             value={totalFee}
                             readOnly
-                          />
+                          /> */}
+                            <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} readOnly = {tenantMonthly}/>
                         </div>
                         <div class="col-md-6 mb-3">
                           <label htmlFor="PaidAmount" class="form-label">

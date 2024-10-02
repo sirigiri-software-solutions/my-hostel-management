@@ -147,6 +147,7 @@ const SignUp = () => {
           draggable: true,
           progress: undefined,
           theme: "light",
+          toastId: "empty-fields-error",
         });
         setData({
           firstname: "",
@@ -174,6 +175,7 @@ const SignUp = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
+            toastId: "empty-fields-error",
           }
         );
       });

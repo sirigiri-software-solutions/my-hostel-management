@@ -272,7 +272,8 @@
           "expenseAmountValidNumber": "व्यय राशि को मान्य संख्या होना चाहिए",
           "expenseNameRequired": "व्यय नाम आवश्यक है",
           "expenseAmountRequired": "व्यय राशि आवश्यक है",
-          "expenseDateRequired": "व्यय तिथि आवश्यक है"
+          "expenseDateRequired": "व्यय तिथि आवश्यक है",
+          "permanentAddress":"स्थायी पता आवश्यक है"
 
         
       },

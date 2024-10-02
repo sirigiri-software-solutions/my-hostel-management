@@ -276,8 +276,8 @@
         "expenseAmountValidNumber": "Expense amount should be a valid number",
         "expenseNameRequired": "Expense name is required",
         "expenseAmountRequired": "Expense amount is required",
-        "expenseDateRequired": "Expense date is required"
-          
+        "expenseDateRequired": "Expense date is required",
+        "permanentAddress":"Address is required"
           
     },
     "toastMessages": {
@@ -367,8 +367,8 @@
         "boysHostels":"Boys Hostels",
         "girlsHostels":"Girls Hostels",
         "addHostel":"Add Hostel",
-        "addboysHostel":"Add Boys Hostel",
-        "addGirlsHostel":"Add Girls Hostel",
+        "addboysHostel":"Add Men's Hostel",
+        "addGirlsHostel":"Add Women's Hostel",
         "hostelName":"Hostel Name",
         "hostelAddress":"Hostel Address",
         "close":"Close",

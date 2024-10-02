@@ -218,9 +218,7 @@ const Login = () => {
               draggable: true,
               progress: undefined,
               theme: "light",
-              onClose: () => {
-                activeToastId = null; // Reset activeToastId when the toast is closed
-              },
+              toastId: "empty-fields-error",
             });
           }
             
@@ -240,9 +238,7 @@ const Login = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           });
         }
         }
@@ -258,9 +254,7 @@ const Login = () => {
           draggable: true,
           progress: undefined,
           theme: "light",
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
         }
 
@@ -321,6 +315,7 @@ const Login = () => {
         position: "bottom-right",
         autoClose: 2000,
         theme: "light",
+        toastId: "empty-fields-error",
       });
       return;
     }
@@ -331,6 +326,7 @@ const Login = () => {
         position: "bottom-right",
         autoClose: 2000,
         theme: "light",
+        toastId: "empty-fields-error",
       });
       return;
     }
@@ -354,6 +350,7 @@ const Login = () => {
           position: "bottom-right",
           autoClose: 2000,
           theme: "light",
+          toastId: "empty-fields-error",
         });
         setForgotPasswordData({
           email: '',
@@ -368,6 +365,7 @@ const Login = () => {
           position: "bottom-right",
           autoClose: 2000,
           theme: "light",
+          toastId: "empty-fields-error",
         });
 
       }
@@ -377,6 +375,7 @@ const Login = () => {
         position: "bottom-right",
         autoClose: 2000,
         theme: "light",
+        toastId: "empty-fields-error",
       });
     }
 
@@ -557,9 +556,7 @@ const Login = () => {
         draggable: true,
         progress: undefined,
         theme: "light",
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       });
     }
       const response = await axios.post(apiEndpoint, formData);
@@ -590,9 +587,7 @@ const Login = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
           }
         );
       }

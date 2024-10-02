@@ -722,9 +722,7 @@ const takePicture = async () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       });
     }
       fetchData()
@@ -738,9 +736,7 @@ const takePicture = async () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       });
     }
     });
@@ -778,7 +774,7 @@ const takePicture = async () => {
     tempErrors.selectedRoom = selectedRoom ? "" : t('errors.roomNumberRequired');
     tempErrors.selectedBed = selectedBed ? "" : t('errors.bedNumberRequired');
     tempErrors.dateOfJoin = dateOfJoin ? "" : t('errors.dateOfJoinRequired');
-
+    tempErrors.permnentAddress = permnentAddress ? "" : t('errors.permanentAddress')
     const phoneRegexWithCountryCode = /^\+\d{12}$/;
     const phoneRegexWithoutCountryCode = /^\d{10}$/;
 
@@ -1166,9 +1162,7 @@ if (bikeRcImage) {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
-                onClose: () => {
-                  activeToastId = null; // Reset activeToastId when the toast is closed
-                },
+                toastId: "empty-fields-error",
             });
           }
             fetchData();
@@ -1183,9 +1177,7 @@ if (bikeRcImage) {
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
-                onClose: () => {
-                  activeToastId = null; // Reset activeToastId when the toast is closed
-                },
+                toastId: "empty-fields-error",
             });
           }
             fetchData();
@@ -1202,9 +1194,7 @@ if (bikeRcImage) {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            onClose: () => {
-              activeToastId = null; // Reset activeToastId when the toast is closed
-            },
+            toastId: "empty-fields-error",
         });
       }
     } finally {
@@ -1278,6 +1268,7 @@ if (bikeRcImage) {
       paidDate,
       dueDate,
       status: parseFloat(due) <= 0 ? 'Paid' : 'Unpaid',
+      monthly:showForm
     };
 
     if (isEditing) {
@@ -1294,9 +1285,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
         fetchData()
@@ -1315,9 +1304,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
       });
@@ -1334,9 +1321,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
         fetchData();
@@ -1356,9 +1341,7 @@ if (bikeRcImage) {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
       });
@@ -1470,10 +1453,7 @@ navigate(-1)
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
-
+        toastId: "empty-fields-error",
       })
     }
     } else {
@@ -1565,10 +1545,7 @@ navigate(-1)
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
-  
+          toastId: "empty-fields-error",
         });
       }
         fetchData();
@@ -1583,9 +1560,7 @@ navigate(-1)
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          },
+          toastId: "empty-fields-error",
         });
       }
       });
@@ -2120,7 +2095,8 @@ navigate(-1)
             </div>
             <div className='col-md-12'>
               <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
-              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' />
+              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' onFocus={handleTenantFocus} />
+              {tenatErrors.permnentAddress && <p style={{ color: 'red' }}>{tenatErrors.permnentAddress}</p>}
             </div>
 
             <div className="col-12 col-sm-12 col-md-12" style={{ marginTop: '20px' }}>

@@ -268,7 +268,8 @@
   "expenseAmountValidNumber": "ఖర్చు మొత్తం ఒక చిరునంబర అయి ఉండాలి",
   "expenseNameRequired": "ఖర్చు పేరు అవసరం",
   "expenseAmountRequired": "ఖర్చు మొత్తం అవసరం",
-  "expenseDateRequired": "ఖర్చు తేదీ అవసరం"
+  "expenseDateRequired": "ఖర్చు తేదీ అవసరం",
+   "permanentAddress":"చిరునామా అవసరం"
   },
   "toastMessages": {
     "success": "గది విజయవంతంగా జోడించబడింది.",
