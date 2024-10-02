@@ -413,6 +413,9 @@ const RoomsGirls = () => {
     window.addEventListener('popstate', handlePopState);
 
 
+    return () => {
+      window.removeEventListener('popstate',handlePopState)
+    }
   }, [showModal,showConfirmationPopUp, location.pathname]);
 
 
