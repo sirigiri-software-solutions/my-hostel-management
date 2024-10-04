@@ -238,7 +238,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       paidDate,
       dueDate,
       status: parseFloat(due) <= 0 ? "Paid" : "Unpaid",
-      monthly:showForm
+      monthly:isEditing ? tenantMonthly : showForm,
     };
 
     if (isEditing) {
@@ -713,7 +713,6 @@ Please note that you made your last payment on ${paidDate}.\n`;
                             class="form-control"
                             type="number"
                             value={totalFee}
-                            readOnly = {tenantMonthly}
                           /> */}
                           <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} readOnly = {tenantMonthly}/>
                         </div>
