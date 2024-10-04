@@ -1244,7 +1244,6 @@ const DashboardBoys = () => {
         
         
       }
-      console.log("triggering","popstate")
     };
 
     window.addEventListener('popstate', handlePopState);

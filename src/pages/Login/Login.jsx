@@ -465,7 +465,7 @@ const Login = () => {
     setLoginErrors((prevErrors) => ({ ...prevErrors, [fieldName]: "" }));
   };
 
-
+const [formSubmiting, setFormSubmiting] = useState(false)
   const submitHandler = async (e) => {
     e.preventDefault();
 
@@ -534,6 +534,7 @@ const Login = () => {
 
 
     try {
+      setFormSubmiting(true)
       const userCredential = await createUserWithEmailAndPassword(auth, signUpEmail, signUpPassword);
       await sendEmailVerification(userCredential.user);
 
@@ -592,8 +593,8 @@ const Login = () => {
       } else {
         setSignUpError(error.message);
       }
-
     }
+    setFormSubmiting(false)
   };
 
 
@@ -843,7 +844,7 @@ const Login = () => {
 
                 {signupError && <p className="text-center error-message">{signupError}</p>}
                 <div className="form-group col-md-11">
-                  <input type="submit" id='submit' className="btn btn-primary rounded-pill" value="Sign up" />
+                  <input type="submit" id='submit' disabled={formSubmiting} className="btn btn-primary rounded-pill" value="Sign up" />
                 </div>
                 <p className="text-center">
                   Already have an account?<span className="forgotText" onClick={(e) => onClickLogin(e)} > Login</span>
