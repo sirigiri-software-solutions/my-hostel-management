@@ -1248,8 +1248,9 @@ if (bikeRcImage) {
     return formIsValid;
   };
 
-
+  const [rentBtnStatus,setRentBtnStatus] = useState(false);
   const handleRentSubmit = async (e) => {
+    setRentBtnStatus(true)
     e.preventDefault();
 
 
@@ -1294,6 +1295,7 @@ if (bikeRcImage) {
           handleNotifyCheckbox(rentData);
         }
         setNotify(false)
+        setRentBtnStatus(false)
       }).catch(error => {
         if (!toast.isActive(activeToastId)) {
           activeToastId=toast.error(t('toastMessages.errorUpdatingRent') + error.message, {
@@ -1306,7 +1308,11 @@ if (bikeRcImage) {
           progress: undefined,
           toastId: "empty-fields-error",
         });
+<<<<<<< HEAD
       }
+=======
+        setRentBtnStatus(false)
+>>>>>>> 3d09bcd0278774ce167516ea70e032125ea318dc
       });
     } else {
 
@@ -1330,6 +1336,7 @@ if (bikeRcImage) {
           handleNotifyCheckbox(rentData);
         }
         setNotify(false)
+        setRentBtnStatus(false)
       }).catch(error => {
         if (!toast.isActive(activeToastId)) {
 
@@ -1343,7 +1350,11 @@ if (bikeRcImage) {
           progress: undefined,
           toastId: "empty-fields-error",
         });
+<<<<<<< HEAD
       }
+=======
+        setRentBtnStatus(false)
+>>>>>>> 3d09bcd0278774ce167516ea70e032125ea318dc
       });
     }
     setShowModal(false);
@@ -1817,7 +1828,7 @@ navigate(-1)
                     </div>
                   </div>
                   <div class="col-12 text-center mt-2">
-                    <button type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
+                    <button disabled={rentBtnStatus} type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
                   </div>
                 </form>
               </div> :
@@ -1942,7 +1953,7 @@ navigate(-1)
                   </div>
 
                   <div class="col-12 text-center mt-2">
-                    <button type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
+                    <button disabled={rentBtnStatus} type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
                   </div>
                 </form>
               </div>
@@ -2192,7 +2203,7 @@ navigate(-1)
 
             <div className="col-12 text-center mt-3">
 
-              <button type="submit" className="btn btn-warning">{t('dashboard.create')}</button>
+              <button type="submit" className="btn btn-warning">{t('dashboard.createExpense')}</button>
 
 
             </div>

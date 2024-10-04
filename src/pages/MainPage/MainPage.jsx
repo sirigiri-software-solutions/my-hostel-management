@@ -89,8 +89,6 @@ const MainPage = () => {
         if (Array.isArray(boys) || Array.isArray(girls)) {
           setIsHostels(boys.length === 0 && girls.length === 0);
           setIsModalOpen1(boys.length === 0 && girls.length === 0);
- 
- 
         }
  
         setWelcomeText(true);
@@ -105,7 +103,7 @@ const MainPage = () => {
     });
   }, [isModalOpen1]);
  
-  console.log(activeBoysHostelButtons.length,"area", "length")
+  // console.log(activeBoysHostelButtons.length,"area", "length")
   // useEffect(() => {
   //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
   //   onValue(tenantsRef, (snapshot) => {
@@ -362,9 +360,9 @@ const MainPage = () => {
     setIsModalOpen1(false);
   };
 
-  useEffect(() =>{
-    console.log(location.pathname,"getPthname")
-  })
+  // useEffect(() =>{
+  //   console.log(location.pathname,"getPthname")
+  // })
  
   return (
     <div className='bg-container' style={mainBackgroundContainerStyle}>

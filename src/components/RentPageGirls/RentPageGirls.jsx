@@ -272,8 +272,9 @@ Please note that you made your last payment on ${paidDate}.\n`;
   };
 
 
-
+  const [rentPageBtnStatus,setRentPageBtnStatus] = useState(false);
   const handleSubmit = async (e) => {
+    setRentPageBtnStatus(true)
     e.preventDefault();
 
     if (!validateForm()) {
@@ -290,7 +291,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       paidDate,
       dueDate,
       status: parseFloat(due) <= 0 ? "Paid" : "Unpaid",
-      monthly:showForm
+      monthly:isEditing ? tenantMonthly : showForm,
     };
 
     if (isEditing) {
@@ -317,6 +318,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             handleNotifyCheckbox(rentData);
           }
           fetchData();
+          setRentPageBtnStatus(false)
         })
         .catch((error) => {
           if (!toast.isActive(activeToastId)) {
@@ -331,7 +333,11 @@ Please note that you made your last payment on ${paidDate}.\n`;
             progress: undefined,
             toastId: "empty-fields-error",
           });
+<<<<<<< HEAD
         }
+=======
+          setRentPageBtnStatus(false)
+>>>>>>> 3d09bcd0278774ce167516ea70e032125ea318dc
         });
     } else {
       const rentRef = ref(
@@ -358,6 +364,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             handleNotifyCheckbox(rentData);
           }
           fetchData();
+          setRentPageBtnStatus(false)
         })
         .catch((error) => {
           if (!toast.isActive(activeToastId)) {
@@ -372,7 +379,11 @@ Please note that you made your last payment on ${paidDate}.\n`;
             progress: undefined,
             toastId: "empty-fields-error",
           });
+<<<<<<< HEAD
         }
+=======
+          setRentPageBtnStatus(false)
+>>>>>>> 3d09bcd0278774ce167516ea70e032125ea318dc
         });
     }
     resetForm();
@@ -912,7 +923,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                           </div>
                         </div>
                         <div class="col-12 text-center mt-2">
-                          <button type="submit" className="btn btn-warning">
+                          <button disabled={rentPageBtnStatus} type="submit" className="btn btn-warning">
                             {isEditing
                               ? t("dashboard.updateRent")
                               : t("dashboard.submitRentDetails")}
@@ -1121,7 +1132,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                           </div>
                         </div>
                         <div class="col-12 text-center mt-2">
-                          <button type="submit" className="btn btn-warning">
+                          <button disabled={rentPageBtnStatus} type="submit" className="btn btn-warning">
                             {isEditing
                               ? t("dashboard.updateRent")
                               : t("dashboard.submitRentDetails")}

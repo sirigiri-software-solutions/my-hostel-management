@@ -24,10 +24,13 @@ import { saveAs } from 'file-saver'; // Add file-saver to handle downloads
 // import Reports from './Reports';
 import imageCompression from 'browser-image-compression';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 const Settings = () => {
 
   const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const { activeBoysHostelName,activeGirlsHostelName,userUid, firebase, activeBoysHostelButtons, activeGirlsHostelButtons,girlsTenants, boysTenants, activeBoysHostel, activeGirlsHostel, boysExTenantsData, girlsExTenantsData, expensesInteracted, activeFlag, changeActiveFlag,entireHMAdata, fetchData } = useData();
   const { database,storage } = firebase;
@@ -278,6 +281,7 @@ const isImageFile = (file) => {
           setNewGirlsHostelAddress('');
           setIsGirlsModalOpen(false);
         }
+        navigate(-1)
       })
       .catch(error => {
         if (!toast.isActive(activeToastId)) {
@@ -288,23 +292,33 @@ const isImageFile = (file) => {
             activeToastId = null; // Reset activeToastId when the toast is closed
           }
         });
-      }
+      }navigate(-1)
       })
       .finally(() => {
         setIsSubmitting(false); // Reset isSubmitting to false when submission completes
       });
   };
+  const [closeBtnStatus,setCloseBtnStatus] = useState(false)
   const handleModalClose = (isBoys) => {
+    setCloseBtnStatus(true)
     if (isBoys) {
       setNewBoysHostelName('');
       setNewBoysHostelAddress('');
       setBoysHostelImage('');
       setIsBoysModalOpen(false);
+      navigate(-1)
+      setTimeout(()=>{
+        setCloseBtnStatus(false)
+      },1000)
     } else {
       setNewGirlsHostelName('');
       setNewGirlsHostelAddress('');
       setGirlsHostelImage('');
       setIsGirlsModalOpen(false);
+      navigate(-1)
+      setTimeout(()=>{
+        setCloseBtnStatus(false)
+      },1000)
     }
   };
 
@@ -1333,6 +1347,23 @@ const handleVacatedBtnExcel = async () => {
     setSelectedHostelType(e.target.value);
   }
 
+  useEffect(() => {
+    const handlePopState = () => {
+      if(isBoysModalOpen){
+        setIsBoysModalOpen(false)
+      }
+      if(isGirlsModalOpen){
+        setIsGirlsModalOpen(false);
+      }
+      
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+
+  }, [isBoysModalOpen,isGirlsModalOpen,location.pathname]);
+
+
 
   return (
     <div className="settings">
@@ -1351,13 +1382,13 @@ const handleVacatedBtnExcel = async () => {
          
       
               <h5 className="addHostelTextBtn">{t('settings.addboysHostel')}</h5>
-              <div><button className="addHostelBtn" onClick={() => setIsBoysModalOpen(true)}>{t("settings.addHostel")}</button></div>
+              <div><button className="addHostelBtn" onClick={() => {setIsBoysModalOpen(true);window.history.pushState(null, null, location.pathname)}}>{t("settings.addHostel")}</button></div>
             </div>
         }
         {
           activeGirlsHostelButtons.length > 0 ? '' :
             <div className='d-flex  align-items-center'>
-              <h5 className="addHostelTextBtn">{t('settings.addGirlsHostel')}</h5><button className="addHostelBtn" onClick={() => setIsGirlsModalOpen(true)}>{t("settings.addHostel")}</button>
+              <h5 className="addHostelTextBtn">{t('settings.addGirlsHostel')}</h5><button className="addHostelBtn" onClick={() => {setIsGirlsModalOpen(true);window.history.pushState(null, null, location.pathname)}}>{t("settings.addHostel")}</button>
             </div>
         }
 
@@ -1398,7 +1429,7 @@ const handleVacatedBtnExcel = async () => {
               </div>
               <div className='mt-3 d-flex justify-content-between'>
                 <Button variant="primary" style={{ marginRight: '10px' }} type="submit" disabled={isSubmitting}>{isSubmitting ? 'Adding...' : t("settings.addHostel")}</Button>
-                <Button variant="secondary" onClick={() => handleModalClose(true)}>{t("settings.close")}</Button>
+                <Button disabled={closeBtnStatus} variant="secondary" onClick={() => handleModalClose(true)}>{t("settings.close")}</Button>
               </div>
             </form>
           </Modal.Body>
@@ -1439,7 +1470,7 @@ const handleVacatedBtnExcel = async () => {
               </div>
               <div className='mt-3 d-flex justify-content-between'>
                 <Button variant="primary" type="submit" style={{ marginRight: '10px' }} disabled={isSubmitting}>{isSubmitting ? 'Adding...' : t("settings.addHostel")}</Button>
-                <Button variant="secondary" onClick={() => handleModalClose(false)}>{t("settings.close")}</Button>
+                <Button disabled={closeBtnStatus} variant="secondary" onClick={() => handleModalClose(false)}>{t("settings.close")}</Button>
               </div>
             </form>
           </Modal.Body>

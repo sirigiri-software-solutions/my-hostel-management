@@ -222,7 +222,10 @@ Please note that you made your last payment on ${paidDate}.\n`;
     return formIsValid;
   };
 
+  const [rentPageBtnStatus,setRentPageBtnStatus] = useState(false);
+
   const handleSubmit = async (e) => {
+    setRentPageBtnStatus(true)
     e.preventDefault();
     if (!validateForm()) {
       return;
@@ -238,7 +241,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       paidDate,
       dueDate,
       status: parseFloat(due) <= 0 ? "Paid" : "Unpaid",
-      monthly:showForm
+      monthly:isEditing ? tenantMonthly : showForm,
     };
 
     if (isEditing) {
@@ -263,7 +266,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
         }
           fetchData();
           setIsEditing(false);
-
+          setRentPageBtnStatus(false)
           if (notify) {
             handleNotifyCheckbox(rentData);
           }
@@ -281,7 +284,11 @@ Please note that you made your last payment on ${paidDate}.\n`;
             progress: undefined,
             toastId: "empty-fields-error",
           });
+<<<<<<< HEAD
         }
+=======
+          setRentPageBtnStatus(false)
+>>>>>>> 3d09bcd0278774ce167516ea70e032125ea318dc
         });
     } else {
       const rentRef = ref(
@@ -308,6 +315,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             handleNotifyCheckbox(rentData);
           }
           fetchData();
+          setRentPageBtnStatus(false)
         })
         .catch((error) => {
           if (!toast.isActive(activeToastId)) {
@@ -324,6 +332,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
           });
         }
         });
+        setRentPageBtnStatus(false)
     }
     setShowModal(false);
     navigate(-1)
@@ -728,7 +737,6 @@ Please note that you made your last payment on ${paidDate}.\n`;
                             class="form-control"
                             type="number"
                             value={totalFee}
-                            readOnly = {tenantMonthly}
                           /> */}
                           <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} readOnly = {tenantMonthly}/>
                         </div>
@@ -860,7 +868,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                         </div>
 
                         <div class="col-12 text-center mt-2">
-                          <button type="submit" className="btn btn-warning">
+                          <button disabled={rentPageBtnStatus} type="submit" className="btn btn-warning">
                             {isEditing
                               ? t("dashboard.updateRent")
                               : t("dashboard.submitRentDetails")}
@@ -1071,7 +1079,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                         </div>
 
                         <div class="col-12 text-center mt-2">
-                          <button type="submit" className="btn btn-warning">
+                          <button disabled={rentPageBtnStatus} type="submit" className="btn btn-warning">
                             {isEditing
                               ? t("dashboard.updateRent")
                               : t("dashboard.submitRentDetails")}

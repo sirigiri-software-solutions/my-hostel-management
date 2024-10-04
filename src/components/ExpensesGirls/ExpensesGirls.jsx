@@ -337,7 +337,6 @@ return () => {
       formIsValid = false;
     }
 
-    console.log('Expense Date:', formData.expenseDate);
 
     if (formIsValid) {
       let updatedFormData = {

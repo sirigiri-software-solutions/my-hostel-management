@@ -56,7 +56,7 @@ const DashboardBoys = () => {
   const [createdBy, setCreatedBy] = useState(adminRole);
   const [updateDate, setUpdateDate] = useState('');
   const [errors, setErrors] = useState({});
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(null);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [currentMonthExpenses, setCurrentMonthExpenses] = useState([])
   const [selectedRoom, setSelectedRoom] = useState('');
@@ -132,6 +132,8 @@ const DashboardBoys = () => {
   const [bedsData, setBedsData] = useState([]);
   let activeToastId=null;
 
+
+  const [rentBtnStatus,setRentBtnStatus] = useState(false);
 
 
   const getCurrentMonth = () => {
@@ -1276,6 +1278,7 @@ const DashboardBoys = () => {
 
 
   const handleRentSubmit = async (e) => {
+    setRentBtnStatus(true)
     e.preventDefault();
     if (!validateRentForm()) {
       return;
@@ -1316,6 +1319,7 @@ const DashboardBoys = () => {
           handleNotifyCheckbox(rentData);
         }
         setNotify(false)
+        setRentBtnStatus(false)
       }).catch(error => {
         if (!toast.isActive(activeToastId)) {
 
@@ -1330,6 +1334,7 @@ const DashboardBoys = () => {
           toastId: "empty-fields-error",
         });
       }
+      setRentBtnStatus(false)
       });
     } else {
       const rentRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${selectedTenant}/rents`);
@@ -1353,6 +1358,7 @@ const DashboardBoys = () => {
           handleNotifyCheckbox(rentData);
         }
         setNotify(false)
+        setRentBtnStatus(false)
       }).catch(error => {
         if (!toast.isActive(activeToastId)) {
           activeToastId=toast.error(t('toastMessages.errorAddingRent') + error.message, {
@@ -1366,6 +1372,7 @@ const DashboardBoys = () => {
           toastId: "empty-fields-error",
         });
       }
+      setRentBtnStatus(false)
       });
     }
     setShowModal(false);
@@ -1477,7 +1484,7 @@ const DashboardBoys = () => {
         progress: undefined,
         toastId: "empty-fields-error",
       })
-    }
+}setShowModal(false);
     } else {
       setModelText(text);
       setFormLayout(text);
@@ -1488,6 +1495,9 @@ const DashboardBoys = () => {
     }
   };
 
+  
+
+    
   useEffect(() => {
     const handlePopState = () => {
 
@@ -1868,7 +1878,7 @@ const DashboardBoys = () => {
                   </div>
 
                   <div class="col-12 text-center mt-2">
-                    <button type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
+                    <button disabled={rentBtnStatus} type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
                   </div>
                 </form>
               </div> :
@@ -1995,7 +2005,7 @@ const DashboardBoys = () => {
 
 
                   <div class="col-12 text-center mt-2">
-                    <button type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
+                    <button  disabled={rentBtnStatus}  type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
                   </div>
                 </form>
               </div>}
@@ -2235,7 +2245,7 @@ const DashboardBoys = () => {
             </div>
 
             <div className="col-12 text-center mt-3">
-              <button type="submit" className="btn btn-warning">{t('dashboard.create')}</button>
+              <button type="submit" className="btn btn-warning">{t('dashboard.createExpense')}</button>
             </div>
           </form>
 
