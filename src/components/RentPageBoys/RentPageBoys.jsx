@@ -222,7 +222,10 @@ Please note that you made your last payment on ${paidDate}.\n`;
     return formIsValid;
   };
 
+  const [rentPageBtnStatus,setRentPageBtnStatus] = useState(false);
+
   const handleSubmit = async (e) => {
+    setRentPageBtnStatus(true)
     e.preventDefault();
     if (!validateForm()) {
       return;
@@ -260,7 +263,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
           });
           fetchData();
           setIsEditing(false);
-
+          setRentPageBtnStatus(false)
           if (notify) {
             handleNotifyCheckbox(rentData);
           }
@@ -276,6 +279,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             progress: undefined,
             toastId: "empty-fields-error",
           });
+          setRentPageBtnStatus(false)
         });
     } else {
       const rentRef = ref(
@@ -299,6 +303,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             handleNotifyCheckbox(rentData);
           }
           fetchData();
+          setRentPageBtnStatus(false)
         })
         .catch((error) => {
           toast.error(t("toastMessages.errorAddingRent") + error.message, {
@@ -312,6 +317,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             toastId: "empty-fields-error",
           });
         });
+        setRentPageBtnStatus(false)
     }
     setShowModal(false);
     navigate(-1)
@@ -844,7 +850,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                         </div>
 
                         <div class="col-12 text-center mt-2">
-                          <button type="submit" className="btn btn-warning">
+                          <button disabled={rentPageBtnStatus} type="submit" className="btn btn-warning">
                             {isEditing
                               ? t("dashboard.updateRent")
                               : t("dashboard.submitRentDetails")}
@@ -1055,7 +1061,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                         </div>
 
                         <div class="col-12 text-center mt-2">
-                          <button type="submit" className="btn btn-warning">
+                          <button disabled={rentPageBtnStatus} type="submit" className="btn btn-warning">
                             {isEditing
                               ? t("dashboard.updateRent")
                               : t("dashboard.submitRentDetails")}
