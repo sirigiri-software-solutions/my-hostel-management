@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, useRef } from 'react'
 import { useLocation } from 'react-router-dom';
 import DashboardImage from '../../images/Icons (11).png'
 import RoomsImage from '../../images/Icons (2).png'
@@ -249,6 +249,24 @@ const MainPage = () => {
     setHamburgerMenuItems(!hamburgerMenuItems)
   }
 
+  const closePopupRef = useRef(null); // Create a ref to store the close function
+  useEffect(() => {
+    const handlePopState = () => {
+      if (closePopupRef.current) {
+        closePopupRef.current(); // Call the close function to close the popup
+      }
+    };
+
+    // Add the event listener for popstate
+    window.addEventListener("popstate", handlePopState);
+
+    // Cleanup function to remove the listener when component unmounts
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+
   useEffect(()=>{
     console.log(location.pathname,"path2")
   },[location.pathname,navigate])
@@ -375,39 +393,65 @@ const MainPage = () => {
             ))
           }
         </div>
-        <Popup modal
-          trigger={<GiHamburgerMenu style={hamburgerMenu} onClick={handleHamburgerMenu} />}>
-          {close => (
-            <div style={{
+        <Popup
+      modal
+      trigger={<GiHamburgerMenu style={hamburgerMenu} onClick={handleHamburgerMenu} />}
+      onOpen={() => {
+        // Push state to history when popup opens
+        window.history.pushState({ popup: true }, "");
+      }}
+    >
+      {close => {
+        closePopupRef.current = close; // Assign the close function to the ref
+
+        return (
+          <div
+            style={{
               backgroundColor: "#fff",
               minHeight: "100vh",
               minWidth: "100vw",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              position: "relative"
-            }}>
-              <div style={{ display: "flex", flexDirection: "Column" }}>
-                {
-                  menuItems.map((item, index) => (
-                    <div key={index} className="link" style={item.path === location.pathname ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() =>{ handleSidebarItemClick(item.id, item.path); close()}}>
-                      <img src={item.icon} alt={item.name} className='icon' />
-                      <label className='link-text'>{item.name}</label>
-                    </div>
-                  ))
-                }
-              </div>
-              <AiOutlineClose
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                }}
-                onClick={() => close()} />
+              position: "relative",
+            }}
+          >
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {menuItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="link"
+                  style={
+                    item.path === location.pathname
+                      ? {
+                          backgroundColor: "hsla(30, 100%, 50%, 0.41)",
+                          borderRadius: "10px",
+                        }
+                      : { borderRadius: "10px" }
+                  }
+                  onClick={() => {
+                    handleSidebarItemClick(item.id, item.path);
+                    close();
+                  }}
+                >
+                  <img src={item.icon} alt={item.name} className="icon" />
+                  <label className="link-text">{item.name}</label>
+                </div>
+              ))}
             </div>
-          )}
-        </Popup>
-      </div>
+            <AiOutlineClose
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+              }}
+              onClick={() => close()}
+            />
+          </div>
+        );
+      }}
+    </Popup>      
+    </div>
  
  
  

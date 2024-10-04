@@ -1,48 +1,44 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
 import * as pdfjsLib from 'pdfjs-dist/webpack';
 import TenantsIcon from '../../images/Icons (4).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { push, ref } from "../../firebase/firebase";
-import '../TenantsGirls/TenantsGirls.css';
-import './TenantsBoys.css'
 
 import { onValue, remove, set, update } from 'firebase/database'
-import { ref as storageRef, uploadBytes, getDownloadURL,getMetadata } from 'firebase/storage';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useTranslation } from 'react-i18next'
-
 import { useData } from '../../ApiData/ContextProvider';
+import '../TenantsBoys/TenantsBoys.css'
+// import './TenantsGirls.css';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera } from '@fortawesome/free-solid-svg-icons';
+
 import Spinner from '../../Elements/Spinner'
-
-
-import imageCompression from 'browser-image-compression';
 import { Capacitor } from '@capacitor/core';
-import { Filesystem, FilesystemDirectory ,Directory} from '@capacitor/filesystem';
+import { Filesystem, FilesystemDirectory,Directory } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 import jsPDF from 'jspdf';
-
 import { isPlatform } from '@ionic/react';
 import { Browser } from '@capacitor/browser';
 import { saveAs } from 'file-saver'; // For web download
-// import * as pdfjsLib from 'pdfjs-dist';
+
+import imageCompression from 'browser-image-compression';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const TenantsBoys = () => {
-  
-  const navigate = useNavigate();
+  const navigate= useNavigate();
   const location = useLocation();
-
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms, boysTenants, entireHMAdata, boysExTenantsData} = useData();
-  const role = localStorage.getItem('role');
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms, boysTenants, entireHMAdata, boysExTenantsData} = useData();  const role = localStorage.getItem('role');
   const { database, storage } = firebase;
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
@@ -58,74 +54,67 @@ const TenantsBoys = () => {
   const [currentId, setCurrentId] = useState('');
   const [errors, setErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
-   const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
   const [tenantId, setTenantId] = useState(null);
+  const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantIdUrl, setTenantIdUrl] = useState('');
+  // const [girlsRoomsData, setGirlsRoomsData] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+
+  const [userDetailsTenantPopup, setUserDetailsTenantsPopup] = useState(false);
+  const [singleTenantDetails, setSingleTenantDetails] = useState(false);
+  const [dueDateOfTenant, setDueDateOfTenant] = useState("");
+
+  // const [exTenants, setExTenants] = useState([]);
+  const [showExTenants, setShowExTenants] = useState(false);
+  const [singleTenantProofId, setSingleTenantProofId] = useState("");
+
+  const [fileName, setFileName] = useState('');
+
+  const [hasBike, setHasBike] = useState(false);
+  const [bikeNumber, setBikeNumber] = useState('NA');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [showBikeFilter, setShowBikeFilter] = useState(true);
+  let activeToastId = null;
+
+
+  const tenantImageInputRef = useRef(null);
+  const tenantProofIdRef = useRef(null);
+  const [permnentAddress, setPermnentAddress] = useState("");
+  const [bikeImage, setBikeImage] = useState(null);
+  const [bikeImageUrl, setBikeImageUrl] = useState('');
+  const [bikeImageField, setBikeImageField] = useState('');
+  const [bikeRcImage, setBikeRcImage] = useState('');
+  const [bikeRcImageUrl, setBikeRcImageUrl] = useState('');
+  const [bikeRcImageField, setBikeRcImageField] = useState('');
+  const [tenantAddress, setTenantAddress] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [singleTenanantBikeNum,setSingleTenantBikeNum] = useState('');
   const [errorMessage, setErrorMessage] = useState({
     tenantImage: '',
     tenantId: '',
     bikeImage: '',
     bikeRcImage: '',
   });
+  const [downloadingTextFlag,setDownloadingTextFlag] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState({
+    idProof: false,
+    bikePic: false,
+    bikeRc: false
+  });
 
 
+   
 
-  const [showModal, setShowModal] = useState(false);
-  const [userDetailsTenantPopup, setUserDetailsTenantsPopup] = useState(false);
-  const [singleTenantDetails, setSingleTenantDetails] = useState(false);
-  const [dueDateOfTenant, setDueDateOfTenant] = useState("");
-  const [tenantAddress, setTenantAddress] = useState("");
-  const [singleTenantProofId, setSingleTenantProofId] = useState("");
-  const [fileName, setFileName] = useState('');
-  const [singleTenantAddress, setSingleTenantAddress] = useState('');
-  const [singleTenanantBikeNum, setSingleTenantBikeNum] = useState('');
 
-  // const [boysRooms, setBoysRooms] = useState([]);
-  // const [exTenants, setExTenants] = useState([]);
-  const [showExTenants, setShowExTenants] = useState(false);
-  const [hasBike, setHasBike] = useState(false);
-  const [bikeNumber, setBikeNumber] = useState('NA');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [showBikeFilter, setShowBikeFilter] = useState(true);
-
-  const [permnentAddress, setPermnentAddress] = useState("");
-
-  const tenantImageInputRef = useRef(null);
-  const tenantProofIdRef = useRef(null);
-  const [bikeImage, setBikeImage] = useState(null);
-  const [bikeImageUrl, setBikeImageUrl] = useState('');
-  const [bikeImageField, setBikeImageField] = useState('');
-  const [bikeRcImage,setBikeRcImage]=useState('');
-  const [bikeRcImageUrl, setBikeRcImageUrl] = useState('');
-  const [bikeRcImageField,setBikeRcImageField]=useState('');
-  let activeToastId = null;
-
-  
   // for camera icon
-  
   const [isMobile, setIsMobile] = useState(false);
-//   const [photoUrl, setPhotoUrl] = useState(null);
-//   const [idUrl,setIdUrl]=useState(null);
-//   const [isFileUploaded, setIsFileUploaded] = useState(false); // For disabling camera when file is uploaded
-// const [isCameraUsed, setIsCameraUsed] = useState(false); // For disabling file input when camera is used
-// const [isTenantIdFileUploaded, setIsTenantIdFileUploaded] = useState(false); // Disable camera if file uploaded
-// const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false); 
-// const [photoSource, setPhotoSource] = useState(null); // Track if photo is from file or camera
-
-// State for tenant image (profile photo)
-
-const [photoUrl, setPhotoUrl] = useState('');
-const [isFileUploaded, setIsFileUploaded] = useState(false);
-const [isCameraUsed, setIsCameraUsed] = useState(false);
-
-// State for tenant ID image
-
-const [idUrl, setIdUrl] = useState('');
-const [isTenantIdFileUploaded, setIsTenantIdFileUploaded] = useState(false);
-const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
-
-
-
+  const [photoUrl, setPhotoUrl] = useState(null);
+  const [idUrl,setIdUrl]=useState(null);
+  const [isFileUploaded, setIsFileUploaded] = useState(false); // For disabling camera when file is uploaded
+const [isCameraUsed, setIsCameraUsed] = useState(false); // For disabling file input when camera is used
+const [isTenantIdFileUploaded, setIsTenantIdFileUploaded] = useState(false); // Disable camera if file uploaded
+const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false); 
+const [photoSource, setPhotoSource] = useState(null); // Track if photo is from file or camera
 
   useEffect(() => {
     // Check if the user agent is a mobile device
@@ -133,53 +122,110 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     setIsMobile(/iPhone|iPod|iPad|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent));
 }, []);
 
+  // const takePicture = async () => {
+
+  //   if (!isMobile) {
+  //     console.error("Camera access is not supported on your device.");
+  //     return;
+  // }
+  //   try {
+  //     const photo = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri
+  //     });
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setPhotoUrl(reader.result);
+  //       setTenantImage(reader.result);
+  //     };
+  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
+      
+      // const response = await fetch(photo.webPath);
+      // const blob = await response.blob();
+      // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
+      // const snapshot = await uploadBytes(imageRef, blob);
+      // const url = await getDownloadURL(snapshot.ref);
+      
+      // setPhotoUrl(url); // Display in UI
+      // setTenantImageUrl(url); // Use in form submission
+      // setPhotoUrl(photo.webPath);
+  //   } catch (error) {
+  //     console.error("Error accessing the camera", error);
+  //     toast.error(t('toastMessages.Image not Uploaded'));
+  //   }
+  // };
+
+  // const takePicture = async () => {
+  //   if (!isMobile) {
+  //     console.error("Camera access is not supported on your device.");
+  //     return;
+  //   }
+  //   try {
+  //     const photo = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri
+  //     });
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setPhotoUrl(reader.result);
+  //       setTenantImage(reader.result);
+  //     };
+  //     fetch(photo.webPath)
+  //       .then(response => response.blob())
+  //       .then(blob => reader.readAsDataURL(blob));
+  //   } catch (error) {
+  //     console.error("Error accessing the camera", error);
+  //     toast.error(t('toastMessages.imageNotUploaded'));
+  //   }
+  // }
+  const takePicture = async () => {
+    if (!isMobile) {
+        console.error("Camera access is not supported on your device.");
+        return;
+    }
+    if (isFileUploaded) {
+      setErrorMessage((prevErrors) => ({
+        ...prevErrors,
+        tenantImage: "You've already uploaded a photo from the file manager.",
+      }));
+      return;
+    }
+    try {
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
+
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+
+        setTenantImage(blob); // Set the blob to tenantImage
+        const uploadFile = async (file, path) => {
+          try {
+              const imageRef = storageRef(storage, path);
+              const snapshot = await uploadBytes(imageRef, file);
+              return await getDownloadURL(snapshot.ref);
+          } catch (error) {
+              console.error(`Error uploading file ${file.name}:`, error);
+              throw error;
+          }
+      };
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${blob.name}`);
+        setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
+        setTenantImage(blob); 
+        setIsCameraUsed(true);
+        setIsFileUploaded(false); // Reset file upload state
   
-//   const takePicture = async () => {
-//     if (!isMobile) {
-//         console.error("Camera access is not supported on your device.");
-//         return;
-//     }
-//     if (isFileUploaded) {
-//       setErrors({ tenantImage: "You've already uploaded a photo from the file manager." });
-//       return;
-//   }
-//     try {
-//         const photo = await Camera.getPhoto({
-//             quality: 90,
-//             allowEditing: false,
-//             resultType: CameraResultType.Uri
-//         });
-
-//         const response = await fetch(photo.webPath);
-//         const blob = await response.blob();
-
-//         setTenantImage(blob); // Set the blob to tenantImage
-//         const uploadFile = async (file, path) => {
-//           try {
-//               const imageRef = storageRef(storage, path);
-//               const snapshot = await uploadBytes(imageRef, file);
-//               return await getDownloadURL(snapshot.ref);
-//           } catch (error) {
-//               console.error(`Error uploading file ${file.name}:`, error);
-//               throw error;
-//           }
-//       };
-   
-//         const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${blob.name}`);
-//         setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
-//         setIsCameraUsed(true); // Disable file input
-//         setIsFileUploaded(false); // Reset file upload state
-//         setPhotoSource("camera");
         
-//     } catch (error) {
-//         console.error("Error accessing the camera", error);
-//         // toast.error(t('toastMessages.imageNotUploaded'));   
-//          }
-// }
-
-
+    } catch (error) {
+        console.error("Error accessing the camera", error);
+        // toast.error(t('toastMessages.imageNotUploaded'));    
+      }
+}
   // const takeidPicture = async () => {
-
 
   //   if (!isMobile) {
   //     console.error("Camera access is not supported on your device.");
@@ -213,102 +259,21 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
   //   }
   // };
 
-  const takePicture = async () => {
-    if (!isMobile) {
-      console.error("Camera access is not supported on your device.");
-      return;
-    }
-    if (isFileUploaded) {
-      setErrorMessage((prevErrors) => ({
-        ...prevErrors,
-        tenantImage: "You've already uploaded a photo from the file manager.",
-      }));
-      return;
-    }
-
-    try {
-      const photo = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-
-      const response = await fetch(photo.webPath);
-      const blob = await response.blob();
-
-      const uploadFile = async (file, path) => {
-        const imageRef = storageRef(storage, path);
-        const snapshot = await uploadBytes(imageRef, file);
-        return await getDownloadURL(snapshot.ref);
-      };
-
-      const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${blob.name}`);
-      setPhotoUrl(uploadedUrl);
-      setTenantImage(blob); 
-
-      setIsCameraUsed(true);
-      setIsFileUploaded(false); // Reset file upload state
-    } catch (error) {
-      console.error("Error accessing the camera", error);
-    }
-  };
 
 
-  const takeidPicture = async () => {
-    if (!isMobile) {
-      console.error("Camera access is not supported on your device.");
-      return;
-    }
-    if (isTenantIdFileUploaded) {
-      setErrorMessage((prevErrors) => ({
-        ...prevErrors,
-        tenantId: "You've already uploaded an ID photo from the file manager.",
-      }));
-      return;
-    }
 
-    try {
-      const photo = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-
-      const response = await fetch(photo.webPath);
-      const blob = await response.blob();
-      setTenantId(blob);
-      const uploadFile = async (file, path) => {
-        const imageRef = storageRef(storage, path);
-        const snapshot = await uploadBytes(imageRef, file);
-        return await getDownloadURL(snapshot.ref);
-      };
-
-      const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${blob.name}`);
-      setIdUrl(uploadedUrl);
-      setIsTenantIdCameraUsed(true);
-      setIsTenantIdFileUploaded(false); // Reset file upload state
-    } catch (error) {
-      console.error("Error accessing the camera", error);
-    }
-  };
-
-  const [loading, setLoading] = useState(false);
-
-  const [downloadingTextFlag,setDownloadingTextFlag] = useState(false);
-  const [downloadStatus, setDownloadStatus] = useState({
-    idProof: false,
-    bikePic: false,
-    bikeRc: false
-  });
 
   // const handleImageChange = (e) => {
   //   const file = e.target.files[0];
+
   //   const reader = new FileReader();
+
   //   reader.onload = () => {
   //     setBikeImage(reader.result);
   //   };
   //   reader.readAsDataURL(file);
   // };
+
 
   // const handleRcChange = (e) => {
   //   const file1 = e.target.files[0];
@@ -317,60 +282,165 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
   //     setBikeRcImage(reader.result);
   //   }
   //   reader.readAsDataURL(file1);
-  // }
 
+  // }
+  const takeidPicture = async () => {
+    if (!isMobile) {
+        console.error("Camera access is not supported on your device.");
+        return;
+    }
+    if (isTenantIdFileUploaded) {
+      setErrorMessage((prevErrors) => ({
+        ...prevErrors,
+        tenantId: "You've already uploaded an ID photo from the file manager.",
+      }));
+      return;
+    }
+    try {
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
+
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+
+        setTenantId(blob); // Set the blob to tenantImage
+        const uploadFile = async (file, path) => {
+          const imageRef = storageRef(storage, path);
+          const snapshot = await uploadBytes(imageRef, file);
+          return await getDownloadURL(snapshot.ref);
+        };
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}tenants/images/tenantId/${blob.name}`);
+        setIdUrl(uploadedUrl); // Set the uploaded URL to display the image
+        setIsTenantIdCameraUsed(true); // Disable file input
+        setIsTenantIdFileUploaded(false);
+    } catch (error) {
+        console.error("Error accessing the camera", error);
+        // toast.error(t('toastMessages.imageNotUploaded'));   
+       }
+}
 
   const handleCheckboxChange = (e) => {
     setHasBike(e.target.value === 'yes');
     if (e.target.value === 'no') {
       setHasBike(false);
       setBikeNumber('NA');
-    }
-    else {
+    } else {
       setBikeNumber('');
     }
   };
 
 
+
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      if (showModal && (event.target.id === "exampleModalTenantsBoys" || event.key === "Escape")) {
+      if (showModal && (event.target.id === "exampleModalTenantsGirls" || event.key === "Escape")) {
         setShowModal(false);
         setTenantId('')
         navigate(-1);
-        console.log("Exceuting Every time","know")
       }
     };
 
     window.addEventListener('click', handleOutsideClick);
-    window.addEventListener('keydown', handleOutsideClick);
+    window.addEventListener('keydown', handleOutsideClick)
+
     return () => {
       window.removeEventListener('click', handleOutsideClick);
       window.removeEventListener("keydown", handleOutsideClick);
     };
-  
   }, [showModal]);
-
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const popup = document.getElementById('userDetailsTenantPopupIdBoy');
+      const popup = document.getElementById('userDetailsTenantPopupIdGirl');
       if (popup && (!popup.contains(event.target) || event.key === "Escape")) {
         setUserDetailsTenantsPopup(false);
         tenantPopupClose()
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleClickOutside)
-
     return () => {
       window.removeEventListener('click', handleClickOutside);
       window.removeEventListener("keydown", handleClickOutside);
     };
+  
   }, []);
 
- 
+  // useEffect(() => {
+  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
+  //     // Extract the values from the data object
+  //     const boysAndGirlsData = Object.values(entireHMAdata);
+  
+  //     // Ensure we have data and that it contains 'boys'
+  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
+  //       const boysData = Object.values(boysAndGirlsData[0].girls);
+  
+  //       // Check if there's data in boysData
+  //       if (boysData.length > 0) {
+  //         // const tenantsData = boysData[0].tenants || {};
+  //         // const roomsData = boysData[0].rooms || {};
+  //         const extenantsData = boysData[0].extenants || {};
+  
+  //         // Map the data to the required format
+  //         // const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
+  //         //   id: key,
+  //         //   ...value,
+  //         // }));
+  
+  //         // const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
+  //         //   id: key,
+  //         //   ...value,
+  //         // }));
+  
+  //         // const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
+  //         //   id: key,
+  //         //   ...value,
+  //         // }));
+  
+  //         // Update the state with the processed data
+  //         // setTenants(loadedTenants); 
+  //         // setGirlsRooms(loadedRooms);
+  //         setExTenants(loadedExTenants);
+  //       }
+  //     }
+  //   }
+  // }, [entireHMAdata]);
+  
+
+
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
+  //   onValue(tenantsRef, snapshot => {
+  //     const data = snapshot.val() || {};
+  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
+  //       id: key,
+  //       ...value,
+  //     }));
+  //     setTenants(loadedTenants);
+  //   });
+  // }, [activeGirlsHostel]);
+
+
+  // const [girlsRooms, setGirlsRooms] = useState([]);
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setGirlsRooms(loadedRooms);
+  //   });
+  // }, [activeGirlsHostel]);
+
+
 
   useEffect(() => {
     if (selectedRoom) {
@@ -382,12 +452,8 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     } else {
       setBedOptions([]);
     }
-
   }, [selectedRoom, boysRooms]);
 
-  const [searchQuery, setSearchQuery] = useState('');
-
- 
 
 
   const validate = () => {
@@ -399,7 +465,6 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
 
     const phoneRegexWithCountryCode = /^\+\d{12}$/;
     const phoneRegexWithoutCountryCode = /^\d{10}$/;
-
 
     if (!name) {
       tempErrors.name = t('errors.nameRequired');
@@ -436,50 +501,84 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     if (!tenantImage && !tenantImageUrl) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
-
-    
     if (hasBike) {
       if (!bikeNumber) {
         tempErrors.bikeNumber = 'Bike number required';
       } else {
         // Remove spaces for validation
         const bikeNumberWithoutSpaces = bikeNumber.replace(/\s+/g, '');
-
+        
         if (!/^[A-Za-z0-9]{6,10}$/.test(bikeNumberWithoutSpaces)) {
           tempErrors.bikeNumber = 'Enter a valid bike number (letters and numbers only)';
         }
       }
     }
-
     setErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
+  
 
+ 
 
   // const handleTenantImageChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     setTenantImage(e.target.files[0]);
+  //   }
+  // };
+  // const handleTenantIdChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     const file = e.target.files[0]
+  //     setFileName(file.name)
+  //     setTenantId(e.target.files[0]);
+  //   }
+  // };
+
+  // const handleTenantBikeChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     setBikeImage(e.target.files[0]);
+  //   }
+  // };
+  // const handleTenantBikeRcChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     setBikeRcImage(e.target.files[0]);
+  //   }
+  // };
+
+
+
+  // const handleTenantIdChange = (e) => {
   //   const file = e.target.files[0];
   //   if (file) {
-  //     const validFormats = ['image/jpeg', 'image/png'];
-  //     if (validFormats.includes(file.type)) {
-  //       setTenantImage(file);
-  //       setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' })); 
-  //       setIsFileUploaded(true);  // Disable camera
-  //       setIsCameraUsed(false);   // Reset camera state
-  //       setPhotoSource("file");
-  //     } else {
-  //       setErrorMessage((prevErrors) => ({
-  //         ...prevErrors,
-  //         tenantImage: 'Please upload a valid image file (JPG, JPEG, PNG).',
-  //       }));
-  //       e.target.value = null; 
-  //     }
-  //     }
-  //   else if (isCameraUsed) {
-  //     setErrors({ tenantImage: "You've already taken a photo using the camera." });
-  // }
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setTenantId(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
   // };
+
+  const compressImage = async (file) => {
+    const options = {
+      maxSizeMB: 0.6, // Compress to a maximum of 1 MB (adjust as needed)
+      maxWidthOrHeight: 1920, 
+      useWebWorker: true, // Use a web worker for better performance
+      fileType: 'image/jpeg',
+    };
   
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error('Error compressing the image:', error);
+    }
+  };
+
+  const checkImage = (type) =>  {
+    return type === "image/jpeg"
+  }
+
+
   const handleTenantImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -487,80 +586,47 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
       if (validFormats.includes(file.type)) {
         setTenantImage(file);
         setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' })); 
-        setIsFileUploaded(true);  // Disable camera
-        setIsCameraUsed(false);   // Reset camera state
-        // setPhotoSource("file");
-
+        setIsFileUploaded(true); // Disable camera for tenant image
+        setIsCameraUsed(false);
       } else {
         setErrorMessage((prevErrors) => ({
           ...prevErrors,
           tenantImage: 'Please upload a valid image file (JPG, JPEG, PNG).',
         }));
-        e.target.value = null;
+        e.target.value = null; 
       }
     }
   };
-
-
-  // const handleTenantIdChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting PDFs and images
-  //     const maxSize = 1 * 1024 * 1024; // 1 MB
-  //     if (validFormats.includes(file.type)) {
-  //       if (file.size <= maxSize) {
-  //         setTenantId(file);
-  //         setErrorMessage((prevErrors) => ({ ...prevErrors, tenantId: '' }));
-  //         setIsTenantIdFileUploaded(true);  // Disable camera
-  //         setIsTenantIdCameraUsed(false);   // Reset camera state
-  //       } else {
-  //         setErrorMessage((prevErrors) => ({
-  //           ...prevErrors,
-  //           tenantId: 'The file size exceeds the 1 MB limit. Please upload a smaller file.',
-  //         }));
-  //         e.target.value = null;
-  //       }
-  //     } else {
-  //       setErrorMessage((prevErrors) => ({
-  //         ...prevErrors,
-  //         tenantId: 'Please upload a valid PDF or image file.',
-  //       }));
-  //       e.target.value = null;
-  //     }
-  //   }
-  //   else if (isCameraUsed) {
-  //     setErrors({ tenantImage: "You've already taken a photo using the camera." });
-  // }
-  // };
-
+  
   const handleTenantIdChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff'];
-      const maxSize = 1 * 1024 * 1024; // 1 MB size limit
-
+      const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting PDFs and images
+      const maxSize = 1 * 1024 * 1024; // 1 MB
       if (validFormats.includes(file.type)) {
         if (file.size <= maxSize) {
           setTenantId(file);
           setErrorMessage((prevErrors) => ({ ...prevErrors, tenantId: '' }));
-          setIsTenantIdFileUploaded(true);  // Disable camera for tenant ID
-          setIsTenantIdCameraUsed(false);  // Only file upload allowed for tenant ID
+          setIsTenantIdFileUploaded(true);  // Disable camera
+          setIsTenantIdCameraUsed(false);  
         } else {
           setErrorMessage((prevErrors) => ({
             ...prevErrors,
             tenantId: 'The file size exceeds the 1 MB limit. Please upload a smaller file.',
           }));
-          e.target.value = null;  // Clear file input on size violation
+          e.target.value = null;
         }
       } else {
         setErrorMessage((prevErrors) => ({
           ...prevErrors,
           tenantId: 'Please upload a valid PDF or image file.',
         }));
-        e.target.value = null;  // Clear file input on invalid format
+        e.target.value = null;
       }
     }
+    
   };
+
 
   const handleTenantBikeChange = (e) => {
     const file = e.target.files[0];
@@ -605,32 +671,9 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     }
   };
 
-
-
-  const compressImage = async (file) => {
-    const options = {
-      maxSizeMB:0.6, 
-      maxWidthOrHeight: 1920, 
-      useWebWorker: true, 
-      fileType: 'image/jpeg',
-    };
-  
-    try {
-      const compressedFile = await imageCompression(file, options);
-      return compressedFile;
-    } catch (error) {
-      console.error('Error compressing the image:', error);
-    }
-  };
-
-  const checkImage = (type) =>  {
-    return type === "image/jpeg"
-  }
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
- 
+
     if (!isEditing) {
         e.target.querySelector('button[type="submit"]').disabled = true;
         if (!validate()) {
@@ -640,13 +683,11 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     } else {
         if (!validate()) return;
     }
- 
+
     setShowModal(false);
     navigate(-1)
     setLoading(true);
-
     const tenantUniqueId = isEditing ? currentId : uuidv4();
-
     // Helper function to upload a file and return its URL
     const uploadFile = async (file, path) => {
         try {
@@ -658,74 +699,71 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
             throw error;
         }
     };
- 
+
     const tasks = [];
     const uploadResults = {};
 
     const addUploadTask = (file, type, path) => {
-        tasks.push(
-            (async () => {
-                let fileToUpload = file;
-                if (checkImage(file.type)) {
-                    console.log(`Executing compression for ${type}`);
-                    try {
-                        fileToUpload = await compressImage(file);
-                    } catch (error) {
-                        console.error(`Error compressing ${type}:`, error);
-                    }
-                }
-                const url = await uploadFile(fileToUpload, path);
-                return { type, url };
-            })()
-        );
+      tasks.push(
+          (async () => {
+              let fileToUpload = file;
+              if (checkImage(file.type)) {
+                  console.log(`Executing compression for ${type}`);
+                  try {
+                      fileToUpload = await compressImage(file);
+                  } catch (error) {
+                      console.error(`Error compressing ${type}:`, error);
+                  }
+              }
+              const url = await uploadFile(fileToUpload, path);
+              return { type, url };
+          })()
+      );
+  };
+
+  if (tenantImage) {
+    addUploadTask(tenantImage, 'tenantImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantUniqueId}`);
+}
+if (tenantId) {
+    addUploadTask(tenantId, 'tenantId', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantUniqueId}`);
+}
+if (bikeImage) {
+    addUploadTask(bikeImage, 'bikeImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${tenantUniqueId}`);
+}
+if (bikeRcImage) {
+    addUploadTask(bikeRcImage, 'bikeRcImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${tenantUniqueId}`);
+}
+
+   
+
+    try {
+      const results = await Promise.all(tasks);
+         // Process results
+         results.forEach(({ type, url }) => {
+          uploadResults[type] = url;
+      });
+
+      const tenantData = {
+        roomNo: selectedRoom,
+        bedNo: selectedBed,
+        dateOfJoin,
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        mobileNo,
+        idNumber,
+        emergencyContact,
+        status,
+        tenantImageUrl: uploadResults['tenantImage'] || tenantImageUrl,
+        tenantIdUrl: uploadResults['tenantId'] || tenantIdUrl,
+        bikeNumber,
+        permnentAddress,
+        bikeImageUrl: uploadResults['bikeImage'] || bikeImageUrl,
+        bikeRcImageUrl: uploadResults['bikeRcImage'] || bikeRcImageUrl,
+       
     };
 
-    if (tenantImage) {
-        addUploadTask(tenantImage, 'tenantImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantUniqueId}`);
-
-    }
-    if (tenantId) {
-        addUploadTask(tenantId, 'tenantId', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantUniqueId}`);
-    }
-    if (bikeImage) {
-        addUploadTask(bikeImage, 'bikeImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${tenantUniqueId}`);
-    }
-    if (bikeRcImage) {
-        addUploadTask(bikeRcImage, 'bikeRcImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${tenantUniqueId}`);
-    }
- 
-    try {
-        const results = await Promise.all(tasks);
-
-        // Process results
-        results.forEach(({ type, url }) => {
-            uploadResults[type] = url;
-        });
-
-        console.log(uploadResults, "whileUpdatingTenant");
-
-        const tenantData = {
-            roomNo: selectedRoom,
-            bedNo: selectedBed,
-            dateOfJoin,
-            name: name.charAt(0).toUpperCase() + name.slice(1),
-            mobileNo,
-            idNumber,
-            emergencyContact,
-            status,
-            tenantImageUrl: uploadResults['tenantImage'] || tenantImageUrl,
-            tenantIdUrl: uploadResults['tenantId'] || tenantIdUrl,
-            bikeNumber,
-            permnentAddress,
-            bikeImageUrl: uploadResults['bikeImage'] || bikeImageUrl,
-            bikeRcImageUrl: uploadResults['bikeRcImage'] || bikeRcImageUrl,
-           
-        };
- 
         if (isEditing) {
             await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
             if (!toast.isActive(activeToastId)) {
-
               activeToastId=toast.success(t('toastMessages.tenantUpdated'), {
                 position: "top-center",
                 autoClose: 2000,
@@ -737,7 +775,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
                 toastId: "empty-fields-error",
             });
           }
-            fetchData();
+            fetchData()
         } else {
             await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
             if (!toast.isActive(activeToastId)) {
@@ -752,12 +790,13 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
                 toastId: "empty-fields-error",
             });
           }
-            fetchData();
+            fetchData()
             e.target.querySelector('button[type="submit"]').disabled = false;
         }
     } catch (error) {
         console.error("Error submitting form:", error);
         if (!toast.isActive(activeToastId)) {
+
           activeToastId=toast.error(t('toastMessages.errorSubmitting') + error.message, {
             position: "top-center",
             autoClose: 2000,
@@ -769,14 +808,11 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
             toastId: "empty-fields-error",
         });
       }
-        e.target.querySelector('button[type="submit"]').disabled = false;
     } finally {
         setLoading(false);
         resetForm();
         setErrors({});
-        // fetchData()
 
-        // Reset file and camera options after submission
     setPhotoUrl(null);
     setIdUrl(null);
     setTenantImage(null);
@@ -785,17 +821,13 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     setIsCameraUsed(false);
     setIsTenantIdFileUploaded(false);
     setIsTenantIdCameraUsed(false);
-    tenantImageInputRef.current.value="";
-    tenantProofIdRef.current.value="";
+
     }
 };
- 
-
 
 
   const handleEdit = (tenant) => {
-    console.log(tenant,"tenantWhileEditing")
-    console.log(tenant.tenantImageUrl,"tenantWhileEditing")
+    console.log(tenant, "ttt")
     const matchedRoom = boysRooms.find((room) => room.roomNumber == tenant.roomNo);
     setSelectedRoom(matchedRoom ? matchedRoom.roomNumber : '');
     setSelectedBed(tenant.bedNo);
@@ -808,31 +840,29 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     setIsEditing(true);
     setCurrentId(tenant.id);
 
-    if (tenantImage) {
+    if(tenantImage){
       setTenantImage(tenant.tenantImageUrl)
     } else {
       setTenantImageUrl(tenant.tenantImageUrl)
     }
-    if (tenantId) {
+    if(tenantId){
       setTenantId(tenant.tenantIdUrl || '');
     } else {
       setTenantIdUrl(tenant.tenantIdUrl)
     }
-    if (bikeImage) {
+    if(bikeImage){
       setBikeImage(tenant.bikeImageUrl || '')
     } else {
       setBikeImageUrl(tenant.bikeImageUrl || '')
     }
-    if (bikeRcImage) {
+    if(bikeRcImage){
       setBikeRcImage(tenant.bikeRcImageUrl || '')
     } else {
       setBikeRcImageUrl(tenant.bikeRcImageUrl || '')
     }
 
-
-    setBikeNumber("");
-    setHasBike(false); 
     setFileName(tenant.fileName || '');
+    setHasBike(false);
     setShowModal(true);
     window.history.pushState(null, null, location.pathname);
     setBikeNumber(tenant.bikeNumber);
@@ -845,13 +875,10 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
       setHasBike(true);
       setBikeNumber(tenant.bikeNumber);
     }
-
-    
-    
   };
 
   const handleAddNew = () => {
-    if (activeBoysHostelButtons.length == 0) {
+    if (activeBoysHostelButtons.length === 0) {
       if (!toast.isActive(activeToastId)) {
 
         activeToastId=toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
@@ -874,7 +901,6 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
       setUserDetailsTenantsPopup(false);
       setHasBike(false);
 
-      // After successfully adding a tenant, reset the photoUrl and idUrl
     setPhotoUrl(null);
     setIdUrl(null);
     setTenantImage(null);
@@ -888,10 +914,9 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
 
     }
     
-      // event.preventDefault();
-    // Logic for adding a tenant
+    
+  };
 
-      };
 
   const resetForm = () => {
     setSelectedRoom('');
@@ -918,17 +943,15 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     setBikeImage(null)
     setBikeImageUrl('')
     setBikeRcImage(null)
-    setBikeRcImageUrl('')
+    setBikeRcImageUrl('')    
     setTenantId('')
     setBikeNumber('NA');
     setPermnentAddress('')
-    // tenantImageInputRef.current.value = null;
-    // tenantProofIdRef.current.value = null;
+    tenantImageInputRef.current.value = null;
+    tenantProofIdRef.current.value = null;
   };
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value)
-  };
+
 
   const columnsEx = [
     t('tenantsPage.sNo'),
@@ -960,30 +983,39 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-
   const rows = boysTenants.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
-    name: tenant.name,
+    name: capitalizeFirstLetter(tenant.name),
     id: tenant.idNumber,
     mobile_no: tenant.mobileNo,
     room_bed_no: `${tenant.roomNo}/${tenant.bedNo}`,
     joining_date: tenant.dateOfJoin,
-    bike_number: tenant.bikeNumber ? tenant.bikeNumber : '-',
+    bike_number: tenant.bikeNumber,
     status: capitalizeFirstLetter(tenant.status),
     actions: <button
       style={{ backgroundColor: '#ff8a00', padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
-      onClick={() => { handleEdit(tenant); }}
+      onClick={() => handleEdit(tenant)}
     >
       Edit
-    </button>
+    </button>,
   }));
+
+
+  const onChangeInput = (e) => {
+    setSearchQuery(e.target.value);
+  }
+
+  const onChangeStatus = (e) => {
+    setSelectedStatus(e.target.value);
+  };
 
 
   const filteredRows = rows.filter((row) => {
     const hasSearchQueryMatch = Object.values(row).some((value) =>
       value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     );
+
     if (selectedStatus === 'YES') {
       return row.bike_number !== 'NA' && hasSearchQueryMatch;
     } else if (selectedStatus === 'NA') {
@@ -992,22 +1024,20 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
       return hasSearchQueryMatch;
     }
   });
-  
 
 
   const handleClosePopUp = () => {
     setShowModal(false);
     setTenantId('')
     setHasBike(false);
-    setBikeNumber('');
+    setBikeNumber("");
     setFileName('');
     setPhotoUrl(null);
     setIdUrl(null);
     setTenantImage(null);
-
+    
     navigate(-1);
   }
-
   useEffect(() => {
     const handlePopState = () => {
       if (showModal) {
@@ -1018,7 +1048,6 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
         setUserDetailsTenantsPopup(false)
       }
     };
-
     window.addEventListener('popstate', handlePopState);
 
 
@@ -1035,7 +1064,6 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     window.history.pushState(null, null, location.pathname);
 
 
-
     const [roomNo, bedNo] = tenant.room_bed_no.split('/');
     const singleUserDueDate = boysTenants.find(eachTenant =>
       eachTenant.name === tenant.name &&
@@ -1043,16 +1071,15 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
       eachTenant.roomNo === roomNo &&
       eachTenant.bedNo === bedNo
     );
-    
 
-    if (singleUserDueDate && singleUserDueDate.bikeNumber) {
+    if(singleUserDueDate && singleUserDueDate.bikeNumber){
       setSingleTenantBikeNum(singleUserDueDate.bikeNumber)
     }
+
 
     if (singleUserDueDate && singleUserDueDate.rents) {
       const dataWithDueDate = Object.values(singleUserDueDate.rents);
       const dueDate = dataWithDueDate[0].dueDate;
-
       setDueDateOfTenant(dueDate);
     } else {
       console.log("Tenant with due date not found or due date is missing");
@@ -1082,17 +1109,18 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     else {
       setBikeRcImageField("");
     }
-  };
 
+  };
 
   const tenantPopupClose = () => {
     setUserDetailsTenantsPopup(false);
-    navigate(-1);
+    navigate(-1)
     setDueDateOfTenant("")
-    setSingleTenantProofId("");
+    setSingleTenantProofId("")
     setPhotoUrl(null);
     setIdUrl(null);
     setTenantImage(null);
+    
   }
 
   const handleVacate = async (id) => {
@@ -1132,7 +1160,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
           });
         }
         });
-        
+        // fetchExTenants()
       }
     }, {
       onlyOnce: true
@@ -1142,10 +1170,10 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     navigate(-1);
     resetForm();
     setErrors({});
-  };
 
+  };
   // const fetchExTenants = () => {
-  //   const exTenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants`);
+  //   const exTenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
   //   onValue(exTenantsRef, (snapshot) => {
   //     const data = snapshot.val();
   //     const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
@@ -1154,6 +1182,7 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
   // };
   // useEffect(() => { fetchExTenants() }, []);
 
+
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [tenantIdToDelete, setTenantIdToDelete] = useState(null);
 
@@ -1161,11 +1190,10 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     setShowConfirmation(true);
     setTenantIdToDelete(id);
     setName(name);
-
   };
 
   const handleConfirmDelete = async () => {
-    const removeRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/extenants/${tenantIdToDelete}`);
+    const removeRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}extenants/${tenantIdToDelete}`);
     remove(removeRef)
       .then(() => {
         if (!toast.isActive(activeToastId)) {
@@ -1205,11 +1233,10 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
   };
 
 
-
   const exTenantRows = boysExTenantsData.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
-    name: tenant.name,
+    name: capitalizeFirstLetter(tenant.name),
     id: tenant.idNumber,
     mobile_no: tenant.mobileNo,
     room_bed_no: `${tenant.roomNo}/${tenant.bedNo}`,
@@ -1229,22 +1256,17 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
         Delete
       </button>
     ) : null,
-
   }));
 
   const showExTenantsData = () => {
     setShowExTenants(!showExTenants)
     setShowBikeFilter(!showBikeFilter);
   }
-
-  const onChangeStatus = (e) => {
-    setSelectedStatus(e.target.value);
-  };
-
   const handleChange = (event) => {
     const value = event.target.checked ? 'YES' : '';
     onChangeStatus({ target: { value } });
   };
+
   const handleTenantFocus = (e) => {
     const { name } = e.target;
     setErrors((prevErrors) => ({
@@ -1253,40 +1275,38 @@ const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false);
     }));
   };
 
-//   const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
-// const isImage = (fileData) => fileData.startsWith('data:image/' || "image/jpeg");
-
-const isPDF = (contentType) => contentType === 'application/pdf';
+  //handleGirlTenantDownload
+  // const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
+  // const isImage = (fileData) => fileData.startsWith('data:image/');
+  const isPDF = (contentType) => contentType === 'application/pdf';
 const isImage = (contentType) => contentType.startsWith('image/');
-
-
+  
   const pdfToImages = async (pdfUrl) => {
     const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
-    console.log(pdf,"pdfImagesWhileDownloading")
     const numPages = pdf.numPages;
     const images = [];
-
+  
     for (let pageNum = 1; pageNum <= numPages; pageNum++) {
       const page = await pdf.getPage(pageNum);
       const viewport = page.getViewport({ scale: 2 });
-
+  
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       canvas.height = viewport.height;
       canvas.width = viewport.width;
-
+  
       await page.render({
         canvasContext: context,
         viewport: viewport
       }).promise;
-
+  
       const imgData = canvas.toDataURL('image/png');
       images.push({ imgData, width: viewport.width, height: viewport.height });
     }
-    console.log(images,"pdfImagesWhileDownloading")
+  
     return images;
   };
-
+  
   const calculateFitDimensions = (imgWidth, imgHeight, maxWidth, maxHeight) => {
     const widthRatio = maxWidth / imgWidth;
     const heightRatio = maxHeight / imgHeight;
@@ -1296,7 +1316,7 @@ const isImage = (contentType) => contentType.startsWith('image/');
       height: imgHeight * ratio
     };
   };
-
+  
   const loadImage = (src) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -1315,13 +1335,8 @@ const isImage = (contentType) => contentType.startsWith('image/');
         return null;
     }
 };
-
-
-
-
-
-
-  const handleTenantDownload = async () => {
+  
+  const handleGirlTenantDownload = async () => {
     setDownloadingTextFlag(true)
     const doc = new jsPDF();
 
@@ -1495,9 +1510,7 @@ const isImage = (contentType) => contentType.startsWith('image/');
         }
     }
 
-  // Save the PDF
-  // doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
-  // Convert PDF to Blob
+     // Convert PDF to Blob
   const pdfOutput = doc.output('blob');
 
   if (Capacitor.isNativePlatform()) {
@@ -1545,41 +1558,47 @@ const isImage = (contentType) => contentType.startsWith('image/');
     document.body.appendChild(a);
     a.click();
     URL.revokeObjectURL(url);
-  } setTimeout(() => {
-    setDownloadingTextFlag(false);
-  }, 800);
+  }
+
+
+
+
+    // Save the PDF
+    doc.save(`${singleTenantDetails.name}_Complete_Details.pdf`);
+    setTimeout(() => {
+      setDownloadingTextFlag(false);
+    }, 800);
+  };
+
+  const getImageBase64 = (url) => {
+    return new Promise((resolve, reject) => {
+        let img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = url;
+        img.onload = () => {
+            let canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            let ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            let dataURL = canvas.toDataURL("image/png");
+            resolve(dataURL);
+        };
+        img.onerror = (error) => {
+            reject(error);
+        };
+    });
 };
-
-
-const getImageBase64 = (url) => {
-  return new Promise((resolve, reject) => {
-      let img = new Image();
-      img.crossOrigin = "Anonymous";
-      img.src = url;
-      img.onload = () => {
-          let canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          let ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-          let dataURL = canvas.toDataURL("image/png");
-          resolve(dataURL);
-      };
-      img.onerror = (error) => {
-          reject(error);
-      };
-  });
-};
-
+ 
 const createPDFWithImage = async (imageUrl) => {
 
-try {
-    const base64Image = await getImageBase64(imageUrl);
-    return base64Image;
-} catch (error) {
-    console.error("Error creating base64 image", error);
-    return null;
-}
+  try {
+      const base64Image = await getImageBase64(imageUrl);
+      return base64Image;
+  } catch (error) {
+      console.error("Error creating base64 image", error);
+      return null;
+  }
 };
 
 
@@ -1685,7 +1704,6 @@ const handleDownload = async (url, type, tenantName) => {
   }
 };
 
- 
   return (
     <>
       <div className="row d-flex flex-wrap align-items-center justify-content-between">
@@ -1696,21 +1714,21 @@ const handleDownload = async (url, type, tenantName) => {
           <h1 className='management-heading'>{t('tenantsPage.tenantsManagement')}</h1>
         </div>
         <div className="col-12 col-md-4 search-wrapper">
-          <input type="text" placeholder={t('common.search')} className='search-input' value={searchQuery} onChange={handleSearchChange} />
+          <input type="text" placeholder={t('common.search')} className='search-input' value={searchQuery} onChange={onChangeInput} />
           <img src={SearchIcon} alt="search-icon" className='search-icon' />
         </div>
-        <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end justify-cotent-end'>
+        <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end'>
           <div className='d-flex align-items-center text-center'>
             {showBikeFilter ? (<div className="toggle-container">
-              <label className="toggle-label" htmlFor="status-toggleGirl">{t('tenantsPage.bike')}</label>
+              <label className="toggle-label" htmlFor="status-toggleGirl1">{t('tenantsPage.bike')}</label>
               <input
                 type="checkbox"
-                id="status-toggleGirl"
+                id="status-toggleGirl1"
                 className="toggle-checkbox"
                 checked={selectedStatus === 'YES'}
                 onChange={handleChange}
               />
-              <label className="toggle-switch" htmlFor="status-toggleGirl">
+              <label className="toggle-switch" htmlFor="status-toggleGirl1">
                 <span className="toggle-text">No</span>
                 <span className="toggle-text">Yes</span>
               </label>
@@ -1728,244 +1746,245 @@ const handleDownload = async (url, type, tenantName) => {
                 </button> : <button id="tenantVacateButton" type="button" class="add-button" onClick={showExTenantsData} >
                   {t('tenantsPage.vacated')}
                 </button>}
+
               </div>
             </div>
-
           </div>
         </div>
+      </div>
 
-      </div>
       <div>
-        {showExTenants ? <Table columns={columnsEx} rows={exTenantRows} onClickTentantRow={handleTentantRow} /> : 
-        <>
-       
-        <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />
-       
-        </>
-        }
+        {showExTenants ? <Table columns={columnsEx} rows={exTenantRows} onClickTentantRow={handleTentantRow} /> : <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />}
       </div>
-      <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalTenantsBoys" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal}  >
+
+      <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalTenantsGirls" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal}>
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title fs-5" id="exampleModalLabel"> {isEditing ? t('dashboard.updateTenant'):t('dashboard.addTenants')}</h5>
-              <button onClick={handleClosePopUp} className="btn-close" aria-label="Close"></button>
+              <h1 class="modal-title fs-5" id="exampleModalLabel"> {isEditing ? t('dashboard.updateTenant'):t('dashboard.addTenants')}</h1>
+              <button onClick={handleClosePopUp} type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <div className="container-fluid">
-              <form class="row lg-10" onSubmit={handleSubmit}>
-            <div class="col-md-6">
-              <label htmlFor='roomNo' class="form-label">{t('dashboard.roomNo')}</label>
-              <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedRoom" onFocus={handleTenantFocus}>
-                <option value="">{t('dashboard.selectRoom')}</option>
-                {boysRooms.map((room) => (
-                  <option key={room.roomNumber} value={room.roomNumber}>
-                    {room.roomNumber}
-                  </option>
-                ))}
-              </select>
-              {errors.selectedRoom && <p style={{ color: 'red' }}>{errors.selectedRoom}</p>}
-            </div>
 
-            <div class="col-md-6">
-              <label htmlFor='bedNo' class="form-label">
-                {t('dashboard.bedNo')}
-              </label>
-              <select id="bedNo" class="form-select" value={selectedBed} onChange={(e) => setSelectedBed(e.target.value)} name="selectedBed" onFocus={handleTenantFocus}>
-                <option value="">{t('dashboard.selectBed')}</option>
-                {bedOptions.map(bedNumber => (
-                  <option key={bedNumber} value={bedNumber}>
-                    {bedNumber}
-                  </option>
-                ))}
-              </select>
+                <form class="row lg-10" onSubmit={handleSubmit}>
+                  <div class="col-md-6">
+                    <label htmlFor='roomNo' class="form-label">
+                      {t('dashboard.roomNo')}
+                    </label>
+                    <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedRoom" onFocus={handleTenantFocus}>
+                      <option value="">{t('dashboard.selectRoom')}</option>
+                      {boysRooms.map((room) => (
+                        <option key={room.roomNumber} value={room.roomNumber}>
+                          {room.roomNumber}
+                        </option>
+                      ))}
+                    </select>
 
-              {errors.selectedBed && <p style={{ color: 'red' }}>{errors.selectedBed}</p>}
-            </div>
-            <div class="col-md-6">
-              <label htmlFor='dataofJoin' class="form-label">
-                {t('dashboard.dateOfJoin')}
-              </label>
-              <input id="dataofJoin" class="form-control" type="date" value={dateOfJoin} onChange={(e) => setDateOfJoin(e.target.value)} name="dateOfJoin" onFocus={handleTenantFocus} />
-
-              {errors.dateOfJoin && <p style={{ color: 'red' }}>{errors.dateOfJoin}</p>}
-            </div>
-            <div class="col-md-6">
-              <label htmlFor='tenantName' class="form-label">
-                {t('dashboard.name')}
-              </label>
-              <input id="tenantName" class="form-control" type="text" value={name} onChange={(e) => setName(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} name="name" onFocus={handleTenantFocus} />
-
-              {errors.name && <p style={{ color: 'red' }}>{errors.name}</p>}
-            </div>
-            <div class="col-md-6">
-              <label htmlFor='tenantMobileNo' class="form-label">
-                {t('dashboard.mobileNo')}
-              </label>
-              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
-              {errors.mobileNo && <p style={{ color: 'red' }}>{errors.mobileNo}</p>}
-            </div>
-            <div class="col-md-6">
-              <label htmlFor='tenantIdNum' class="form-label">
-                {t('dashboard.idNumber')}
-              </label>
-              <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')} name="idNumber" onFocus={handleTenantFocus} />
-
-              {errors.idNumber && <p style={{ color: 'red' }}>{errors.idNumber}</p>}
-            </div>
-            <div class="col-md-6">
-              <label htmlFor='tenantEmergency' class="form-label">
-                {t('dashboard.emergencyContact')}
-              </label>
-              <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="emergencyContact" onFocus={handleTenantFocus} />
-
-              {errors.emergencyContact && <p style={{ color: 'red' }}>{errors.emergencyContact}</p>}
-            </div>
-            <div class="col-md-6">
-              <label htmlFor='tenantStatus' class="form-label">
-                {t('dashboard.status')}
-              </label>
-              <select id="tenantStatus" class="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
-                <option value="occupied">{t('dashboard.occupied')}</option>
-                <option value="unoccupied">{t('dashboard.unoccupied')}</option>
-              </select>
-
-            </div>
-            <div class="col-md-6">
-              <label htmlFor='tenantUpload' class="form-label">
-                {t('dashboard.uploadImage')}
-              </label>
-              {isEditing && tenantImage && (
-                <div>
-                  <img src={tenantImage} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
-                  <p>{t('dashboard.currentImage')}</p>
-                </div>
-              )}
-              <input id="tenantUpload" class="form-control" type="file" accept=".jpg, .jpeg, .png"   onChange={handleTenantImageChange} ref={tenantImageInputRef} 
-              disabled={isCameraUsed} 
-              />
-              {isMobile && !isFileUploaded &&   (
-                  <div>
-                  <p>{t('tenantsPage.or')}</p>
-                  <div style={{display:'flex',flexDirection:'row'}}>
-                  <p>{t('tenantsPage.takePhoto')}</p>
-                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
-                  disabled={isFileUploaded}
-                  />
-                  {photoUrl && <img src={photoUrl} alt="Captured" style={{  marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
+                    {errors.selectedRoom && <p style={{ color: 'red' }}>{errors.selectedRoom}</p>}
                   </div>
+
+                  <div class="col-md-6">
+                    <label htmlFor='bedNo' class="form-label">
+                      {t('dashboard.bedNo')}
+                    </label>
+                    <select id="bedNo" class="form-select" value={selectedBed} onChange={(e) => setSelectedBed(e.target.value)} name="selectedBed" onFocus={handleTenantFocus}>
+                      <option value="">{t('dashboard.selectBed')}</option>
+                      {bedOptions.map(bedNumber => (
+                        <option key={bedNumber} value={bedNumber}>
+                          {bedNumber}
+                        </option>
+                      ))}
+                    </select>
+
+                    {errors.selectedBed && <p style={{ color: 'red' }}>{errors.selectedBed}</p>}
                   </div>
+
+                  <div class="col-md-6">
+                    <label htmlFor='dataofJoin' class="form-label">
+                      {t('dashboard.dateOfJoin')}
+                    </label>
+                    <input id="dataofJoin" class="form-control" type="date" value={dateOfJoin} onChange={(e) => setDateOfJoin(e.target.value)} name="dateOfJoin" onFocus={handleTenantFocus} />
+
+                    {errors.dateOfJoin && <p style={{ color: 'red' }}>{errors.dateOfJoin}</p>}
+                  </div>
+                  <div class="col-md-6">
+                    <label htmlFor='tenantName' class="form-label">
+                      {t('dashboard.name')}
+                    </label>
+                    <input id="tenantName" class="form-control" type="text" value={name} onChange={(e) => setName(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} name="name" onFocus={handleTenantFocus} />
+
+                    {errors.name && <p style={{ color: 'red' }}>{errors.name}</p>}
+                  </div>
+
+                  <div class="col-md-6">
+                    <label htmlFor='tenantMobileNo' class="form-label">
+                      {t('dashboard.mobileNo')}
+                    </label>
+                    <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
+
+                    {errors.mobileNo && <p style={{ color: 'red' }}>{errors.mobileNo}</p>}
+                  </div>
+                  <div class="col-md-6">
+                    <label htmlFor='tenantIdNum' class="form-label">
+                      {t('dashboard.idNumber')}
+                    </label>
+                    <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')} name="idNumber" onFocus={handleTenantFocus} />
+
+                    {errors.idNumber && <p style={{ color: 'red' }}>{errors.idNumber}</p>}
+                  </div>
+                  <div class="col-md-6">
+                    <label htmlFor='tenantEmergency' class="form-label">
+                      {t('dashboard.emergencyContact')}
+                    </label>
+                    <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="emergencyContact" onFocus={handleTenantFocus} />
+
+                    {errors.emergencyContact && <p style={{ color: 'red' }}>{errors.emergencyContact}</p>}
+                  </div>
+                  <div class="col-md-6">
+                    <label htmlFor='tenantStatus' class="form-label">
+                      {t('dashboard.status')}
+                    </label>
+                    <select id="tenantStatus" class="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
+                      <option value="occupied">{t('dashboard.occupied')}</option>
+                      <option value="unoccupied">{t('dashboard.unoccupied')}</option>
+                    </select>
+
+                  </div>
+                  <div class="col-md-6">
+                    <label htmlFor='tenantUpload' class="form-label">
+                      {t('dashboard.uploadImage')}
+                    </label>
+                    {isEditing && tenantImageUrl && (
+                      <div>
+                        <img src={ tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
+                        <p>{t('dashboard.currentImage')}</p>
+                      </div>
+                    )}
+                    <input ref={tenantImageInputRef} id="tenantUpload" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantImageChange}   
+                     disabled={isCameraUsed} />
+                    {isMobile && !isFileUploaded && (
+                    <div>
+                    <p>{t('tenantsPage.or')}</p>
+                    <div style={{display:'flex',flexDirection:'row'}}>
+                    <p>{t('tenantsPage.takePhoto')}</p>
+                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                    disabled={isFileUploaded} />
+                    {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, maxWidth: '100px', height: '100px' }} />}
+                    </div>
+                    </div>
                     )}
 
-              {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
-              {errorMessage.tenantImage && <p style={{ color: 'red' }}>{errorMessage.tenantImage}</p>}
-            </div>
-            <div class="col-md-6">
-              <label htmlFor='tenantUploadId' class="form-label">
-                {t('dashboard.uploadId')}:
-              </label>
-              {isEditing && tenantId && (
-                <object
-                  data={tenantId}
-                  type="application/pdf"
-                  width="50%"
-                  height="200px"
-                >
-                  <a href={tenantId}>{t('dashboard.downloadPdf')}</a>
-                </object>
-              )}
-              <input id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png"  onChange={handleTenantIdChange} ref={tenantImageInputRef} 
-              disabled={isTenantIdCameraUsed} />
-              {isMobile && !isTenantIdFileUploaded &&(
+                    {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
+                    {errorMessage.tenantImage && <p style={{ color: 'red' }}>{errorMessage.tenantImage}</p>}
+                  </div>
+                  <div class="col-md-6">
+                    <label htmlFor='tenantUploadId' class="form-label">
+                      {t('dashboard.uploadId')}:
+                    </label>
+                    {isEditing && tenantId && (
+                      <div>
+                        <p>{fileName}</p>
+                      </div>
+                    )}
+                    <input ref={tenantProofIdRef} id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantIdChange} 
+                    disabled={isTenantIdCameraUsed}/>
+                    {isMobile && !isTenantIdFileUploaded &&(
                     <div>
                     <p>{t('tenantsPage.or')}</p>
                     <div style={{display:'flex',flexDirection:'row'}}>
                     <p>{t('tenantsPage.takePhoto')}</p>
                     <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeidPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
                     disabled={isTenantIdFileUploaded}/>
-                    {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
+                    {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, maxWidth: '100px', height: '100px' }} />}
                     </div>
                     </div>
                     )}
-                     {errors.tenantId && <p style={{ color: 'red' }}>{errors.tenantId}</p>}
-                     {errorMessage.tenantId && <p style={{ color: 'red' }}>{errorMessage.tenantId}</p>}
-            </div>
-            <div className='col-md-12'>
-              <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
-              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' onFocus={handleTenantFocus}/>
-              {errors.permnentAddress && <p style={{ color: 'red' }}>{errors.permnentAddress}</p>}
-            </div>
+                    {errors.tenantId && <p style={{ color: 'red' }}>{errors.tenantId}</p>}
+                    {errorMessage.tenantId && <p style={{ color: 'red' }}>{errorMessage.tenantId}</p>}
+                    
 
-            <div className="col-12 col-sm-12 col-md-12" style={{ marginTop: '20px' }}>
-              <label className='col-sm-12 col-md-4' htmlFor="bikeCheck">{t('dashboard.doYouHaveBike')}</label>
-              <input
-                type="radio"
-                className="Radio"
-                id="bikeCheck"
-                name="bike"
-                value="yes"
-                onClick={handleCheckboxChange}
-                checked={hasBike}
-              />
-              <label htmlFor='bikeCheck' className='bike'>{t('dashboard.yes')}</label>
-              <input
-                type="radio"
-                id="bikeCheck1"
-                name="bike"
-                value="no"
-                onClick={handleCheckboxChange}
-                checked={!hasBike}
-                style={{ marginLeft: '30px' }}
-              />
-              <label htmlFor='bikeCheck1' className='bike'>{t('dashboard.no')}</label>
-            </div>
+                  </div>
+                  <div className='col-md-12'>
+                    <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
+                    <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' onFocus={handleTenantFocus} />
+                    {errors.permnentAddress && <p style={{ color: 'red' }}>{errors.permnentAddress}</p>}
+                  </div>
 
-            {hasBike && (
-              <div className=' bikeField'>
-                <label class="bikenumber" htmlFor="bikeNumber" >{t('dashboard.bikeNumber')}</label>
-                <input
-                  type="text"
-                  id="bikeNumber"
-                  onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')}
-                  className='form-control'
-                  placeholder="Enter number plate ID"
-                  value={bikeNumber}
-                  onChange={(event) => setBikeNumber(event.target.value)}
-                  style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px' }}
-                />
+
+                  <div className="col-12 col-sm-12 col-md-12" style={{ marginTop: '20px' }}>
+                    <label className='col-sm-12 col-md-4' htmlFor="bikeCheck">{t('dashboard.doYouHaveBike')}</label>
+                    <input
+                      type="radio"
+                      className="Radio"
+                      id="bikeCheck"
+                      name="bike"
+                      value="yes"
+                      onClick={handleCheckboxChange}
+                      checked={hasBike}
+                    />
+                    <label htmlFor='bikeCheck' className='bike'>{t('dashboard.yes')}</label>
+                    <input
+                      type="radio"
+                      id="bikeCheck1"
+                      name="bike"
+                      value="no"
+                      onClick={handleCheckboxChange}
+                      checked={!hasBike}
+                      style={{ marginLeft: '30px' }}
+                    />
+                    <label htmlFor='bikeCheck1' className='bike'>{t('dashboard.no')}</label>
+                  </div>
+
+                  {hasBike && (
+                    <div className='bikeField' >
+                      <label class="bikenumber" htmlFor="bikeNumber" >{t('dashboard.bikeNumber')}</label>
+                      <input
+                        type="text"
+                        id="bikeNumber"
+
+                        className='form-control'
+                        placeholder="Enter number plate ID"
+                        value={bikeNumber}
+                        onChange={(event) => setBikeNumber(event.target.value)}
+                        onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')}
+                        style={{ borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px' }}
+                      />
+                      {errors.bikeNumber && <p style={{ color: 'red' }}>{errors.bikeNumber}</p>}
+                    </div>
+                  )}
+
+                  {hasBike && (
+                    <>
+                      <div className="col-md-6">
+                        <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
+                        <input type="file" className="form-control" accept=".jpg, .jpeg, .png"  onChange={handleTenantBikeChange} />
+                        {errorMessage.bikeImage && <p style={{ color: 'red' }}>{errorMessage.bikeImage}</p>}
+                      </div>
+                      <div className="col-md-6">
+                        <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
+                        <input type="file" className="form-control"accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantBikeRcChange} />
+                        {errorMessage.bikeRcImage && <p style={{ color: 'red' }}>{errorMessage.bikeRcImage}</p>}
+                        
+                      </div>
+                    </>
+                  )}
+
+                  <div className='col-12 text-center mt-3'>
+                    {isEditing ? (
+                      <div className="d-flex justify-content-center gap-2 mt-3">
+                        <button type="button" className="btn btn-warning" onClick={handleSubmit}>{t('tenantsPage.updateTenant')}</button>
+                        <button type="button" className="btn btn-warning" onClick={handleVacate}>{t('tenantsPage.vacateTenant')}</button>
+                      </div>
+                    ) : (
+                      <button className="btn btn-warning" type="submit">{t('dashboard.addTenants')}</button>
+                    )}
+                  </div>
+                </form>
+
               </div>
-            )
-            }
-
-            {errors.bikeNumber && <p style={{ color: 'red', marginLeft: "4px" }}>{errors.bikeNumber}</p>}
-
-            {hasBike && (
-              <>
-                <div className="col-md-6">
-                  <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-                  <input type="file" className="form-control" accept=".jpg, .jpeg, .png" onChange={handleTenantBikeChange} />
-                  {errorMessage.bikeImage && <p style={{ color: 'red' }}>{errorMessage.bikeImage}</p>}
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-                  <input type="file" className="form-control" accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantBikeRcChange} />
-                  {errorMessage.bikeRcImage && <p style={{ color: 'red' }}>{errorMessage.bikeRcImage}</p>}
-                </div>
-              </>
-            )}
-
-
-            <div className='col-12 text-center mt-3'>
-              {isEditing ? (
-                <button type="button" className="btn btn-warning" onClick={handleSubmit}>{t('dashboard.updateTenant')}</button>
-              ) : (
-                <button className='btn btn-warning' type="submit">{t('dashboard.addTenants')}</button>
-              )}
             </div>
-          </form>
 
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -1974,7 +1993,7 @@ const handleDownload = async (url, type, tenantName) => {
       {downloadingTextFlag && <Spinner />}
 
       {userDetailsTenantPopup &&
-        <div id="userDetailsTenantPopupIdBoy" className='userDetailsTenantPopup'>
+        <div id="userDetailsTenantPopupIdGirl" className='userDetailsTenantPopup'>
           <div className='tenants-dialog-container'>
           <span className="close-icon" onClick={tenantPopupClose}>&times;</span>
             <h1 className="tenants-popup-heading">{t('tenantsPage.tenantDetails')} </h1>
@@ -2008,7 +2027,7 @@ const handleDownload = async (url, type, tenantName) => {
       </p> */}
       
       <p>
-        <strong>{t('tenantsPage.PermanentAddress')}</strong>{tenantAddress ? tenantAddress : " NA"}
+        <strong>{t('tenantsPage.PermanentAddress')}</strong>{tenantAddress? tenantAddress : " NA"}
       </p>
 
       {/* <p>
@@ -2027,9 +2046,9 @@ const handleDownload = async (url, type, tenantName) => {
         ) : (
           <span className="NotUploadedText">{t('tenantsPage.NotUploaded')}</span>
         )}
-      </p>
+      </p> */}
 
-      <p>
+      {/* <p>
         <strong>{t('tenantsPage.BikeRc')}</strong>
         {bikeRcImageField ? (
           downloadStatus.bikeRc ? (
@@ -2050,12 +2069,13 @@ const handleDownload = async (url, type, tenantName) => {
             </div>
             <div className='popup-tenants-closeBtn'>
               <button className='btn btn-warning' onClick={tenantPopupClose}>{t('tenantsPage.close')}</button>
-              {downloadingTextFlag ? <button id="downloadPdfBtn" className='btn btn-warning' >{t('tenantsPage.downloading')}</button> :<button id="downloadPdfBtn" className='btn btn-warning' onClick={handleTenantDownload}><FaDownload /> {t('tenantsPage.downloadPdf')}</button> }
-              
+              {/* <button id="downloadPdfBtn" className='btn btn-warning' onClick={handleGirlTenantDownload}><FaDownload /> {t('tenantsPage.downloadPdf')}</button> */}
+              {downloadingTextFlag ? <button id="downloadPdfBtn" className='btn btn-warning' >{t('tenantsPage.downloading')}</button> :<button id="downloadPdfBtn" className='btn btn-warning' onClick={handleGirlTenantDownload}><FaDownload /> {t('tenantsPage.downloadPdf')}</button> }
             </div>
           </div>
         </div>
       }
+
       {showConfirmation && (
         <div className="confirmation-dialog">
           <div className='confirmation-card'>
@@ -2068,10 +2088,9 @@ const handleDownload = async (url, type, tenantName) => {
           </div>
         </div>
       )}
-
     </>
   );
-
 };
 
-export default TenantsBoys;
+
+export default TenantsBoys; 

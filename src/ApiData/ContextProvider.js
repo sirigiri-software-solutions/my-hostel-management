@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useRef, useEffect } from 'r
  
 import isEqual from 'lodash/isEqual';
 import { firebaseInstances, ref } from '../firebase/firebase';
- 
+import { useLocation, useNavigationType } from "react-router-dom";
 const DataContext = createContext();
  
 function useDeepCompareEffect(callback, dependencies) {
@@ -303,6 +303,10 @@ const DataProvider = ({ children }) => {
   useEffect(() => {
     fetchData();
 }, [userUid, completeData, defaultArea]);
+
+// ===============================
+
+
 
   return (
     <DataContext.Provider

@@ -16,7 +16,7 @@ import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
 import { write, utils } from 'xlsx';
 import * as XLSX from 'xlsx';
-import { Permissions } from '@capacitor/permissions';
+
 
 import { saveAs } from 'file-saver'; // Add file-saver to handle downloads
 
@@ -466,7 +466,7 @@ const handleReportBtn = async () => {
                   const result = await Filesystem.writeFile({
                       path: fileName,
                       data: base64String,
-                      directory: Directory.Documents,
+                      directory: Directory.Data,
                       encoding: Encoding.Base64
                   });
                   console.log('File saved successfully:', result.uri);
@@ -720,7 +720,7 @@ const handleVacatedReportBtn = async () => {
                     const result = await Filesystem.writeFile({
                         path: fileName,
                         data: base64String,
-                        directory: Directory.Documents,
+                        directory: Directory.Data,
                         encoding: Encoding.Base64
                     });
                     console.log('File saved successfully:', result.uri);
@@ -799,7 +799,7 @@ const handleVacatedReportBtn = async () => {
                     const result = await Filesystem.writeFile({
                         path: fileName,
                         data: base64String,
-                        directory: Directory.Documents,
+                        directory: Directory.Data,
                         encoding: Encoding.Base64
                     });
                     console.log('File saved successfully:', result.uri);
@@ -1092,7 +1092,7 @@ const handleTenantBtnExcel = async () => {
                   const result = await Filesystem.writeFile({
                       path: fileName,
                       data: base64String,
-                      directory: Directory.Documents,
+                      directory: Directory.Data,
                       encoding: Encoding.Base64
                   });
                   console.log('File saved successfully:', result.uri);
@@ -1126,196 +1126,201 @@ const handleTenantBtnExcel = async () => {
 
 
 
-// const handleVacatedBtnExcel = async () => {
-//     const dataToUse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData;
-
-//     const flatData = dataToUse.map(item => {
-//         const flatRents = Object.entries(item.rents || { NA: {} }).map(([rentId, rent]) => ({
-//             PaidAmount: rent.paidAmount || "NA",
-//             Due: rent.due || "NA",
-//             DueDate: rent.dueDate || "NA",
-//             PaidDate: rent.paidDate || "NA",
-//             Status: rent.status || "NA",
-//             TotalFee: rent.totalFee || "NA",
-//         }));
-
-//         return flatRents.map(flatRent => ({
-//             Room: item.roomNo || "NA",
-//             Bed: item.bedNo || "NA",
-//             Name: item.name || "NA",
-//             Address: item.permnentAddress || "NA",
-//             bikeNumber: item.bikeNumber || "NA",
-//             DateOfJoin: item.dateOfJoin || "NA",
-//             Emergency: item.emergencyContact || "NA",
-//             Id: item.idNumber || "NA",
-//             Mobile: item.mobileNo || "NA",
-//             Status: item.status || "NA",
-//             ...flatRent // Spread the flattened rent information
-//         }));
-//     }).flat();
-
-//     // Create a new workbook and a worksheet
-//     const workbook = XLSX.utils.book_new();
-//     const worksheet = XLSX.utils.json_to_sheet(flatData);
-
-//     // Add the worksheet to the workbook only if it doesn't already exist
-//     if (!workbook.SheetNames.includes('Tenants')) {
-//         XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
-//     }
-//     // Generate a binary Excel file
-//     const fileData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
-//     // const handleChangeHostelType = (e) => {
-//     //   console.log(e.target.value, "e.target")
-//     //   if (e.target.value === "mens") {
-//     //     changeActiveFlag("boys")
-//     //   } else if (e.target.value === "girls") {
-//     //     changeActiveFlag("girls")
-//     //   }
-
-//     if (Capacitor.isNativePlatform()) {
-//         // Convert array buffer to base64
-//         const reader = new FileReader();
-//         reader.readAsDataURL(new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
-//         reader.onloadend = async () => {
-//             const base64String = reader.result.split(',')[1]; // Remove the prefix
-
-//             try {
-//                 // Write the file to the filesystem
-//                 const result = await Filesystem.writeFile({
-//                     path: 'vacated_tenants_data.xlsx',
-//                     data: base64String,
-//                     directory: Directory.ExternalStorage,
-//                     encoding: Encoding.Base64
-//                 });
-//                 console.log('File saved successfully:', result.uri);
-
-//                 // Optionally open the file using the FileOpener plugin
-//                 await FileOpener.open({
-//                     filePath: result.uri,
-//                     fileMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-//                 });
-//             } catch (error) {
-//                 console.error('Error saving file:', error);
-//             }
-//         };
-//         reader.onerror = (error) => {
-//             console.error('Error converting Excel to base64:', error);
-//         };
-//     } else {
-//         // For web environment, use the default download method
-//         try {
-//             // Convert array buffer to blob
-//             const blob = new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            
-//             // Use FileSaver to trigger download
-//             saveAs(blob, 'vacated_tenants_data.xlsx');
-//         } catch (error) {
-//             console.error('Error saving file:', error);
-//         }
-//     }
-// };
-
-// Function to check file system permissions
-const checkPermissions = async () => {
-  const { storage } = await Permissions.query({ name: 'filesystem' });
-  if (storage.state !== 'granted') {
-    await Permissions.request({ name: 'filesystem' });
-  }
-};
-
 const handleVacatedBtnExcel = async () => {
-  const dataToUse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData;
+    const dataToUse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData;
 
-  const flatData = dataToUse.map(item => {
-    const flatRents = Object.entries(item.rents || { NA: {} }).map(([rentId, rent]) => ({
-      PaidAmount: rent.paidAmount || "NA",
-      Due: rent.due || "NA",
-      DueDate: rent.dueDate || "NA",
-      PaidDate: rent.paidDate || "NA",
-      Status: rent.status || "NA",
-      TotalFee: rent.totalFee || "NA",
-    }));
+    const flatData = dataToUse.map(item => {
+        const flatRents = Object.entries(item.rents || { NA: {} }).map(([rentId, rent]) => ({
+            PaidAmount: rent.paidAmount || "NA",
+            Due: rent.due || "NA",
+            DueDate: rent.dueDate || "NA",
+            PaidDate: rent.paidDate || "NA",
+            Status: rent.status || "NA",
+            TotalFee: rent.totalFee || "NA",
+        }));
 
-    return flatRents.map(flatRent => ({
-      Room: item.roomNo || "NA",
-      Bed: item.bedNo || "NA",
-      Name: item.name || "NA",
-      Address: item.permnentAddress || "NA",
-      bikeNumber: item.bikeNumber || "NA",
-      DateOfJoin: item.dateOfJoin || "NA",
-      Emergency: item.emergencyContact || "NA",
-      Id: item.idNumber || "NA",
-      Mobile: item.mobileNo || "NA",
-      Status: item.status || "NA",
-      ...flatRent, // Spread the flattened rent information
-    }));
-  }).flat();
+        return flatRents.map(flatRent => ({
+            Room: item.roomNo || "NA",
+            Bed: item.bedNo || "NA",
+            Name: item.name || "NA",
+            Address: item.permnentAddress || "NA",
+            bikeNumber: item.bikeNumber || "NA",
+            DateOfJoin: item.dateOfJoin || "NA",
+            Emergency: item.emergencyContact || "NA",
+            Id: item.idNumber || "NA",
+            Mobile: item.mobileNo || "NA",
+            Status: item.status || "NA",
+            ...flatRent // Spread the flattened rent information
+        }));
+    }).flat();
 
-  // Create a new workbook and a worksheet
-  const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.json_to_sheet(flatData);
+    // Create a new workbook and a worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(flatData);
 
-  // Add the worksheet to the workbook
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Vacated Tenants');
-
-  // Generate a binary Excel file
-  const fileData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
-  const fileName = `vacated_tenants_data.xlsx`;
-
-  const saveAndOpenExcel = async (fileName) => {
-    const excelBlob = new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    // Add the worksheet to the workbook only if it doesn't already exist
+    if (!workbook.SheetNames.includes('Tenants')) {
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenants');
+    }
+    // Generate a binary Excel file
+    const fileData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+    // const handleChangeHostelType = (e) => {
+    //   console.log(e.target.value, "e.target")
+    //   if (e.target.value === "mens") {
+    //     changeActiveFlag("boys")
+    //   } else if (e.target.value === "girls") {
+    //     changeActiveFlag("girls")
+    //   }
 
     if (Capacitor.isNativePlatform()) {
-      const reader = new FileReader();
-      reader.readAsDataURL(excelBlob);
-      reader.onloadend = async () => {
-        const base64String = reader.result.split(',')[1]; // Remove the prefix
+        // Convert array buffer to base64
+        const reader = new FileReader();
+        reader.readAsDataURL(new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+        reader.onloadend = async () => {
+            const base64String = reader.result.split(',')[1]; // Remove the prefix
 
-        try {
-          // Ensure permissions are granted
-          await checkPermissions();
+            try {
+                // Write the file to the filesystem
+                const result = await Filesystem.writeFile({
+                    path: 'vacated_tenants_data.xlsx',
+                    data: base64String,
+                    directory: Directory.Data,
+                    encoding: Encoding.Base64
+                });
+                console.log('File saved successfully:', result.uri);
 
-          // Save file to external storage directory
-          const result = await Filesystem.writeFile({
-            path: fileName,
-            data: base64String,
-            directory: Directory.ExternalStorage, // Or Directory.Data for Android 10+
-            encoding: Encoding.Base64
-          });
-          console.log('File saved successfully:', result.uri);
-
-          // Open the file using the FileOpener plugin
-          try {
-            await FileOpener.open({
-              filePath: result.uri,
-              fileMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            });
-            console.log('File opened successfully');
-          } catch (error) {
-            console.error('Error opening file:', error);
-          }
-        } catch (error) {
-          console.error('Error saving file:', error);
-        }
-      };
-      reader.onerror = (error) => {
-        console.error('Error converting Excel to base64:', error);
-      };
+                // Optionally open the file using the FileOpener plugin
+                await FileOpener.open({
+                    filePath: result.uri,
+                    fileMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+            } catch (error) {
+                console.error('Error saving file:', error);
+            }
+        };
+        reader.onerror = (error) => {
+            console.error('Error converting Excel to base64:', error);
+        };
     } else {
-      // Web environment download
-      const url = URL.createObjectURL(excelBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', fileName);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        // For web environment, use the default download method
+        try {
+            // Convert array buffer to blob
+            const blob = new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            
+            // Use FileSaver to trigger download
+            saveAs(blob, 'vacated_tenants_data.xlsx');
+        } catch (error) {
+            console.error('Error saving file:', error);
+        }
     }
-  };
-
-  // Call the function to save and open the Excel file
-  await saveAndOpenExcel(fileName);
 };
+
+// Function to check file system permissions
+// const checkPermissions = async () => {
+//   if (Capacitor.isNativePlatform()) {
+//     try {
+//       const { uri } = await Filesystem.requestPermissions();
+//       console.log('Permissions granted', uri);
+//     } catch (error) {
+//       console.error('Error requesting permissions:', error);
+//     }
+//   }
+// };
+
+
+// const handleVacatedBtnExcel = async () => {
+//   const dataToUse = selectedHostelType === "mens" ? boysExTenantsData : girlsExTenantsData;
+
+//   const flatData = dataToUse.map(item => {
+//     const flatRents = Object.entries(item.rents || { NA: {} }).map(([rentId, rent]) => ({
+//       PaidAmount: rent.paidAmount || "NA",
+//       Due: rent.due || "NA",
+//       DueDate: rent.dueDate || "NA",
+//       PaidDate: rent.paidDate || "NA",
+//       Status: rent.status || "NA",
+//       TotalFee: rent.totalFee || "NA",
+//     }));
+
+//     return flatRents.map(flatRent => ({
+//       Room: item.roomNo || "NA",
+//       Bed: item.bedNo || "NA",
+//       Name: item.name || "NA",
+//       Address: item.permnentAddress || "NA",
+//       bikeNumber: item.bikeNumber || "NA",
+//       DateOfJoin: item.dateOfJoin || "NA",
+//       Emergency: item.emergencyContact || "NA",
+//       Id: item.idNumber || "NA",
+//       Mobile: item.mobileNo || "NA",
+//       Status: item.status || "NA",
+//       ...flatRent, // Spread the flattened rent information
+//     }));
+//   }).flat();
+
+//   // Create a new workbook and a worksheet
+//   const workbook = XLSX.utils.book_new();
+//   const worksheet = XLSX.utils.json_to_sheet(flatData);
+
+//   // Add the worksheet to the workbook
+//   XLSX.utils.book_append_sheet(workbook, worksheet, 'Vacated Tenants');
+
+//   // Generate a binary Excel file
+//   const fileData = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+//   const fileName = `vacated_tenants_data.xlsx`;
+
+//   const saveAndOpenExcel = async (fileName) => {
+//     const excelBlob = new Blob([fileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+//     if (Capacitor.isNativePlatform()) {
+//       const reader = new FileReader();
+//       reader.readAsDataURL(excelBlob);
+//       reader.onloadend = async () => {
+//         const base64String = reader.result.split(',')[1]; // Remove the prefix
+
+//         try {
+//           // Ensure permissions are granted
+//           await checkPermissions();
+
+//           // Save file to external storage directory
+//           const result = await Filesystem.writeFile({
+//             path: fileName,
+//             data: base64String,
+//             directory: Directory.ExternalStorage, // Or Directory.Data for Android 10+
+//             encoding: Encoding.Base64
+//           });
+//           console.log('File saved successfully:', result.uri);
+
+//           // Open the file using the FileOpener plugin
+//           try {
+//             await FileOpener.open({
+//               filePath: result.uri,
+//               fileMimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+//             });
+//             console.log('File opened successfully');
+//           } catch (error) {
+//             console.error('Error opening file:', error);
+//           }
+//         } catch (error) {
+//           console.error('Error saving file:', error);
+//         }
+//       };
+//       reader.onerror = (error) => {
+//         console.error('Error converting Excel to base64:', error);
+//       };
+//     } else {
+//       // Web environment download
+//       const url = URL.createObjectURL(excelBlob);
+//       const link = document.createElement('a');
+//       link.href = url;
+//       link.setAttribute('download', fileName);
+//       document.body.appendChild(link);
+//       link.click();
+//       document.body.removeChild(link);
+//     }
+//   };
+
+//   // Call the function to save and open the Excel file
+//   await saveAndOpenExcel(fileName);
+// };
 
 
   const handleChangeHostelType = (e) => {

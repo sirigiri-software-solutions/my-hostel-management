@@ -40,7 +40,7 @@ const DashboardBoys = () => {
     adminRole = "Sub-admin"
   }
   const isUneditable = role === 'admin' || role === 'subAdmin';
-  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag, boysRooms, fetchData, boysTenants, boysTenantsWithRents, entireHMAdata } = useData();
+  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag, boysRooms, fetchData, boysTenants, boysTenantsWithRents, entireHMAdata, history, setHistory } = useData();
   const { database, storage } = firebase;
 
   const [loading, setLoading] = useState(false);
@@ -1483,37 +1483,37 @@ const DashboardBoys = () => {
       setFormLayout(text);
       setShowModal(true);
       window.history.pushState(null, null, location.pathname);
+      console.log(location.pathname, "pathHistory")
+      setHistory([...history, location.pathname])
     }
   };
 
   useEffect(() => {
     const handlePopState = () => {
+
+    
       if (showModal) {
         setShowModal(false); // Close the popup
-        console.log("popup close")
-        
-      }else{
-        if (!showModal && (location.pathname === '/dashboard' || location.pathname === "/") ) {
-          if (Capacitor.getPlatform() === 'android') {
-            CapacitorApp.exitApp(); 
-          }
-          console.log(Capacitor.getPlatform(),"firstTime")
-         }
-         
+        console.log("working while popup open")
       }
+        
+      // else{
+      //   console.log("working while popup close")
+      //   if ( location.pathname === '/') {
+      //     if (Capacitor.getPlatform() === 'android') {
+      //       CapacitorApp.exitApp(); 
+      //     }
+      //     console.log(Capacitor.getPlatform(),"firstTime")
+      //    }
+         
+      // }
       
-      console.log("runningWhiile","firstTime")
-      console.log("triggering","popstate")
+   
     };
 
     window.addEventListener('popstate', handlePopState);
 
     return ()=>{
-      window.removeEventListener('popstate',handlePopState)
-    }
-
-
-    return () => {
       window.removeEventListener('popstate',handlePopState)
     }
 
@@ -1529,6 +1529,7 @@ const DashboardBoys = () => {
     setBikeNumber("NA");
     setNotify(false)
     navigate(-1);
+    setHistory(prevHistory => [...prevHistory]);
   };
 
   const getMonthYearKey = (dateString) => {
