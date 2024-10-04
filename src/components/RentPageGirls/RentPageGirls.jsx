@@ -289,7 +289,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       paidDate,
       dueDate,
       status: parseFloat(due) <= 0 ? "Paid" : "Unpaid",
-      monthly:showForm
+      monthly:isEditing ? tenantMonthly : showForm,
     };
 
     if (isEditing) {
