@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useData } from '../../ApiData/ContextProvider';
 import { set, ref, remove, onValue, update, get, push } from 'firebase/database';
 
@@ -38,6 +38,7 @@ const Hostels = () => {
   const [girlsHostelImage, setGirlsHostelImage] = useState('');
   const [hostelImageUrl, setHostelImageUrl] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [btnDisabledStatus,setBtnDisabledStatus] = useState(false)
   
 
   useEffect(() => {
@@ -99,7 +100,19 @@ const Hostels = () => {
 
 const submitHostelEdit = async (e) => {
   e.preventDefault();
+  setBtnDisabledStatus(true)
   const { id, name, address, hostelImage, isBoys } = isEditing;
+
+  if (name.trim() === '' || address.trim() === '' || !hostelImage) {
+    toast.error("Hostel name, address and image cannot be empty.", {
+      position: "top-center",
+      autoClose: 3000,
+      toastId: "empty-fields-error",
+    });
+    setBtnDisabledStatus(false)
+    return;
+  }
+ 
   const basePath = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
   let updatedImageUrl = hostelImage;
   let compressedImage = await compressImage(selectedImage)
@@ -130,6 +143,7 @@ const submitHostelEdit = async (e) => {
       });
       cancelEdit();
       fetchData();
+      setBtnDisabledStatus(false)
     })
     .catch(error => {
       toast.error("Failed to update hostel: " + error.message, {
@@ -137,85 +151,121 @@ const submitHostelEdit = async (e) => {
         autoClose: 3000,
         toastId: "empty-fields-error",
       });
+      setBtnDisabledStatus(false)
     });
+  
 };
 
   const deleteHostel = (id) => {
     const isBoys = activeFlag === 'boys';
     setIsDeleteConfirmationOpen(true);
-    window.history.pushState(null, null, location.pathname);
-    setHostelToDelete({ isBoys, id });
+    window.history.pushState(null, null,location.pathname);
+    console.log(isBoys,id,"hostelPage")
+    setHostelToDelete((prev) =>({...prev, isBoys, id }));
+    console.log("deletedStatus","hostelPage2")
   };
 
   const confirmDeleteHostel =async () => {
-    const { isBoys, id } = hostelToDelete;
-
+    setBtnDisabledStatus(true)
+    console.log(hostelToDelete,"hostelPage")
     try{
-      const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
-      const hostelSnapshot = await get(ref(database,path));
-      if(hostelSnapshot.exists()){
-        const hostelData = hostelSnapshot.val();
-        console.log(hostelData,"inHostelPage")
-        const hasTenants = hostelData.tenants && Object.keys(hostelData.tenants).length > 0;
-        const hasExTenants = hostelData.extenants && Object.keys(hostelData.extenants).length > 0;
-        if(!hasTenants && !hasExTenants){
-          await remove(ref(database, path))
-     
+      const { isBoys, id } = hostelToDelete;
+    
+      try{
+        const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
+        const hostelSnapshot = await get(ref(database,path));
+        if(hostelSnapshot.exists()){
+          const hostelData = hostelSnapshot.val();
+          console.log(hostelData,"inHostelPage")
+          const hasTenants = hostelData.tenants && Object.keys(hostelData.tenants).length > 0;
+          const hasExTenants = hostelData.extenants && Object.keys(hostelData.extenants).length > 0;
+          if(!hasTenants && !hasExTenants){
+            await remove(ref(database, path))
+       
+            toast.success("Hostel deleted successfully.", {
+              position: "top-center",
+              autoClose: 3000,
+              toastId: "empty-fields-error",
+            });
+            fetchData();
+            setIsDeleteConfirmationOpen(false);
+            
+            setHostelToDelete(null);
+            setBtnDisabledStatus(false)
+          }else{
+            toast.error("Hostel cannot be deleted as it has tenants,extenants.Please transfer the tenants first.",{
+              position: "top-center",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              toastId: "empty-fields-error",
+            })
+            setIsDeleteConfirmationOpen(false);
+            
+            setHostelToDelete(null);
+            setBtnDisabledStatus(false)
+          }
+          navigate(-1)
+        }
+        
+      }catch(error){
+        const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
+  
+        await remove(ref(database, path))
+       
           toast.success("Hostel deleted successfully.", {
             position: "top-center",
             autoClose: 3000,
             toastId: "empty-fields-error",
           });
-          fetchData();
           setIsDeleteConfirmationOpen(false);
-          
+          navigate(-1)
           setHostelToDelete(null);
-        }else{
-          toast.error("Hostel cannot be deleted as it has tenants,extenants.Please transfer the tenants first.",{
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            toastId: "empty-fields-error",
-          })
-          setIsDeleteConfirmationOpen(false);
-          
-          setHostelToDelete(null);
-        }
-        navigate(-1)
+          setBtnDisabledStatus(false)
       }
-      
-    }catch(error){
-      const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
-
-      await remove(ref(database, path))
      
-        toast.success("Hostel deleted successfully.", {
-          position: "top-center",
-          autoClose: 3000,
-          toastId: "empty-fields-error",
-        });
-        setIsDeleteConfirmationOpen(false);
-        navigate(-1)
-        setHostelToDelete(null);
+    }catch(err){
+      setBtnDisabledStatus(false)
     }
-   
+    
   };
 
   const cancelDeleteHostel = () => {
+    setBtnDisabledStatus(true)
     setIsDeleteConfirmationOpen(false);
     setHostelToDelete(null);
-    navigate(-1)
+    console.log("deletedStatus","hostelPage1")
+    navigate(-1);
+    setBtnDisabledStatus(false);
   };
 
+  
+
   const cancelEdit = () => {
+    setBtnDisabledStatus(true)
     setIsEditing(null);
     setSelectedImage(null);
     navigate(-1)
+  //  setTimeout(()=>{
+    setBtnDisabledStatus(false);
+  //  },1000)
   };
+
+  const [crossBtnStatus,setCrossbtnStatus] = useState(false)
+
+  const closePopupForm = () => {
+    console.log("called CloseBtn")
+    setCrossbtnStatus(true)
+    setIsEditing(null);
+    setSelectedImage(null);
+    navigate(-1)
+    setTimeout(()=>{
+      setCrossbtnStatus(false)
+    },1000)
+  }
 
   const startEdit = (id, name, address, hostelImage, isBoys) => {
     setIsEditing({ id, name, originalName: name, address, hostelImage, isBoys });
@@ -536,7 +586,7 @@ const submitHostelEdit = async (e) => {
              
             </div>
             <div className='col-6 col-md-6 d-flex justify-content-end'>
-                <button className="add-button" onClick={() => {setIsGirlsModalOpen(true); window.history.pushState(null, null, location.pathname);}}>{t("settings.addHostel")}</button>
+                <button className="add-button" onClick={() => {setIsGirlsModalOpen(true); window.history.pushState(null, null,location.pathname);}}>{t("settings.addHostel")}</button>
               </div>
           </div>
 
@@ -551,9 +601,10 @@ const submitHostelEdit = async (e) => {
         }
         
       </Tabs>
-      <Modal show={isEditing !== null} onHide={cancelEdit}>
-        <Modal.Header closeButton>
+      <Modal show={isEditing !== null} >
+        <Modal.Header >
           <Modal.Title>{t("hostels.editHostel")}</Modal.Title>
+          <Button disabled={crossBtnStatus} variant="close" aria-label="Close" onClick={closePopupForm} />
         </Modal.Header>
         <Modal.Body>
           {isEditing && (
@@ -584,26 +635,27 @@ const submitHostelEdit = async (e) => {
           )}
 
           <div className='mt-3 d-flex justify-content-between'>
-            <Button variant="primary" onClick={submitHostelEdit}>
+            <Button disabled={btnDisabledStatus} variant="primary" onClick={submitHostelEdit}>
               {t("hostels.save")}
             </Button>
-            <Button variant="secondary" onClick={cancelEdit}>
+            <Button disabled={btnDisabledStatus} variant="secondary" onClick={cancelEdit}>
               {t("hostels.cancel")}
             </Button>
 
           </div>
         </Modal.Body>
       </Modal>
-      <Modal show={isDeleteConfirmationOpen} onHide={cancelDeleteHostel}>
-        <Modal.Header closeButton>
+      <Modal show={isDeleteConfirmationOpen} >
+        <Modal.Header >
           <Modal.Title>{t("hostels.confirmDelete")}</Modal.Title>
+          <Button disabled={crossBtnStatus} variant="close" aria-label="Close" onClick={closePopupForm} />
         </Modal.Header>
         <Modal.Body>{t("hostels.confirmMsg")}</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={cancelDeleteHostel}>
+          <Button disabled={btnDisabledStatus}  variant="secondary" onClick={cancelDeleteHostel}>
             {t("hostels.cancel")}
           </Button>
-          <Button variant="danger" onClick={confirmDeleteHostel}>
+          <Button  disabled={btnDisabledStatus} variant="danger" onClick={confirmDeleteHostel}>
             {t("hostels.delete")}
           </Button>
         </Modal.Footer>
@@ -611,9 +663,10 @@ const submitHostelEdit = async (e) => {
 
       {/* ================== */}
 
-      <Modal show={isBoysModalOpen} onHide={() => handleModalClose(true)}>
-        <Modal.Header closeButton>
+      <Modal show={isBoysModalOpen} >
+        <Modal.Header>
           <Modal.Title>{t("settings.addboysHostel")}</Modal.Title>
+          <Button disabled={crossBtnStatus} variant="close" aria-label="Close" onClick={closePopupForm} />
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={(e) => addNewHostel(e, true)}>
@@ -653,9 +706,10 @@ const submitHostelEdit = async (e) => {
         </Modal.Body>
       </Modal>
 
-      <Modal show={isGirlsModalOpen} onHide={() => handleModalClose(false)}>
-        <Modal.Header closeButton>
+      <Modal show={isGirlsModalOpen} >
+        <Modal.Header >
           <Modal.Title>{t("settings.addGirlsHostel")}</Modal.Title>
+          <Button disabled={crossBtnStatus} variant="close" aria-label="Close" onClick={closePopupForm} />
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={(e) => addNewHostel(e, false)}>
