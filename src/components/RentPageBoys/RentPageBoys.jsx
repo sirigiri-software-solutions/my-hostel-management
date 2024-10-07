@@ -176,7 +176,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
     );
    
     if (rentRecord) {
-
+   
       setSelectedTenant(tenantId || "");
       setRoomNumber(rentRecord.roomNumber || "");
       setBedNumber(rentRecord.bedNumber || "");
@@ -185,7 +185,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       setPaidAmount(rentRecord.paidAmount || "");
       setDue(rentRecord.due || "");
       setPaidDate(rentRecord.paidDate || "");
-      setDueDate(rentRecord.dueDate || "");
+      setDueDate(rentRecord.dueDate || "" );
       setIsEditing(true);
       setEditingRentId(rentId);
     }
@@ -815,6 +815,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                             type="date"
                             value={dueDate}
                             onChange={(e) => setDueDate(e.target.value)}
+                            min={dateOfJoin}
                             name="dueDate"
                             onFocus={handleFocus}
                           />
@@ -1027,6 +1028,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                             type="date"
                             value={dueDate}
                             onChange={(e) => setDueDate(e.target.value)}
+                            min={dateOfJoin}
                             name="dueDate"
                             onFocus={handleFocus}
                           />

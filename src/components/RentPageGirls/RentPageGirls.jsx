@@ -869,6 +869,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                             type="date"
                             value={dueDate}
                             onChange={(e) => setDueDate(e.target.value)}
+                            min={dateOfJoin}
                             name="dueDate"
                             onFocus={handleFocus}
                           />
@@ -1078,6 +1079,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                             type="date"
                             value={dueDate}
                             onChange={(e) => setDueDate(e.target.value)}
+                            min={dateOfJoin}
                             name="dueDate"
                             onFocus={handleFocus}
                           />
