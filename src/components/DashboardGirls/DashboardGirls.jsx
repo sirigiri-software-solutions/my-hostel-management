@@ -1799,6 +1799,7 @@ navigate(-1)
                       type="date"
                       value={dueDate}
                       onChange={e => setDueDate(e.target.value)}
+                      min={dateOfJoin}
                       name="dueDate"
                       onFocus={handleFocus}
                     />
@@ -1923,6 +1924,7 @@ navigate(-1)
                       type="date"
                       value={dueDate}
                       onChange={e => setDueDate(e.target.value)}
+                      min={dateOfJoin}
                       name="dueDate"
                       onFocus={handleFocus}
                     />
