@@ -766,7 +766,7 @@ const isImageFile = (file) => {
     XLSX.writeFile(workbook, 'tenants_data.xlsx');
   }
 
-
+console.log(activeFlag, "ActiveFlag")
   const handleChangeHostelType = (e) => {
     console.log(e.target.value, "e.target")
     if (e.target.value === "mens") {
@@ -776,7 +776,15 @@ const isImageFile = (file) => {
     }
     setSelectedHostelType(e.target.value);
   }
-
+useEffect(()=>{
+  if(activeFlag === 'boys'){
+    setSelectedHostelType('mens')
+  } else {
+    setSelectedHostelType('womens')
+  }
+  
+}, [activeFlag])
+console.log(selectedHostelType, "ActiveFlagselectedHostelType")
   useEffect(() => {
     const handlePopState = () => {
       if(isBoysModalOpen){

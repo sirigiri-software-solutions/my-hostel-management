@@ -1574,6 +1574,7 @@ const DashboardBoys = () => {
                       type="date"
                       value={dueDate}
                       onChange={e => setDueDate(e.target.value)}
+                      min={dateOfJoin}
                       name="dueDate"
                       onFocus={handleFocus}
                     />
@@ -1699,6 +1700,7 @@ const DashboardBoys = () => {
                       type="date"
                       value={dueDate}
                       onChange={e => setDueDate(e.target.value)}
+                      min={dateOfJoin}
                       name="dueDate"
                       onFocus={handleFocus}
                     />
