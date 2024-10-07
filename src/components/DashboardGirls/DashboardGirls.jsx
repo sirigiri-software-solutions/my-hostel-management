@@ -1308,11 +1308,7 @@ if (bikeRcImage) {
           progress: undefined,
           toastId: "empty-fields-error",
         });
-<<<<<<< HEAD
-      }
-=======
-        setRentBtnStatus(false)
->>>>>>> 3d09bcd0278774ce167516ea70e032125ea318dc
+      }setRentBtnStatus(false)
       });
     } else {
 
@@ -1350,11 +1346,7 @@ if (bikeRcImage) {
           progress: undefined,
           toastId: "empty-fields-error",
         });
-<<<<<<< HEAD
-      }
-=======
-        setRentBtnStatus(false)
->>>>>>> 3d09bcd0278774ce167516ea70e032125ea318dc
+      }setRentBtnStatus(false)
       });
     }
     setShowModal(false);

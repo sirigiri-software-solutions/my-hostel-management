@@ -1264,9 +1264,12 @@ if (bikeRcImage) {
     setShowBikeFilter(!showBikeFilter);
   }
   const handleChange = (event) => {
+    
     const value = event.target.checked ? 'YES' : '';
     onChangeStatus({ target: { value } });
+    console.log("clicked",)
   };
+
 
   const handleTenantFocus = (e) => {
     const { name } = e.target;
@@ -1528,12 +1531,12 @@ const isImage = (contentType) => contentType.startsWith('image/');
         await Filesystem.writeFile({
           path: filePath,
           data: base64Data,
-          directory: FilesystemDirectory.Documents,
+          directory: Directory.Data,
           recursive: true,
         });
 
         const result = await Filesystem.getUri({
-          directory: FilesystemDirectory.Documents,
+          directory: Directory.Data,
           path: filePath,
         });
 
@@ -1726,7 +1729,6 @@ const handleDownload = async (url, type, tenantName) => {
                 type="checkbox"
                 id="status-toggleGirl1"
                 className="toggle-checkbox"
-                checked={selectedStatus === 'YES'}
                 onChange={handleChange}
               />
               <label className="toggle-switch" htmlFor="status-toggleGirl1">

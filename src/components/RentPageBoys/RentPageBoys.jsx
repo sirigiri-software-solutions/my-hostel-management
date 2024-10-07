@@ -284,11 +284,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
             progress: undefined,
             toastId: "empty-fields-error",
           });
-<<<<<<< HEAD
-        }
-=======
-          setRentPageBtnStatus(false)
->>>>>>> 3d09bcd0278774ce167516ea70e032125ea318dc
+        }setRentPageBtnStatus(false)
         });
     } else {
       const rentRef = ref(
