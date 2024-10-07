@@ -215,7 +215,7 @@ console.log(roomNumbersToShow, "00007")
   }, [boysRooms, boysTenants, showModal])
 
 
-
+ const [editRoomNumber,setEditRoomNumber] = useState();
   useEffect(() => {
     if (selectedRoom) {
       const room = boysRooms.find(room => room.roomNumber === selectedRoom);
@@ -226,15 +226,24 @@ console.log(roomNumbersToShow, "00007")
           .filter((each) => each.status === "Unoccupied")
           .map((each) => each.bedNumber);
         // console.log(unoccupiedBedNumbers,"bedOptionsToShow")
+        // console.log(requiredRoom[0].roomNumber,selectedRoom,"unoccupiedBedNumbers")
 
-        setBedOptions(unoccupiedBedNumbers);
+        if(isEditing && requiredRoom[0].roomNumber === editRoomNumber){
+          const unoccupiedBedNumbers = requiredRoom.filter((each) => each.bedNumber === parseInt(selectedBed)).map((each) => each.bedNumber)
+          console.log(unoccupiedBedNumbers,requiredRoom,selectedBed,"unoccupiedBedNumbers")
+          setBedOptions(unoccupiedBedNumbers)
+        }else{
+          setBedOptions(unoccupiedBedNumbers);
+        }
+
+        
         
       }
     } else {
       setBedOptions([]);
     }
 
-  }, [selectedRoom, boysRooms]);
+  }, [selectedRoom, boysRooms,showModal]);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -524,6 +533,7 @@ console.log(roomNumbersToShow, "00007")
           toastId: "empty-fields-error",
         });
         fetchData();
+
       } else {
         await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
         toast.success(t('toastMessages.tenantAddedSuccess'), {
@@ -556,6 +566,7 @@ console.log(roomNumbersToShow, "00007")
       setLoading(false);
       resetForm();
       setErrors({});
+      setEditRoomNumber(false);
       // fetchData()
     }
   };
@@ -569,6 +580,7 @@ console.log(roomNumbersToShow, "00007")
 
     setSelectedRoom(matchedRoom ? matchedRoom.roomNumber : '');
     setSelectedBed(tenant.bedNo);
+    setEditRoomNumber(matchedRoom ? matchedRoom.roomNumber : '')
     setDateOfJoin(tenant.dateOfJoin);
     setName(tenant.name);
     setMobileNo(tenant.mobileNo);
