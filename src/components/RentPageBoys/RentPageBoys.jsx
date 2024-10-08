@@ -225,12 +225,12 @@ Please note that you made your last payment on ${paidDate}.\n`;
   const [rentPageBtnStatus,setRentPageBtnStatus] = useState(false);
 
   const handleSubmit = async (e) => {
-    setRentPageBtnStatus(true)
+    
     e.preventDefault();
     if (!validateForm()) {
       return;
     }
-
+    setRentPageBtnStatus(true)
     const rentData = {
       roomNumber,
       bedNumber,

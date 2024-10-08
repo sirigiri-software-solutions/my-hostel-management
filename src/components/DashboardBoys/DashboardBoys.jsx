@@ -40,7 +40,7 @@ const DashboardBoys = () => {
     adminRole = "Sub-admin"
   }
   const isUneditable = role === 'admin' || role === 'subAdmin';
-  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag, boysRooms, fetchData, boysTenants, boysTenantsWithRents, entireHMAdata, history, setHistory } = useData();
+  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag, boysRooms, fetchData, boysTenants, boysTenantsWithRents, entireHMAdata } = useData();
   const { database, storage } = firebase;
 
   const [loading, setLoading] = useState(false);
@@ -1491,7 +1491,7 @@ const DashboardBoys = () => {
       setShowModal(true);
       window.history.pushState(null, null, location.pathname);
       console.log(location.pathname, "pathHistory")
-      setHistory([...history, location.pathname])
+      // setHistory([...history, location.pathname])
     }
   };
 
@@ -1539,7 +1539,7 @@ const DashboardBoys = () => {
     setBikeNumber("NA");
     setNotify(false)
     navigate(-1);
-    setHistory(prevHistory => [...prevHistory]);
+    // setHistory(prevHistory => [...prevHistory]);
   };
 
   const getMonthYearKey = (dateString) => {
