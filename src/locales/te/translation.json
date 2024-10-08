@@ -267,7 +267,8 @@
   "expenseNameRequired": "ఖర్చు పేరు అవసరం",
   "expenseAmountRequired": "ఖర్చు మొత్తం అవసరం",
   "expenseDateRequired": "ఖర్చు తేదీ అవసరం",
-   "permanentAddress":"చిరునామా అవసరం"
+   "permanentAddress":"చిరునామా అవసరం",
+   "bedsLimit":"పడకల సంఖ్య 20 మించరాదు"
   },
   "toastMessages": {
     "success": "గది విజయవంతంగా జోడించబడింది.",
@@ -281,6 +282,7 @@
     "rentAddedSuccess": "లాగు యాక్సెస్ విజయవంతంగా చేర్చబడింది.",
     "errorAddingRent": "లాగు యాక్సెస్ చేర్చడంలో లోపం: ",
     "roomAddedSuccessfully":"గది యశస్విగా జోడించబడింది.",
+    "roomUpdatedSuccessfully":"గది విజయవంతంగా నవీకరించబడింది.",
     "errorAddingRoom": "గది జోడించడంలో పొరపాటు",
     "expenseAddedSuccessfully": "ఖర్చు విజయవంతంగా జోడబడింది.",
     "errorAddingExpense": "ఖర్చు జోడించడంలో లోపం: ",
@@ -347,7 +349,17 @@
     "save": "భద్రపరచు",
     "confirmDelete": "తొలగించు నిర్ధారించు",
     "confirmMsg": "మీరు ఈ హాస్టల్‌ని తొలగిస్తే, గదులు, పడకలు, అద్దెదారులు, అద్దెలు మరియు ఖర్చులకు సంబంధించిన మొత్తం డేటా తొలగించబడుతుంది మరియు మీరు దీన్ని మళ్లీ తిరిగి పొందలేరు.  మీరు ఖచ్చితంగా ఈ హాస్టల్‌ని తొలగించాలనుకుంటున్నారా?",
-    "delete": "తొలగించు"
+    "delete": "తొలగించు",
+    "hostelDeletedSuccessfully":"హాస్టల్ విజయవంతంగా తొలగించబడింది.",
+    "hostelCannotBeDeleted":"హాస్టల్‌ను తొలగించడం సాధ్యం కాదు, ఎందుకంటే అందులో అద్దెదారులు మరియు బయటి వ్యక్తులు ఉన్నారు. దయచేసి మొదట అద్దెదారులను బదిలీ చేయండి.",
+    "hostelDetailsCannotBeEmpty":"హాస్టల్ పేరు, చిరునామా మరియు చిత్రం ఖాళీగా ఉండకూడదు.",
+    "errorUploadingImage":"చిత్రాన్ని అప్‌లోడ్ చేయడంలో పొరబాటు",
+    "hostelUpdatedSuccessfully":"హాస్టల్ విజయవంతంగా నవీకరించబడింది.",
+    "failedToUpdateHostel":"హాస్టల్‌ను నవీకరించడంలో విఫలమైంది",
+    "hostelNameMustContainAlphabets":"హాస్టల్ పేరు కేవలం అక్షరాలను మాత్రమే కలిగి ఉండాలి",
+    "pleaseSelectAFile":"దయచేసి ఒక ఫైల్‌ను ఎంచుకోండి",
+    "pleaseUploadValidImage":"దయచేసి సరైన ఇమేజ్ ఫైల్‌ను అప్‌లోడ్ చేయండి (JPEG, PNG, GIF)",
+    "failedToAddNewHostel": "కొత్త హాస్టల్‌ను జోడించడంలో విఫలమైంది."
 },
 "settings": {
   "languages": "భాషలు",

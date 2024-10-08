@@ -931,8 +931,6 @@ const TenantsBoys = () => {
     setShowConfirmation(false);
   };
 
-
-
   const exTenantRows = boysExTenantsData.map((tenant, index) => ({
     s_no: index + 1,
     image: tenant.tenantImageUrl,
@@ -958,6 +956,13 @@ const TenantsBoys = () => {
     ) : null,
 
   }));
+
+  const filteredExTenantRows = exTenantRows.filter((row) => {
+    const hasSearchQueryMatch = Object.values(row).some((value) =>
+      value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    return hasSearchQueryMatch;
+  });
 
   const showExTenantsData = () => {
     setShowExTenants(!showExTenants)
@@ -1342,7 +1347,7 @@ const TenantsBoys = () => {
 
       </div>
       <div>
-        {showExTenants ? <Table columns={columnsEx} rows={exTenantRows} onClickTentantRow={handleTentantRow} /> :
+        {showExTenants ? <Table columns={columnsEx} rows={filteredExTenantRows} onClickTentantRow={handleTentantRow} /> :
           <>
 
             <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />

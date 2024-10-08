@@ -136,6 +136,7 @@ const Settings = () => {
       toast.error("Hostel name must contain only alphabets.", {
         position: "top-center",
         autoClose: 3000,
+        toastId: "empty-fields-error",
       });
     }
   };
@@ -168,6 +169,7 @@ const isImageFile = (file) => {
       toast.error("Please select a file.", {
         position: "top-center",
         autoClose: 3000,
+        toastId: "empty-fields-error",
       });
       return;
     }
@@ -175,6 +177,7 @@ const isImageFile = (file) => {
       toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
         position: "top-center",
         autoClose: 3000,
+        toastId: "empty-fields-error",
       });
       e.target.value = ''; // Clear the input
       return;
@@ -200,6 +203,7 @@ const isImageFile = (file) => {
       toast.error("Hostel name, address and image cannot be empty.", {
         position: "top-center",
         autoClose: 3000,
+        toastId: "empty-fields-error",
       });
       return;
     }
@@ -233,6 +237,7 @@ const isImageFile = (file) => {
         toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
           position: "top-center",
           autoClose: 3000,
+          toastId: "empty-fields-error",
         });
         fetchData()
         if (isBoys) {
@@ -252,6 +257,7 @@ const isImageFile = (file) => {
         toast.error("Failed to add new hostel: " + error.message, {
           position: "top-center",
           autoClose: 3000,
+          toastId: "empty-fields-error",
         });
         navigate(-1)
       })
