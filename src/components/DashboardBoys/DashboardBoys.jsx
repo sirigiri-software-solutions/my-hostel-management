@@ -1083,12 +1083,12 @@ const DashboardBoys = () => {
 
 
   const handleRentSubmit = async (e) => {
-    setRentBtnStatus(true)
+    
     e.preventDefault();
     if (!validateRentForm()) {
       return;
     }
-
+    setRentBtnStatus(true)
     const rentData = {
       roomNumber,
       bedNumber,
