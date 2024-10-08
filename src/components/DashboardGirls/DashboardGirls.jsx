@@ -1537,7 +1537,7 @@ navigate(-1)
             </div>
             <div className="col-md-6">
               <label htmlFor="inputRent" className="form-label">{t('dashboard.roomNumber')}</label>
-              <input type="text" className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+              <input type="text" className="form-control" placeholder='like F1, 102, ..etc' id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
               {errors.roomNumber && <div style={{ color: 'red' }}>{errors.roomNumber}</div>}
             </div>
             <div className="col-md-6">
