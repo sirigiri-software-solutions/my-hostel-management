@@ -201,14 +201,9 @@ const TenantsBoys = () => {
     })
 
     const roomNumbersToShow = roomToShow.map((eachRoom) => eachRoom.roomNumber);
-
-    console.log(roomNumbersToShow, "0000") 
-
     if (selectedRoom && !roomNumbersToShow.includes(selectedRoom)) {
       roomNumbersToShow.push(selectedRoom); // Add the current room if not already present
     }
-console.log(roomNumbersToShow, "00007") 
-    //  console.log(roomNumbersToShow,"RoomNumberSToShow")
     setShowBoysRooms(roomNumbersToShow)
 
 
@@ -225,25 +220,17 @@ console.log(roomNumbersToShow, "00007")
         const unoccupiedBedNumbers = requiredRoom
           .filter((each) => each.status === "Unoccupied")
           .map((each) => each.bedNumber);
-        // console.log(unoccupiedBedNumbers,"bedOptionsToShow")
-        // console.log(requiredRoom[0].roomNumber,selectedRoom,"unoccupiedBedNumbers")
-
         if(isEditing && requiredRoom[0].roomNumber === editRoomNumber){
           const unoccupiedBedNumbers = requiredRoom.filter((each) => each.bedNumber === parseInt(selectedBed)).map((each) => each.bedNumber)
-          console.log(unoccupiedBedNumbers,requiredRoom,selectedBed,"unoccupiedBedNumbers")
           setBedOptions(unoccupiedBedNumbers)
         }else{
           setBedOptions(unoccupiedBedNumbers);
-        }
-
-        
-        
+        } 
       }
     } else {
       setBedOptions([]);
     }
-
-  }, [selectedRoom, boysRooms,showModal]);
+  }, [selectedRoom, boysRooms, showModal]);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -574,8 +561,6 @@ console.log(roomNumbersToShow, "00007")
 
 
   const handleEdit = (tenant) => {
-    console.log(tenant, "tenantWhileEditing")
-    console.log(tenant.tenantImageUrl, "tenantWhileEditing")
     const matchedRoom = boysRooms.find((room) => room.roomNumber == tenant.roomNo);
 
     setSelectedRoom(matchedRoom ? matchedRoom.roomNumber : '');
