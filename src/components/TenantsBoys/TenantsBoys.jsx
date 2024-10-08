@@ -9,7 +9,7 @@ import '../TenantsGirls/TenantsGirls.css';
 import './TenantsBoys.css'
 
 import { onValue, remove, set, update } from 'firebase/database'
-import { ref as storageRef, uploadBytes, getDownloadURL,getMetadata } from 'firebase/storage';
+import { ref as storageRef, uploadBytes, getDownloadURL, getMetadata } from 'firebase/storage';
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useTranslation } from 'react-i18next'
@@ -23,12 +23,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const TenantsBoys = () => {
-  
+
   const navigate = useNavigate();
   const location = useLocation();
 
   const { t } = useTranslation();
-  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms, boysTenants, entireHMAdata, boysExTenantsData} = useData();
+  const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms, boysTenants, entireHMAdata, boysExTenantsData } = useData();
   const role = localStorage.getItem('role');
   const { database, storage } = firebase;
 
@@ -88,7 +88,7 @@ const TenantsBoys = () => {
   const [bikeRcImageField, setBikeRcImageField] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [downloadingTextFlag,setDownloadingTextFlag] = useState(false);
+  const [downloadingTextFlag, setDownloadingTextFlag] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState({
     idProof: false,
     bikePic: false,
@@ -141,7 +141,7 @@ const TenantsBoys = () => {
       window.removeEventListener('click', handleOutsideClick);
       window.removeEventListener("keydown", handleOutsideClick);
     };
-  
+
   }, [showModal]);
 
 
@@ -163,24 +163,91 @@ const TenantsBoys = () => {
     };
   }, []);
 
- 
+  const [bedsData, setBedsData] = useState([]);
+  const [showBoysRoom, setShowBoysRooms] = useState([]);
 
+
+  useEffect(() => {
+    if (!boysRooms || boysRooms.length === 0) {
+      // If rooms are not defined or the array is empty, clear bedsData and exit early
+      setBedsData([]);
+      return;
+    }
+
+    const allBeds = boysRooms.flatMap(room => {
+      return Array.from({ length: room.numberOfBeds }, (_, i) => {
+        const bedNumber = i + 1;
+        const tenant = boysTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        const tenantName = tenant ? tenant.name : "-";
+        return {
+          name: tenantName,
+          floorNumber: room.floorNumber,
+          roomNumber: room.roomNumber,
+          bedNumber: bedNumber,
+          rent: room.bedRent || "N/A",
+          status: tenant ? "Occupied" : "Unoccupied"
+        };
+      });
+    });
+    setBedsData(allBeds);
+  }, [boysRooms, boysTenants, selectedRoom]);
+
+
+  useEffect(() => {
+
+    const roomToShow = boysRooms.filter((each) => {
+      const room = bedsData.some((eachBed) => eachBed.roomNumber === each.roomNumber && eachBed.status === "Unoccupied");
+      return room;
+    })
+
+    const roomNumbersToShow = roomToShow.map((eachRoom) => eachRoom.roomNumber);
+
+    console.log(roomNumbersToShow, "0000") 
+
+    if (selectedRoom && !roomNumbersToShow.includes(selectedRoom)) {
+      roomNumbersToShow.push(selectedRoom); // Add the current room if not already present
+    }
+console.log(roomNumbersToShow, "00007") 
+    //  console.log(roomNumbersToShow,"RoomNumberSToShow")
+    setShowBoysRooms(roomNumbersToShow)
+
+
+  }, [boysRooms, boysTenants, showModal])
+
+
+ const [editRoomNumber,setEditRoomNumber] = useState();
   useEffect(() => {
     if (selectedRoom) {
       const room = boysRooms.find(room => room.roomNumber === selectedRoom);
       if (room) {
         const options = Array.from({ length: room.numberOfBeds }, (_, i) => i + 1);
-        setBedOptions(options);
+        const requiredRoom = bedsData?.filter((each) => each.roomNumber === room.roomNumber);
+        const unoccupiedBedNumbers = requiredRoom
+          .filter((each) => each.status === "Unoccupied")
+          .map((each) => each.bedNumber);
+        // console.log(unoccupiedBedNumbers,"bedOptionsToShow")
+        // console.log(requiredRoom[0].roomNumber,selectedRoom,"unoccupiedBedNumbers")
+
+        if(isEditing && requiredRoom[0].roomNumber === editRoomNumber){
+          const unoccupiedBedNumbers = requiredRoom.filter((each) => each.bedNumber === parseInt(selectedBed)).map((each) => each.bedNumber)
+          console.log(unoccupiedBedNumbers,requiredRoom,selectedBed,"unoccupiedBedNumbers")
+          setBedOptions(unoccupiedBedNumbers)
+        }else{
+          setBedOptions(unoccupiedBedNumbers);
+        }
+
+        
+        
       }
     } else {
       setBedOptions([]);
     }
 
-  }, [selectedRoom, boysRooms]);
+  }, [selectedRoom, boysRooms,showModal]);
 
   const [searchQuery, setSearchQuery] = useState('');
 
- 
+
 
 
   const validate = () => {
@@ -230,7 +297,7 @@ const TenantsBoys = () => {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
     }
 
-    
+
     if (hasBike) {
       if (!bikeNumber) {
         tempErrors.bikeNumber = 'Bike number required';
@@ -256,17 +323,17 @@ const TenantsBoys = () => {
       const validFormats = ['image/jpeg', 'image/png'];
       if (validFormats.includes(file.type)) {
         setTenantImage(file);
-        setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' })); 
+        setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' }));
       } else {
         setErrorMessage((prevErrors) => ({
           ...prevErrors,
           tenantImage: 'Please upload a valid image file (JPG, JPEG, PNG).',
         }));
-        e.target.value = null; 
+        e.target.value = null;
       }
     }
   };
-  
+
   const handleTenantIdChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -310,7 +377,7 @@ const TenantsBoys = () => {
       }
     }
   };
-  
+
   const handleTenantBikeRcChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -341,12 +408,12 @@ const TenantsBoys = () => {
 
   const compressImage = async (file) => {
     const options = {
-      maxSizeMB:0.6, 
-      maxWidthOrHeight: 1920, 
-      useWebWorker: true, 
+      maxSizeMB: 0.6,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
       fileType: 'image/jpeg',
     };
-  
+
     try {
       const compressedFile = await imageCompression(file, options);
       return compressedFile;
@@ -355,7 +422,7 @@ const TenantsBoys = () => {
     }
   };
 
-  const checkImage = (type) =>  {
+  const checkImage = (type) => {
     return type === "image/jpeg"
   }
 
@@ -364,13 +431,13 @@ const TenantsBoys = () => {
     e.preventDefault();
 
     if (!isEditing) {
-        e.target.querySelector('button[type="submit"]').disabled = true;
-        if (!validate()) {
-            e.target.querySelector('button[type="submit"]').disabled = false;
-            return;
-        }
+      e.target.querySelector('button[type="submit"]').disabled = true;
+      if (!validate()) {
+        e.target.querySelector('button[type="submit"]').disabled = false;
+        return;
+      }
     } else {
-        if (!validate()) return;
+      if (!validate()) return;
     }
 
     setShowModal(false);
@@ -381,135 +448,139 @@ const TenantsBoys = () => {
 
     // Helper function to upload a file and return its URL
     const uploadFile = async (file, path) => {
-        try {
-            const imageRef = storageRef(storage, path);
-            const snapshot = await uploadBytes(imageRef, file);
-            return await getDownloadURL(snapshot.ref);
-        } catch (error) {
-            console.error(`Error uploading file ${file.name}:`, error);
-            throw error;
-        }
+      try {
+        const imageRef = storageRef(storage, path);
+        const snapshot = await uploadBytes(imageRef, file);
+        return await getDownloadURL(snapshot.ref);
+      } catch (error) {
+        console.error(`Error uploading file ${file.name}:`, error);
+        throw error;
+      }
     };
 
     const tasks = [];
     const uploadResults = {};
 
     const addUploadTask = (file, type, path) => {
-        tasks.push(
-            (async () => {
-                let fileToUpload = file;
-                if (checkImage(file.type)) {
-                    console.log(`Executing compression for ${type}`);
-                    try {
-                        fileToUpload = await compressImage(file);
-                    } catch (error) {
-                        console.error(`Error compressing ${type}:`, error);
-                    }
-                }
-                const url = await uploadFile(fileToUpload, path);
-                return { type, url };
-            })()
-        );
+      tasks.push(
+        (async () => {
+          let fileToUpload = file;
+          if (checkImage(file.type)) {
+            console.log(`Executing compression for ${type}`);
+            try {
+              fileToUpload = await compressImage(file);
+            } catch (error) {
+              console.error(`Error compressing ${type}:`, error);
+            }
+          }
+          const url = await uploadFile(fileToUpload, path);
+          return { type, url };
+        })()
+      );
     };
 
     if (tenantImage) {
-        addUploadTask(tenantImage, 'tenantImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantUniqueId}`);
+      addUploadTask(tenantImage, 'tenantImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantUniqueId}`);
     }
     if (tenantId) {
-        addUploadTask(tenantId, 'tenantId', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantUniqueId}`);
+      addUploadTask(tenantId, 'tenantId', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantUniqueId}`);
     }
     if (bikeImage) {
-        addUploadTask(bikeImage, 'bikeImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${tenantUniqueId}`);
+      addUploadTask(bikeImage, 'bikeImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${tenantUniqueId}`);
     }
     if (bikeRcImage) {
-        addUploadTask(bikeRcImage, 'bikeRcImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${tenantUniqueId}`);
+      addUploadTask(bikeRcImage, 'bikeRcImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${tenantUniqueId}`);
     }
 
     try {
-        const results = await Promise.all(tasks);
+      const results = await Promise.all(tasks);
 
-        // Process results
-        results.forEach(({ type, url }) => {
-            uploadResults[type] = url;
+      // Process results
+      results.forEach(({ type, url }) => {
+        uploadResults[type] = url;
+      });
+
+      console.log(uploadResults, "whileUpdatingTenant");
+
+      const tenantData = {
+        roomNo: selectedRoom,
+        bedNo: selectedBed,
+        dateOfJoin,
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        mobileNo,
+        idNumber,
+        emergencyContact,
+        status,
+        tenantImageUrl: uploadResults['tenantImage'] || tenantImageUrl,
+        tenantIdUrl: uploadResults['tenantId'] || tenantIdUrl,
+        bikeNumber,
+        permnentAddress,
+        bikeImageUrl: uploadResults['bikeImage'] || bikeImageUrl,
+        bikeRcImageUrl: uploadResults['bikeRcImage'] || bikeRcImageUrl,
+
+      };
+
+      if (isEditing) {
+        await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
+        toast.success(t('toastMessages.tenantUpdated'), {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          toastId: "empty-fields-error",
         });
+        fetchData();
 
-        console.log(uploadResults, "whileUpdatingTenant");
-
-        const tenantData = {
-            roomNo: selectedRoom,
-            bedNo: selectedBed,
-            dateOfJoin,
-            name: name.charAt(0).toUpperCase() + name.slice(1),
-            mobileNo,
-            idNumber,
-            emergencyContact,
-            status,
-            tenantImageUrl: uploadResults['tenantImage'] || tenantImageUrl,
-            tenantIdUrl: uploadResults['tenantId'] || tenantIdUrl,
-            bikeNumber,
-            permnentAddress,
-            bikeImageUrl: uploadResults['bikeImage'] || bikeImageUrl,
-            bikeRcImageUrl: uploadResults['bikeRcImage'] || bikeRcImageUrl,
-           
-        };
-
-        if (isEditing) {
-            await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
-            toast.success(t('toastMessages.tenantUpdated'), {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                toastId: "empty-fields-error",
-            });
-            fetchData();
-        } else {
-            await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
-            toast.success(t('toastMessages.tenantAddedSuccess'), {
-                position: "top-center",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                toastId: "empty-fields-error",
-            });
-            fetchData();
-            e.target.querySelector('button[type="submit"]').disabled = false;
-        }
-    } catch (error) {
-        console.error("Error submitting form:", error);
-        toast.error(t('toastMessages.errorSubmitting') + error.message, {
-            position: "top-center",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            toastId: "empty-fields-error",
+      } else {
+        await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
+        toast.success(t('toastMessages.tenantAddedSuccess'), {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          toastId: "empty-fields-error",
         });
+        fetchData();
         e.target.querySelector('button[type="submit"]').disabled = false;
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error(t('toastMessages.errorSubmitting') + error.message, {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        toastId: "empty-fields-error",
+      });
+      e.target.querySelector('button[type="submit"]').disabled = false;
     } finally {
-        setLoading(false);
-        resetForm();
-        setErrors({});
-        // fetchData()
+      setLoading(false);
+      resetForm();
+      setErrors({});
+      setEditRoomNumber(false);
+      // fetchData()
     }
-};
+  };
 
 
 
   const handleEdit = (tenant) => {
-    console.log(tenant,"tenantWhileEditing")
-    console.log(tenant.tenantImageUrl,"tenantWhileEditing")
+    console.log(tenant, "tenantWhileEditing")
+    console.log(tenant.tenantImageUrl, "tenantWhileEditing")
     const matchedRoom = boysRooms.find((room) => room.roomNumber == tenant.roomNo);
+
     setSelectedRoom(matchedRoom ? matchedRoom.roomNumber : '');
     setSelectedBed(tenant.bedNo);
+    setEditRoomNumber(matchedRoom ? matchedRoom.roomNumber : '')
     setDateOfJoin(tenant.dateOfJoin);
     setName(tenant.name);
     setMobileNo(tenant.mobileNo);
@@ -542,7 +613,7 @@ const TenantsBoys = () => {
 
 
     setBikeNumber("");
-    setHasBike(false); 
+    setHasBike(false);
     setFileName(tenant.fileName || '');
     setShowModal(true);
     window.history.pushState(null, null, location.pathname);
@@ -557,8 +628,8 @@ const TenantsBoys = () => {
       setBikeNumber(tenant.bikeNumber);
     }
 
-    
-    
+
+
   };
 
   const handleAddNew = () => {
@@ -682,7 +753,7 @@ const TenantsBoys = () => {
       return hasSearchQueryMatch;
     }
   });
-  
+
 
 
   const handleClosePopUp = () => {
@@ -698,9 +769,9 @@ const TenantsBoys = () => {
     const handlePopState = () => {
       if (showModal) {
         setShowModal(false); // Close the popup
-        
+
       }
-      if(userDetailsTenantPopup){
+      if (userDetailsTenantPopup) {
         setUserDetailsTenantsPopup(false)
       }
     };
@@ -709,9 +780,9 @@ const TenantsBoys = () => {
 
 
     return () => {
-      window.removeEventListener('popstate',handlePopState)
+      window.removeEventListener('popstate', handlePopState)
     }
-  }, [showModal,userDetailsTenantPopup, location.pathname]);
+  }, [showModal, userDetailsTenantPopup, location.pathname]);
 
   const handleTentantRow = (tenant) => {
 
@@ -729,7 +800,7 @@ const TenantsBoys = () => {
       eachTenant.roomNo === roomNo &&
       eachTenant.bedNo === bedNo
     );
-    
+
 
     if (singleUserDueDate && singleUserDueDate.bikeNumber) {
       setSingleTenantBikeNum(singleUserDueDate.bikeNumber)
@@ -809,7 +880,7 @@ const TenantsBoys = () => {
             toastId: "empty-fields-error",
           });
         });
-        
+
       }
     }, {
       onlyOnce: true
@@ -924,16 +995,16 @@ const TenantsBoys = () => {
     }));
   };
 
-//   const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
-// const isImage = (fileData) => fileData.startsWith('data:image/' || "image/jpeg");
+  //   const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
+  // const isImage = (fileData) => fileData.startsWith('data:image/' || "image/jpeg");
 
-const isPDF = (contentType) => contentType === 'application/pdf';
-const isImage = (contentType) => contentType.startsWith('image/');
+  const isPDF = (contentType) => contentType === 'application/pdf';
+  const isImage = (contentType) => contentType.startsWith('image/');
 
 
   const pdfToImages = async (pdfUrl) => {
     const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
-    console.log(pdf,"pdfImagesWhileDownloading")
+    console.log(pdf, "pdfImagesWhileDownloading")
     const numPages = pdf.numPages;
     const images = [];
 
@@ -954,7 +1025,7 @@ const isImage = (contentType) => contentType.startsWith('image/');
       const imgData = canvas.toDataURL('image/png');
       images.push({ imgData, width: viewport.width, height: viewport.height });
     }
-    console.log(images,"pdfImagesWhileDownloading")
+    console.log(images, "pdfImagesWhileDownloading")
     return images;
   };
 
@@ -979,13 +1050,13 @@ const isImage = (contentType) => contentType.startsWith('image/');
 
   const getContentType = async (url) => {
     try {
-        const response = await fetch(url);
-        return response.headers.get('Content-Type');
+      const response = await fetch(url);
+      return response.headers.get('Content-Type');
     } catch (error) {
-        console.error('Error fetching content type:', error);
-        return null;
+      console.error('Error fetching content type:', error);
+      return null;
     }
-};
+  };
 
 
 
@@ -1003,23 +1074,23 @@ const isImage = (contentType) => contentType.startsWith('image/');
 
     const createPDFWithImage = async (imageUrl) => {
 
-        try {
-            const base64Image = await getImageBase64(imageUrl);
-            return base64Image;
-        } catch (error) {
-            console.error("Error creating base64 image", error);
-            return null;
-        }
+      try {
+        const base64Image = await getImageBase64(imageUrl);
+        return base64Image;
+      } catch (error) {
+        console.error("Error creating base64 image", error);
+        return null;
+      }
     };
 
-   
+
 
 
     if (singleTenantDetails.image) {
-        const imageUrl = await createPDFWithImage(singleTenantDetails.image);
-        if (imageUrl) {
-            doc.addImage(imageUrl, "PNG", 130, 24, 50, 50);
-        }
+      const imageUrl = await createPDFWithImage(singleTenantDetails.image);
+      if (imageUrl) {
+        doc.addImage(imageUrl, "PNG", 130, 24, 50, 50);
+      }
     }
 
     doc.setFontSize(12);
@@ -1054,12 +1125,12 @@ const isImage = (contentType) => contentType.startsWith('image/');
     doc.text(singleTenantDetails.joining_date, 48, 65);
 
     if (dueDateOfTenant) {
-        doc.setFont("helvetica", "bold");
-        doc.text("Due Date: ", 20, 75);
+      doc.setFont("helvetica", "bold");
+      doc.text("Due Date: ", 20, 75);
 
-        doc.setFont("helvetica", "normal");
-        doc.text(dueDateOfTenant, 40, 75);
-    }else{
+      doc.setFont("helvetica", "normal");
+      doc.text(dueDateOfTenant, 40, 75);
+    } else {
       doc.setFont("helvetica", "bold");
       doc.text("Due Date: ", 20, 75);
 
@@ -1068,12 +1139,12 @@ const isImage = (contentType) => contentType.startsWith('image/');
     }
 
     if (bikeNumber) {
-        doc.setFont("helvetica", "bold");
-        doc.text("Bike Number: ", 20, 85);
+      doc.setFont("helvetica", "bold");
+      doc.text("Bike Number: ", 20, 85);
 
-        doc.setFont("helvetica", "normal");
-        doc.text(singleTenanantBikeNum, 48, 85);
-    }else{
+      doc.setFont("helvetica", "normal");
+      doc.text(singleTenanantBikeNum, 48, 85);
+    } else {
       doc.setFont("helvetica", "bold");
       doc.text("Bike Number: ", 20, 85);
 
@@ -1082,64 +1153,64 @@ const isImage = (contentType) => contentType.startsWith('image/');
     }
 
     if (tenantAddress) {
-        doc.setFont("helvetica", "bold");
-        doc.text("Address: ", 20, 95);
+      doc.setFont("helvetica", "bold");
+      doc.text("Address: ", 20, 95);
 
-        doc.setFont("helvetica", "normal");
-        doc.text(tenantAddress, 39, 95);
+      doc.setFont("helvetica", "normal");
+      doc.text(tenantAddress, 39, 95);
     }
 
     // Add a new page
     doc.addPage();
-   
+
     // Page 2: ID Proof Image or PDF
     if (singleTenantProofId) {
-      const response =await getContentType(singleTenantProofId)
-      console.log(response,'whatComingfromAPi')
-        if (isImage(response)) {
-         
-          console.log("image","pdfOFTenant")
-            try {
-              const imageUrl = await createPDFWithImage(singleTenantProofId);
-                // const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-                doc.addImage(imageUrl, "PNG", 20, 20, 120, 120);
-            } catch (error) {
-                console.error('Error loading image:', error);
-            }
-        } else if (isPDF(response)) {
-          console.log("image","pdfOFTenant")
-            const images = await pdfToImages(singleTenantProofId);
-            images.forEach((img, index) => {
-                if (index > 0) doc.addPage();
-                const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-                doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-            });
+      const response = await getContentType(singleTenantProofId)
+      console.log(response, 'whatComingfromAPi')
+      if (isImage(response)) {
+
+        console.log("image", "pdfOFTenant")
+        try {
+          const imageUrl = await createPDFWithImage(singleTenantProofId);
+          // const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(imageUrl, "PNG", 20, 20, 120, 120);
+        } catch (error) {
+          console.error('Error loading image:', error);
         }
+      } else if (isPDF(response)) {
+        console.log("image", "pdfOFTenant")
+        const images = await pdfToImages(singleTenantProofId);
+        images.forEach((img, index) => {
+          if (index > 0) doc.addPage();
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+        });
+      }
     }
 
     // Add a new page
     doc.addPage();
-    
-    console.log(bikeImageField,bikeRcImageField,"whatUrlisComing")
+
+    console.log(bikeImageField, bikeRcImageField, "whatUrlisComing")
     // Page 3: Bike Image or PDF
     if (bikeImageField) {
-      const response =await getContentType(bikeImageField)
-        if (isImage(response)) {
-            try {
-              const imageUrl = await createPDFWithImage(bikeImageField);
-                // const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-                doc.addImage(imageUrl, 'JPEG', 20, 20,120, 120);
-            } catch (error) {
-                console.error('Error loading image:', error);
-            }
-        } else if (isPDF(response)) {
-            const images = await pdfToImages(bikeImageField);
-            images.forEach((img, index) => {
-                if (index > 0) doc.addPage();
-                const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-                doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-            });
+      const response = await getContentType(bikeImageField)
+      if (isImage(response)) {
+        try {
+          const imageUrl = await createPDFWithImage(bikeImageField);
+          // const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(imageUrl, 'JPEG', 20, 20, 120, 120);
+        } catch (error) {
+          console.error('Error loading image:', error);
         }
+      } else if (isPDF(response)) {
+        const images = await pdfToImages(bikeImageField);
+        images.forEach((img, index) => {
+          if (index > 0) doc.addPage();
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+        });
+      }
     }
 
     // Add a new page
@@ -1147,23 +1218,23 @@ const isImage = (contentType) => contentType.startsWith('image/');
 
     // Page 4: Bike RC Image or PDF
     if (bikeRcImageField) {
-      const response =await getContentType(bikeRcImageField)
-        if (isImage(response)) {
-            try {
-              const imageUrl = await createPDFWithImage(bikeRcImageField);
-                // const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-                doc.addImage(imageUrl, 'JPEG', 20, 20, 120, 120);
-            } catch (error) {
-                console.error('Error loading image:', error);
-            }
-        } else if (isPDF(response)) {
-            const images = await pdfToImages(bikeRcImageField);
-            images.forEach((img, index) => {
-                if (index > 0) doc.addPage();
-                const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-                doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-            });
+      const response = await getContentType(bikeRcImageField)
+      if (isImage(response)) {
+        try {
+          const imageUrl = await createPDFWithImage(bikeRcImageField);
+          // const { width, height } = calculateFitDimensions(imageUrl.width, imageUrl.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(imageUrl, 'JPEG', 20, 20, 120, 120);
+        } catch (error) {
+          console.error('Error loading image:', error);
         }
+      } else if (isPDF(response)) {
+        const images = await pdfToImages(bikeRcImageField);
+        images.forEach((img, index) => {
+          if (index > 0) doc.addPage();
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+        });
+      }
     }
 
     // Save the PDF
@@ -1171,69 +1242,69 @@ const isImage = (contentType) => contentType.startsWith('image/');
     setTimeout(() => {
       setDownloadingTextFlag(false);
     }, 800);
-};
+  };
 
   const getImageBase64 = (url) => {
     return new Promise((resolve, reject) => {
-        let img = new Image();
-        img.crossOrigin = "Anonymous";
-        img.src = url;
-        img.onload = () => {
-            let canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            let ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-            let dataURL = canvas.toDataURL("image/png");
-            resolve(dataURL);
-        };
-        img.onerror = (error) => {
-            reject(error);
-        };
+      let img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = url;
+      img.onload = () => {
+        let canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        let ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        let dataURL = canvas.toDataURL("image/png");
+        resolve(dataURL);
+      };
+      img.onerror = (error) => {
+        reject(error);
+      };
     });
-};
- 
-const createPDFWithImage = async (imageUrl) => {
+  };
 
-  try {
+  const createPDFWithImage = async (imageUrl) => {
+
+    try {
       const base64Image = await getImageBase64(imageUrl);
       return base64Image;
-  } catch (error) {
+    } catch (error) {
       console.error("Error creating base64 image", error);
       return null;
-  }
-};
-
-
-const handleDownload = async (url, type,tenantName) => {
-  setDownloadStatus(prev => ({ ...prev, [type]: true }));
-  
-  try {
-    const response = await getContentType(url);
-    console.log(response, "downloadIssue");
-    
-    if (isImage(response)) {
-      const imageUrl = await createPDFWithImage(url);
-      const doc = new jsPDF();
-      doc.addImage(imageUrl, "PNG", 20, 20, 100, 100);
-      doc.save(`${tenantName} ${type}.pdf`);
-    } else if (isPDF(response)) {
-      const images = await pdfToImages(url);
-      const doc = new jsPDF();
-      images.forEach((img, index) => {
-        if (index > 0) doc.addPage();
-        const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
-        doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
-      });
-      doc.save(`${tenantName} ${type}.pdf`);
     }
-  } catch (error) {
-    console.error("Download error:", error);
-  } finally {
-    setDownloadStatus(prev => ({ ...prev, [type]: false }));
-  }
-};
- 
+  };
+
+
+  const handleDownload = async (url, type, tenantName) => {
+    setDownloadStatus(prev => ({ ...prev, [type]: true }));
+
+    try {
+      const response = await getContentType(url);
+      console.log(response, "downloadIssue");
+
+      if (isImage(response)) {
+        const imageUrl = await createPDFWithImage(url);
+        const doc = new jsPDF();
+        doc.addImage(imageUrl, "PNG", 20, 20, 100, 100);
+        doc.save(`${tenantName} ${type}.pdf`);
+      } else if (isPDF(response)) {
+        const images = await pdfToImages(url);
+        const doc = new jsPDF();
+        images.forEach((img, index) => {
+          if (index > 0) doc.addPage();
+          const { width, height } = calculateFitDimensions(img.width, img.height, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 40);
+          doc.addImage(img.imgData, 'PNG', 20, 20, width, height);
+        });
+        doc.save(`${tenantName} ${type}.pdf`);
+      }
+    } catch (error) {
+      console.error("Download error:", error);
+    } finally {
+      setDownloadStatus(prev => ({ ...prev, [type]: false }));
+    }
+  };
+
 
 
   return (
@@ -1286,19 +1357,19 @@ const handleDownload = async (url, type,tenantName) => {
 
       </div>
       <div>
-        {showExTenants ? <Table columns={columnsEx} rows={exTenantRows} onClickTentantRow={handleTentantRow} /> : 
-        <>
-       
-        <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />
-       
-        </>
+        {showExTenants ? <Table columns={columnsEx} rows={exTenantRows} onClickTentantRow={handleTentantRow} /> :
+          <>
+
+            <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />
+
+          </>
         }
       </div>
       <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalTenantsBoys" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal}  >
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title fs-5" id="exampleModalLabel"> {isEditing ? t('dashboard.updateTenant'):t('dashboard.addTenants')}</h5>
+              <h5 class="modal-title fs-5" id="exampleModalLabel"> {isEditing ? t('dashboard.updateTenant') : t('dashboard.addTenants')}</h5>
               <button onClick={handleClosePopUp} className="btn-close" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -1308,14 +1379,40 @@ const handleDownload = async (url, type,tenantName) => {
                     <label htmlFor='roomNo' class="form-label">
                       {t('dashboard.roomNo')}
                     </label>
-                    <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedRoom" onFocus={handleTenantFocus}>
+                    {/* <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedRoom" onFocus={handleTenantFocus}>
                       <option value="">{t('dashboard.selectRoom')}</option>
-                      {boysRooms.map((room) => (
-                        <option key={room.roomNumber} value={room.roomNumber}>
-                          {room.roomNumber}
+                      {showBoysRoom.map((room) => (
+                        <option key={room} value={room}>
+                          {room}
+                        </option>
+                      ))}
+                    </select> */}
+
+                    <select
+                      id="roomNo"
+                      className="form-select"
+                      value={selectedRoom}
+                      onChange={(e) => setSelectedRoom(e.target.value)}
+                      name="selectedRoom"
+                      onFocus={handleTenantFocus}
+                    >
+                      <option value="">{t('dashboard.selectRoom')}</option>
+
+                      {/* Always show the current room in the dropdown */}
+                      {selectedRoom && !showBoysRoom.includes(selectedRoom) && (
+                        <option key={selectedRoom} value={selectedRoom}>
+                          {selectedRoom} (Current)
+                        </option>
+                      )}
+
+                      {/* Show unoccupied rooms */}
+                      {showBoysRoom.map((room) => (
+                        <option key={room} value={room}>
+                          {room}
                         </option>
                       ))}
                     </select>
+
 
                     {errors.selectedRoom && <p style={{ color: 'red' }}>{errors.selectedRoom}</p>}
                   </div>
@@ -1406,7 +1503,7 @@ const handleDownload = async (url, type,tenantName) => {
                       </div>
                     )}
 
-                    <input ref={tenantProofIdRef} id="tenantUploadId" className="form-control" type="file"accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantIdChange} />
+                    <input ref={tenantProofIdRef} id="tenantUploadId" className="form-control" type="file" accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantIdChange} />
                     {errorMessage.tenantId && <p style={{ color: 'red' }}>{errorMessage.tenantId}</p>}
 
                   </div>
@@ -1464,7 +1561,7 @@ const handleDownload = async (url, type,tenantName) => {
                         <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
                         <input type="file" className="form-control" accept=".jpg, .jpeg, .png" onChange={handleTenantBikeChange} />
                         {errorMessage.bikeImage && <p style={{ color: 'red' }}>{errorMessage.bikeImage}</p>}
-                        
+
                       </div>
                       <div className="col-md-6">
                         <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
@@ -1498,7 +1595,7 @@ const handleDownload = async (url, type,tenantName) => {
       {userDetailsTenantPopup &&
         <div id="userDetailsTenantPopupIdBoy" className='userDetailsTenantPopup'>
           <div className='tenants-dialog-container'>
-          <span className="close-icon" onClick={tenantPopupClose}>&times;</span>
+            <span className="close-icon" onClick={tenantPopupClose}>&times;</span>
             <h1 className="tenants-popup-heading">{t('tenantsPage.tenantDetails')} </h1>
             <div className='tenants-popup-mainContainer'>
               <div className='tenants-profile-container'>
@@ -1528,12 +1625,12 @@ const handleDownload = async (url, type,tenantName) => {
           <span className='NotUploadedText'>{t('tenantsPage.notUploaded')}</span>
         )}
       </p> */}
-      
-      <p>
-        <strong>{t('tenantsPage.PermanentAddress')}</strong>{tenantAddress ? tenantAddress : " NA"}
-      </p>
 
-      {/* <p>
+                <p>
+                  <strong>{t('tenantsPage.PermanentAddress')}</strong>{tenantAddress ? tenantAddress : " NA"}
+                </p>
+
+                {/* <p>
         <strong>{t('tenantsPage.BikePic')}</strong>
         {bikeImageField ? (
           downloadStatus.bikePic ? (
@@ -1572,8 +1669,8 @@ const handleDownload = async (url, type,tenantName) => {
             </div>
             <div className='popup-tenants-closeBtn'>
               <button className='btn btn-warning' onClick={tenantPopupClose}>{t('tenantsPage.close')}</button>
-              {downloadingTextFlag ? <button id="downloadPdfBtn" className='btn btn-warning' >{t('tenantsPage.downloading')}</button> :<button id="downloadPdfBtn" className='btn btn-warning' onClick={handleTenantDownload}><FaDownload /> {t('tenantsPage.downloadPdf')}</button> }
-              
+              {downloadingTextFlag ? <button id="downloadPdfBtn" className='btn btn-warning' >{t('tenantsPage.downloading')}</button> : <button id="downloadPdfBtn" className='btn btn-warning' onClick={handleTenantDownload}><FaDownload /> {t('tenantsPage.downloadPdf')}</button>}
+
             </div>
           </div>
         </div>
