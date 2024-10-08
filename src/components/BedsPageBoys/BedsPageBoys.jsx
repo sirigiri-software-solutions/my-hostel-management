@@ -134,9 +134,7 @@ const BedsPageBoys = () => {
       )
     );
   });
- 
-  // console.log(rows,"bedsPageData")
-  // console.log(filteredRows,"bedsPageData")
+
 
 
   return (

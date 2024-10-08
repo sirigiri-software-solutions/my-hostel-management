@@ -441,19 +441,75 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
   //   });
   // }, [activeGirlsHostel]);
 
+  const [bedsData, setBedsData] = useState([]);
+  const [showBoysRoom, setShowBoysRooms] = useState([]);
 
+  useEffect(() => {
+    if (!girlsRooms || girlsRooms.length === 0) {
+      // If rooms are not defined or the array is empty, clear bedsData and exit early
+      setBedsData([]);
+      return;
+    }
+
+    const allBeds = girlsRooms.flatMap(room => {
+      return Array.from({ length: room.numberOfBeds }, (_, i) => {
+        const bedNumber = i + 1;
+        const tenant = girlsTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        const tenantName = tenant ? tenant.name : "-";
+        return {
+          name: tenantName,
+          floorNumber: room.floorNumber,
+          roomNumber: room.roomNumber,
+          bedNumber: bedNumber,
+          rent: room.bedRent || "N/A",
+          status: tenant ? "Occupied" : "Unoccupied"
+        };
+      });
+    });
+    setBedsData(allBeds);
+  }, [girlsRooms, girlsTenants, selectedRoom]);
+
+
+  useEffect(() => {
+
+    const roomToShow = girlsRooms.filter((each) => {
+      const room = bedsData.some((eachBed) => eachBed.roomNumber === each.roomNumber && eachBed.status === "Unoccupied");
+      return room;
+    })
+
+    const roomNumbersToShow = roomToShow.map((eachRoom) => eachRoom.roomNumber);
+
+    if (selectedRoom && !roomNumbersToShow.includes(selectedRoom)) {
+      roomNumbersToShow.push(selectedRoom); // Add the current room if not already present
+    }
+
+    setShowBoysRooms(roomNumbersToShow)
+
+
+  }, [girlsRooms, girlsTenants, showModal])
+
+  const [editRoomNumber,setEditRoomNumber] = useState();
 
   useEffect(() => {
     if (selectedRoom) {
       const room = girlsRooms.find(room => room.roomNumber === selectedRoom);
       if (room) {
         const options = Array.from({ length: room.numberOfBeds }, (_, i) => i + 1);
-        setBedOptions(options);
+        const requiredRoom = bedsData?.filter((each) => each.roomNumber === room.roomNumber);
+        const unoccupiedBedNumbers = requiredRoom
+          .filter((each) => each.status === "Unoccupied")
+          .map((each) => each.bedNumber);
+          if(isEditing && requiredRoom[0].roomNumber === editRoomNumber){
+            const unoccupiedBedNumbers = requiredRoom.filter((each) => each.bedNumber === parseInt(selectedBed)).map((each) => each.bedNumber)
+            setBedOptions(unoccupiedBedNumbers)
+          }else{
+            setBedOptions(unoccupiedBedNumbers);
+          } 
       }
     } else {
       setBedOptions([]);
     }
-  }, [selectedRoom, girlsRooms]);
+  }, [selectedRoom, girlsRooms,showModal]);
 
 
 
@@ -559,25 +615,7 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
   //   }
   // };
 
-  const compressImage = async (file) => {
-    const options = {
-      maxSizeMB: 0.6, // Compress to a maximum of 1 MB (adjust as needed)
-      maxWidthOrHeight: 1920, 
-      useWebWorker: true, // Use a web worker for better performance
-      fileType: 'image/jpeg',
-    };
-  
-    try {
-      const compressedFile = await imageCompression(file, options);
-      return compressedFile;
-    } catch (error) {
-      console.error('Error compressing the image:', error);
-    }
-  };
 
-  const checkImage = (type) =>  {
-    return type === "image/jpeg"
-  }
 
 
   const handleTenantImageChange = (e) => {
@@ -671,6 +709,26 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
       }
     }
   };
+
+  const compressImage = async (file) => {
+    const options = {
+      maxSizeMB: 0.6, // Compress to a maximum of 1 MB (adjust as needed)
+      maxWidthOrHeight: 1920, 
+      useWebWorker: true, // Use a web worker for better performance
+      fileType: 'image/jpeg',
+    };
+  
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error('Error compressing the image:', error);
+    }
+  };
+
+  const checkImage = (type) =>  {
+    return type === "image/jpeg"
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -822,7 +880,7 @@ if (bikeRcImage) {
     setIsCameraUsed(false);
     setIsTenantIdFileUploaded(false);
     setIsTenantIdCameraUsed(false);
-
+    setEditRoomNumber(false);
     }
 };
 
@@ -832,6 +890,7 @@ if (bikeRcImage) {
     const matchedRoom = girlsRooms.find((room) => room.roomNumber == tenant.roomNo);
     setSelectedRoom(matchedRoom ? matchedRoom.roomNumber : '');
     setSelectedBed(tenant.bedNo);
+    setEditRoomNumber(matchedRoom ? matchedRoom.roomNumber : '')
     setDateOfJoin(tenant.dateOfJoin);
     setName(tenant.name);
     setMobileNo(tenant.mobileNo);
@@ -1777,9 +1836,21 @@ const handleDownload = async (url, type, tenantName) => {
                     </label>
                     <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedRoom" onFocus={handleTenantFocus}>
                       <option value="">{t('dashboard.selectRoom')}</option>
-                      {girlsRooms.map((room) => (
+                      {/* {girlsRooms.map((room) => (
                         <option key={room.roomNumber} value={room.roomNumber}>
                           {room.roomNumber}
+                        </option>
+                      ))}  */}
+                      {selectedRoom && !showBoysRoom.includes(selectedRoom) && (
+                        <option key={selectedRoom} value={selectedRoom}>
+                          {selectedRoom} (Current)
+                        </option>
+                      )}
+
+                      {/* Show unoccupied rooms */}
+                      {showBoysRoom.map((room) => (
+                        <option key={room} value={room}>
+                          {room}
                         </option>
                       ))}
                     </select>

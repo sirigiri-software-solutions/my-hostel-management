@@ -297,14 +297,68 @@ const DashboardGirls = () => {
   //   // Fetch tenants
   // }, [activeGirlsHostel]);
 
+  const [showGirlsRoom, setShowGirlsRooms] = useState([]);
+  useEffect(() => {
+    if (!girlsRooms || girlsRooms.length === 0) {
+      // If rooms are not defined or the array is empty, clear bedsData and exit early
+      setBedsData([]);
+      return;
+    }
+
+    const allBeds = girlsRooms.flatMap(room => {
+      return Array.from({ length: room.numberOfBeds }, (_, i) => {
+        const bedNumber = i + 1;
+        const tenant = girlsTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        const tenantName = tenant ? tenant.name : "-";
+        return {
+          name: tenantName,
+          floorNumber: room.floorNumber,
+          roomNumber: room.roomNumber,
+          bedNumber: bedNumber,
+          rent: room.bedRent || "N/A",
+          status: tenant ? "Occupied" : "Unoccupied"
+        };
+      });
+    });
+    setBedsData(allBeds);
+  }, [girlsRooms, girlsTenants, selectedRoom]);
 
 
+  useEffect(() => {
+
+    const roomToShow = girlsRooms.filter((each) => {
+      const room = bedsData.some((eachBed) => eachBed.roomNumber === each.roomNumber && eachBed.status === "Unoccupied");
+      return room;
+    })
+
+    const roomNumbersToShow = roomToShow.map((eachRoom) => eachRoom.roomNumber);
+
+    if (selectedRoom && !roomNumbersToShow.includes(selectedRoom)) {
+      roomNumbersToShow.push(selectedRoom); // Add the current room if not already present
+    }
+
+    setShowGirlsRooms(roomNumbersToShow)
+
+
+  }, [girlsRooms, girlsTenants, showModal])
+
+
+  const [editRoomNumber,setEditRoomNumber] = useState();
   useEffect(() => {
     if (selectedRoom) {
       const room = girlsRooms.find(room => room.roomNumber === selectedRoom);
       if (room) {
         const options = Array.from({ length: room.numberOfBeds }, (_, i) => i + 1);
-        setBedOptions(options);
+        const requiredRoom = bedsData?.filter((each) => each.roomNumber === room.roomNumber);
+        const unoccupiedBedNumbers = requiredRoom
+          .filter((each) => each.status === "Unoccupied")
+          .map((each) => each.bedNumber);
+        if(isEditing && requiredRoom[0].roomNumber === editRoomNumber){
+          const unoccupiedBedNumbers = requiredRoom.filter((each) => each.bedNumber === parseInt(selectedBed)).map((each) => each.bedNumber)
+          setBedOptions(unoccupiedBedNumbers)
+        }else{
+          setBedOptions(unoccupiedBedNumbers);
+        } 
       }
     } else {
       setBedOptions([]);
@@ -1250,14 +1304,12 @@ if (bikeRcImage) {
 
   const [rentBtnStatus,setRentBtnStatus] = useState(false);
   const handleRentSubmit = async (e) => {
-    setRentBtnStatus(true)
+    
     e.preventDefault();
-
-
     if (!validateRentForm()) {
-
       return;
     }
+    setRentBtnStatus(true)
 
     const rentData = {
       roomNumber,
@@ -1666,7 +1718,7 @@ navigate(-1)
             </div>
             <div className="col-md-6">
               <label htmlFor="inputRent" className="form-label">{t('dashboard.roomNumber')}</label>
-              <input type="text" className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+              <input type="text" className="form-control" placeholder='like F1, 102, ..etc' id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
               {errors.roomNumber && <div style={{ color: 'red' }}>{errors.roomNumber}</div>}
             </div>
             <div className="col-md-6">
@@ -1961,11 +2013,23 @@ navigate(-1)
               <label htmlFor='roomNo' class="form-label">{t('dashboard.roomNo')}</label>
               <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedBed" onFocus={handleTenantFocus}>
                 <option value="">{t('dashboard.selectRoom')}</option>
-                {girlsRooms.map((room) => (
+                {/* {girlsRooms.map((room) => (
                   <option key={room.roomNumber} value={room.roomNumber}>
                     {room.roomNumber}
                   </option>
-                ))}
+                ))} */}
+                {selectedRoom && !showGirlsRoom.includes(selectedRoom) && (
+                        <option key={selectedRoom} value={selectedRoom}>
+                          {selectedRoom} (Current)
+                        </option>
+                      )}
+
+                      {/* Show unoccupied rooms */}
+                      {showGirlsRoom.map((room) => (
+                        <option key={room} value={room}>
+                          {room}
+                        </option>
+                      ))}
               </select>
               {tenatErrors.selectedRoom && <p style={{ color: 'red' }}>{tenatErrors.selectedRoom}</p>}
             </div>

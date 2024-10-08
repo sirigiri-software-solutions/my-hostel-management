@@ -28,7 +28,7 @@ const RoomsBoys = () => {
     adminRole = "Sub-admin"
   }
 
-  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms } = useData();
+  const { activeBoysHostel, userArea, userUid, activeBoysHostelButtons, firebase, fetchData, boysRooms ,boysTenants} = useData();
   const { database } = firebase;
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
@@ -44,11 +44,36 @@ const RoomsBoys = () => {
   const [roomToDelete, setRoomToDelete] = useState({ roomNumber: '', currentId: '' });
   let activeToastId = null;
   const [previousNumberOfBeds, setPreviousNumberOfBeds] = useState(0);
- 
+  const [bedsData, setBedsData] = useState([]);
 
 
 
-  // console.log(fetchData, "fetchData")
+  useEffect(() => {
+    if (!boysRooms || boysRooms.length === 0) {
+      // If rooms are not defined or the array is empty, clear bedsData and exit early
+      setBedsData([]);
+      return;
+    }
+
+    const allBeds = boysRooms.flatMap(room => {
+      return Array.from({ length: room.numberOfBeds }, (_, i) => {
+        const bedNumber = i + 1;
+        const tenant = boysTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        const tenantName = tenant ? tenant.name : "-";
+        return {
+          name: tenantName,
+          floorNumber: room.floorNumber,
+          roomNumber: room.roomNumber,
+          bedNumber: bedNumber,
+          rent: room.bedRent || "N/A",
+          status: tenant ? "Occupied" : "Unoccupied"
+        };
+      });
+    });
+    setBedsData(allBeds);
+  }, [boysRooms, boysTenants]);
+
+  // console.log(bedsData, "allBedsDataInRooms")
   useEffect(() => {
 
       const handleOutsideClick = (event) => {
@@ -95,7 +120,7 @@ const RoomsBoys = () => {
     }
   };
 
-  
+  console.log(boysRooms,"boysRoomsData")
   
 
   const handleSubmit = (e) => {
@@ -114,9 +139,18 @@ const RoomsBoys = () => {
     if (!bedRent) newErrors.bedRent = 'Bed rent is required';
 
 
-    if (isEditing && parseInt(numberOfBeds) < parseInt(previousNumberOfBeds)) {
-      newErrors.numberOfBeds = `Number of beds must be greater than or equal to ${previousNumberOfBeds}`;
+  //   if (isEditing && parseInt(numberOfBeds) < parseInt(previousNumberOfBeds)) {
+  //     newErrors.numberOfBeds = `Number of beds must be greater than or equal to ${previousNumberOfBeds}`;
+  // }
+  
+  const requiredRoom = bedsData.filter((each) => each.roomNumber === roomNumber);
+  const occupiedBedsCount = requiredRoom.filter((each) => each.status === "Occupied")
+
+  if(isEditing && parseInt(numberOfBeds) <= occupiedBedsCount.length){
+    newErrors.numberOfBeds = `${occupiedBedsCount.length} beds are occupied,first transfer them.`
   }
+
+ 
 
    
 

@@ -24,7 +24,7 @@ const RoomsGirls = () => {
   } else if (role === "subAdmin") {
     adminRole = "Sub-admin"
   }
-  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, fetchData, girlsRooms } = useData();
+  const { activeGirlsHostel, userUid, activeGirlsHostelButtons, firebase, fetchData, girlsRooms,girlsTenants } = useData();
   const { database } = firebase;
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
@@ -42,6 +42,34 @@ const RoomsGirls = () => {
 
   const [previousNumberOfBeds, setPreviousNumberOfBeds] = useState(0);
   // Store the previous number of beds
+  const [bedsData, setBedsData] = useState([]);
+
+  useEffect(() => {
+    if (!girlsRooms || girlsRooms.length === 0) {
+      // If rooms are not defined or the array is empty, clear bedsData and exit early
+      setBedsData([]);
+      return;
+    }
+
+    const allBeds = girlsRooms.flatMap(room => {
+      return Array.from({ length: room.numberOfBeds }, (_, i) => {
+        const bedNumber = i + 1;
+        const tenant = girlsTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        const tenantName = tenant ? tenant.name : "-";
+        return {
+          name: tenantName,
+          floorNumber: room.floorNumber,
+          roomNumber: room.roomNumber,
+          bedNumber: bedNumber,
+          rent: room.bedRent || "N/A",
+          status: tenant ? "Occupied" : "Unoccupied"
+        };
+      });
+    });
+    setBedsData(allBeds);
+
+
+  }, [girlsRooms, girlsTenants]);
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -108,8 +136,15 @@ const RoomsGirls = () => {
     else if (numberOfBeds > 20) newErrors.numberOfBeds = "No.of beds can't exceed 20";
     if (!bedRent) newErrors.bedRent = 'Bed rent is required';
     // New check: if editing, ensure the new number of beds is greater than or equal to the previous number
-    if (isEditing && parseInt(numberOfBeds) < parseInt(previousNumberOfBeds)) {
-      newErrors.numberOfBeds = `Number of beds must be greater than or equal to ${previousNumberOfBeds}`;
+  //   if (isEditing && parseInt(numberOfBeds) < parseInt(previousNumberOfBeds)) {
+  //     newErrors.numberOfBeds = `Number of beds must be greater than or equal to ${previousNumberOfBeds}`;
+  // }
+
+  const requiredRoom = bedsData.filter((each) => each.roomNumber === roomNumber);
+  const occupiedBedsCount = requiredRoom.filter((each) => each.status === "Occupied")
+
+  if(isEditing && parseInt(numberOfBeds) <= occupiedBedsCount.length){
+    newErrors.numberOfBeds = `${occupiedBedsCount.length} beds are occupied,first transfer them.`
   }
 
     if (Object.keys(newErrors).length > 0) {
