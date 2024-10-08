@@ -293,12 +293,67 @@ const DashboardBoys = () => {
   //   });
   // }, [activeBoysHostel]);
 
+  const [showBoysRoom, setShowBoysRooms] = useState([]);
+  useEffect(() => {
+    if (!boysRooms || boysRooms.length === 0) {
+      // If rooms are not defined or the array is empty, clear bedsData and exit early
+      setBedsData([]);
+      return;
+    }
+
+    const allBeds = boysRooms.flatMap(room => {
+      return Array.from({ length: room.numberOfBeds }, (_, i) => {
+        const bedNumber = i + 1;
+        const tenant = boysTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        const tenantName = tenant ? tenant.name : "-";
+        return {
+          name: tenantName,
+          floorNumber: room.floorNumber,
+          roomNumber: room.roomNumber,
+          bedNumber: bedNumber,
+          rent: room.bedRent || "N/A",
+          status: tenant ? "Occupied" : "Unoccupied"
+        };
+      });
+    });
+    setBedsData(allBeds);
+  }, [boysRooms, boysTenants, selectedRoom]);
+
+
+  useEffect(() => {
+
+    const roomToShow = boysRooms.filter((each) => {
+      const room = bedsData.some((eachBed) => eachBed.roomNumber === each.roomNumber && eachBed.status === "Unoccupied");
+      return room;
+    })
+
+    const roomNumbersToShow = roomToShow.map((eachRoom) => eachRoom.roomNumber);
+
+    if (selectedRoom && !roomNumbersToShow.includes(selectedRoom)) {
+      roomNumbersToShow.push(selectedRoom); // Add the current room if not already present
+    }
+    setShowBoysRooms(roomNumbersToShow)
+
+
+  }, [boysRooms, boysTenants, showModal])
+
+
+  const [editRoomNumber,setEditRoomNumber] = useState();
   useEffect(() => {
     if (selectedRoom) {
       const room = boysRooms.find(room => room.roomNumber === selectedRoom);
       if (room) {
         const options = Array.from({ length: room.numberOfBeds }, (_, i) => i + 1);
-        setBedOptions(options);
+        const requiredRoom = bedsData?.filter((each) => each.roomNumber === room.roomNumber);
+        const unoccupiedBedNumbers = requiredRoom
+          .filter((each) => each.status === "Unoccupied")
+          .map((each) => each.bedNumber);
+        if(isEditing && requiredRoom[0].roomNumber === editRoomNumber){
+          const unoccupiedBedNumbers = requiredRoom.filter((each) => each.bedNumber === parseInt(selectedBed)).map((each) => each.bedNumber)
+          setBedOptions(unoccupiedBedNumbers)
+        }else{
+          setBedOptions(unoccupiedBedNumbers);
+        } 
       }
     } else {
       setBedOptions([]);
@@ -429,12 +484,6 @@ const DashboardBoys = () => {
     });
     setBedsData(allBeds);
   }, [boysRooms, boysTenants]);
-
-
-
-
-
-
 
 
   const sendMessage = (tenant, rentRecord) => {
@@ -1738,11 +1787,23 @@ const DashboardBoys = () => {
               <label htmlFor='roomNo' class="form-label">{t('dashboard.roomNo')}</label>
               <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedRoom" onFocus={handleTenantFocus}>
                 <option value="">{t('dashboard.selectRoom')}</option>
-                {boysRooms.map((room) => (
+                {/* {boysRooms.map((room) => (
                   <option key={room.roomNumber} value={room.roomNumber}>
                     {room.roomNumber}
                   </option>
-                ))}
+                ))} */}
+                {selectedRoom && !showBoysRoom.includes(selectedRoom) && (
+                        <option key={selectedRoom} value={selectedRoom}>
+                          {selectedRoom} (Current)
+                        </option>
+                      )}
+
+                      {/* Show unoccupied rooms */}
+                      {showBoysRoom.map((room) => (
+                        <option key={room} value={room}>
+                          {room}
+                        </option>
+                      ))}
               </select>
               {tenatErrors.selectedRoom && <p style={{ color: 'red' }}>{tenatErrors.selectedRoom}</p>}
             </div>
