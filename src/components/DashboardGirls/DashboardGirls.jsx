@@ -1141,14 +1141,12 @@ if (bikeRcImage) {
 
   const [rentBtnStatus,setRentBtnStatus] = useState(false);
   const handleRentSubmit = async (e) => {
-    setRentBtnStatus(true)
+    
     e.preventDefault();
-
-
     if (!validateRentForm()) {
-
       return;
     }
+    setRentBtnStatus(true)
 
     const rentData = {
       roomNumber,
