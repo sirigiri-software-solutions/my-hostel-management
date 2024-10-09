@@ -285,7 +285,7 @@ const RoomsBoys = () => {
           // Room has no tenants, proceed to delete the room
           await remove(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms/${currentId}`));
   
-          toast.success("Room deleted successfully!", {
+          toast.success(t('toastMessages.roomDeletedSuccess'), {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -298,7 +298,7 @@ const RoomsBoys = () => {
   
           fetchData(); // Refresh data after deletion
         } else {
-          toast.error("Room cannot be deleted as it has tenants. Please transfer the tenants first.", {
+          toast.error(t('toastMessages.roomCannotBeDeleted'), {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,

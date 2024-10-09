@@ -265,7 +265,7 @@ const RoomsGirls = () => {
           // Room has no tenants, proceed to delete the room
           await remove(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`));
   
-          toast.success("Room deleted successfully!", {
+          toast.success(t('toastMessages.roomDeletedSuccess'), {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -278,7 +278,7 @@ const RoomsGirls = () => {
   
           fetchData(); // Refresh data after deletion
         } else {
-          toast.error("Room cannot be deleted as it has tenants. Please transfer the tenants first.", {
+          toast.error(t('toastMessages.roomCannotBeDeleted'), {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,
@@ -293,7 +293,7 @@ const RoomsGirls = () => {
         // No tenants found, safe to delete the room
         await remove(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`));
   
-        toast.success("Room deleted successfully!", {
+        toast.success(t('toastMessages.roomDeletedSuccess'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -308,7 +308,7 @@ const RoomsGirls = () => {
       }
     } catch (error) {
       console.error("Error deleting room: ", error);
-      toast.error("Failed to delete room. Please try again.", {
+      toast.error(t('toastMessages.failedToDeleteRoom'), {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
