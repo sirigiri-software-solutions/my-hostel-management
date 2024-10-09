@@ -53,6 +53,8 @@ const Settings = () => {
   const [entireBoysYearExpensesData, setEntireBoysYearExpensesData] = useState([])
   const [entireGirlsYearExpensesData, setEntireGirlsYearExpensesData] = useState([]);
   const [hostelImageUrl, setHostelImageUrl] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
   let activeToastId=null;
 
   const [photoUrl, setPhotoUrl] = useState('');
@@ -72,7 +74,16 @@ const Settings = () => {
   const [year, setYear] = useState(getCurrentYear());
   const [month, setMonth] = useState(getCurrentMonth())
   
-
+  useEffect(() => {
+    if (isBoysModalOpen || isGirlsModalOpen ) {
+        // Reset states when either modal opens
+        setIsFileUploaded(false);
+        setIsCameraUsed(false);
+        setPhotoUrl(''); // Clear previously uploaded or captured photo
+        setErrorMessage(''); // Clear any previous error messages
+    }
+  }, [isBoysModalOpen, isGirlsModalOpen]); // Depend on modal open states
+  
 
   
   const takePicture = async (isBoys, name) => {
@@ -261,6 +272,13 @@ const isImageFile = (file) => {
       }
       
     }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+    setPhotoUrl(reader.result); // Preview the uploaded image
+  };
+  reader.readAsDataURL(file);
+  setIsFileUploaded(true); // Mark the file as uploaded
+  setIsCameraUsed(false);
     if (!isImageFile(file)) {
       if (!toast.isActive(activeToastId)) {
         activeToastId=toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
@@ -273,18 +291,25 @@ const isImageFile = (file) => {
       return;
     }
 
-    if (isBoys) {
-        setBoysHostelImage(file); 
-    } else {
-        setGirlsHostelImage(file); 
-    }
-    setPhotoUrl(''); // Reset photoUrl if file is uploaded
-       setIsFileUploaded(true); // Mark the file as uploaded
-       setIsCameraUsed(false);
+    const validFormats = ['image/jpeg', 'image/png'];
+    if (validFormats.includes(file.type)) {
+       
+        if (isBoys) {
+            setBoysHostelImage(file);
+        } else {
+            setGirlsHostelImage(file);
+        }
+        setPhotoUrl(''); // Reset photoUrl if file is uploaded
+       
         setErrorMessage('');
-   
-  };
-
+    } else {
+       
+        setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+        e.target.value = null;
+    }
+     // Ensure camera state is reset
+    // setErrorMessage('');
+};
   const addNewHostel = async (e, isBoys) => {
     e.preventDefault();
     
@@ -1556,7 +1581,21 @@ console.log(selectedHostelType, "ActiveFlagselectedHostelType")
               </div>
               <div className="form-group">
                 <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
-                <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, false)} />
+                <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, false)} 
+                disabled={isCameraUsed} />
+              { isMobile && !isFileUploaded && (
+                  <div>
+                  <p>{t('tenantsPage.or')}</p>
+                  <div style={{display:'flex',flexDirection:'row'}}>
+                  <p>{t('tenantsPage.takePhoto')}</p>
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                  disabled={isFileUploaded} 
+
+                  />
+                  {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
+                  </div>
+                  </div>
+                    )}
               </div>
               <div className='mt-3 d-flex justify-content-between'>
                 <Button variant="primary" type="submit" style={{ marginRight: '10px' }} disabled={isSubmitting}>{isSubmitting ? 'Adding...' : t("settings.addHostel")}</Button>

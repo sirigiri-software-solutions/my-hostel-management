@@ -6,7 +6,11 @@ import { toast } from 'react-toastify';
 import { useData } from '../../ApiData/ContextProvider';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import './MainPage.css'
+import { Capacitor } from '@capacitor/core';
 import imageCompression from 'browser-image-compression';
+import { Camera, CameraResultType } from '@capacitor/camera';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCamera } from '@fortawesome/free-solid-svg-icons';
 
 
 
@@ -20,8 +24,66 @@ const DefaultModal = ({ show, handleClose }) => {
     });
     const [currentForm, setCurrentForm] = useState('');
     const [mensFormData, setMensFormData] = useState(null);
-
-
+    const [photoUrl, setPhotoUrl] = useState('');
+    const [isFileUploaded, setIsFileUploaded] = useState(false);
+    const[isCameraUsed,setIsCameraUsed]=useState(false);
+    const isMobile = Capacitor.isNativePlatform(); // Detect if running on mobile
+    const [errorMessage, setErrorMessage] = useState('');
+ 
+     
+    const takePicture = async (isBoys, name) => {
+        if (!isMobile) {
+            console.error("Camera access is not supported on your device.");
+            return;
+        }
+        if (isFileUploaded) {
+            setErrorMessage((prevErrors) => ({
+                ...prevErrors,
+                hostelImage: "You've already uploaded a photo from the file manager.",
+            }));
+            return;
+        }
+        try {
+            const photo = await Camera.getPhoto({
+                quality: 90,
+                allowEditing: false,
+                resultType: CameraResultType.Uri
+            });
+    
+            const response = await fetch(photo.webPath);
+            const blob = await response.blob();
+    
+            // Set image state based on whether it's a boys' or girls' hostel
+            if (isBoys) {
+                setBoysHostelImage(blob);
+            } else {
+                setGirlsHostelImage(blob);
+            }
+    
+            const uploadFile = async (file, path) => {
+                try {
+                    const imageRef = storageRef(storage, path);
+                    const snapshot = await uploadBytes(imageRef, file);
+                    return await getDownloadURL(snapshot.ref);
+                } catch (error) {
+                    console.error(`Error uploading file ${file.name}:`, error);
+                    throw error;
+                }
+            };
+    
+            // Construct the path for storage
+            const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+            setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
+    
+            // After successful upload
+            setIsCameraUsed(true);
+            setIsFileUploaded(false); // Indicate that a file has been uploaded from the camera
+        } catch (error) {
+            console.error("Error accessing the camera", error);
+            // Optionally show a toast error message here
+        }
+    };
+    
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
         setSelectedForms((prev) => ({ ...prev, [name]: checked }));
@@ -220,11 +282,23 @@ const DefaultModal = ({ show, handleClose }) => {
             e.target.value = ''; 
             return;
           }
+          const reader = new FileReader();
+         reader.onloadend = () => {
+         setPhotoUrl(reader.result); // Preview the uploaded image
+        };
+      reader.readAsDataURL(file);
+      setIsFileUploaded(true); // Mark the file as uploaded
+      setIsCameraUsed(false);
+
+
         if (isBoys) {
             setBoysHostelImage(file); // Store file directly
         } else {
             setGirlsHostelImage(file); // Store file directly
         }
+        setPhotoUrl(''); // Reset photoUrl if file is uploaded
+       
+        setErrorMessage('');
     };
 
     const capitalizeFirstLetter = (string) => {
@@ -373,7 +447,20 @@ const DefaultModal = ({ show, handleClose }) => {
                                     type="file"
                                     className="form-control"
                                     onChange={(e) => handleHostelChange(e, true)}
+                                    disabled={isCameraUsed} />
+                                { isMobile && !isFileUploaded && (
+                                <div>
+                                <p>{t('tenantsPage.or')}</p>
+                                <div style={{display:'flex',flexDirection:'row'}}>
+                                <p>{t('tenantsPage.takePhoto')}</p>
+                                <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                                disabled={isFileUploaded} 
+
                                 />
+                               {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
+                                </div>
+                                 </div>
+                                 )}
                             </div>
                             <div className='mt-3 d-flex justify-content-between'>
                                 <button
@@ -426,7 +513,20 @@ const DefaultModal = ({ show, handleClose }) => {
                                     type="file"
                                     className="form-control"
                                     onChange={(e) => handleHostelChange(e, false)}
+                                    disabled={isCameraUsed}/>
+                                { isMobile && !isFileUploaded && (
+                                 <div>
+                                 <p>{t('tenantsPage.or')}</p>
+                                 <div style={{display:'flex',flexDirection:'row'}}>
+                                 <p>{t('tenantsPage.takePhoto')}</p>
+                                 <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                                 disabled={isFileUploaded} 
+
                                 />
+                              {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
+                              </div>
+                              </div>
+                              )}
                             </div>
                             <div className='mt-3 d-flex justify-content-between'>
                                 <button

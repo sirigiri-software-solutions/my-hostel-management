@@ -56,6 +56,17 @@ const Hostels = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   // const strage = getStorage(); // Initialize Firebase Storage
 
+// Reset states when the modal is opened (first time and every time)
+useEffect(() => {
+  if (isBoysModalOpen || isGirlsModalOpen || isEditing !== null) {
+      // Reset states when either modal opens
+      setIsFileUploaded(false);
+      setIsCameraUsed(false);
+      setPhotoUrl(''); // Clear previously uploaded or captured photo
+      setErrorMessage(''); // Clear any previous error messages
+  }
+}, [isBoysModalOpen, isGirlsModalOpen,isEditing]); // Depend on modal open states
+
 
   const takePicture = async (isBoys, name) => {
     if (!isMobile) {
@@ -357,14 +368,15 @@ const submitHostelEdit = async (e) => {
       if (allowedTypes.includes(file.type)) {
         setSelectedImage(file);
         setErrorMessage(''); // Clear error message
-       
+        setIsFileUploaded(true); // Mark file as uploaded
+        setIsCameraUsed(false); 
 
       } else {
         setErrorMessage("Only JPEG and PNG images are allowed.");
         e.target.value = ''; // Clear the file input
         setSelectedImage(null); // Clear selected image
-        setIsFileUploaded(false); // Set to false if invalid file type
-
+        setIsFileUploaded(false); // Set to false if an invalid file type
+        setIsCameraUsed(false);
       }
     }
   };
@@ -492,6 +504,8 @@ const submitHostelEdit = async (e) => {
     setPhotoUrl(reader.result); // Preview the uploaded image
   };
   reader.readAsDataURL(file);
+  setIsFileUploaded(true); // Mark the file as uploaded
+  setIsCameraUsed(false);
 
     if (!isImageFile(file)) {
       toast.error(t('hostels.pleaseUploadValidImage'), {
@@ -512,8 +526,7 @@ const submitHostelEdit = async (e) => {
             setGirlsHostelImage(file);
         }
         setPhotoUrl(''); // Reset photoUrl if file is uploaded
-       setIsFileUploaded(true); // Mark the file as uploaded
-       setIsCameraUsed(false);
+       
         setErrorMessage('');
     } else {
        
@@ -521,7 +534,7 @@ const submitHostelEdit = async (e) => {
         e.target.value = null;
     }
      // Ensure camera state is reset
-    setErrorMessage('');
+    // setErrorMessage('');
 };
  
  
@@ -726,7 +739,22 @@ const submitHostelEdit = async (e) => {
  
               <div >
                 <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
-                <input type="file" className="form-control" accept="image/jpeg, image/png" onChange={handleImageChange} />
+                <input type="file" className="form-control" accept="image/jpeg, image/png" onChange={handleImageChange} 
+                disabled={isCameraUsed} />
+              { isMobile && !isFileUploaded && (
+                  <div>
+                  <p>{t('tenantsPage.or')}</p>
+                  <div style={{display:'flex',flexDirection:'row'}}>
+                  <p>{t('tenantsPage.takePhoto')}</p>
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                  disabled={isFileUploaded} 
+
+                  />
+                  {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
+                  </div>
+                  </div>
+                    )}
+
                 {errorMessage && <div style={{ color: 'red', marginTop: '5px' }}>{errorMessage}</div>}
                 <img src={isEditing.hostelImage} alt='hostel image' style={{ width: '100px', borderRadius: '8px', margin: '10px 0' }} />
               </div>
@@ -852,7 +880,22 @@ const submitHostelEdit = async (e) => {
             </div>
             <div className="form-group">
               <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
-              <input type="file" className="form-control"  accept=".jpg, .jpeg, .png"  onChange={(e) => handleHostelChange(e, false)} />
+              <input type="file" className="form-control"  accept=".jpg, .jpeg, .png"  onChange={(e) => handleHostelChange(e, false)}
+              disabled={isCameraUsed} />
+              { isMobile && !isFileUploaded && (
+                  <div>
+                  <p>{t('tenantsPage.or')}</p>
+                  <div style={{display:'flex',flexDirection:'row'}}>
+                  <p>{t('tenantsPage.takePhoto')}</p>
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                  disabled={isFileUploaded} 
+
+                  />
+                  {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
+                  </div>
+                  </div>
+                    )}
+
               {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             </div>
             <div className='mt-3 d-flex justify-content-between'>
