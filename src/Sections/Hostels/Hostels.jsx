@@ -11,7 +11,14 @@ import Table from '../../Elements/Table';
 import './Hostels.css'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
+import { v4 as uuidv4 } from 'uuid'; // For unique file names
+import { Capacitor } from '@capacitor/core';
+
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Camera, CameraResultType } from '@capacitor/camera';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCamera } from '@fortawesome/free-solid-svg-icons';
+
  
 const Hostels = () => {
   const location = useLocation();
@@ -39,7 +46,71 @@ const Hostels = () => {
   const [hostelImageUrl, setHostelImageUrl] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [btnDisabledStatus,setBtnDisabledStatus] = useState(false)
-  
+
+  //  for camera icon in mobile device
+
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [isFileUploaded, setIsFileUploaded] = useState(false);
+  const[isCameraUsed,setIsCameraUsed]=useState(false);
+  const isMobile = Capacitor.isNativePlatform(); // Detect if running on mobile
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // const strage = getStorage(); // Initialize Firebase Storage
+
+
+  const takePicture = async (isBoys, name) => {
+    if (!isMobile) {
+        console.error("Camera access is not supported on your device.");
+        return;
+    }
+    if (isFileUploaded) {
+        setErrorMessage((prevErrors) => ({
+            ...prevErrors,
+            hostelImage: "You've already uploaded a photo from the file manager.",
+        }));
+        return;
+    }
+    try {
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
+
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+
+        // Set image state based on whether it's a boys' or girls' hostel
+        if (isBoys) {
+            setBoysHostelImage(blob);
+        } else {
+            setGirlsHostelImage(blob);
+        }
+
+        const uploadFile = async (file, path) => {
+            try {
+                const imageRef = storageRef(storage, path);
+                const snapshot = await uploadBytes(imageRef, file);
+                return await getDownloadURL(snapshot.ref);
+            } catch (error) {
+                console.error(`Error uploading file ${file.name}:`, error);
+                throw error;
+            }
+        };
+
+        // Construct the path for storage
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+        setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
+
+        // After successful upload
+        setIsCameraUsed(true);
+        setIsFileUploaded(false); // Indicate that a file has been uploaded from the camera
+    } catch (error) {
+        console.error("Error accessing the camera", error);
+        // Optionally show a toast error message here
+    }
+};
+
+
 
   useEffect(() => {
     const boysRef = ref(database, `Hostel/${userUid}/boys`);
@@ -286,10 +357,14 @@ const submitHostelEdit = async (e) => {
       if (allowedTypes.includes(file.type)) {
         setSelectedImage(file);
         setErrorMessage(''); // Clear error message
+       
+
       } else {
         setErrorMessage("Only JPEG and PNG images are allowed.");
         e.target.value = ''; // Clear the file input
         setSelectedImage(null); // Clear selected image
+        setIsFileUploaded(false); // Set to false if invalid file type
+
       }
     }
   };
@@ -404,6 +479,20 @@ const submitHostelEdit = async (e) => {
         });
         return;
     }
+    if (file && isImageFile(file)) {
+      if (isBoys) {
+        setBoysHostelImage(file);
+      } else {
+        setGirlsHostelImage(file);
+      }
+      
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+    setPhotoUrl(reader.result); // Preview the uploaded image
+  };
+  reader.readAsDataURL(file);
+
     if (!isImageFile(file)) {
       toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
         position: "top-center",
@@ -422,16 +511,23 @@ const submitHostelEdit = async (e) => {
         } else {
             setGirlsHostelImage(file);
         }
+        setPhotoUrl(''); // Reset photoUrl if file is uploaded
+       setIsFileUploaded(true); // Mark the file as uploaded
+       setIsCameraUsed(false);
         setErrorMessage('');
     } else {
        
         setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
         e.target.value = null;
     }
+     // Ensure camera state is reset
+    setErrorMessage('');
 };
  
  
-  const [isSubmitting, setIsSubmitting] = useState(false);
+ 
+  
+
  
   const addNewHostel = async (e, isBoys) => {
     e.preventDefault();
@@ -493,6 +589,8 @@ const submitHostelEdit = async (e) => {
           setNewGirlsHostelAddress('');
           setIsGirlsModalOpen(false);
         }
+        setPhotoUrl('');
+
         navigate(-1)
       })
       .catch(error => {
@@ -696,7 +794,22 @@ const submitHostelEdit = async (e) => {
             </div>
             <div className="form-group">
               <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
-              <input type="file" className="form-control" accept=".jpg, .jpeg, .png"  onChange={(e) => handleHostelChange(e, true)} />
+              <input type="file" className="form-control" accept=".jpg, .jpeg, .png"  onChange={(e) => handleHostelChange(e, true)} 
+              disabled={isCameraUsed} />
+              { isMobile && !isFileUploaded && (
+                  <div>
+                  <p>{t('tenantsPage.or')}</p>
+                  <div style={{display:'flex',flexDirection:'row'}}>
+                  <p>{t('tenantsPage.takePhoto')}</p>
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                  disabled={isFileUploaded} 
+
+                  />
+                  {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
+                  </div>
+                  </div>
+                    )}
+
               {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             </div>
             <div className='mt-3 d-flex justify-content-between'>

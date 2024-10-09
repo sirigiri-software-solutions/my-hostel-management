@@ -26,6 +26,11 @@ import imageCompression from 'browser-image-compression';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
+import { Camera, CameraResultType } from '@capacitor/camera';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCamera } from '@fortawesome/free-solid-svg-icons';
+// import { Capacitor } from '@capacitor/core';
+
 const Settings = () => {
 
   const { t } = useTranslation();
@@ -50,6 +55,11 @@ const Settings = () => {
   const [hostelImageUrl, setHostelImageUrl] = useState('');
   let activeToastId=null;
 
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [isFileUploaded, setIsFileUploaded] = useState(false);
+  const[isCameraUsed,setIsCameraUsed]=useState(false);
+  const isMobile = Capacitor.isNativePlatform(); // Detect if running on mobile
+ 
   const getCurrentMonth = () => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
     const currentMonth = new Date().getMonth();
@@ -61,6 +71,62 @@ const Settings = () => {
   };
   const [year, setYear] = useState(getCurrentYear());
   const [month, setMonth] = useState(getCurrentMonth())
+  
+
+
+  
+  const takePicture = async (isBoys, name) => {
+    if (!isMobile) {
+        console.error("Camera access is not supported on your device.");
+        return;
+    }
+    if (isFileUploaded) {
+        setErrorMessage((prevErrors) => ({
+            ...prevErrors,
+            hostelImage: "You've already uploaded a photo from the file manager.",
+        }));
+        return;
+    }
+    try {
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
+
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+
+        // Set image state based on whether it's a boys' or girls' hostel
+        if (isBoys) {
+            setBoysHostelImage(blob);
+        } else {
+            setGirlsHostelImage(blob);
+        }
+
+        const uploadFile = async (file, path) => {
+            try {
+                const imageRef = storageRef(storage, path);
+                const snapshot = await uploadBytes(imageRef, file);
+                return await getDownloadURL(snapshot.ref);
+            } catch (error) {
+                console.error(`Error uploading file ${file.name}:`, error);
+                throw error;
+            }
+        };
+
+        // Construct the path for storage
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+        setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
+
+        // After successful upload
+        setIsCameraUsed(true);
+        setIsFileUploaded(false); // Indicate that a file has been uploaded from the camera
+    } catch (error) {
+        console.error("Error accessing the camera", error);
+        // Optionally show a toast error message here
+    }
+};
 
 
 
@@ -191,6 +257,14 @@ const isImageFile = (file) => {
     }
       return;
     }
+    if (file && isImageFile(file)) {
+      if (isBoys) {
+        setBoysHostelImage(file);
+      } else {
+        setGirlsHostelImage(file);
+      }
+      
+    }
     if (!isImageFile(file)) {
       if (!toast.isActive(activeToastId)) {
         activeToastId=toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
@@ -210,7 +284,10 @@ const isImageFile = (file) => {
     } else {
         setGirlsHostelImage(file); 
     }
-
+    setPhotoUrl(''); // Reset photoUrl if file is uploaded
+       setIsFileUploaded(true); // Mark the file as uploaded
+       setIsCameraUsed(false);
+        setErrorMessage('');
    
   };
 
@@ -281,6 +358,8 @@ const isImageFile = (file) => {
           setNewGirlsHostelAddress('');
           setIsGirlsModalOpen(false);
         }
+        setPhotoUrl('');
+
         navigate(-1)
       })
       .catch(error => {
@@ -1433,7 +1512,22 @@ console.log(selectedHostelType, "ActiveFlagselectedHostelType")
               </div>
               <div className="form-group">
                 <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
-                <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, true)} />
+                <input type="file" className="form-control" onChange={(e) => handleHostelChange(e, true)} 
+                disabled={isCameraUsed} />
+                {isMobile && !isFileUploaded && (
+                  <div>
+                  <p>{t('tenantsPage.or')}</p>
+                  <div style={{display:'flex',flexDirection:'row'}}>
+                  <p>{t('tenantsPage.takePhoto')}</p>
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                  disabled={isFileUploaded} 
+
+                  />
+                  {photoUrl && <img src={photoUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
+                  </div>
+                  </div>
+                    )}
+
               </div>
               <div className='mt-3 d-flex justify-content-between'>
                 <Button variant="primary" style={{ marginRight: '10px' }} type="submit" disabled={isSubmitting}>{isSubmitting ? 'Adding...' : t("settings.addHostel")}</Button>

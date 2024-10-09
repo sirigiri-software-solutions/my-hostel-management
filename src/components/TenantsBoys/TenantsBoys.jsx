@@ -90,6 +90,14 @@ const TenantsBoys = () => {
   const [bikeRcImageField, setBikeRcImageField] = useState('');
   const [tenantAddress, setTenantAddress] = useState('');
   const [loading, setLoading] = useState(false);
+  const [singleTenanantBikeNum,setSingleTenantBikeNum] = useState('');
+
+  const [errorMessage, setErrorMessage] = useState({
+    tenantImage: '',
+    tenantId: '',
+    bikeImage: '',
+    bikeRcImage: '',
+  });
 
   const [downloadingTextFlag, setDownloadingTextFlag] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState({
@@ -1593,12 +1601,12 @@ const isImage = (contentType) => contentType.startsWith('image/');
         await Filesystem.writeFile({
           path: filePath,
           data: base64Data,
-          directory: FilesystemDirectory.Documents,
+          directory: Directory.Data,
           recursive: true,
         });
 
         const result = await Filesystem.getUri({
-          directory: FilesystemDirectory.Documents,
+          directory: Directory.Data,
           path: filePath,
         });
 

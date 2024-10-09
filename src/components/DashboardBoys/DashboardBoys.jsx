@@ -1579,6 +1579,16 @@ const DashboardBoys = () => {
 
   }, [showModal, location.pathname]);
 
+
+// useEffect(()=>{
+//   if ( location.pathname === '/' && showModal != true ) {
+//     if (Capacitor.getPlatform() === 'android') {
+//       CapacitorApp.exitApp(); 
+//     }
+//   }
+// },[location.pathname])
+
+    
   const handleCloseModal = () => {
     setModelText('');
     setFormLayout('');
