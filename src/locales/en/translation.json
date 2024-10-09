@@ -292,7 +292,10 @@
         "expensesUpdatedSuccessfully":"Expense updated successfully.",
         "errorUpdatinExpense":"Error updating Expense",
         "expenseDeteledSuccessfully":"Expense deleted successfully",
-        "errorDeletingExpense":"Error deleting Expense"
+        "errorDeletingExpense":"Error deleting Expense",
+        "roomDeletedSuccess":"Room deleted successfully.",
+        "roomCannotBeDeleted":"Room cannot be deleted as it has tenants. Please transfer the tenants first.",
+        "failedToDeleteRoom":"Failed to delete room. Please try again."
     },
     "mobileTable":{
 
