@@ -293,8 +293,11 @@
     "expenseDeteledSuccessfully": "ఖర్చు విజయవంతంగా తొలగించబడింది.",
     "errorDeletingExpense": "ఖర్చు తొలగించడంలో లోపం.",
     "imageNotUploaded":"చిత్రం అప్లోడ్ కాలేదు",
-    "idNotUploaded":"ఐడీ అప్లోడ్ కాలేదు"
+    "idNotUploaded":"ఐడీ అప్లోడ్ కాలేదు",
 
+    "roomDeletedSuccess":"గది విజయవంతంగా తొలగించబడింది",
+    "roomCannotBeDeleted":"ఇది కిరాయిదారులతో ఉన్నందున గది తొలగించలేరు. దయచేసి ముందుగా కిరాయిదారులను బదిలీ చేయండి.",
+    "failedToDeleteRoom":"గదిని తొలగించడంలో విఫలమయ్యారు. దయచేసి మళ్ళీ ప్రయత్నించండి."
   },
   "mobileTable":{
     "serialNumber": "క్ర.సూ.",

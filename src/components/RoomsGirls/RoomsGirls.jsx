@@ -279,7 +279,7 @@ const RoomsGirls = () => {
           await remove(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`));
 
           if (!toast.isActive(activeToastId)) {
-            activeToastId=toast.success("Room deleted successfully!", {
+            activeToastId=toast.success(t('toastMessages.roomDeletedSuccess'), {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -294,7 +294,7 @@ const RoomsGirls = () => {
         } else {
           if (!toast.isActive(activeToastId)) {
 
-            activeToastId=toast.error("Room cannot be deleted as it has tenants. Please transfer the tenants first.", {
+            activeToastId=toast.error(t('toastMessages.roomCannotBeDeleted'), {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,
@@ -310,7 +310,7 @@ const RoomsGirls = () => {
         // No tenants found, safe to delete the room
         await remove(ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms/${currentId}`));
         if (!toast.isActive(activeToastId)) {
-          activeToastId=toast.success("Room deleted successfully!", {
+          activeToastId=toast.success(t('toastMessages.roomDeletedSuccess'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -327,7 +327,7 @@ const RoomsGirls = () => {
       console.error("Error deleting room: ", error);
       if (!toast.isActive(activeToastId)) {
 
-        activeToastId=toast.error("Failed to delete room. Please try again.", {
+        activeToastId=toast.error(t('toastMessages.failedToDeleteRoom'), {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,

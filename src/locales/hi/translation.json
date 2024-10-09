@@ -297,7 +297,10 @@
         "expenseDeteledSuccessfully": "खर्च सफलतापूर्वक हटा दिया गया।",
     "errorDeletingExpense": "खर्च हटाने में त्रुटि।",
     "imageNotUploaded":"छवि अपलोड नहीं हुई",
-    "idNotUploaded":"आईडी अपलोड नहीं हुई"
+    "idNotUploaded":"आईडी अपलोड नहीं हुई",
+    "roomDeletedSuccess":"कमरा सफलतापूर्वक हटाया गया!",
+    "roomCannotBeDeleted":"कमरा हटाया नहीं जा सकता क्योंकि इसमें किरायेदार हैं। कृपया पहले किरायेदारों को स्थानांतरित करें।",
+    "failedToDeleteRoom":"कमरा हटाने में विफल। कृपया फिर से प्रयास करें।"
       },
       "mobileTable":{
         "serialNumber": "क्रमांक",

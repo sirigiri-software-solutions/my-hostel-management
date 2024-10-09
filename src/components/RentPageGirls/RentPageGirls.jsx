@@ -302,7 +302,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       await update(rentRef, rentData)
         .then(() => {
           if (!toast.isActive(activeToastId)) {
-            activeToastId=toast.success(t("toastMessages.rentAddedSuccess"), {
+            activeToastId=toast.success(t("toastMessages.rentUpdatedSuccess"), {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
