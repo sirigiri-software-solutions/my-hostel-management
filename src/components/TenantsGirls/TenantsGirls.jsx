@@ -282,22 +282,22 @@ const TenantsGirls = () => {
   }, [girlsRooms, girlsTenants, showModal])
 
   const [editRoomNumber,setEditRoomNumber] = useState();
-
+  const [editBedNumber,setEditBedNumber] = useState();
   useEffect(() => {
     if (selectedRoom) {
       const room = girlsRooms.find(room => room.roomNumber === selectedRoom);
       if (room) {
         const options = Array.from({ length: room.numberOfBeds }, (_, i) => i + 1);
         const requiredRoom = bedsData?.filter((each) => each.roomNumber === room.roomNumber);
-        const unoccupiedBedNumbers = requiredRoom
+        let unoccupiedBedNumbers = requiredRoom
           .filter((each) => each.status === "Unoccupied")
           .map((each) => each.bedNumber);
           if(isEditing && requiredRoom[0].roomNumber === editRoomNumber){
-            const unoccupiedBedNumbers = requiredRoom.filter((each) => each.bedNumber === parseInt(selectedBed)).map((each) => each.bedNumber)
-            setBedOptions(unoccupiedBedNumbers)
-          }else{
+            const bedNumberToShow = requiredRoom.filter((each) => each.bedNumber === parseInt(editBedNumber)).map((each) => each.bedNumber)
+            unoccupiedBedNumbers = [...bedNumberToShow,...unoccupiedBedNumbers]
+          }
             setBedOptions(unoccupiedBedNumbers);
-          } 
+          
       }
     } else {
       setBedOptions([]);
@@ -652,7 +652,8 @@ if (bikeRcImage) {
         setLoading(false);
         resetForm();
         setErrors({});
-        setEditRoomNumber(false);
+        setEditRoomNumber();
+        setEditBedNumber();
     }
 };
 
@@ -663,6 +664,7 @@ if (bikeRcImage) {
     setSelectedRoom(matchedRoom ? matchedRoom.roomNumber : '');
     setSelectedBed(tenant.bedNo);
     setEditRoomNumber(matchedRoom ? matchedRoom.roomNumber : '')
+    setEditBedNumber(tenant.bedNo)
     setDateOfJoin(tenant.dateOfJoin);
     setName(tenant.name);
     setMobileNo(tenant.mobileNo);
@@ -764,6 +766,8 @@ if (bikeRcImage) {
     setPermnentAddress('')
     tenantImageInputRef.current.value = null;
     tenantProofIdRef.current.value = null;
+    setEditRoomNumber()
+    setEditBedNumber();
   };
 
 
@@ -1453,18 +1457,18 @@ const handleDownload = async (url, type,tenantName) => {
                     <label htmlFor='roomNo' class="form-label">
                       {t('dashboard.roomNo')}
                     </label>
-                    <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedRoom" onFocus={handleTenantFocus}>
+                    <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => {setSelectedRoom(e.target.value);setSelectedBed('')}} name="selectedRoom" onFocus={handleTenantFocus}>
                       <option value="">{t('dashboard.selectRoom')}</option>
                       {/* {girlsRooms.map((room) => (
                         <option key={room.roomNumber} value={room.roomNumber}>
                           {room.roomNumber}
                         </option>
                       ))}  */}
-                      {selectedRoom && !showBoysRoom.includes(selectedRoom) && (
+                      {/* {selectedRoom && !showBoysRoom.includes(selectedRoom) && (
                         <option key={selectedRoom} value={selectedRoom}>
                           {selectedRoom} (Current)
                         </option>
-                      )}
+                      )} */}
 
                       {/* Show unoccupied rooms */}
                       {showBoysRoom.map((room) => (
