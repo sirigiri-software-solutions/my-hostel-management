@@ -127,14 +127,14 @@ const RoomsGirls = () => {
     const now = new Date().toISOString();
     const newErrors = {};
 
-    if (!floorNumber.trim()) newErrors.floorNumber = 'Floor number is required';
-    if (!roomNumber.trim()) newErrors.roomNumber = 'Room number is required';
+    if (!floorNumber.trim()) newErrors.floorNumber = t('errors.floorNumberRequired');
+    if (!roomNumber.trim()) newErrors.roomNumber =  t('errors.roomNumberRequired');
     else if (girlsRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
-      newErrors.roomNumber = 'Room number already exists';
+      newErrors.roomNumber = t('errors.roomNumberExists');
     }
-    if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
-    else if (numberOfBeds > 20) newErrors.numberOfBeds = "No.of beds can't exceed 20";
-    if (!bedRent) newErrors.bedRent = 'Bed rent is required';
+    if (!numberOfBeds) newErrors.numberOfBeds = t('errors.numberOfBedsRequired');
+    else if (numberOfBeds > 20) newErrors.numberOfBeds = t('errors.bedsLimit');
+    if (!bedRent) newErrors.bedRent =  t('errors.bedRentRequired');
     // New check: if editing, ensure the new number of beds is greater than or equal to the previous number
   //   if (isEditing && parseInt(numberOfBeds) < parseInt(previousNumberOfBeds)) {
   //     newErrors.numberOfBeds = `Number of beds must be greater than or equal to ${previousNumberOfBeds}`;
@@ -163,7 +163,7 @@ const RoomsGirls = () => {
         updateDate: now
       }).then(() => {
         if (!toast.isActive(activeToastId)) {
-          activeToastId=toast.success("Room updated successfully.", {
+          activeToastId=toast.success(t('toastMessages.roomUpdatedSuccessfully'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -179,7 +179,7 @@ const RoomsGirls = () => {
       }).catch(error => {
         if (!toast.isActive(activeToastId)) {
 
-          activeToastId=toast.error("Error updating room: " + error.message, {
+          activeToastId=toast.error(t('toastMessages.errorAddingRoom')+ error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -203,7 +203,7 @@ const RoomsGirls = () => {
       }).then(() => {
         if (!toast.isActive(activeToastId)) {
 
-          activeToastId=toast.success("Room added successfully.", {
+          activeToastId=toast.success(t('toastMessages.roomAddedSuccessfully'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -218,7 +218,7 @@ const RoomsGirls = () => {
       }).catch(error => {
         if (!toast.isActive(activeToastId)) {
 
-          activeToastId=toast.error("Error adding room: " + error.message, {
+          activeToastId=toast.error(t('toastMessages.errorAddingRoom')  + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,

@@ -129,14 +129,14 @@ const RoomsBoys = () => {
     const newErrors = {};
 
     // Validation checks
-    if (!floorNumber.trim()) newErrors.floorNumber = 'Floor number is required';
-    if (!roomNumber.trim()) newErrors.roomNumber = 'Room number is required';
+    if (!floorNumber.trim()) newErrors.floorNumber = t('errors.floorNumberRequired');
+    if (!roomNumber.trim()) newErrors.roomNumber = t('errors.roomNumberRequired');
     else if (boysRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
-        newErrors.roomNumber = 'Room number already exists';
+        newErrors.roomNumber = t('errors.roomNumberExists');
     }
-    if (!numberOfBeds) newErrors.numberOfBeds = 'Number of beds is required';
-    else if (numberOfBeds > 20) newErrors.numberOfBeds = "No.of beds can't exceed 20";
-    if (!bedRent) newErrors.bedRent = 'Bed rent is required';
+    if (!numberOfBeds) newErrors.numberOfBeds =  t('errors.numberOfBedsRequired');
+    else if (numberOfBeds > 20) newErrors.numberOfBeds =  t('errors.bedsLimit');
+    if (!bedRent) newErrors.bedRent =  t('errors.bedRentRequired');
 
 
   //   if (isEditing && parseInt(numberOfBeds) < parseInt(previousNumberOfBeds)) {
@@ -170,7 +170,7 @@ const RoomsBoys = () => {
             createdBy,
             updateDate: now
         }).then(() => {
-            toast.success("Room updated successfully.", {
+            toast.success(t('toastMessages.roomUpdatedSuccessfully'), {
                 position: "top-center",
                 autoClose: 2000,
                 hideProgressBar: false,
@@ -183,7 +183,7 @@ const RoomsBoys = () => {
             fetchData();
             setIsEditing(false);
         }).catch(error => {
-            toast.error("Error updating room: " + error.message, {
+            toast.error(t('toastMessages.errorAddingRoom')+ error.message, {
                 position: "top-center",
                 autoClose: 2000,
                 hideProgressBar: false,
@@ -208,7 +208,7 @@ const RoomsBoys = () => {
             createdBy,
             updateDate: now
         }).then(() => {
-            toast.success("Room added successfully.", {
+            toast.success(t('toastMessages.roomAddedSuccessfully'), {
                 position: "top-center",
                 autoClose: 2000,
                 hideProgressBar: false,
@@ -220,7 +220,7 @@ const RoomsBoys = () => {
             });
             fetchData();
         }).catch(error => {
-            toast.error("Error adding room: " + error.message, {
+            toast.error(t('toastMessages.errorAddingRoom') + error.message, {
                 position: "top-center",
                 autoClose: 2000,
                 hideProgressBar: false,

@@ -1318,6 +1318,13 @@ if (bikeRcImage) {
     ) : null,
   }));
 
+  const filteredExTenantRows = exTenantRows.filter((row) => {
+    const hasSearchQueryMatch = Object.values(row).some((value) =>
+      value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    return hasSearchQueryMatch;
+  });
+
   const showExTenantsData = () => {
     setShowExTenants(!showExTenants)
     setShowBikeFilter(!showBikeFilter);
@@ -1816,7 +1823,7 @@ const handleDownload = async (url, type, tenantName) => {
       </div>
 
       <div>
-        {showExTenants ? <Table columns={columnsEx} rows={exTenantRows} onClickTentantRow={handleTentantRow} /> : <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />}
+        {showExTenants ? <Table columns={columnsEx} rows={filteredExTenantRows} onClickTentantRow={handleTentantRow} /> : <Table columns={columns} rows={filteredRows} onClickTentantRow={handleTentantRow} />}
       </div>
 
       <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalTenantsGirls" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal}>

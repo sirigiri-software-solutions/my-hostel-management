@@ -273,9 +273,8 @@
           "expenseNameRequired": "व्यय नाम आवश्यक है",
           "expenseAmountRequired": "व्यय राशि आवश्यक है",
           "expenseDateRequired": "व्यय तिथि आवश्यक है",
-          "permanentAddress":"स्थायी पता आवश्यक है"
-
-        
+          "permanentAddress":"स्थायी पता आवश्यक है",
+          "bedsLimit":"मंज़िल संख्या आवश्यक है"
       },
       "toastMessages": {
         "success": "कमरा सफलतापूर्वक जोड़ा गया।",
@@ -289,6 +288,7 @@
         "rentAddedSuccess": "किराया सफलतापूर्वक जोड़ा गया।",
         "errorAddingRent": "किराया जोड़ने में त्रुटि: ",
         "roomAddedSuccessfully": "कमरा सफलतापूर्वक जोड़ा गया।",
+        "roomUpdatedSuccessfully":"कमरा सफलतापूर्वक अपडेट किया गया।",
         "errorAddingRoom": "कमरे जोड़ने में त्रुटि",
         "expenseAddedSuccessfully": "व्यय सफलतापूर्वक जोड़ा गया।",
         "errorAddingExpense": "व्यय जोड़ते समय त्रुटि: ",
@@ -357,8 +357,17 @@
     "save": "सहेजें",
     "confirmDelete": "हटाने की पुष्टि करें",
     "confirmMsg": "यदि आप इस छात्रावास को हटा रहे हैं, तो कमरे, बिस्तर, किरायेदारों, किराए और खर्चों से संबंधित सभी डेटा हटा दिया जाएगा और आप इसे दोबारा एक्सेस नहीं कर पाएंगे।  क्या आप वाकई इस छात्रावास को हटाना चाहते हैं?",
-    "delete": "हटाएं"
-
+    "delete": "हटाएं",
+    "hostelDeletedSuccessfully": "हॉस्टल सफलतापूर्वक हटाया गया।",
+  "hostelCannotBeDeleted": "हॉस्टल को नहीं हटाया जा सकता क्योंकि इसमें निवासियों और बाहरी लोग हैं। कृपया पहले निवासियों को स्थानांतरित करें।",
+  "hostelDetailsCannotBeEmpty": "हॉस्टल का नाम, पता और चित्र खाली नहीं हो सकते।",
+  "errorUploadingImage": "चित्र अपलोड करने में त्रुटि।",
+  "hostelUpdatedSuccessfully": "हॉस्टल सफलतापूर्वक अपडेट किया गया।",
+  "failedToUpdateHostel": "हॉस्टल को अपडेट करने में विफल।",
+  "hostelNameMustContainAlphabets": "हॉस्टल का नाम केवल अक्षर ही होना चाहिए।",
+  "pleaseSelectAFile": "कृपया एक फ़ाइल चुनें।",
+  "pleaseUploadValidImage": "कृपया एक मान्य छवि फ़ाइल अपलोड करें (JPEG, PNG, GIF)।",
+"failedToAddNewHostel": "नया हॉस्टल जोड़ने में विफल।"
 },
 "settings": {
   "languages": "भाषाएँ",

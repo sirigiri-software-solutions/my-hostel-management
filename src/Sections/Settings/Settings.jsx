@@ -213,9 +213,7 @@ const Settings = () => {
         activeToastId=toast.error("Hostel name must contain only alphabets.", {
         position: "top-center",
         autoClose: 3000,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        },
+        toastId: "empty-fields-error",
       });
     }
     }
@@ -250,9 +248,7 @@ const isImageFile = (file) => {
         activeToastId=toast.error("Please select a file.", {
         position: "top-center",
         autoClose: 3000,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        }
+        toastId: "empty-fields-error",
       });
     }
       return;
@@ -270,9 +266,7 @@ const isImageFile = (file) => {
         activeToastId=toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
         position: "top-center",
         autoClose: 3000,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        }
+        toastId: "empty-fields-error",
       });
     }
       e.target.value = ''; // Clear the input
@@ -303,9 +297,7 @@ const isImageFile = (file) => {
         activeToastId=toast.error("Hostel name, address and image cannot be empty.", {
         position: "top-center",
         autoClose: 3000,
-        onClose: () => {
-          activeToastId = null; // Reset activeToastId when the toast is closed
-        }
+        toastId: "empty-fields-error",
       });
     }
       return;
@@ -341,9 +333,7 @@ const isImageFile = (file) => {
           activeToastId=toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
           position: "top-center",
           autoClose: 3000,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          }
+          toastId: "empty-fields-error",
         });
       }
         fetchData()
@@ -367,9 +357,7 @@ const isImageFile = (file) => {
           activeToastId=toast.error("Failed to add new hostel: " + error.message, {
           position: "top-center",
           autoClose: 3000,
-          onClose: () => {
-            activeToastId = null; // Reset activeToastId when the toast is closed
-          }
+          toastId: "empty-fields-error",
         });
       }navigate(-1)
       })

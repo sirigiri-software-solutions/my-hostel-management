@@ -175,7 +175,7 @@ const submitHostelEdit = async (e) => {
   const { id, name, address, hostelImage, isBoys } = isEditing;
 
   if (name.trim() === '' || address.trim() === '' || !hostelImage) {
-    toast.error("Hostel name, address and image cannot be empty.", {
+    toast.error(t('hostels.hostelDetailsCannotBeEmpty'), {
       position: "top-center",
       autoClose: 3000,
       toastId: "empty-fields-error",
@@ -193,7 +193,7 @@ const submitHostelEdit = async (e) => {
       const snapshot = await uploadBytes(imageRef, compressedImage);
       updatedImageUrl = await getDownloadURL(snapshot.ref);
     } catch (error) {
-      toast.error("Error uploading image: " + error.message, {
+      toast.error(t('hostels.errorUploadingImage') + error.message, {
         position: "top-center",
         autoClose: 3000,
         toastId: "empty-fields-error",
@@ -207,7 +207,7 @@ const submitHostelEdit = async (e) => {
  
   update(hostelRef, updateData)
     .then(() => {
-      toast.success("Hostel updated successfully.", {
+      toast.success(t('hostels.hostelUpdatedSuccessfully'), {
         position: "top-center",
         autoClose: 3000,
         toastId: "empty-fields-error",
@@ -217,7 +217,7 @@ const submitHostelEdit = async (e) => {
       setBtnDisabledStatus(false)
     })
     .catch(error => {
-      toast.error("Failed to update hostel: " + error.message, {
+      toast.error(t('hostels.failedToUpdateHostel')+ error.message, {
         position: "top-center",
         autoClose: 3000,
         toastId: "empty-fields-error",
@@ -255,7 +255,7 @@ const submitHostelEdit = async (e) => {
           if(!hasTenants && !hasExTenants){
             await remove(ref(database, path))
        
-            toast.success("Hostel deleted successfully.", {
+            toast.success(t('hostels.hostelDeletedSuccessfully'), {
               position: "top-center",
               autoClose: 3000,
               toastId: "empty-fields-error",
@@ -266,7 +266,7 @@ const submitHostelEdit = async (e) => {
             setHostelToDelete(null);
             setBtnDisabledStatus(false)
           }else{
-            toast.error("Hostel cannot be deleted as it has tenants,extenants.Please transfer the tenants first.",{
+            toast.error(t('hostels.hostelCannotBeDeleted'),{
               position: "top-center",
               autoClose: 5000,
               hideProgressBar: false,
@@ -289,7 +289,7 @@ const submitHostelEdit = async (e) => {
   
         await remove(ref(database, path))
        
-          toast.success("Hostel deleted successfully.", {
+          toast.success(t('hostels.hostelDeletedSuccessfully'), {
             position: "top-center",
             autoClose: 3000,
             toastId: "empty-fields-error",
@@ -450,7 +450,7 @@ const submitHostelEdit = async (e) => {
         setNewGirlsHostelName(value);
       }
     } else {
-      toast.error("Hostel name must contain only alphabets.", {
+      toast.error(t('hostels.hostelNameMustContainAlphabets'), {
         position: "top-center",
         autoClose: 3000,
         toastId: "empty-fields-error",
@@ -472,7 +472,7 @@ const submitHostelEdit = async (e) => {
    
     if (!file) {
         // No file selected
-        toast.error("Please select a file.", {
+        toast.error(t('hostels.pleaseSelectAFile'), {
             position: "top-center",
             autoClose: 3000,
             toastId: "empty-fields-error",
@@ -494,7 +494,7 @@ const submitHostelEdit = async (e) => {
   reader.readAsDataURL(file);
 
     if (!isImageFile(file)) {
-      toast.error("Please upload a valid image file (JPEG, PNG, GIF).", {
+      toast.error(t('hostels.pleaseUploadValidImage'), {
         position: "top-center",
         autoClose: 3000,
         toastId: "empty-fields-error",
@@ -537,7 +537,7 @@ const submitHostelEdit = async (e) => {
     const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
  
     if (name.trim() === '' || address.trim() === '' || !hostelImage) {
-      toast.error("Hostel name, address and image cannot be empty.", {
+      toast.error(t('hostels.hostelDetailsCannotBeEmpty'), {
         position: "top-center",
         autoClose: 3000,
         toastId: "empty-fields-error",
@@ -594,7 +594,7 @@ const submitHostelEdit = async (e) => {
         navigate(-1)
       })
       .catch(error => {
-        toast.error("Failed to add new hostel: " + error.message, {
+        toast.error(t('hostels.failedToAddNewHostel') + error.message, {
           position: "top-center",
           autoClose: 3000,
           toastId: "empty-fields-error",

@@ -751,7 +751,7 @@ const takePicture = async () => {
       newErrors.roomNumber = t('errors.roomNumberExists');
     }
     if (!numberOfBeds) newErrors.numberOfBeds = t('errors.numberOfBedsRequired');
-    else if (numberOfBeds > 20) newErrors.numberOfBeds = "No.of beds can't exceed 20";
+    else if (numberOfBeds > 20) newErrors.numberOfBeds = t('errors.bedsLimit');
     if (!bedRent) newErrors.bedRent = t('errors.bedRentRequired');
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);

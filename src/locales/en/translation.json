@@ -277,11 +277,12 @@
         "expenseNameRequired": "Expense name is required",
         "expenseAmountRequired": "Expense amount is required",
         "expenseDateRequired": "Expense date is required",
-        "permanentAddress":"Address is required"
-          
+        "permanentAddress":"Address is required",
+        "bedsLimit":"No.of beds can't exceed 20"
     },
     "toastMessages": {
         "roomAddedSuccessfully": "Room added successfully.",
+        "roomUpdatedSuccessfully":"Room updated successfully.",
         "errorAddingRoom": "Error adding room",
         "tenantUpdated": "Tenant updated successfully.",
         "errorUpdatingTenant": "Error updating Tenant ",
@@ -359,7 +360,17 @@
        "save":"Save",
        "confirmDelete":"Confirm Delete",
        "confirmMsg":"If you are Delete this Hostel, all the Data related to rooms, beds, tenants, rents and expenses will be deleted and you can't access it again.  Are you sure you want to delete this hostel? ",
-       "delete":"Delete"
+       "delete":"Delete",
+       "hostelDeletedSuccessfully": "Hostel deleted successfully.",
+       "hostelCannotBeDeleted": "Hostel cannot be deleted as it has tenants and externals. Please transfer the tenants first.",
+       "hostelDetailsCannotBeEmpty": "Hostel name, address and image cannot be empty.",
+       "errorUploadingImage": "Error uploading image.",
+       "hostelUpdatedSuccessfully": "Hostel updated successfully.",
+       "failedToUpdateHostel": "Failed to update hostel.",
+       "hostelNameMustContainAlphabets": "Hostel name must contain only alphabets.",
+       "pleaseSelectAFile": "Please select a file.",
+       "pleaseUploadValidImage": "Please upload a valid image file (JPEG, PNG, GIF).",
+       "failedToAddNewHostel": "Failed to add new hostel."
 
     },
     "settings":{
