@@ -257,10 +257,19 @@ const submitHostelEdit = async (e) => {
   const [crossBtnStatus,setCrossbtnStatus] = useState(false)
 
   const closePopupForm = () => {
-    console.log("called CloseBtn")
     setCrossbtnStatus(true)
     setIsEditing(null);
     setSelectedImage(null);
+    // ==================
+    setNewBoysHostelName('');
+    setNewBoysHostelAddress('');
+    setBoysHostelImage('');
+    setIsBoysModalOpen(false);
+    setNewGirlsHostelName('');
+    setNewGirlsHostelAddress('');
+    setGirlsHostelImage('');
+    setIsGirlsModalOpen(false);
+    // =============
     navigate(-1)
     setTimeout(()=>{
       setCrossbtnStatus(false)
