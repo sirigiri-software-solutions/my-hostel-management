@@ -23,7 +23,10 @@ import Spinner from '../../Elements/Spinner';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
 import { v4 as uuidv4 } from 'uuid';
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom';
+import { App as CapacitorApp } from '@capacitor/app';
+import { isPlatform } from '@ionic/react';
+import { Capacitor } from '@capacitor/core';
 
 const DashboardGirls = () => {
   const location = useLocation();
@@ -184,6 +187,7 @@ const DashboardGirls = () => {
       if (showModal && (event.target.id === "exampleModalRoomsGirls" || event.key === "Escape")) {
         setShowModal(false);
         setHasBike(false);
+        setShowForm(true);
         setBikeNumber('NA');
         handleCloseModal();
       }
@@ -342,6 +346,52 @@ const DashboardGirls = () => {
 
   }, [girlsRooms, girlsTenants, showModal])
 
+  // useEffect(() => {
+  //   const handleBackButton = () => {
+  //     console.log('Back button pressed');
+  //     console.log('Modal open state:', showModal);
+
+  //     // if (showModal) {
+  //     //   setShowModal(false); // Close the popup
+  //     //   console.log("working while popup open")
+  //     // }
+      
+  //    if(!showModal) {
+  //       // Confirm exit if no popups are open
+  //       console.log('No modal is open, asking for exit confirmation...');
+
+  //       const shouldExit = window.confirm('Are you sure you want to exit the app?');
+  //       if (shouldExit) {
+  //         console.log('Exiting the app...');
+
+  //         CapacitorApp.exitApp(); // Exit the app if confirmed
+  //       }
+  //     }
+  //   };
+ 
+  //   const addBackButtonListener = async () => {
+  //     console.log('Adding back button listener');
+
+  //     const listener = await CapacitorApp.addListener('backButton', handleBackButton);
+  //     return listener;
+  //   };
+ 
+  //   let listener;
+  //   addBackButtonListener().then((l) => {
+  //     listener = l;
+  //     console.log('Back button listener added');
+
+  //   });
+ 
+  //   // Clean up listener on unmount
+  //   return () => {
+  //     if (listener && listener.remove) {
+  //       console.log('Removing back button listener');
+
+  //       listener.remove();
+  //     }
+  //   };
+  // }, [showModal,location.pathname]);
 
   const [editRoomNumber,setEditRoomNumber] = useState();
   useEffect(() => {
@@ -1539,6 +1589,7 @@ navigate(-1)
     setFormLayout('');
     resetForm();
     setShowModal(false);
+    setShowForm(true);
     navigate(-1)
     setHasBike(false);
     setBikeNumber("NA");

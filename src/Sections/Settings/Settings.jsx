@@ -86,7 +86,10 @@ const Settings = () => {
   
 
   
-  const takePicture = async (isBoys, name) => {
+  const takePicture = async (isBoys) => {
+    
+     let name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
+
     if (!isMobile) {
         console.error("Camera access is not supported on your device.");
         return;
@@ -107,6 +110,7 @@ const Settings = () => {
 
         const response = await fetch(photo.webPath);
         const blob = await response.blob();
+        
 
         // Set image state based on whether it's a boys' or girls' hostel
         if (isBoys) {
@@ -1532,7 +1536,7 @@ console.log(selectedHostelType, "ActiveFlagselectedHostelType")
                   <p>{t('tenantsPage.or')}</p>
                   <div style={{display:'flex',flexDirection:'row'}}>
                   <p>{t('tenantsPage.takePhoto')}</p>
-                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={()=>takePicture(true)} style={{marginTop:'-7px',paddingLeft:'30px'}}
                   disabled={isFileUploaded} 
 
                   />
@@ -1588,7 +1592,7 @@ console.log(selectedHostelType, "ActiveFlagselectedHostelType")
                   <p>{t('tenantsPage.or')}</p>
                   <div style={{display:'flex',flexDirection:'row'}}>
                   <p>{t('tenantsPage.takePhoto')}</p>
-                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={()=>takePicture(false)} style={{marginTop:'-7px',paddingLeft:'30px'}}
                   disabled={isFileUploaded} 
 
                   />

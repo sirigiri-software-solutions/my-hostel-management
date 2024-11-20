@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 import MainPage from './pages/MainPage/MainPage';
 import Login from './pages/Login/Login';
-import SubscriptionPage from './pages/Subscription';
+// import SubscriptionPage from './pages/Subscription';
 import { ToastContainer } from 'react-toastify';
 import { DataProvider } from './ApiData/ContextProvider';
 import ProtectedRoute from './ProtectedRoute';
@@ -49,14 +49,14 @@ const App = () => {
         </Route>
 
        
-        <Route
+        {/* <Route
       path="/subscribe"
       element={
         <DataProvider>
           <SubscriptionPage />
         </DataProvider>
       }
-    />
+    /> */}
       </Routes>
     </BrowserRouter>
   );

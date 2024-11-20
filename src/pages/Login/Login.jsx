@@ -15,6 +15,9 @@ import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailA
 import { FirebaseError } from 'firebase/app';
 import { ref, set, get,update} from 'firebase/database';
 import { firebaseInstances } from "../../firebase/firebase";
+import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
+
 
 
 
@@ -196,10 +199,12 @@ const Login = () => {
               })
               localStorage.setItem('accessEnd', now.add(3, 'months').toISOString()); 
 
-            }else if (accessEnd && now.isAfter(accessEnd)) {
-              navigate('/subscribe');
-              return;
-            } else {
+            }
+            // else if (accessEnd && now.isAfter(accessEnd)) {
+            //   navigate('/subscribe');
+            //   return;
+            // } 
+            else {
               // Set access end from the database
               localStorage.setItem('accessEnd', accessEnd.toISOString());
             }
@@ -261,6 +266,41 @@ const Login = () => {
       }
     }
   };
+
+   
+  useEffect(() => {
+    const handleBackButton = () => {
+      // Check if any popup is open
+      // if (showForm) {
+      //   closeForm(); // Close the modal if it's open
+      // } else {
+        // Confirm exit if no popups are open
+        const shouldExit = window.confirm('Are you sure you want to exit the app?');
+        if (shouldExit) {
+          CapacitorApp.exitApp(); // Exit the app if confirmed
+        }
+      }
+    
+ 
+    const addBackButtonListener = async () => {
+      const listener = await CapacitorApp.addListener('backButton', handleBackButton);
+      return listener;
+    };
+ 
+    let listener;
+    addBackButtonListener().then((l) => {
+      listener = l;
+    });
+ 
+    // Clean up listener on unmount
+    return () => {
+      if (listener && listener.remove) {
+        listener.remove();
+      }
+    };
+  }, []);
+ 
+ 
   
 
 
@@ -531,7 +571,7 @@ const [formSubmiting, setFormSubmiting] = useState(false)
       phone,
       signUpEmail,
       firstLogin:false,
-      subscriptionPlan:null,
+      // subscriptionPlan:null,
       accessEnd:null
     };
 

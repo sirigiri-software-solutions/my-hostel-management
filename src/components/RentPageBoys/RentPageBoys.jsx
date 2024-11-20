@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useData } from "../../ApiData/ContextProvider";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const RentPageBoys = () => {
+  const RentPageBoys = ({searchQuery,setSearchQuery,filterOption,setFilterOption}) => {
   const { t } = useTranslation();
 
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ const RentPageBoys = () => {
     boysTenantsWithRents,
   } = useData();
   const { database } = firebase;
-  const [searchQuery, setSearchQuery] = useState("");
+  // const [searchQuery, setSearchQuery] = useState("");
   // const [tenants, setTenants] = useState([]);
   // const [rooms, setRooms] = useState({});
   const [selectedTenant, setSelectedTenant] = useState("");
@@ -52,7 +52,7 @@ const RentPageBoys = () => {
   const [notify, setNotify] = useState(false);
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [showForm, setShowForm] = useState(true);
-  const [filterOption, setFilterOption] = useState("all");
+  // const [filterOption, setFilterOption] = useState("all");
   const [tenantMonthly, setTenantMonthly] = useState(showForm)
   let  activeToastId=null;
   // Function to send WhatsApp message
@@ -113,6 +113,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
   }, [showModal]);
 
   useEffect(() => {
+    setTenantMonthly(true)
     const updateTotalFeeFromRoom = () => {
       const roomsArray = Object.values(boysRooms);
       const matchingRoom = roomsArray.find(
@@ -124,11 +125,10 @@ Please note that you made your last payment on ${paidDate}.\n`;
       } 
       
     };
-
     if (roomNumber) {
       updateTotalFeeFromRoom();
     }
-  }, [roomNumber, boysRooms,showModal]);
+  }, [roomNumber, boysRooms,showModal, showForm]);
 
   useEffect(() => {
     if (selectedTenant) {
@@ -180,8 +180,10 @@ Please note that you made your last payment on ${paidDate}.\n`;
       setSelectedTenant(tenantId || "");
       setRoomNumber(rentRecord.roomNumber || "");
       setBedNumber(rentRecord.bedNumber || "");
-      setTenantMonthly(rentRecord.monthly)
-      setTotalFee(rentRecord.monthly ? matchingRoom.bedRent :  rentRecord.totalFee);
+       setTenantMonthly(rentRecord.daily)
+      
+      // setTotalFee(rentRecord.monthly ? matchingRoom.bedRent :  rentRecord.totalFee);
+      setTotalFee(rentRecord.daily? matchingRoom.bedRent:rentRecord.totalFee);
       setPaidAmount(rentRecord.paidAmount || "");
       setDue(rentRecord.due || "");
       setPaidDate(rentRecord.paidDate || "");
@@ -465,7 +467,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
         return value
           .toString()
           .toLowerCase()
-          .includes(searchQuery.toLowerCase());
+          .includes(searchQuery?.toLowerCase());
       }
       return false;
     });
@@ -499,7 +501,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
 
 
     return () => {
-      window.removeEventListener('popstate',handlePopState)
+      window.removeEventListener('popstate',handlePopState);
     }
   }, [showModal, location.pathname]);
 
@@ -518,8 +520,8 @@ Please note that you made your last payment on ${paidDate}.\n`;
     setRoomNumber("");
     setBedNumber("");
     setTotalFee(0);
-    setPaidAmount(0);
-    setDue(0);
+    setPaidAmount("");
+    setDue("");
     setDateOfJoin("");
     setPaidDate("");
     setDueDate("");
@@ -532,8 +534,8 @@ Please note that you made your last payment on ${paidDate}.\n`;
     setRoomNumber("");
     setBedNumber("");
     setTotalFee(0);
-    setPaidAmount(0);
-    setDue(0);
+    setPaidAmount("");
+    setDue("");
     setDateOfJoin("");
     setPaidDate("");
     setDueDate("");

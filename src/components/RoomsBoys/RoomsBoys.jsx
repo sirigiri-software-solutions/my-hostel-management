@@ -14,7 +14,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Popup from 'reactjs-popup';
 
 
-const RoomsBoys = () => {
+const RoomsBoys = ({searchQuery,setSearchQuery}) => {
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -510,16 +510,16 @@ const RoomsBoys = () => {
     // }
   }, [boysRooms, activeBoysHostel]);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  // const [searchTerm, setSearchTerm] = useState('');
   const [initialRows, setInitialRows] = useState([]);
 
   const handleChange = (event) => {
-    setSearchTerm(event.target.value)
+    setSearchQuery(event.target.value)
   }
 
   const filteredRows = initialRows.filter(row => {
     return Object.values(row).some(value =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value.toString().toLowerCase().includes(searchQuery?.toLowerCase())
     );
   });
 
@@ -545,7 +545,7 @@ const RoomsBoys = () => {
             <h1 className='management-heading'>{t('roomsPage.RoomsManagement')}</h1>
           </div>
           <div className="col-6 col-md-4  search-wrapper">
-            <input type="text" placeholder={t('common.search')} className='search-input' onChange={handleChange} value={searchTerm} />
+            <input type="text" placeholder={t('common.search')} className='search-input' onChange={handleChange} value={searchQuery} />
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
           <div className="col-6 col-md-4 d-flex justify-content-end">

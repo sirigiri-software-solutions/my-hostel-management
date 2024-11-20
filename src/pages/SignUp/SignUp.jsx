@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./SignUp.css";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useData } from "../../ApiData/ContextProvider";
@@ -50,6 +50,38 @@ const SignUp = () => {
   const clearErrorOnFocus = (fieldName) => {
     setErrors({ ...errors, [fieldName]: "" });
   };
+
+  // useEffect(() => {
+  //   const handleBackButton = () => {
+  //     // Check if any popup is open
+  //     // if (showForm) {
+  //     //   closeForm(); // Close the modal if it's open
+  //     // } else {
+  //       // Confirm exit if no popups are open
+  //       const shouldExit = window.confirm('Are you sure you want to exit the app?');
+  //       if (shouldExit) {
+  //         CapacitorApp.exitApp(); // Exit the app if confirmed
+  //       }
+  //     }
+ 
+  //   const addBackButtonListener = async () => {
+  //     const listener = await CapacitorApp.addListener('backButton', handleBackButton);
+  //     return listener;
+  //   };
+ 
+  //   let listener;
+  //   addBackButtonListener().then((l) => {
+  //     listener = l;
+  //   });
+ 
+  //   // Clean up listener on unmount
+  //   return () => {
+  //     if (listener && listener.remove) {
+  //       listener.remove();
+  //     }
+  //   };
+  // }, []);
+  //  navigate(-1);
 
   const submitHandler = (e) => {
     e.preventDefault();

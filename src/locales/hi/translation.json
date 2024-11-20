@@ -283,6 +283,8 @@
         "errorUpdatingTenant": "किरायेदार अपडेट करने में त्रुटि: ",
         "tenantAddedSuccess": "किरायेदार सफलतापूर्वक जोड़ा गया।",
         "errorAddingTenant": "किरायेदार जोड़ने में त्रुटि: ",
+        "errortenantvacate": "त्रुटि किरायेदार खाली करना",
+        "tenantvacated":"किरायेदार ने खाली किया",
         "rentUpdatedSuccess": "किराया सफलतापूर्वक अपडेट किया गया।",
         "errorUpdatingRent": "किराया अपडेट करते समय त्रुटि: ",
         "rentAddedSuccess": "किराया सफलतापूर्वक जोड़ा गया।",

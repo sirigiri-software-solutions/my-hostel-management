@@ -26,7 +26,7 @@ import { App as CapacitorApp } from '@capacitor/app';
 import { isPlatform } from '@ionic/react';
 import { Capacitor } from '@capacitor/core';
 
-const DashboardBoys = () => {
+const DashboardBoys = ({show}) => {
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -56,7 +56,8 @@ const DashboardBoys = () => {
   const [createdBy, setCreatedBy] = useState(adminRole);
   const [updateDate, setUpdateDate] = useState('');
   const [errors, setErrors] = useState({});
-  const [showModal, setShowModal] = useState(null);
+  const [showModal, setShowModal] = useState(show);
+  // const backButtonPressed = useRef(false); // Track if the back button was already pressed
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [currentMonthExpenses, setCurrentMonthExpenses] = useState([])
   const [selectedRoom, setSelectedRoom] = useState('');
@@ -190,6 +191,7 @@ const DashboardBoys = () => {
         setBikeNumber('NA');
         setModelText('');
         setFormLayout('');
+        setShowForm(true);
         resetForm();
         setNotify(false)
         navigate(-1);
@@ -1556,16 +1558,16 @@ const DashboardBoys = () => {
         console.log("working while popup open")
       }
         
-      // else{
-      //   console.log("working while popup close")
-      //   if ( location.pathname === '/') {
-      //     if (Capacitor.getPlatform() === 'android') {
-      //       CapacitorApp.exitApp(); 
-      //     }
-      //     console.log(Capacitor.getPlatform(),"firstTime")
-      //    }
+  //     // else if(!showModal){
+  //     //   console.log("working while popup close")
+  //     //   if ( location.pathname === '/') {
+  //     //     if (Capacitor.getPlatform() === 'android') {
+  //     //       CapacitorApp.exitApp(); 
+  //     //     }
+  //     //     console.log(Capacitor.getPlatform(),"firstTime")
+  //     //    }
          
-      // }
+  //     // }
       
    
     };
@@ -1580,13 +1582,107 @@ const DashboardBoys = () => {
   }, [showModal, location.pathname]);
 
 
-// useEffect(()=>{
-//   if ( location.pathname === '/' && showModal != true ) {
-//     if (Capacitor.getPlatform() === 'android') {
-//       CapacitorApp.exitApp(); 
-//     }
-//   }
-// },[location.pathname])
+ 
+  // useEffect(() => {
+  //   const handleBackButton = () => {
+  //     console.log('Back button pressed');
+  //     console.log('Modal open state:', showModal);
+
+  //     // if (showModal) {
+  //     //   setShowModal(false); // Close the popup
+  //     //   console.log("working while popup open")
+  //     // }
+      
+  //    if(!showModal) {
+  //       // Confirm exit if no popups are open
+  //       console.log('No modal is open, asking for exit confirmation...');
+
+  //       const shouldExit = window.confirm('Are you sure you want to exit the app?');
+  //       if (shouldExit) {
+  //         console.log('Exiting the app...');
+
+  //         CapacitorApp.exitApp(); // Exit the app if confirmed
+  //       }
+  //     }
+  //   };
+ 
+  //   const addBackButtonListener = async () => {
+  //     console.log('Adding back button listener');
+
+  //     const listener = await CapacitorApp.addListener('backButton', handleBackButton);
+  //     return listener;
+  //   };
+ 
+  //   let listener;
+  //   addBackButtonListener().then((l) => {
+  //     listener = l;
+  //     console.log('Back button listener added');
+
+  //   });
+ 
+  //   // Clean up listener on unmount
+  //   return () => {
+  //     // if (listener && listener.remove) {
+  //       console.log('Removing back button listener');
+
+  //       listener.remove();
+  //     // }
+  //   };
+  // }, [showModal,location.pathname]);
+ 
+   const isExiting = useRef(false); // Tracks if exit prompt has been shown
+   const backButtonListenerRef = useRef(null); // Tracks if listener is already set
+
+ useEffect(() => {
+  
+  const handleBackButton = () => {
+    console.log('Back button pressed');
+    console.log('showModal state:', showModal);
+
+    // if (showModal) {
+    //   // Close the modal if it's open
+    //   console.log('Closing modal...');
+    //   showModal(false);
+    // } else {
+      // Show exit confirmation if no modal is open and exit prompt hasn't been shown
+      if (!isExiting.current) {
+        console.log('No modal is open, showing exit confirmation...');
+        isExiting.current = true;
+        
+        const shouldExit = window.confirm('Are you sure you want to exit the app?');
+        if (shouldExit) {
+          console.log('Exiting the app...');
+          CapacitorApp.exitApp();
+        } else {
+          console.log('Exit canceled');
+           isExiting.current = false; // Reset flag if user cancels
+          // isExiting.current = true;
+        }
+      }
+    }
+  // };
+
+  const addBackButtonListener = async () => {
+    console.log('Adding back button listener');
+    const listener = await CapacitorApp.addListener('backButton', handleBackButton);
+    backButtonListenerRef.current = listener;
+  };
+
+  // Add back button listener once if not already set
+  if (!backButtonListenerRef.current) {
+    addBackButtonListener();
+    setShowModal(false)
+  }
+
+  // Clean up listener on unmount
+  return () => {
+    //  if(Capacitor.isNative && backButtonListenerRef.current){
+      console.log('Removing back button listener');
+      backButtonListenerRef?.current?.remove();
+      }
+  // };
+}, [showModal]);
+
 
     
   const handleCloseModal = () => {
@@ -1594,6 +1690,7 @@ const DashboardBoys = () => {
     setFormLayout('');
     resetForm();
     setShowModal(false);
+    setShowForm(true)
     setHasBike(false);
     setBikeNumber("NA");
     setNotify(false)
@@ -1734,9 +1831,9 @@ const DashboardBoys = () => {
     setSelectedTenant("");
     setRoomNumber("");
     setBedNumber("");
-    setTotalFee(0);
-    setPaidAmount(0);
-    setDue(0);
+    setTotalFee("");
+    setPaidAmount("");
+    setDue("");
     setDateOfJoin("");
     setPaidDate("");
     setDueDate("");
@@ -1748,15 +1845,42 @@ const DashboardBoys = () => {
     setSelectedTenant("");
     setRoomNumber("");
     setBedNumber("");
-    setTotalFee(0);
-    setPaidAmount(0);
-    setDue(0);
+    setTotalFee("");
+    setPaidAmount("");
+    setDue("");
     setDateOfJoin("");
     setPaidDate("");
     setDueDate("");
     setNotify(false);
     setErrors({}); 
   };
+  // const handleResetMonthly = () => {
+  //   setSelectedTenant("");
+  //   setRoomNumber("");
+  //   setBedNumber("");
+  //   setTotalFee("");
+  //   setPaidAmount("");
+  //   setDue(0);
+  //   setDateOfJoin("");
+  //   setPaidDate("");
+  //   setDueDate("");
+  //   setNotify(false);
+  //   setErrors({}); 
+  // };
+
+  // const handleResetDaily = () => {
+  //   setSelectedTenant("");
+  //   setRoomNumber("");
+  //   setBedNumber("");
+  //   setTotalFee("");
+  //   setPaidAmount("");
+  //   setDue(0);
+  //   setDateOfJoin("");
+  //   setPaidDate("");
+  //   setDueDate("");
+  //   setNotify(false);
+  //   setErrors({}); 
+  // };
 
   const renderFormLayout = () => {
     switch (formLayout) {
@@ -1790,6 +1914,7 @@ const DashboardBoys = () => {
           </form>
         )
       case t('dashboard.addRent'):
+        // {setShowForm(true)}
         return (
           <div>
             <div className='monthlyDailyButtons'>
@@ -2207,7 +2332,7 @@ const DashboardBoys = () => {
                   <a href={tenantId}>{t('dashboard.downloadPdf')}</a>
                 </object>
               )}
-              <input id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png"  onChange={handleTenantIdChange} ref={idInputRef} 
+              <input id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png , .pdf"  onChange={handleTenantIdChange} ref={idInputRef} 
               disabled={isTenantIdCameraUsed} />
               {isMobile && !isTenantIdFileUploaded &&(
                     <div>

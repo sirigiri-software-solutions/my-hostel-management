@@ -31,7 +31,7 @@ import imageCompression from 'browser-image-compression';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const TenantsBoys = () => {
+const TenantsBoys = ({searchQuery,setSearchQuery,showBikeFilter,setShowBikeFilter,selectedStatus,setSelectedStatus}) => {
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,7 +40,7 @@ const TenantsBoys = () => {
   const role = localStorage.getItem('role');
   const { database, storage } = firebase;
 
-  const [searchQuery, setSearchQuery] = useState('');
+  // const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
@@ -74,8 +74,8 @@ const TenantsBoys = () => {
 
   const [hasBike, setHasBike] = useState(false);
   const [bikeNumber, setBikeNumber] = useState('NA');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [showBikeFilter, setShowBikeFilter] = useState(true);
+  //  const [selectedStatus, setSelectedStatus] = useState('');
+  // const [showBikeFilter, setShowBikeFilter] = useState(true);
   let activeToastId = null;
 
 
@@ -1082,7 +1082,7 @@ if (bikeRcImage) {
 
   const filteredRows = rows.filter((row) => {
     const hasSearchQueryMatch = Object.values(row).some((value) =>
-      value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      value && value.toString().toLowerCase().includes(searchQuery?.toLowerCase())
     );
 
     if (selectedStatus === 'YES') {
@@ -1202,7 +1202,7 @@ if (bikeRcImage) {
         await remove(tenantRef).then(() => {
           if (!toast.isActive(activeToastId)) {
 
-            activeToastId=toast.success("Tenant Vacated", {
+            activeToastId=toast.success(t('toastMessages.tenantvacated'), {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -1217,7 +1217,7 @@ if (bikeRcImage) {
         }).catch(error => {
           if (!toast.isActive(activeToastId)) {
 
-            activeToastId=toast.error("Error Tenant Vacate " + error.message, {
+            activeToastId=toast.error(t('toastMessages.errortenantvacate') + error.message, {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -1993,7 +1993,7 @@ const handleDownload = async (url, type, tenantName) => {
                         <p>{fileName}</p>
                       </div>
                     )}
-                    <input ref={tenantProofIdRef} id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png" onChange={handleTenantIdChange} 
+                    <input ref={tenantProofIdRef} id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantIdChange} 
                     disabled={isTenantIdCameraUsed}/>
                     {isMobile && !isTenantIdFileUploaded &&(
                     <div>

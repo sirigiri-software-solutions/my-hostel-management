@@ -6,14 +6,14 @@ import "../BedsPageBoys/BedsPageBoys.css"
 import { useData } from '../../ApiData/ContextProvider';
 import { useTranslation } from 'react-i18next';
 
-const BedsPageGirls = () => {
+const BedsPageGirls = ({searchQuery,setSearchQuery,selectedFloor,setSelectedFloor,selectedRoomNo,setSelectedRoomNo,selectedStatus,setSelectedStatus}) => {
   const { t } = useTranslation();
   const { activeGirlsHostel, girlsRooms, girlsTenants } = useData();
 
   const [bedsData, setBedsData] = useState([]);
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedFloor, setSelectedFloor] = useState('');
-  const [selectedRoomNo, setSelectedRoomNo] = useState('');
+  // const [selectedStatus, setSelectedStatus] = useState('');
+  // const [selectedFloor, setSelectedFloor] = useState('');
+  // const [selectedRoomNo, setSelectedRoomNo] = useState('');
   const [roomNumbersToShow, setRoomNumbersToShow] = useState([]);
   const [floorNumbersToShow, setFloorNumbersToShow] = useState([]);
 
@@ -80,10 +80,10 @@ const BedsPageGirls = () => {
     status: beds.status
   }));
 
-  const [searchValue, setSearchValue] = useState("");
+  // const [searchValue, setSearchValue] = useState("");
 
   const onChangeSearch = (e) => {
-    setSearchValue(e.target.value);
+    setSearchQuery(e.target.value);
   }
 
   const onChangeStatus = (e) => {
@@ -130,7 +130,7 @@ const BedsPageGirls = () => {
       (selectedFloor === '' || row.floor === selectedFloor) &&
       (selectedRoomNo === '' || row.room_no === selectedRoomNo) &&
       Object.values(row).some((value) =>
-        value.toString().toLowerCase().includes(searchValue.toLowerCase())
+        value.toString().toLowerCase().includes(searchQuery?.toLowerCase())
       )
     );
   });
@@ -148,7 +148,7 @@ const BedsPageGirls = () => {
             <h1 className='management-heading'>{t('bedsPage.bedsManagement')}</h1>
           </div>
           <div className="col-12 col-md-4 search-wrapper">
-            <input onChange={onChangeSearch} value={searchValue} type="text" placeholder={t('common.search')} className='search-input' />
+            <input onChange={onChangeSearch} value={searchQuery} type="text" placeholder={t('common.search')} className='search-input' />
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
           <div className='col-12 col-md-4 d-flex mt-2 justify-content-md-end'>

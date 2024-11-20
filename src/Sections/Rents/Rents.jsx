@@ -8,10 +8,15 @@ import { useData } from '../../ApiData/ContextProvider';
 
 const Rents = () => {
     const { t } = useTranslation();
-    const { activeBoysHostelButtons, activeGirlsHostelButtons, activeFlag,  changeActiveFlag } = useData()
+    const { activeBoysHostelButtons, activeGirlsHostelButtons, activeFlag,  changeActiveFlag } = useData();
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filterOption, setFilterOption] = useState("all");
+
 
     const handleTabSelect = (tab) => {
         // onTabSelect(tab)
+        setSearchQuery("")
+        setFilterOption("all")
         changeActiveFlag(tab)
     };
 
@@ -22,13 +27,13 @@ const Rents = () => {
                 {
                     activeBoysHostelButtons.length > 0 ?
                         <Tab eventKey="boys" title={t('dashboard.mens')} className={activeFlag === 'boys' ? 'active-tab' : ''}>
-                            <RentPageBoys />
+                            <RentPageBoys setSearchQuery={setSearchQuery} searchQuery={searchQuery} setFilterOption={setFilterOption} filterOption={filterOption}/>
                         </Tab> : ''
                 }
                 {
                     activeGirlsHostelButtons.length > 0 ?
                         <Tab eventKey="girls" title={t('dashboard.womens')} className={activeFlag === 'girls' ? 'active-tab' : ''}>
-                            <RentPageGirls />
+                            <RentPageGirls setSearchQuery={setSearchQuery} searchQuery={searchQuery} setFilterOption={setFilterOption} filterOption={filterOption}/>
                         </Tab> : ''
                 }
 

@@ -307,13 +307,14 @@ const MainPage = () => {
         const now = moment();
         const endTime = moment(accessEnd);
  
-        if (now.isAfter(endTime)) {
-          navigate('/subscribe');
-        }
-      } else {
+        // if (now.isAfter(endTime)) {
+        //   navigate('/subscribe');
+        // }
+      } 
+      // else {
  
-        navigate('/subscribe');
-      }
+      //   navigate('/subscribe');
+      // }
     };
  
     checkSession();

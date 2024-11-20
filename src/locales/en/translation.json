@@ -288,6 +288,8 @@
         "errorUpdatingTenant": "Error updating Tenant ",
         "tenantAddedSuccess": "Tenant added successfully.",
         "errorAddingTenant": "Error adding Tenant: ",
+        "errortenantvacate":"Error Tenant Vacate",
+        "tenantvacated"    :"Tenant Vacated",
         "rentUpdatedSuccess": "Rent updated successfully.",
         "errorUpdatingRent": "Error updating rent ",
         "rentAddedSuccess": "Rent added successfully.",
@@ -373,7 +375,8 @@
        "hostelNameMustContainAlphabets": "Hostel name must contain only alphabets.",
        "pleaseSelectAFile": "Please select a file.",
        "pleaseUploadValidImage": "Please upload a valid image file (JPEG, PNG, GIF).",
-       "failedToAddNewHostel": "Failed to add new hostel."
+       "failedToAddNewHostel": "Failed to add new hostel.",
+       "newhostelAddedsuccessfully":  "New ${gender} hostel '${name}' added successfully."
 
     },
     "settings":{

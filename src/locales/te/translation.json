@@ -279,6 +279,8 @@
     "errorUpdatingTenant": "ఉద్యోగి నవీకరణలో లోపం: ",
     "tenantAddedSuccess": "ఉద్యోగి విజయవంతంగా చేర్చబడింది.",
     "errorAddingTenant": "ఉద్యోగి జోడించుటలో లోపం: ",
+    "errortenantvacate":"తప్పు కిరాయిదారు ఖాళీ చేయండి",
+    "tenantvacated":"కిరాయిదారు ఖాళీ చేశారు",
     "rentUpdatedSuccess": "లాగు యాక్సెస్ విజయవంతంగా అప్‌డేట్ చేయబడింది.",
     "errorUpdatingRent": "లాగు యాక్సెస్ నవీకరణలో లోపం: ",
     "rentAddedSuccess": "లాగు యాక్సెస్ విజయవంతంగా చేర్చబడింది.",
@@ -294,7 +296,6 @@
     "errorDeletingExpense": "ఖర్చు తొలగించడంలో లోపం.",
     "imageNotUploaded":"చిత్రం అప్లోడ్ కాలేదు",
     "idNotUploaded":"ఐడీ అప్లోడ్ కాలేదు",
-
     "roomDeletedSuccess":"గది విజయవంతంగా తొలగించబడింది",
     "roomCannotBeDeleted":"ఇది కిరాయిదారులతో ఉన్నందున గది తొలగించలేరు. దయచేసి ముందుగా కిరాయిదారులను బదిలీ చేయండి.",
     "failedToDeleteRoom":"గదిని తొలగించడంలో విఫలమయ్యారు. దయచేసి మళ్ళీ ప్రయత్నించండి."

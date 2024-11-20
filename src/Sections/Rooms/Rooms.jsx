@@ -8,9 +8,13 @@ import { useData } from '../../ApiData/ContextProvider';
 const Rooms = () => {
     const { t } = useTranslation();
     const { activeBoysHostelButtons, activeGirlsHostelButtons, activeFlag,  changeActiveFlag } = useData()
+    const [searchQuery, setSearchQuery] = useState("");
+    
 
     const handleTabSelect = (tab) => {
         // onTabSelect(tab);
+        setSearchQuery("")
+        
         changeActiveFlag(tab)  
     };
 
@@ -19,13 +23,13 @@ const Rooms = () => {
             <Tabs activeKey={activeFlag} onSelect={handleTabSelect} className="mb-3 tabs-nav custom-tabs">
                 {activeBoysHostelButtons.length > 0 ?
                     <Tab eventKey="boys" title={t('dashboard.mens')} className={activeFlag === 'boys' ? 'active-tab' : ''}>
-                        <RoomsBoys />
+                        <RoomsBoys setSearchQuery={setSearchQuery} searchQuery={searchQuery} />
                     </Tab> : ''
                 }
                 {
                     activeGirlsHostelButtons.length > 0 ?
                         <Tab eventKey="girls" title={t('dashboard.womens')} className={activeFlag === 'girls' ? 'active-tab' : ''}>
-                            <RoomsGirls />
+                            <RoomsGirls setSearchQuery={setSearchQuery} searchQuery={searchQuery} />
                         </Tab> : ''
                 }
 

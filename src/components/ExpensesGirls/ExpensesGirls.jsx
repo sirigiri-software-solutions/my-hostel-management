@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useData } from '../../ApiData/ContextProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const ExpensesGirls = () => {
+const ExpensesGirls = ({searchQuery,setSearchQuery,month,setMonth}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ const ExpensesGirls = () => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
 
   
-  const [searchTerm, setSearchTerm] = useState('');
+  // const [searchTerm, setSearchTerm] = useState('');
   const [initialRows, setInitialRows] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
@@ -48,7 +48,7 @@ const ExpensesGirls = () => {
   };
 
   const [year, setYear] = useState(getCurrentYear());
-  const [month, setMonth] = useState(getCurrentMonth());
+  // const [month, setMonth] = useState(getCurrentMonth());
   const [total, setTotal] = useState(0);
   const [yearsList, setYearsList] = useState([]);
 
@@ -442,12 +442,12 @@ return () => {
 
 
   const handleChange = (event) => {
-    setSearchTerm(event.target.value)
+    setSearchQuery(event.target.value)
   }
 
   const filteredRows = initialRows.filter(row => {
     return Object.values(row).some(value =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value.toString().toLowerCase().includes(searchQuery?.toLowerCase())
     );
   });
 
@@ -588,7 +588,7 @@ const handleExpensesFocus = (e) => {
             <h1 className='management-heading'>{t('expensesPage.expensesManagement')}</h1>
           </div>
           <div className="col-6 col-md-4 search-wrapper">
-            <input type="text" placeholder={t('common.search')} className='search-input' onChange={handleChange} value={searchTerm} />
+            <input type="text" placeholder={t('common.search')} className='search-input' onChange={handleChange} value={searchQuery} />
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
           <div className="col-6 col-md-4 d-flex justify-content-end">

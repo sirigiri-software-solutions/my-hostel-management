@@ -10,9 +10,18 @@ import { useData } from '../../ApiData/ContextProvider';
 const Expenses = () => {
     const { t } = useTranslation();
     const { activeBoysHostelButtons, activeGirlsHostelButtons, activeFlag,  changeActiveFlag  } = useData()
-
+    const [searchQuery, setSearchQuery] = useState("");
+    
+    const getCurrentMonth = () => {
+        const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+        const currentMonth = new Date().getMonth();
+        return monthNames[currentMonth];
+      };
+      const [month, setMonth] = useState(getCurrentMonth());
     const handleTabSelect = (tab) => {
         // onTabSelect(tab);
+        setSearchQuery("")
+        setMonth(getCurrentMonth())
         changeActiveFlag(tab)
     };
     return (
@@ -21,13 +30,13 @@ const Expenses = () => {
                 {
                     activeBoysHostelButtons.length > 0 ?
                         <Tab eventKey="boys" title={t('dashboard.mens')} className={activeFlag === 'boys' ? 'active-tab' : ''}>
-                            <ExpensesBoys />
+                            <ExpensesBoys setSearchQuery={setSearchQuery} searchQuery={searchQuery} setMonth={setMonth} month={month}/>
                         </Tab> : ''
                 }
                 {
                     activeGirlsHostelButtons.length > 0 ?
                         <Tab eventKey="girls" title={t('dashboard.womens')} className={activeFlag === 'girls' ? 'active-tab' : ''}>
-                            <ExpensesGirls />
+                            <ExpensesGirls setSearchQuery={setSearchQuery} searchQuery={searchQuery} setMonth={setMonth} month={month}/>
                         </Tab> : ''
                 }
 

@@ -68,59 +68,80 @@ useEffect(() => {
 }, [isBoysModalOpen, isGirlsModalOpen,isEditing]); // Depend on modal open states
 
 
-  const takePicture = async (isBoys, name) => {
-    if (!isMobile) {
-        console.error("Camera access is not supported on your device.");
-        return;
-    }
-    if (isFileUploaded) {
-        setErrorMessage((prevErrors) => ({
-            ...prevErrors,
-            hostelImage: "You've already uploaded a photo from the file manager.",
-        }));
-        return;
-    }
-    try {
-        const photo = await Camera.getPhoto({
-            quality: 90,
-            allowEditing: false,
-            resultType: CameraResultType.Uri
-        });
 
-        const response = await fetch(photo.webPath);
-        const blob = await response.blob();
+const takePicture = async (isBoys) => {
+  let name ="";
+  if(isEditing !== null){
+     const {isBoys,name} = isEditing;
+     isBoys = isBoys;
+     name = name;
+  }else{
+    name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
+  }
 
-        // Set image state based on whether it's a boys' or girls' hostel
-        if (isBoys) {
-            setBoysHostelImage(blob);
-        } else {
-            setGirlsHostelImage(blob);
-        }
+  console.log(name,"takePicture")
+  console.log(isBoys,"takePicture")
 
-        const uploadFile = async (file, path) => {
-            try {
-                const imageRef = storageRef(storage, path);
-                const snapshot = await uploadBytes(imageRef, file);
-                return await getDownloadURL(snapshot.ref);
-            } catch (error) {
-                console.error(`Error uploading file ${file.name}:`, error);
-                throw error;
-            }
-        };
 
-        // Construct the path for storage
-        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
-        setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
+  if (!isMobile) {
+      console.error("Camera access is not supported on your device.");
+      return;
+  }
 
-        // After successful upload
-        setIsCameraUsed(true);
-        setIsFileUploaded(false); // Indicate that a file has been uploaded from the camera
-    } catch (error) {
-        console.error("Error accessing the camera", error);
-        // Optionally show a toast error message here
-    }
+  if (isFileUploaded) {
+      setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          hostelImage: "You've already uploaded a photo from the file manager.",
+      }));
+      return;
+  }
+
+  try {
+      const photo = await Camera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.Uri,
+      });
+
+      const response = await fetch(photo.webPath);
+      const blob = await response.blob();
+      console.log(blob,"takePicture")
+      setSelectedImage(blob);
+      if (isBoys) {
+          setBoysHostelImage(blob);
+      } else {
+          setGirlsHostelImage(blob);
+          const url = URL.createObjectURL(blob); // Convert Blob to URL for preview
+            setPhotoUrl(url); // Set the photo URL for preview
+            console.log("Set Girls Hostel Image:", url); // Debugging
+          console.log("Set Girls Hostel Image:", blob); // Debugging
+
+      }
+
+      // Construct the storage path for uploading the image
+      const uploadFile = async (file, path) => {
+          try {
+              const imageRef = storageRef(storage, path);
+              const snapshot = await uploadBytes(imageRef, file);
+              return await getDownloadURL(snapshot.ref);
+          } catch (error) {
+              console.error(`Error uploading file ${file.name}:`, error);
+              throw error;
+          }
+      };
+
+      const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+      console.log("Uploaded Image URL:", uploadedUrl); // Check if URL is being returned properly
+      setPhotoUrl(uploadedUrl);  // Display the uploaded image
+
+      // Reset states
+      setIsCameraUsed(true);
+      setIsFileUploaded(false);  // Indicate that the file is from the camera
+      setErrorMessage('');       // Clear any errors
+  } catch (error) {
+      console.error("Error accessing the camera", error);
+  }
 };
-
 
 
   useEffect(() => {
@@ -184,7 +205,7 @@ const submitHostelEdit = async (e) => {
   e.preventDefault();
   setBtnDisabledStatus(true)
   const { id, name, address, hostelImage, isBoys } = isEditing;
-
+  
   if (name.trim() === '' || address.trim() === '' || !hostelImage) {
     toast.error(t('hostels.hostelDetailsCannotBeEmpty'), {
       position: "top-center",
@@ -196,7 +217,10 @@ const submitHostelEdit = async (e) => {
   }
  
   const basePath = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
+
+
   let updatedImageUrl = hostelImage;
+  console.log(selectedImage,"selectedImageCam")
   let compressedImage = await compressImage(selectedImage)
   if (compressedImage) {
     const imageRef = storageRef(storage, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
@@ -258,25 +282,20 @@ const submitHostelEdit = async (e) => {
       try{
         const path = `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${id}`;
         const hostelSnapshot = await get(ref(database,path));
+        console.log(hostelSnapshot,"all data");
+        
         if(hostelSnapshot.exists()){
           const hostelData = hostelSnapshot.val();
           console.log(hostelData,"inHostelPage")
-          const hasTenants = hostelData.tenants && Object.keys(hostelData.tenants).length > 0;
-          const hasExTenants = hostelData.extenants && Object.keys(hostelData.extenants).length > 0;
-          if(!hasTenants && !hasExTenants){
-            await remove(ref(database, path))
-       
-            toast.success(t('hostels.hostelDeletedSuccessfully'), {
-              position: "top-center",
-              autoClose: 3000,
-              toastId: "empty-fields-error",
-            });
-            fetchData();
-            setIsDeleteConfirmationOpen(false);
-            
-            setHostelToDelete(null);
-            setBtnDisabledStatus(false)
-          }else{
+          // const hasTenants = hostelData.tenants && Object.keys(hostelData.tenants).length > 0;
+            const hasExTenants = hostelData?.extenants && Object.keys(hostelData?.extenants).length > 0;
+          const hasTenants = hostelData.tenants ? Object.keys(hostelData.tenants).length > 0 : false;
+          //  const hasExTenants = hostelData.extenants ? Object.keys(hostelData.extenants).length > 0 : false;
+
+          console.log(hasTenants,"hastenants");
+          console.log(hasExTenants,"hasExtenants");
+          // if((!hasTenants && !hasExTenants) 
+          if(hasTenants){
             toast.error(t('hostels.hostelCannotBeDeleted'),{
               position: "top-center",
               autoClose: 5000,
@@ -291,6 +310,21 @@ const submitHostelEdit = async (e) => {
             
             setHostelToDelete(null);
             setBtnDisabledStatus(false)
+           
+          }else{
+            await remove(ref(database, path))
+       
+            toast.success(t('hostels.hostelDeletedSuccessfully'), {
+              position: "top-center",
+              autoClose: 3000,
+              toastId: "empty-fields-error",
+            });
+            fetchData();
+            setIsDeleteConfirmationOpen(false);
+            
+            setHostelToDelete(null)
+            setBtnDisabledStatus(false)
+           
           }
           navigate(-1)
         }
@@ -343,6 +377,14 @@ const submitHostelEdit = async (e) => {
     setCrossbtnStatus(true)
     setIsEditing(null);
     setSelectedImage(null);
+    setNewBoysHostelName('');
+    setNewBoysHostelAddress('');
+    setBoysHostelImage('');
+    setIsBoysModalOpen(false);
+    setNewGirlsHostelName('');
+    setNewGirlsHostelAddress('');
+    setGirlsHostelImage('');
+    setIsGirlsModalOpen(false);
     navigate(-1)
     setTimeout(()=>{
       setCrossbtnStatus(false)
@@ -361,7 +403,7 @@ const submitHostelEdit = async (e) => {
  
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-   
+    console.log(e,file,"selectedImageCam");
     if (file) {
       const allowedTypes = ['image/jpeg', 'image/png'];
  
@@ -376,7 +418,7 @@ const submitHostelEdit = async (e) => {
         e.target.value = ''; // Clear the file input
         setSelectedImage(null); // Clear selected image
         setIsFileUploaded(false); // Set to false if an invalid file type
-        setIsCameraUsed(false);
+        setIsCameraUsed(true);
       }
     }
   };
@@ -408,9 +450,11 @@ const submitHostelEdit = async (e) => {
   const handleTabSelect = (tab) => {
  
     changeActiveFlag(tab)
+    
   };
- 
+  console.log(changeActiveFlag,"flag");
   console.log(handleTabSelect , "aaaff")
+  
   // ================================
  
  
@@ -478,146 +522,294 @@ const submitHostelEdit = async (e) => {
     return file && allowedImageTypes.includes(file.type);
   };
  
-  const handleHostelChange = (e, isBoys) => {
-    e.preventDefault();
-    const file = e.target.files[0];
+//   const handleHostelChange = (e, isBoys) => {
+//     e.preventDefault();
+//     const file = e.target.files[0];
    
-    if (!file) {
-        // No file selected
-        toast.error(t('hostels.pleaseSelectAFile'), {
+//     if (!file) {
+//         // No file selected
+//         toast.error(t('hostels.pleaseSelectAFile'), {
+//             position: "top-center",
+//             autoClose: 3000,
+//             toastId: "empty-fields-error",
+//         });
+//         return;
+//     }
+//     if (file && isImageFile(file)) {
+//       if (isBoys) {
+//         setBoysHostelImage(file);
+//       } else {
+//         setGirlsHostelImage(file);
+//       }
+      
+//     }
+//     const reader = new FileReader();
+//     reader.onloadend = () => {
+//     setPhotoUrl(reader.result); // Preview the uploaded image
+//   };
+//   reader.readAsDataURL(file);
+//   setIsFileUploaded(true); // Mark the file as uploaded
+//   setIsCameraUsed(false);
+
+//     if (!isImageFile(file)) {
+//       toast.error(t('hostels.pleaseUploadValidImage'), {
+//         position: "top-center",
+//         autoClose: 3000,
+//         toastId: "empty-fields-error",
+//       });
+//       e.target.value = ''; // Clear the input
+//       return;
+//     }
+ 
+//     const validFormats = ['image/jpeg', 'image/png'];
+//     if (validFormats.includes(file.type)) {
+       
+//         if (isBoys) {
+//             setBoysHostelImage(file);
+//         } else {
+//             setGirlsHostelImage(file);
+//         }
+//         setPhotoUrl(''); // Reset photoUrl if file is uploaded
+       
+//         setErrorMessage('');
+//     } else {
+       
+//         setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
+//         e.target.value = null;
+//     }
+//      // Ensure camera state is reset
+//     // setErrorMessage('');
+// };
+ 
+const handleHostelChange = (e, isBoys) => {
+  e.preventDefault();
+  const file = e.target.files[0];
+
+  if (!file) {
+      toast.error(t('hostels.pleaseSelectAFile'), {
+          position: "top-center",
+          autoClose: 3000,
+          toastId: "empty-fields-error",
+      });
+      return;
+  }
+
+  // Validate file type
+  const validFormats = ['image/jpeg', 'image/png'];
+  if (!validFormats.includes(file.type)) {
+      toast.error(t('hostels.pleaseUploadValidImage'), {
+          position: "top-center",
+          autoClose: 3000,
+          toastId: "invalid-file-error",
+      });
+      e.target.value = ''; // Clear the input
+      return;
+  }
+
+  // Handle boys or girls hostel image
+  if (isBoys) {
+    console.log("onHostelChange","men",file)
+      setBoysHostelImage(file);
+  } else {
+    console.log("onHostelChange","women",file)
+      setGirlsHostelImage(file);
+  }
+
+  // Preview the uploaded image
+  const reader = new FileReader();
+  reader.onloadend = () => {
+      setPhotoUrl(reader.result); // Display the image preview
+  };
+  reader.readAsDataURL(file);
+
+  // Reset states
+  setIsFileUploaded(true);
+  setIsCameraUsed(false);  // Reset camera state
+  setErrorMessage('');     // Clear any previous error
+};
+
+ 
+  
+
+ 
+  // const addNewHostel = async (e, isBoys) => {
+  //   e.preventDefault();
+   
+  //   const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
+  //   const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
+  //   const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
+ 
+  //   if (name.trim() === '' || address.trim() === '' || !hostelImage) {
+  //     toast.error(t('hostels.hostelDetailsCannotBeEmpty'), {
+  //       position: "top-center",
+  //       autoClose: 3000,
+  //       toastId: "empty-fields-error",
+  //     });
+  //     return;
+  //   }
+  //   setIsSubmitting(true);
+  //   let hostelImageUrlToUpdate = hostelImageUrl;
+  //   // console.log(isBoys ? boysHostelImage : girlsHostelImage, "kkk")
+  //   const hostelImageFile = isBoys ? boysHostelImage : girlsHostelImage;
+  //   let compressedHostelImageFile = await compressImage(hostelImageFile);
+  //   if (compressedHostelImageFile) {
+  //     const imageRef = storageRef(storage, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+  //     try {
+  //       const snapshot = await uploadBytes(imageRef, compressedHostelImageFile);
+  //       hostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
+  //       console.log(hostelImageUrlToUpdate, "hostelImageUrlToUpdate for girls")
+  //     } catch (error) {
+  //       console.error("Error uploading tenant image:", error);
+  //     }
+  //   }
+   
+ 
+  //   // Create a new reference with a unique ID
+  //   const newHostelRef = push(ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`));
+  //   const hostelDetails = {
+  //     id: newHostelRef.key, // Store the unique key if needed
+  //     name,
+  //     address,
+  //     hostelImage: hostelImageUrlToUpdate
+  //   };
+ 
+  //   set(newHostelRef, hostelDetails)
+  //     .then(() => {
+  //       toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
+  //         position: "top-center",
+  //         autoClose: 3000,
+  //         toastId: "empty-fields-error",
+  //       });
+  //       fetchData()
+  //       if (isBoys) {
+  //         setNewBoysHostelName('');
+  //         setBoysHostelImage('');
+  //         setNewBoysHostelAddress('');
+  //         setIsBoysModalOpen(false);
+  //       } else {
+  //         setNewGirlsHostelName('');
+  //         setGirlsHostelImage('');
+  //         setNewGirlsHostelAddress('');
+  //         setIsGirlsModalOpen(false);
+  //       }
+  //       setPhotoUrl('');
+
+  //       navigate(-1)
+  //     })
+  //     .catch(error => {
+  //       toast.error(t('hostels.failedToAddNewHostel') + error.message, {
+  //         position: "top-center",
+  //         autoClose: 3000,
+  //         toastId: "empty-fields-error",
+  //       });
+  //     })
+  //     .finally(() => {
+  //       setIsSubmitting(false); // Reset isSubmitting to false when submission completes
+  //     });
+  // };
+ 
+
+  const addNewHostel = async (e, isBoys) => {
+    e.preventDefault();
+    const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
+    const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
+    const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
+    console.log("Is Boys Hostel:", isBoys);
+
+    console.log("Name:", name); // Log name
+    console.log("Address:", address); // Log address
+    console.log("Hostel Image:", hostelImage); // Log hostel image
+    
+
+    // Validation Check
+    if (name.trim() === '' || address.trim() === '' || !hostelImage) {
+        toast.error(t('hostels.hostelDetailsCannotBeEmpty'), {
             position: "top-center",
             autoClose: 3000,
             toastId: "empty-fields-error",
         });
         return;
     }
-    if (file && isImageFile(file)) {
-      if (isBoys) {
-        setBoysHostelImage(file);
-      } else {
-        setGirlsHostelImage(file);
-      }
-      
-    }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-    setPhotoUrl(reader.result); // Preview the uploaded image
-  };
-  reader.readAsDataURL(file);
-  setIsFileUploaded(true); // Mark the file as uploaded
-  setIsCameraUsed(false);
 
-    if (!isImageFile(file)) {
-      toast.error(t('hostels.pleaseUploadValidImage'), {
-        position: "top-center",
-        autoClose: 3000,
-        toastId: "empty-fields-error",
-      });
-      e.target.value = ''; // Clear the input
-      return;
+    if (!boysHostelImage && !girlsHostelImage) {
+        console.error("No image found for either hostel.");
     }
- 
-    const validFormats = ['image/jpeg', 'image/png'];
-    if (validFormats.includes(file.type)) {
-       
-        if (isBoys) {
-            setBoysHostelImage(file);
-        } else {
-            setGirlsHostelImage(file);
-        }
-        setPhotoUrl(''); // Reset photoUrl if file is uploaded
-       
-        setErrorMessage('');
-    } else {
-       
-        setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
-        e.target.value = null;
-    }
-     // Ensure camera state is reset
-    // setErrorMessage('');
-};
- 
- 
- 
-  
 
- 
-  const addNewHostel = async (e, isBoys) => {
-    e.preventDefault();
-   
-    const name = isBoys ? capitalizeFirstLetter(newBoysHostelName) : capitalizeFirstLetter(newGirlsHostelName);
-    const address = isBoys ? capitalizeFirstLetter(newBoysHostelAddress) : capitalizeFirstLetter(newGirlsHostelAddress);
-    const hostelImage = isBoys ? boysHostelImage : girlsHostelImage;
- 
-    if (name.trim() === '' || address.trim() === '' || !hostelImage) {
-      toast.error(t('hostels.hostelDetailsCannotBeEmpty'), {
-        position: "top-center",
-        autoClose: 3000,
-        toastId: "empty-fields-error",
-      });
-      return;
-    }
     setIsSubmitting(true);
+
     let hostelImageUrlToUpdate = hostelImageUrl;
-    // console.log(isBoys ? boysHostelImage : girlsHostelImage, "kkk")
     const hostelImageFile = isBoys ? boysHostelImage : girlsHostelImage;
-    let compressedHostelImageFile = await compressImage(hostelImageFile);
-    if (compressedHostelImageFile) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, compressedHostelImageFile);
-        hostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
-        console.log(hostelImageUrlToUpdate, "hostelImageUrlToUpdate")
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-      }
+    let compressedHostelImageFile;
+
+    try {
+        compressedHostelImageFile = await compressImage(hostelImageFile);
+    } catch (error) {
+        console.error("Error compressing the image:", error);
+        toast.error("Failed to compress the image.");
+        setIsSubmitting(false);
+        return;
     }
-   
- 
-    // Create a new reference with a unique ID
+
+    // Uploading the image
+    if (compressedHostelImageFile) {
+        const imageRef = storageRef(storage, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}/${name}`);
+        try {
+            const snapshot = await uploadBytes(imageRef, compressedHostelImageFile);
+            hostelImageUrlToUpdate = await getDownloadURL(snapshot.ref);
+            console.log(hostelImageUrlToUpdate, "hostelImageUrlToUpdate for", isBoys ? "boys" : "girls");
+        } catch (error) {
+            console.error("Error uploading hostel image:", error);
+            toast.error("Error uploading hostel image.");
+            setIsSubmitting(false);
+            return;
+        }
+    }
+
+    // Creating a new reference with a unique ID
     const newHostelRef = push(ref(database, `Hostel/${userUid}/${isBoys ? 'boys' : 'girls'}`));
     const hostelDetails = {
-      id: newHostelRef.key, // Store the unique key if needed
-      name,
-      address,
-      hostelImage: hostelImageUrlToUpdate
+        id: newHostelRef.key, // Store the unique key if needed
+        name,
+        address,
+        hostelImage: hostelImageUrlToUpdate
     };
- 
-    set(newHostelRef, hostelDetails)
-      .then(() => {
-        toast.success(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`, {
-          position: "top-center",
-          autoClose: 3000,
-          toastId: "empty-fields-error",
+
+    // Storing hostel details
+    try {
+        await set(newHostelRef, hostelDetails);
+        // const gender = isBoys ? "men's" : "women's";
+        toast.success(t(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`), {
+            position: "top-center",
+            autoClose: 3000,
+            toastId: "success-toast",
         });
-        fetchData()
+        fetchData();
+    } catch (error) {
+        console.error("Failed to add new hostel:", error);
+        toast.error(t('hostels.failedToAddNewHostel') + error.message, {
+            position: "top-center",
+            autoClose: 3000,
+            toastId: "error-toast",
+        });
+    } finally {
+        // Resetting state and closing the modal
         if (isBoys) {
-          setNewBoysHostelName('');
-          setBoysHostelImage('');
-          setNewBoysHostelAddress('');
-          setIsBoysModalOpen(false);
+            setNewBoysHostelName('');
+            setBoysHostelImage(null); // Set to null to clear the input
+            setNewBoysHostelAddress('');
+            setIsBoysModalOpen(false);
         } else {
-          setNewGirlsHostelName('');
-          setGirlsHostelImage('');
-          setNewGirlsHostelAddress('');
-          setIsGirlsModalOpen(false);
+            setNewGirlsHostelName('');
+            setGirlsHostelImage(null); // Set to null to clear the input
+            setNewGirlsHostelAddress('');
+            setIsGirlsModalOpen(false);
         }
         setPhotoUrl('');
-
-        navigate(-1)
-      })
-      .catch(error => {
-        toast.error(t('hostels.failedToAddNewHostel') + error.message, {
-          position: "top-center",
-          autoClose: 3000,
-          toastId: "empty-fields-error",
-        });
-      })
-      .finally(() => {
         setIsSubmitting(false); // Reset isSubmitting to false when submission completes
-      });
-  };
- 
+        navigate(-1); // Navigate back after the process
+    }
+};
+
   const handleModalClose = (isBoys) => {
     if (isBoys) {
       setNewBoysHostelName('');
@@ -738,15 +930,15 @@ const submitHostelEdit = async (e) => {
               />
  
               <div >
-                <label htmlFor="Hostel Image" className="form-label">{t('settings.hostelImage')}</label>
-                <input type="file" className="form-control" accept="image/jpeg, image/png" onChange={handleImageChange} 
+                <label htmlFor="HostelEditImage" className="form-label">{t('settings.hostelImage')}</label>
+                <input id="HostelEditImage" type="file" className="form-control" accept=".jpg, .jpeg, .png" onChange={(e) => handleImageChange(e)} 
                 disabled={isCameraUsed} />
               { isMobile && !isFileUploaded && (
                   <div>
                   <p>{t('tenantsPage.or')}</p>
                   <div style={{display:'flex',flexDirection:'row'}}>
                   <p>{t('tenantsPage.takePhoto')}</p>
-                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={()=>takePicture()} style={{marginTop:'-7px',paddingLeft:'30px'}}
                   disabled={isFileUploaded} 
 
                   />
@@ -829,7 +1021,7 @@ const submitHostelEdit = async (e) => {
                   <p>{t('tenantsPage.or')}</p>
                   <div style={{display:'flex',flexDirection:'row'}}>
                   <p>{t('tenantsPage.takePhoto')}</p>
-                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={()=>takePicture(true)} style={{marginTop:'-7px',paddingLeft:'30px'}}
                   disabled={isFileUploaded} 
 
                   />
@@ -887,7 +1079,7 @@ const submitHostelEdit = async (e) => {
                   <p>{t('tenantsPage.or')}</p>
                   <div style={{display:'flex',flexDirection:'row'}}>
                   <p>{t('tenantsPage.takePhoto')}</p>
-                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={()=>takePicture(false)} style={{marginTop:'-7px',paddingLeft:'30px'}}
                   disabled={isFileUploaded} 
 
                   />

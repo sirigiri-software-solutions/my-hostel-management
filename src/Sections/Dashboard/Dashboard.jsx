@@ -6,16 +6,31 @@ import './Dashboard.css';
 import { useTranslation } from 'react-i18next';
 import DashboardGirls from '../../components/DashboardGirls/DashboardGirls'
 import { useData } from '../../ApiData/ContextProvider';
+import { App as CapacitorApp } from '@capacitor/app';
+import { isPlatform } from '@ionic/react';
+import { Capacitor } from '@capacitor/core';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+
+
 
 const Dashboard = ({ onTabSelect, activeTab }) => {
   const { t } = useTranslation()
   const { activeBoysHostel, activeFlag, changeActiveFlag, activeBoysHostelButtons, activeGirlsHostelButtons, } = useData();
   const name = localStorage.getItem("username");
+  const [showModal, setShowModal] = useState(false);
+  const location = useLocation();
 
+  
   const handleTabSelect = (tab) => {
     // onTabSelect(tab);
     changeActiveFlag(tab)
+    setShowModal(false)
+   
   };
+  useEffect(()=>{
+    setShowModal(false)
+  },[])
 console.log(activeBoysHostelButtons.length,"area",  "length")
 
   return (
@@ -25,7 +40,7 @@ console.log(activeBoysHostelButtons.length,"area",  "length")
           {
             activeBoysHostelButtons.length > 0 ?
               <Tab eventKey="boys" title={t('dashboard.mens')} className={activeFlag === 'boys' ? 'active-tab' : ''}>
-                <DashboardBoys />
+                <DashboardBoys show={showModal} />
               </Tab> : ""
           }
           {

@@ -6,16 +6,16 @@ import "../BedsPageBoys/BedsPageBoys.css"
 import { useData } from '../../ApiData/ContextProvider';
 import { useTranslation } from 'react-i18next';
 
-const BedsPageBoys = () => {
+const BedsPageBoys = ({searchQuery,setSearchQuery,selectedFloor,setSelectedFloor,selectedRoomNo,setSelectedRoomNo,selectedStatus,setSelectedStatus}) => {
   const { t } = useTranslation();
 
   const { activeBoysHostel, boysRooms, boysTenants} = useData();
 
   const [bedsData, setBedsData] = useState([]);
-  const [searchValue, setSearchValue] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedFloor, setSelectedFloor] = useState('');
-  const [selectedRoomNo, setSelectedRoomNo] = useState('');
+  // const [searchValue, setSearchValue] = useState("");
+  // const [selectedStatus, setSelectedStatus] = useState('');
+  // const [selectedFloor, setSelectedFloor] = useState('');
+  // const [selectedRoomNo, setSelectedRoomNo] = useState('');
   const [roomNumbersToShow, setRoomNumbersToShow] = useState([]);
   const [floorNumbersToShow, setFloorNumbersToShow] = useState([]);
 
@@ -81,7 +81,7 @@ const BedsPageBoys = () => {
   }));
 
   const onChangeSearch = (e) => {
-    setSearchValue(e.target.value);
+    setSearchQuery(e.target.value);
   }
 
   const onChangeStatus = (e) => {
@@ -130,7 +130,7 @@ const BedsPageBoys = () => {
       (selectedFloor === '' || row.floor=== selectedFloor)  &&
       (selectedRoomNo === '' || row.room_no === selectedRoomNo) &&
       Object.values(row).some((value) =>
-        value.toString().toLowerCase().includes(searchValue.toLowerCase())
+        value.toString().toLowerCase().includes(searchQuery?.toLowerCase())
       )
     );
   });
@@ -148,7 +148,7 @@ const BedsPageBoys = () => {
             <h1 className='management-heading'>{t('bedsPage.bedsManagement')}</h1>
           </div>
           <div className="col-12 col-md-4 search-wrapper ">
-            <input value={searchValue} onChange={onChangeSearch} type="text" placeholder={t('common.search')} className='search-input' />
+            <input value={searchQuery} onChange={onChangeSearch} type="text" placeholder={t('common.search')} className='search-input' />
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
 

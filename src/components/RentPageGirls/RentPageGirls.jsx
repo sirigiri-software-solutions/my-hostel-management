@@ -13,7 +13,7 @@ import { useData } from "../../ApiData/ContextProvider";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const RentPageGirls = () => {
+const RentPageGirls = ({searchQuery,setSearchQuery,filterOption,setFilterOption}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ const RentPageGirls = () => {
     fetchData,
   } = useData();
   const { database } = firebase;
-  const [searchQuery, setSearchQuery] = useState("");
+  // const [searchQuery, setSearchQuery] = useState("");
   // const [tenants, setTenants] = useState([]);
   // const [rooms, setRooms] = useState({});
   const [selectedTenant, setSelectedTenant] = useState("");
@@ -52,7 +52,7 @@ const RentPageGirls = () => {
   const [notify, setNotify] = useState(false);
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [showForm, setShowForm] = useState(true);
-  const [filterOption, setFilterOption] = useState("all");
+  // const [filterOption, setFilterOption] = useState("all");
   const [tenantMonthly, setTenantMonthly] = useState(showForm)
   let activeToastId = null;
 
@@ -134,6 +134,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
   // }, [activeGirlsHostel]);
 
   useEffect(() => {
+    setTenantMonthly(true)
     const updateTotalFeeFromRoom = () => {
       const roomsArray = Object.values(girlsRooms);
 
@@ -228,9 +229,10 @@ Please note that you made your last payment on ${paidDate}.\n`;
       setSelectedTenant(tenantId || "");
       setRoomNumber(rentRecord.roomNumber || "");
       setBedNumber(rentRecord.bedNumber || "");
-      // setTotalFee(rentRecord.totalFee || "");
-      setTenantMonthly(rentRecord.monthly)
-      setTotalFee(rentRecord.monthly ? matchingRoom.bedRent :  rentRecord.totalFee);
+       setTotalFee(rentRecord.totalFee || "");
+       setTenantMonthly(rentRecord.daily)
+      // setTotalFee(rentRecord.monthly ? matchingRoom.bedRent :  rentRecord.totalFee);
+      setTotalFee(rentRecord.daily? matchingRoom.bedRent:rentRecord.totalFee);
       setPaidAmount(rentRecord.paidAmount || "");
       setDue(rentRecord.due || "");
       setPaidDate(rentRecord.paidDate || "");
@@ -512,7 +514,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
         return value
           .toString()
           .toLowerCase()
-          .includes(searchQuery.toLowerCase());
+          .includes(searchQuery?.toLowerCase());
       }
       return false;
     });
