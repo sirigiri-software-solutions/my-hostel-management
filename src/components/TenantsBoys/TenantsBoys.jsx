@@ -493,21 +493,24 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
 
 
  const [editRoomNumber,setEditRoomNumber] = useState();
+ const [editBedNumber,setEditBedNumber] = useState();
   useEffect(() => {
     if (selectedRoom) {
       const room = boysRooms.find(room => room.roomNumber === selectedRoom);
       if (room) {
         const options = Array.from({ length: room.numberOfBeds }, (_, i) => i + 1);
         const requiredRoom = bedsData?.filter((each) => each.roomNumber === room.roomNumber);
-        const unoccupiedBedNumbers = requiredRoom
+        let unoccupiedBedNumbers = requiredRoom
           .filter((each) => each.status === "Unoccupied")
           .map((each) => each.bedNumber);
         if(isEditing && requiredRoom[0].roomNumber === editRoomNumber){
-          const unoccupiedBedNumbers = requiredRoom.filter((each) => each.bedNumber === parseInt(selectedBed)).map((each) => each.bedNumber)
-          setBedOptions(unoccupiedBedNumbers)
-        }else{
-          setBedOptions(unoccupiedBedNumbers);
-        } 
+          const bedNumberToShow = requiredRoom.filter((each) => each.bedNumber === parseInt(editBedNumber)).map((each) => each.bedNumber)
+          // setBedOptions(unoccupiedBedNumbers)
+          console.log(bedNumberToShow,"bedNumberToShow")
+          unoccupiedBedNumbers = [...bedNumberToShow,...unoccupiedBedNumbers]
+        }
+        
+        setBedOptions(unoccupiedBedNumbers);
       }
     } else {
       setBedOptions([]);
@@ -885,6 +888,8 @@ if (bikeRcImage) {
     setIsTenantIdFileUploaded(false);
     setIsTenantIdCameraUsed(false);
     setEditRoomNumber(false);
+    setEditRoomNumber();
+    setEditBedNumber();
 
     }
   };
@@ -897,6 +902,7 @@ if (bikeRcImage) {
     setSelectedRoom(matchedRoom ? matchedRoom.roomNumber : '');
     setSelectedBed(tenant.bedNo);
     setEditRoomNumber(matchedRoom ? matchedRoom.roomNumber : '')
+    setEditBedNumber(tenant.bedNo)
     setDateOfJoin(tenant.dateOfJoin);
     setName(tenant.name);
     setMobileNo(tenant.mobileNo);
@@ -1018,6 +1024,8 @@ if (bikeRcImage) {
     setPermnentAddress('')
     tenantImageInputRef.current.value = null;
     tenantProofIdRef.current.value = null;
+    setEditRoomNumber()
+    setEditBedNumber();
   };
 
 
@@ -1865,18 +1873,13 @@ const handleDownload = async (url, type, tenantName) => {
                       id="roomNo"
                       className="form-select"
                       value={selectedRoom}
-                      onChange={(e) => setSelectedRoom(e.target.value)}
+                      onChange={(e) => {setSelectedRoom(e.target.value);setSelectedBed('')}}
                       name="selectedRoom"
                       onFocus={handleTenantFocus}
                     >
                       <option value="">{t('dashboard.selectRoom')}</option>
 
-                      {/* Always show the current room in the dropdown */}
-                      {selectedRoom && !showBoysRoom.includes(selectedRoom) && (
-                        <option key={selectedRoom} value={selectedRoom}>
-                          {selectedRoom} (Current)
-                        </option>
-                      )}
+                    
 
                       {/* Show unoccupied rooms */}
                       {showBoysRoom.map((room) => (

@@ -83,7 +83,9 @@
       "notify": "सूचित करें",
       "welcomeTo": "स्वागत है",
     "boysHostel": "लड़कों के हॉस्टल",
-    "girlsHostel": "लड़कियों के हॉस्टल"
+    "girlsHostel": "लड़कियों के हॉस्टल",
+    "boysHostelNotAdded":"आपने कोई लड़कों का हॉस्टल नहीं जोड़ा है, कृपया सेटिंग्स में अपना पहला हॉस्टल जोड़ें।",
+    "girlsHostelNotAdded":"आपने कोई लड़कियों का हॉस्टल नहीं जोड़ा है, कृपया सेटिंग्स में अपना पहला हॉस्टल जोड़ें।"
     },
     "roomsPage": {
       "S.No": "क्रमांक",
@@ -349,8 +351,8 @@
       "Unpaid":"अवितरित"
   },
   "hostels": {
-    "boysHostels": "लड़कों के हॉस्टल",
-    "girlsHostels": "लड़कियों के हॉस्टल",
+    "boysHostels": "पुरुषों के हॉस्टल",
+    "girlsHostels": "महिलाओं के हॉस्टल",
     "name": "नाम",
     "address": "पता",
     "actions": "क्रियाएँ",
@@ -372,7 +374,12 @@
   "hostelNameMustContainAlphabets": "हॉस्टल का नाम केवल अक्षर ही होना चाहिए।",
   "pleaseSelectAFile": "कृपया एक फ़ाइल चुनें।",
   "pleaseUploadValidImage": "कृपया एक मान्य छवि फ़ाइल अपलोड करें (JPEG, PNG, GIF)।",
-"failedToAddNewHostel": "नया हॉस्टल जोड़ने में विफल।"
+"failedToAddNewHostel": "नया हॉस्टल जोड़ने में विफल।",
+"new": "नया",
+"mens": "पुरुषों का",
+"womens": "महिलाओं का",
+"hostel": "हॉस्टल",
+"addedsuccessfully": "सफलतापूर्वक जोड़ा गया"
 },
 "settings": {
   "languages": "भाषाएँ",

@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera } from '@fortawesome/free-solid-svg-icons';
-// import Joyride, { STATUS } from "react-joyride";
+
 
 import Spinner from '../../Elements/Spinner';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -72,7 +72,6 @@ const DashboardGirls = () => {
   const [idNumber, setIdNumber] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [status, setStatus] = useState('occupied');
-  // const [tenants, setTenants] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentTenantId, setCurrentTenantId] = useState('');
   const [tenatErrors, setTenantErrors] = useState({});
@@ -120,12 +119,12 @@ const DashboardGirls = () => {
     rooms: '',
     status: ''
   });
-  // const [girlsRooms, setGirlsRooms] = useState([]);
+  
   const [bedNumber, setBedNumber] = useState('');
   const [totalFee, setTotalFee] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
   const [due, setDue] = useState('');
-  // const [tenantsWithRents, setTenantsWithRents] = useState([]);
+  
   const [paidDate, setPaidDate] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [editingRentId, setEditingRentId] = useState(null);
@@ -204,42 +203,7 @@ const DashboardGirls = () => {
   }, [showModal]);
 
 
-  // useEffect(() => {
-  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-  //   onValue(roomsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedRooms = [];
-  //     for (const key in data) {
-  //       loadedRooms.push({
-  //         id: key,
-  //         ...data[key]
-  //       });
-  //     }
-  //     setRooms(loadedRooms);
-  //   });
-  // }, [activeGirlsHostel]);
-
-  // useEffect(() => {
-  //   const formattedMonth = month.slice(0, 3).toLowerCase();
-  //   const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
-  //   onValue(expensesRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     let total = 0;
-  //     const expensesArray = [];
-  //     for (const key in data) {
-  //       const expense = {
-  //         id: key,
-  //         ...data[key],
-  //         expenseDate: formatDate(data[key].expenseDate)
-  //       };
-  //       total += expense.expenseAmount;
-  //       expensesArray.push(expense);
-  //     }
-  //     setCurrentMonthExpenses(expensesArray);
-  //     setTotalExpenses(total);
-  //   });
-  // }, [activeGirlsHostel]);
-
+  
   useEffect(() => {
     if (!entireHMAdata || !activeGirlsHostel ) return;
   
@@ -270,36 +234,6 @@ const DashboardGirls = () => {
   }, [entireHMAdata, activeGirlsHostel, month, year]);
   
 
-
-  // useEffect(() => {
-  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-  //   onValue(tenantsRef, snapshot => {
-  //     const data = snapshot.val() || {};
-  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
-  //       id: key,
-  //       ...value,
-  //     }));
-  //     setTenants(loadedTenants);
-  //   });
-  // }, [activeGirlsHostel]);
-
-
-
-  // useEffect(() => {
-  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-  //   onValue(roomsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedRooms = [];
-  //     for (const key in data) {
-  //       loadedRooms.push({
-  //         id: key,
-  //         ...data[key]
-  //       });
-  //     }
-  //     setGirlsRooms(loadedRooms);
-  //   });
-  //   // Fetch tenants
-  // }, [activeGirlsHostel]);
 
   const [showGirlsRoom, setShowGirlsRooms] = useState([]);
   useEffect(() => {
@@ -346,53 +280,7 @@ const DashboardGirls = () => {
 
   }, [girlsRooms, girlsTenants, showModal])
 
-  // useEffect(() => {
-  //   const handleBackButton = () => {
-  //     console.log('Back button pressed');
-  //     console.log('Modal open state:', showModal);
-
-  //     // if (showModal) {
-  //     //   setShowModal(false); // Close the popup
-  //     //   console.log("working while popup open")
-  //     // }
-      
-  //    if(!showModal) {
-  //       // Confirm exit if no popups are open
-  //       console.log('No modal is open, asking for exit confirmation...');
-
-  //       const shouldExit = window.confirm('Are you sure you want to exit the app?');
-  //       if (shouldExit) {
-  //         console.log('Exiting the app...');
-
-  //         CapacitorApp.exitApp(); // Exit the app if confirmed
-  //       }
-  //     }
-  //   };
  
-  //   const addBackButtonListener = async () => {
-  //     console.log('Adding back button listener');
-
-  //     const listener = await CapacitorApp.addListener('backButton', handleBackButton);
-  //     return listener;
-  //   };
- 
-  //   let listener;
-  //   addBackButtonListener().then((l) => {
-  //     listener = l;
-  //     console.log('Back button listener added');
-
-  //   });
- 
-  //   // Clean up listener on unmount
-  //   return () => {
-  //     if (listener && listener.remove) {
-  //       console.log('Removing back button listener');
-
-  //       listener.remove();
-  //     }
-  //   };
-  // }, [showModal,location.pathname]);
-
   const [editRoomNumber,setEditRoomNumber] = useState();
   useEffect(() => {
     if (selectedRoom) {
@@ -469,34 +357,6 @@ const DashboardGirls = () => {
     setDue(calculatedDue);
   }, [paidAmount, totalFee]);
 
-  // useEffect(() => {
-  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-  //   onValue(tenantsRef, (snapshot) => {
-  //     const tenantsData = snapshot.val();
-  //     const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
-
-  //     const rentsPromises = tenantIds.map(tenantId => {
-  //       return new Promise((resolve) => {
-  //         const rentsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
-  //         onValue(rentsRef, (rentSnapshot) => {
-  //           const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
-  //             id: key,
-  //             ...rentSnapshot.val()[key],
-  //           })) : [];
-  //           resolve({ id: tenantId, ...tenantsData[tenantId], rents });
-  //         }, {
-  //           onlyOnce: true
-  //         });
-  //       });
-  //     });
-
-  //     Promise.all(rentsPromises).then(tenantsWithTheirRents => {
-  //       setTenantsWithRents(tenantsWithTheirRents);
-  //     });
-  //   });
-  // }, []);
-
-
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (popupOpen && event.target.id === "example") {
@@ -537,37 +397,11 @@ const DashboardGirls = () => {
   }, [girlsRooms, girlsTenants]);
 
 
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-
-  //   const reader = new FileReader();
-
-  //   reader.onload = () => {
-  //     setBikeImage(reader.result);
-
-  //   };
-
-  //   reader.readAsDataURL(file);
-  // };
+  
   const isFileType = (file, allowedTypes) => {
     return allowedTypes.includes(file.type);
   };
  
-
-
-
-  // const handleRcChange = (e) => {
-  //   const file1 = e.target.files[0];
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     setBikeRcImage(reader.result);
-  //   }
-  //   reader.readAsDataURL(file1);
-
-  // }
-
-
-
   const sendMessage = (tenant, rentRecord) => {
 
     const totalFee = rentRecord.totalFee;
@@ -662,38 +496,6 @@ const takePicture = async () => {
       // toast.error(t('toastMessages.imageNotUploaded'));   
        }
 }
-  // const takeIdPicture = async () => {
-
-  //   if (!isMobile) {
-  //     console.error("Camera access is not supported on your device.");
-  //     return;
-  // }
-  //   try {
-  //     const photo = await Camera.getPhoto({
-  //       quality: 90,
-  //       allowEditing: false,
-  //       resultType: CameraResultType.Uri
-  //     });
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setIdUrl(reader.result);
-  //       setTenantId(reader.result);
-  //     };
-  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
-  //     // const response = await fetch(photo.webPath);
-  //     // const blob = await response.blob();
-  //     // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-  //     // const snapshot = await uploadBytes(imageRef, blob);
-  //     // const url = await getDownloadURL(snapshot.ref);
-      
-  //     // setPhotoUrl(url); // Display in UI
-  //     // setTenantImageUrl(url); // Use in form submission
-  //     // setPhotoUrl(photo.webPath);
-  //   } catch (error) {
-  //     console.error("Error accessing the camera", error);
-  //     toast.error("Id not Uploaded");
-  //   }
-  // };
 
   const takeIdPicture = async () => {
     if (!isMobile) {
@@ -935,19 +737,7 @@ const takePicture = async () => {
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
-  // const handleTenantImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
 
-  //       setTenantImage(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-
-  
   const handleTenantImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -1042,104 +832,7 @@ const takePicture = async () => {
   };
 
 
-  // const handleTenantImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const validFormats = ['image/jpeg', 'image/png'];
-  //     if (validFormats.includes(file.type)) {
-  //       setTenantImage(file);
-  //       setErrorMessage(''); 
-  //     } else {
-  //       setErrorMessage('Please upload a valid image file (JPG, JPEG, PNG).');
-  //       e.target.value = null; 
-  //     }
-  //   }
-  // };
-
-  // const handleTenantIdChange = (e) => {
-  //   const file = e.target.files[0];
-
-  //   if (file) {
-
-  //     const validFormat = 'application/pdf';
-  //     const maxSize = 1 * 1024 * 1024;
-
-
-  //     if (file.type === validFormat) {
-
-  //       if (file.size <= maxSize) {
-
-  //         setFileName(file.name);
-  //         setTenantId(file);
-  //         setTenantId(file);
-  //         setErrorMessage('');
-  //       } else {
-
-  //         setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
-  //       e.target.value = null;
-
-
-       
-  //       }
-  //     } else {
-
-  //       setErrorMessage('Please upload a valid  file.');
-
-
-  //       e.target.value = null;
-  //     }
-  //   }
-  // };
-  // const handleTenantBikeChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-      
-  //     const validFormats = ['image/jpeg', 'image/png'];
-
-     
-  //     if (validFormats.includes(file.type)) {
-        
-  //       setBikeImage(file);
-  //       setErrorMessage('');
-        
-  //     } else {
-  //       setErrorMessage('Please upload a valid  file.');
-        
-
-        
-  //       e.target.value = null;
-  //     }
-  //   }
-  // };
-
-  // const handleTenantBikeRcChange = (e) => {
-  //   const file = e.target.files[0];
-
-  //   if (file) {
-     
-  //     const validFormat = 'application/pdf';
-  //     const maxSize = 1 * 1024 * 1024; 
-
-      
-  //     if (file.type === validFormat) {
-        
-  //       if (file.size <= maxSize) {
-          
-  //         setBikeRcImage(file);
-  //         setErrorMessage('');
-  //       } else {
-          
-  //         setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
-  //         e.target.value = null; 
-  //       }
-  //     } else {
-        
-  //       setErrorMessage('Please upload a valid  file.');
-  //       e.target.value = null; 
-  //     }
-  //   }
-  // };
-
+  
   const compressImage = async (file) => {
     const options = {
       maxSizeMB: 1, // Compress to a maximum of 1 MB (adjust as needed)
@@ -1550,7 +1243,7 @@ navigate(-1)
     if (activeGirlsHostelButtons?.length == 0) {
       if (!toast.isActive(activeToastId)) {
 
-        activeToastId=toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
+        activeToastId=toast.warn(t('dashboard.girlsHostelNotAdded'), {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -2064,11 +1757,7 @@ navigate(-1)
               <label htmlFor='roomNo' class="form-label">{t('dashboard.roomNo')}</label>
               <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedBed" onFocus={handleTenantFocus}>
                 <option value="">{t('dashboard.selectRoom')}</option>
-                {/* {girlsRooms.map((room) => (
-                  <option key={room.roomNumber} value={room.roomNumber}>
-                    {room.roomNumber}
-                  </option>
-                ))} */}
+                
                 {selectedRoom && !showGirlsRoom.includes(selectedRoom) && (
                         <option key={selectedRoom} value={selectedRoom}>
                           {selectedRoom} (Current)

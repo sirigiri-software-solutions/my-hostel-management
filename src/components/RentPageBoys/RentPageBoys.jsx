@@ -31,16 +31,13 @@ import { useLocation, useNavigate } from "react-router-dom";
     boysTenantsWithRents,
   } = useData();
   const { database } = firebase;
-  // const [searchQuery, setSearchQuery] = useState("");
-  // const [tenants, setTenants] = useState([]);
-  // const [rooms, setRooms] = useState({});
+  
   const [selectedTenant, setSelectedTenant] = useState("");
   const [roomNumber, setRoomNumber] = useState("");
   const [bedNumber, setBedNumber] = useState("");
   const [totalFee, setTotalFee] = useState("");
   const [paidAmount, setPaidAmount] = useState("");
   const [due, setDue] = useState("");
-  // const [tenantsWithRents, setTenantsWithRents] = useState([]);
   const [paidDate, setPaidDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -52,7 +49,6 @@ import { useLocation, useNavigate } from "react-router-dom";
   const [notify, setNotify] = useState(false);
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [showForm, setShowForm] = useState(true);
-  // const [filterOption, setFilterOption] = useState("all");
   const [tenantMonthly, setTenantMonthly] = useState(showForm)
   let  activeToastId=null;
   // Function to send WhatsApp message
@@ -730,16 +726,8 @@ Please note that you made your last payment on ${paidDate}.\n`;
                           <label htmlFor="TotalFee" class="form-label">
                             {t("dashboard.totalFee")}:
                           </label>
-                          {/* <input
-                            id="TotalFee"
-                            class="form-control"
-                            type="number"
-                            value={totalFee}
-                          /> */}
-                          <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} readOnly = {tenantMonthly}/>
+                           <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} readOnly = {tenantMonthly}/>
                         </div>
-
-
 
                         <div class="col-md-6 mb-3">
                           <label htmlFor="PaidAmount" class="form-label">
@@ -773,9 +761,6 @@ Please note that you made your last payment on ${paidDate}.\n`;
                             <div style={{ color: "red" }}>{errors.paidAmount}</div>
                           )}
                         </div>
-
-
-
 
                         <div class="col-md-6 mb-3">
                           <label htmlFor="Due" class="form-label">
