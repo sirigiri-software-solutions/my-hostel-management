@@ -95,6 +95,8 @@
     "Last Updated Date": "చివరి నవీకరణ తేదీ",
     "Edit": "సవరించు",
     "RoomsManagement": "గదుల నిర్వహణ",
+    
+    "HostelsManagement":"హాస్టల్స్ నిర్వహణ",
     "addRooms": "గదులు చేర్చండి",
     "createRooms": "గదులు సృష్టించండి",
     "floorNumber": "అంతస్తు సంఖ్య",
@@ -143,6 +145,7 @@
   "rentsPage": {
     "rentsManagement": "కిరాయాల నిర్వహణ",
     "addRent": "కిరాయా జోడించండి",
+    "UpdateRent":"అద్దెను నవీకరించు",
     "sNo": "క్ర.సూ.",
   "roomNo": "గది నం",
   "personName": "పేరు",
@@ -177,7 +180,8 @@
   "joiningDate": "చేరిక తేదీ",
   "dueDate": "కడవ తేదీ",
   "idProof": "ID ప్రూఫ్",
-  "downloadPdf": "PDF డౌన్‌లోడ్ చేయండి",
+  "downloadPdf": "డౌన్‌లోడ్ చేయండి",
+  "downloadId": "డౌన్లోడ్ ఐడి",
   "notUploaded": "అప్‌లోడ్ కాలేదు",
   "close": "మూసివేయి",
   "sNo": "క్ర.సూ.",
@@ -190,7 +194,10 @@
   "BikeRc": "బైక్ ఆర్సీ:",
   "DownloadPic": "పిక్ డౌన్‌లోడ్ చేయండి",
   "DownloadRc": "ఆర్సీ డౌన్‌లోడ్ చేయండి",
-  "NotUploaded": "ఎక్కించబడలేదు"
+  "NotUploaded": "ఎక్కించబడలేదు",
+  "or":"లేదా",
+  "takePhoto": "ఫోటో తీసుకోండి",
+  "downloading":"డౌన్లోడ్ జరుగుతోంది..."
 
     
   },
@@ -261,7 +268,9 @@
   "expenseAmountValidNumber": "ఖర్చు మొత్తం ఒక చిరునంబర అయి ఉండాలి",
   "expenseNameRequired": "ఖర్చు పేరు అవసరం",
   "expenseAmountRequired": "ఖర్చు మొత్తం అవసరం",
-  "expenseDateRequired": "ఖర్చు తేదీ అవసరం"
+  "expenseDateRequired": "ఖర్చు తేదీ అవసరం",
+   "permanentAddress":"చిరునామా అవసరం",
+   "bedsLimit":"పడకల సంఖ్య 20 మించరాదు"
   },
   "toastMessages": {
     "success": "గది విజయవంతంగా జోడించబడింది.",
@@ -270,18 +279,26 @@
     "errorUpdatingTenant": "ఉద్యోగి నవీకరణలో లోపం: ",
     "tenantAddedSuccess": "ఉద్యోగి విజయవంతంగా చేర్చబడింది.",
     "errorAddingTenant": "ఉద్యోగి జోడించుటలో లోపం: ",
+    "errortenantvacate":"తప్పు కిరాయిదారు ఖాళీ చేయండి",
+    "tenantvacated":"కిరాయిదారు ఖాళీ చేశారు",
     "rentUpdatedSuccess": "లాగు యాక్సెస్ విజయవంతంగా అప్‌డేట్ చేయబడింది.",
     "errorUpdatingRent": "లాగు యాక్సెస్ నవీకరణలో లోపం: ",
     "rentAddedSuccess": "లాగు యాక్సెస్ విజయవంతంగా చేర్చబడింది.",
     "errorAddingRent": "లాగు యాక్సెస్ చేర్చడంలో లోపం: ",
     "roomAddedSuccessfully":"గది యశస్విగా జోడించబడింది.",
+    "roomUpdatedSuccessfully":"గది విజయవంతంగా నవీకరించబడింది.",
     "errorAddingRoom": "గది జోడించడంలో పొరపాటు",
     "expenseAddedSuccessfully": "ఖర్చు విజయవంతంగా జోడబడింది.",
     "errorAddingExpense": "ఖర్చు జోడించడంలో లోపం: ",
     "expensesUpdatedSuccessfully": "ఖర్చు విజయవంతంగా నవీకరించబడింది.",
     "errorUpdatinExpense": "ఖర్చు నవీకరించడంలో లోపం.",
     "expenseDeteledSuccessfully": "ఖర్చు విజయవంతంగా తొలగించబడింది.",
-    "errorDeletingExpense": "ఖర్చు తొలగించడంలో లోపం."
+    "errorDeletingExpense": "ఖర్చు తొలగించడంలో లోపం.",
+    "imageNotUploaded":"చిత్రం అప్లోడ్ కాలేదు",
+    "idNotUploaded":"ఐడీ అప్లోడ్ కాలేదు",
+    "roomDeletedSuccess":"గది విజయవంతంగా తొలగించబడింది",
+    "roomCannotBeDeleted":"ఇది కిరాయిదారులతో ఉన్నందున గది తొలగించలేరు. దయచేసి ముందుగా కిరాయిదారులను బదిలీ చేయండి.",
+    "failedToDeleteRoom":"గదిని తొలగించడంలో విఫలమయ్యారు. దయచేసి మళ్ళీ ప్రయత్నించండి."
   },
   "mobileTable":{
     "serialNumber": "క్ర.సూ.",
@@ -314,7 +331,8 @@
     "status": "స్థితి",
     "edit": "సవరించు",
     "actions": "చర్యలు",
-    "delete": "తొలగించు"
+    "delete": "తొలగించు",
+    "address":"చిరునామా"
 },
 "createdBy": {
   "Admin": "అడ్మిన్",
@@ -339,8 +357,18 @@
     "cancel": "రద్దు చేయి",
     "save": "భద్రపరచు",
     "confirmDelete": "తొలగించు నిర్ధారించు",
-    "confirmMsg": "ఈ హాస్టల్ తొలగించడానికి ఖచ్చితమైనదియా?",
-    "delete": "తొలగించు"
+    "confirmMsg": "మీరు ఈ హాస్టల్‌ని తొలగిస్తే, గదులు, పడకలు, అద్దెదారులు, అద్దెలు మరియు ఖర్చులకు సంబంధించిన మొత్తం డేటా తొలగించబడుతుంది మరియు మీరు దీన్ని మళ్లీ తిరిగి పొందలేరు.  మీరు ఖచ్చితంగా ఈ హాస్టల్‌ని తొలగించాలనుకుంటున్నారా?",
+    "delete": "తొలగించు",
+    "hostelDeletedSuccessfully":"హాస్టల్ విజయవంతంగా తొలగించబడింది.",
+    "hostelCannotBeDeleted":"హాస్టల్‌ను తొలగించడం సాధ్యం కాదు, ఎందుకంటే అందులో అద్దెదారులు మరియు బయటి వ్యక్తులు ఉన్నారు. దయచేసి మొదట అద్దెదారులను బదిలీ చేయండి.",
+    "hostelDetailsCannotBeEmpty":"హాస్టల్ పేరు, చిరునామా మరియు చిత్రం ఖాళీగా ఉండకూడదు.",
+    "errorUploadingImage":"చిత్రాన్ని అప్‌లోడ్ చేయడంలో పొరబాటు",
+    "hostelUpdatedSuccessfully":"హాస్టల్ విజయవంతంగా నవీకరించబడింది.",
+    "failedToUpdateHostel":"హాస్టల్‌ను నవీకరించడంలో విఫలమైంది",
+    "hostelNameMustContainAlphabets":"హాస్టల్ పేరు కేవలం అక్షరాలను మాత్రమే కలిగి ఉండాలి",
+    "pleaseSelectAFile":"దయచేసి ఒక ఫైల్‌ను ఎంచుకోండి",
+    "pleaseUploadValidImage":"దయచేసి సరైన ఇమేజ్ ఫైల్‌ను అప్‌లోడ్ చేయండి (JPEG, PNG, GIF)",
+    "failedToAddNewHostel": "కొత్త హాస్టల్‌ను జోడించడంలో విఫలమైంది."
 },
 "settings": {
   "languages": "భాషలు",
@@ -353,7 +381,15 @@
   "hostelAddress": "హాస్టల్ చిరునామా",
   "close": "మూసివేయి",
   "enterhostelName": "హాస్టల్ పేరు నమోదు చేయండి",
-  "enterhostelAddress": "హాస్టల్ చిరునామా నమోదు చేయండి"
+  "enterhostelAddress": "హాస్టల్ చిరునామా నమోదు చేయండి",
+   "generateReport":"సంగ్రహం తయారుచేయండి",
+    "selectHostelType":"హాస్టల్ రకం ఎంచుకోండి",
+     "tenantsReport":"నివాసుల నివేదిక",
+      "vacatedTenantsReport":"ఖాళీ చేసిన నివాసుల నివేదిక",
+      "expensesReport":"ఖర్చుల నివేదిక",
+       "generatePdf": "PDF రూపొందించు",
+  "generateExcel":"Excel రూపొందించు"
+
 
 }
 

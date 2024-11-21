@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import "./SignUp.css";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useData } from "../../ApiData/ContextProvider";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const { areaToApiEndpoint } = useData();
+  let navigate = useNavigate();
   const [data, setData] = useState({
     firstname: "",
     lastname: "",
@@ -16,6 +18,8 @@ const SignUp = () => {
     phone: "",
     password: "",
     confirmpassword: "",
+    securityQuestion: "",
+    securityAnswer: "",
   });
 
   const [errors, setErrors] = useState({
@@ -26,6 +30,8 @@ const SignUp = () => {
     phone: "",
     password: "",
     confirmpassword: "",
+    securityQuestion: "",
+    securityAnswer: "",
   });
 
   const [selectedRole, setSelectedRole] = useState(null);
@@ -34,24 +40,54 @@ const SignUp = () => {
     setSelectedRole(event.target.value);
   };
 
-  const { firstname, lastname, area, email, phone, password, confirmpassword } = data;
+  const { firstname, lastname, area, email, phone, password, confirmpassword, securityQuestion, securityAnswer } = data;
 
   const changeHandler = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" }); // Reset error when input changes
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const clearErrorOnFocus = (fieldName) => {
     setErrors({ ...errors, [fieldName]: "" });
   };
 
+  // useEffect(() => {
+  //   const handleBackButton = () => {
+  //     // Check if any popup is open
+  //     // if (showForm) {
+  //     //   closeForm(); // Close the modal if it's open
+  //     // } else {
+  //       // Confirm exit if no popups are open
+  //       const shouldExit = window.confirm('Are you sure you want to exit the app?');
+  //       if (shouldExit) {
+  //         CapacitorApp.exitApp(); // Exit the app if confirmed
+  //       }
+  //     }
+ 
+  //   const addBackButtonListener = async () => {
+  //     const listener = await CapacitorApp.addListener('backButton', handleBackButton);
+  //     return listener;
+  //   };
+ 
+  //   let listener;
+  //   addBackButtonListener().then((l) => {
+  //     listener = l;
+  //   });
+ 
+  //   // Clean up listener on unmount
+  //   return () => {
+  //     if (listener && listener.remove) {
+  //       listener.remove();
+  //     }
+  //   };
+  // }, []);
+  //  navigate(-1);
 
   const submitHandler = (e) => {
     e.preventDefault();
     let formValid = true;
     const newErrors = { ...errors };
 
-    // Check for empty fields
     if (firstname.trim() === "") {
       newErrors.firstname = "Please enter your first name";
       formValid = false;
@@ -94,6 +130,16 @@ const SignUp = () => {
       formValid = false;
     }
 
+    if (securityQuestion.trim() === "") {
+      newErrors.securityQuestion = "Please select a security question";
+      formValid = false;
+    }
+
+    if (securityAnswer.trim() === "") {
+      newErrors.securityAnswer = "Please provide a security answer";
+      formValid = false;
+    }
+
     if (!selectedRole) {
       newErrors.role = "Please select a role";
       formValid = false;
@@ -101,10 +147,9 @@ const SignUp = () => {
 
     if (!formValid) {
       setErrors(newErrors);
-      return; // Don't proceed with submission if form is invalid
+      return;
     }
 
-    // Create a data object for submission without errors
     const formData = {
       firstname,
       lastname,
@@ -113,13 +158,15 @@ const SignUp = () => {
       phone,
       password,
       confirmpassword,
+      securityQuestion,
+      securityAnswer,
       role: selectedRole,
     };
 
-    const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
-    console.log(areaToApiEndpoint[area.toLowerCase()]);
 
-    // Proceed with form submission if all fields are filled
+    const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || " ";
+
+
     axios
       .post(apiEndpoint, formData)
       .then(() => {
@@ -132,6 +179,7 @@ const SignUp = () => {
           draggable: true,
           progress: undefined,
           theme: "light",
+          toastId: "empty-fields-error",
         });
         setData({
           firstname: "",
@@ -141,7 +189,10 @@ const SignUp = () => {
           phone: "",
           password: "",
           confirmpassword: "",
-        }); // Clear input fields after successful submission
+          securityQuestion: "",
+          securityAnswer: "",
+        });
+        navigate("/");
       })
       .catch((error) => {
         console.error("Error submitting data:", error);
@@ -156,13 +207,13 @@ const SignUp = () => {
             draggable: true,
             progress: undefined,
             theme: "light",
+            toastId: "empty-fields-error",
           }
         );
       });
   };
 
   const isPasswordValid = (password) => {
-    // Password must be at least 8 characters long and contain at least 1 character, 1 symbol, and 1 number
     return /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
       password
     );
@@ -171,121 +222,174 @@ const SignUp = () => {
   return (
     <div className="signup-page">
       <div className="signup-form">
-        <form autoComplete="off" onSubmit={submitHandler}>
-          <input
-            type="text"
-            name="firstname"
-            value={firstname}
-            onChange={changeHandler}
-            placeholder="Enter Your FirstName"
-            onFocus={() => clearErrorOnFocus("firstname")}
-          />
-          <br />
-          {errors.firstname && <div className="error">{errors.firstname}</div>}
-          <input
-            type="text"
-            name="lastname"
-            value={lastname}
-            onChange={changeHandler}
-            placeholder="Enter Your LastName"
-            onFocus={() => clearErrorOnFocus("lastname")}
-          />
-          <br />
-          {errors.lastname && <div className="error">{errors.lastname}</div>}
-          <input
-            type="text"
-            name="area"
-            value={area}
-            onChange={changeHandler}
-            placeholder="Enter Your Area"
-            onFocus={() => clearErrorOnFocus("area")}
-          />
-          <br />
-          {errors.area && <div className="error">{errors.area}</div>}
-          <input
-            type="email"
-            name="email"
-            value={email}
-            onChange={changeHandler}
-            placeholder="Enter Your Email"
-            onFocus={() => clearErrorOnFocus("email")}
-          />
-          <br />
-          {errors.email && <div className="error">{errors.email}</div>}
-          <input
-            type="tel"
-            name="phone"
-            value={phone}
-            onChange={changeHandler}
-            placeholder="Mobile number"
-            onFocus={() => clearErrorOnFocus("phone")}
-          />
-          <br />
-          {errors.phone && <div className="error">{errors.phone}</div>}
-          <input
-            type="password"
-            name="password"
-            value={password}
-            onChange={changeHandler}
-            placeholder="Enter Your Password"
-            onFocus={() => clearErrorOnFocus("password")}
-          />
-          <br />
-          {errors.password && <div className="error">{errors.password}</div>}
-          <input
-            type="password"
-            name="confirmpassword"
-            value={confirmpassword}
-            onChange={changeHandler}
-            placeholder="Confirm Your Password"
-            onFocus={() => clearErrorOnFocus("confirmpassword")}
-          />
-          <br />
-          {errors.confirmpassword && (
-            <div className="error">{errors.confirmpassword}</div>
-          )}
-          <label className="loginText">Register As:</label>
-          <div className="confirmationContainer">
-            <div className="checkBoxTextContainer">
-              <input
-                name="role"
-                type="checkbox"
-                id="admin"
-                value="admin"
-                checked={selectedRole === "admin"}
-                onChange={handleCheckboxChange}
-                className="checkbox"
-                onFocus={() => clearErrorOnFocus("role")}
-              />
-              <label className="checkBoxText" htmlFor="admin">
-                Admin
-              </label>
-            </div>
-            <div className="checkBoxTextContainer">
-              <input
-                name="role"
-                type="checkbox"
-                id="subAdmin"
-                value="subAdmin"
-                checked={selectedRole === "subAdmin"}
-                onChange={handleCheckboxChange}
-                className="checkbox"
-                onFocus={() => clearErrorOnFocus("role")}
-              />
-              <label className="checkBoxText" htmlFor="subAdmin">
-                Subadmin
-              </label>
-            </div>
+        <text id='signuphead' className="signuphead">SignUp</text>
+        <form autoComplete="off" onSubmit={submitHandler} className="row">
+          <div className="form-group col-md-6">
+
+            <input
+              type="text"
+              name="firstname"
+              value={firstname}
+              onChange={changeHandler}
+              placeholder="Enter Your FirstName"
+              onFocus={() => clearErrorOnFocus("firstname")}
+              className="form-control rounded-pill"
+            />
+            {errors.firstname && <div className="text-danger">{errors.firstname}</div>}
           </div>
-          {errors.role && <div className="error">{errors.role}</div>}
-          <input type="submit" className="Signup" value="Sign up" />
+          <div className="form-group col-md-6">
+            <input
+              type="text"
+              name="lastname"
+              value={lastname}
+              onChange={changeHandler}
+              placeholder="Enter Your LastName"
+              onFocus={() => clearErrorOnFocus("lastname")}
+              className="form-control rounded-pill"
+            />
+            {errors.lastname && <div className="text-danger">{errors.lastname}</div>}
+          </div>
+          <div className="form-group col-md-6">
+            <input
+              type="text"
+              name="area"
+              value={area}
+              onChange={changeHandler}
+              placeholder="Enter Your Area"
+              onFocus={() => clearErrorOnFocus("area")}
+              className="form-control rounded-pill"
+            />
+            {errors.area && <div className="text-danger">{errors.area}</div>}
+          </div>
+
+          <div className="form-group col-md-6">
+
+            <input
+              type="email"
+              name="email"
+              value={email}
+              onChange={changeHandler}
+              placeholder="Enter Your Email"
+              onFocus={() => clearErrorOnFocus("email")}
+              className="form-control rounded-pill"
+            />
+            {errors.email && <div className="text-danger">{errors.email}</div>}
+          </div>
+          <div className="form-group col-md-6">
+
+            <input
+              type="tel"
+              name="phone"
+              value={phone}
+              onChange={changeHandler}
+              placeholder="Mobile number"
+              onFocus={() => clearErrorOnFocus("phone")}
+              className="form-control rounded-pill"
+            />
+            {errors.phone && <div className="text-danger">{errors.phone}</div>}
+          </div>
+          <div className="form-group col-md-6">
+
+            <input
+              type="password"
+              name="password"
+              value={password}
+              onChange={changeHandler}
+              placeholder="Enter Your Password"
+              onFocus={() => clearErrorOnFocus("password")}
+              className="form-control rounded-pill"
+            />
+            {errors.password && <div className="text-danger">{errors.password}</div>}
+          </div>
+          <div className="form-group col-md-6">
+            <input
+              type="password"
+              name="confirmpassword"
+              value={confirmpassword}
+              onChange={changeHandler}
+              placeholder="Confirm Your Password"
+              onFocus={() => clearErrorOnFocus("confirmpassword")}
+              className="form-control rounded-pill"
+            />
+            {errors.confirmpassword && (
+              <div className="text-danger">{errors.confirmpassword}</div>
+            )}
+          </div>
+          <div className="form-group col-md-6">
+            <select
+              name="securityQuestion"
+              value={securityQuestion}
+              onChange={changeHandler}
+              onFocus={() => clearErrorOnFocus("securityQuestion")}
+              className="form-control rounded-pill"
+            >
+              <option value="">Select a security question</option>
+              <option value="question1">What was the name of your first pet?</option>
+              <option value="question2">What is your mother's maiden name?</option>
+              <option value="question3">What is your favorite color?</option>
+              <option value="question4">What is the name of the city you were born in?</option>
+              <option value="question5">What was the make of your first car?</option>
+            </select>
+            {errors.securityQuestion && <div className="text-danger">{errors.securityQuestion}</div>}
+          </div>
+          <div className="form-group col-md-6">
+            <input
+              type="text"
+              name="securityAnswer"
+              value={securityAnswer}
+              onChange={changeHandler}
+              placeholder="Enter your security answer"
+              onFocus={() => clearErrorOnFocus("securityAnswer")}
+              className="form-control rounded-pill"
+            />
+            {errors.securityAnswer && <div className="text-danger">{errors.securityAnswer}</div>}
+          </div>
+          <div className="form-group col-md-12">
+
+            <div className="confirmationContainer">
+              <div className="form-check form-check-inline">
+                <input
+                  name="role"
+                  type="checkbox"
+                  id="admin"
+                  value="admin"
+                  checked={selectedRole === "admin"}
+                  onChange={handleCheckboxChange}
+                  className="form-check-input rounded-pill"
+                  onFocus={() => clearErrorOnFocus("role")}
+                />
+                <label className="form-check-label" htmlFor="admin">
+                  Admin
+                </label>
+              </div>
+              <div className="form-check form-check-inline">
+                <input
+                  name="role"
+                  type="checkbox"
+                  id="subAdmin"
+                  value="subAdmin"
+                  checked={selectedRole === "subAdmin"}
+                  onChange={handleCheckboxChange}
+                  className="form-check-input rounded-pill"
+                  onFocus={() => clearErrorOnFocus("role")}
+                />
+                <label className="form-check-label" htmlFor="subAdmin">
+                  Subadmin
+                </label>
+              </div>
+            </div>
+            {errors.role && <div className="text-danger">{errors.role}</div>}
+          </div>
+          <div className="form-group col-md-12">
+
+            <input type="submit" id='submit' className="btn btn-primary rounded-pill" value="Sign up" />
+          </div>
         </form>
         <p>
-          Already have an account <Link to="/">Login</Link>
+          Already have an account? <Link to="/">Login</Link>
         </p>
       </div>
     </div>
   );
-};
-
+}
 export default SignUp;

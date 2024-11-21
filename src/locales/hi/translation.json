@@ -95,6 +95,8 @@
       "Last Updated Date": "अंतिम अपडेट की तारीख",
       "Edit": "संपादित करें",
       "RoomsManagement": "कक्ष प्रबंधन",
+     
+      "HostelsManagement":"होस्टल प्रबंधन",
       "floorNumber": "मंजिल संख्या",
   "roomNumber": "कमरा संख्या",
   "numberOfBeds": "बिस्तरों की संख्या",
@@ -148,6 +150,7 @@
     "rentsPage": {
       "rentsManagement": "किराया प्रबंधन",
       "addRent": "किराया जोड़ें",
+      "UpdateRent":"किराया अपडेट करें",
         "unpaid": "अभुगतान",
         "sNo": "क्रम संख्या",
   "roomNo": "कमरा नंबर",
@@ -182,7 +185,8 @@
       "joiningDate": "शामिल होने की तिथि",
       "dueDate": "नियत तिथि",
       "idProof": "आईडी प्रूफ",
-      "downloadPdf": "पीडीएफ डाउनलोड करें",
+      "downloadPdf": "डाउनलोड करें",
+      "downloadId": "डाउनलोड आईडी",
     "notUploaded": "अपलोड नहीं किया गया",
     "close": "बंद करें",
     "sNo": "क्रमांक",
@@ -195,7 +199,10 @@
   "BikeRc": "बाइक आरसी:",
   "DownloadPic": "चित्र डाउनलोड करें",
   "DownloadRc": "आरसी डाउनलोड करें",
-  "NotUploaded": "अपलोड नहीं हुआ"
+  "NotUploaded": "अपलोड नहीं हुआ",
+  "or":"या",
+  "takePhoto": "फोटो लें",
+  "downloading":"डाउनलोड हो रहा है..."
         
     },
     "expensesPage": {
@@ -218,6 +225,8 @@
         "sNo": "क्रमिक संख्या",
         "date": "तारीख",
         "actions": "क्रियाएँ"
+        
+
     },
     "months": {
         "jan": "जनवरी",
@@ -263,9 +272,9 @@
           "expenseAmountValidNumber": "व्यय राशि को मान्य संख्या होना चाहिए",
           "expenseNameRequired": "व्यय नाम आवश्यक है",
           "expenseAmountRequired": "व्यय राशि आवश्यक है",
-          "expenseDateRequired": "व्यय तिथि आवश्यक है"
-
-        
+          "expenseDateRequired": "व्यय तिथि आवश्यक है",
+          "permanentAddress":"स्थायी पता आवश्यक है",
+          "bedsLimit":"मंज़िल संख्या आवश्यक है"
       },
       "toastMessages": {
         "success": "कमरा सफलतापूर्वक जोड़ा गया।",
@@ -274,18 +283,26 @@
         "errorUpdatingTenant": "किरायेदार अपडेट करने में त्रुटि: ",
         "tenantAddedSuccess": "किरायेदार सफलतापूर्वक जोड़ा गया।",
         "errorAddingTenant": "किरायेदार जोड़ने में त्रुटि: ",
+        "errortenantvacate": "त्रुटि किरायेदार खाली करना",
+        "tenantvacated":"किरायेदार ने खाली किया",
         "rentUpdatedSuccess": "किराया सफलतापूर्वक अपडेट किया गया।",
         "errorUpdatingRent": "किराया अपडेट करते समय त्रुटि: ",
         "rentAddedSuccess": "किराया सफलतापूर्वक जोड़ा गया।",
         "errorAddingRent": "किराया जोड़ने में त्रुटि: ",
         "roomAddedSuccessfully": "कमरा सफलतापूर्वक जोड़ा गया।",
+        "roomUpdatedSuccessfully":"कमरा सफलतापूर्वक अपडेट किया गया।",
         "errorAddingRoom": "कमरे जोड़ने में त्रुटि",
         "expenseAddedSuccessfully": "व्यय सफलतापूर्वक जोड़ा गया।",
         "errorAddingExpense": "व्यय जोड़ते समय त्रुटि: ",
         "expensesUpdatedSuccessfully": "खर्च सफलतापूर्वक अपडेट किया गया।",
         "errorUpdatinExpense": "खर्च अपडेट करने में त्रुटि।",
         "expenseDeteledSuccessfully": "खर्च सफलतापूर्वक हटा दिया गया।",
-    "errorDeletingExpense": "खर्च हटाने में त्रुटि।"
+    "errorDeletingExpense": "खर्च हटाने में त्रुटि।",
+    "imageNotUploaded":"छवि अपलोड नहीं हुई",
+    "idNotUploaded":"आईडी अपलोड नहीं हुई",
+    "roomDeletedSuccess":"कमरा सफलतापूर्वक हटाया गया!",
+    "roomCannotBeDeleted":"कमरा हटाया नहीं जा सकता क्योंकि इसमें किरायेदार हैं। कृपया पहले किरायेदारों को स्थानांतरित करें।",
+    "failedToDeleteRoom":"कमरा हटाने में विफल। कृपया फिर से प्रयास करें।"
       },
       "mobileTable":{
         "serialNumber": "क्रमांक",
@@ -318,7 +335,8 @@
         "status": "स्थिति",
         "edit": "संपादित करें",
         "actions": "क्रियाएँ",
-        "delete": "हटाएं"
+        "delete": "हटाएं",
+        "address":"पता"
     },
     "createdBy": {
       "Admin": "प्रशासक",
@@ -343,9 +361,18 @@
     "cancel": "रद्द करें",
     "save": "सहेजें",
     "confirmDelete": "हटाने की पुष्टि करें",
-    "confirmMsg": "क्या आप निश्चित हैं कि आप इस हॉस्टल को हटाना चाहते हैं?",
-    "delete": "हटाएं"
-
+    "confirmMsg": "यदि आप इस छात्रावास को हटा रहे हैं, तो कमरे, बिस्तर, किरायेदारों, किराए और खर्चों से संबंधित सभी डेटा हटा दिया जाएगा और आप इसे दोबारा एक्सेस नहीं कर पाएंगे।  क्या आप वाकई इस छात्रावास को हटाना चाहते हैं?",
+    "delete": "हटाएं",
+    "hostelDeletedSuccessfully": "हॉस्टल सफलतापूर्वक हटाया गया।",
+  "hostelCannotBeDeleted": "हॉस्टल को नहीं हटाया जा सकता क्योंकि इसमें निवासियों और बाहरी लोग हैं। कृपया पहले निवासियों को स्थानांतरित करें।",
+  "hostelDetailsCannotBeEmpty": "हॉस्टल का नाम, पता और चित्र खाली नहीं हो सकते।",
+  "errorUploadingImage": "चित्र अपलोड करने में त्रुटि।",
+  "hostelUpdatedSuccessfully": "हॉस्टल सफलतापूर्वक अपडेट किया गया।",
+  "failedToUpdateHostel": "हॉस्टल को अपडेट करने में विफल।",
+  "hostelNameMustContainAlphabets": "हॉस्टल का नाम केवल अक्षर ही होना चाहिए।",
+  "pleaseSelectAFile": "कृपया एक फ़ाइल चुनें।",
+  "pleaseUploadValidImage": "कृपया एक मान्य छवि फ़ाइल अपलोड करें (JPEG, PNG, GIF)।",
+"failedToAddNewHostel": "नया हॉस्टल जोड़ने में विफल।"
 },
 "settings": {
   "languages": "भाषाएँ",
@@ -358,7 +385,16 @@
   "hostelAddress": "हॉस्टल का पता",
   "close": "बंद करें",
   "enterhostelName": "हॉस्टल का नया नाम दर्ज करें",
-  "enterhostelAddress": "हॉस्टल का पता दर्ज करें"
+  "enterhostelAddress": "हॉस्टल का पता दर्ज करें",
+  "generateReport":"रिपोर्ट तैयार करें",
+  "selectHostelType":"हॉस्टल प्रकार चुनें",
+  "tenantsReport":"किरायेदार रिपोर्ट",
+  "vacatedTenantsReport":"खाली किए गए किरायेदारों की रिपोर्ट",
+  "expensesReport":"खर्च रिपोर्ट",
+  "generatePdf": "PDF उत्पन्न करें",
+  "generateExcel":"Excel उत्पन्न करें"
+
+
 }
   
     

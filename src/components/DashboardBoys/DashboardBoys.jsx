@@ -5,26 +5,33 @@ import Tenants from '../../images/Icons (4).png'
 import Expenses from '../../images/Icons (5).png'
 import './DashboardBoys.css'
 import SmallCard from '../../Elements/SmallCard'
-import './DashboardBoys.css';
 import PlusIcon from "../../images/Icons (8).png"
-// import { database, push, ref, storage } from "../../firebase";
-// import { database, push, ref, storage } from "../../firebase/firebase";
-import { database, storage } from '../../firebase/firebase';
-import { onValue, push, ref, update } from 'firebase/database'
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { push, ref } from "../../firebase/firebase"
+import { onValue, update, set } from 'firebase/database'
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-// import Table from '../../Elements/Table';
 import { Modal, Button } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { Camera, CameraResultType } from '@capacitor/camera';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCamera } from '@fortawesome/free-solid-svg-icons';
 import { FaWhatsapp } from "react-icons/fa";
 import { useData } from '../../ApiData/ContextProvider';
+import Spinner from '../../Elements/Spinner';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import imageCompression from 'browser-image-compression';
+import { v4 as uuidv4 } from 'uuid';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { App as CapacitorApp } from '@capacitor/app';
+import { isPlatform } from '@ionic/react';
+import { Capacitor } from '@capacitor/core';
 
-const DashboardBoys = () => {
+const DashboardBoys = ({show}) => {
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const { t } = useTranslation();
-
-  // created by admin or subAdmin 
   const role = localStorage.getItem('role');
   let adminRole = "";
   if (role === "admin") {
@@ -33,25 +40,26 @@ const DashboardBoys = () => {
     adminRole = "Sub-admin"
   }
   const isUneditable = role === 'admin' || role === 'subAdmin';
+  const { activeBoysHostel, setActiveBoysHostel, setActiveBoysHostelName, activeBoysHostelButtons, userUid, firebase, changeActiveFlag, boysRooms, fetchData, boysTenants, boysTenantsWithRents, entireHMAdata } = useData();
+  const { database, storage } = firebase;
 
+  const [loading, setLoading] = useState(false);
 
-  const { activeBoysHostel, setActiveBoysHostel, activeBoysHostelButtons, userArea, userUid } = useData();
   const [modelText, setModelText] = useState('');
   const [formLayout, setFormLayout] = useState('');
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
-  const [rooms, setRooms] = useState([]);
+  // const [rooms, setRooms] = useState([]);
   const [bedRent, setBedRent] = useState('');
   const [currentId, setCurrentId] = useState('');
-  const [createdBy, setCreatedBy] = useState(adminRole); // Default to 'admin'
+  const [createdBy, setCreatedBy] = useState(adminRole);
   const [updateDate, setUpdateDate] = useState('');
   const [errors, setErrors] = useState({});
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(show);
+  // const backButtonPressed = useRef(false); // Track if the back button was already pressed
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [currentMonthExpenses, setCurrentMonthExpenses] = useState([])
-
-  //===============================
   const [selectedRoom, setSelectedRoom] = useState('');
   const [bedOptions, setBedOptions] = useState([]);
   const [selectedBed, setSelectedBed] = useState('');
@@ -61,70 +69,105 @@ const DashboardBoys = () => {
   const [idNumber, setIdNumber] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [status, setStatus] = useState('occupied');
-  const [tenants, setTenants] = useState([]);
+  // const [tenants, setTenants] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentTenantId, setCurrentTenantId] = useState('');
   const [tenatErrors, setTenantErrors] = useState({});
   const [tenantImage, setTenantImage] = useState(null);
-  const [tenantImageUrl, setTenantImageUrl] = useState(''); // For the image URL from Firebase Storage
+  const [tenantImageUrl, setTenantImageUrl] = useState('');
   const [tenantId, setTenantId] = useState(null);
   const [tenantIdUrl, setTenantIdUrl] = useState('');
   const imageInputRef = useRef(null);
   const idInputRef = useRef(null);
   const [showForm, setShowForm] = useState(true);
-  // const { data } = useContext(DataContext);
-  // const onClickCloseBedsPopup = () => {
-  //   setPopupOpen(false);
-  // };
-
-  // Function to send WhatsApp message
   const [notify, setNotify] = useState(false);
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [totalTenantsData, setTotalTenantData] = useState({});
   const [selectedTenant, setSelectedTenant] = useState('');
   const [tenantAddress, setTenantAddress] = useState("");
   const [permnentAddress, setPermnentAddress] = useState("");
+  const [fileName, setFileName] = useState('');
+  const [errorMessage, setErrorMessage] = useState({
+    tenantImage: '',
+    tenantId: '',
+    bikeImage: '',
+    bikeRcImage: '',
+  });
 
   const tenantImageInputRef = useRef(null);
   const tenantProofIdRef = useRef(null);
   const [bikeImage, setBikeImage] = useState(null);
+  const [bikeImageUrl, setBikeImageUrl] = useState('');
   const [bikeImageField, setBikeImageField] = useState('');
   const [bikeRcImage, setBikeRcImage] = useState('');
+  const [bikeRcImageUrl, setBikeRcImageUrl] = useState('');
   const [bikeRcImageField, setBikeRcImageField] = useState('');
+  const [hasBike, setHasBike] = useState(false);
+  const [bikeNumber, setBikeNumber] = useState('NA');
+  const [formData, setFormData] = useState({
+    expenseName: '',
+    expenseAmount: '',
+    expenseDate: '',
+    createdBy: 'admin'
+  });
 
-  console.log(database, "ddd database ")
+  const [formErrors, setFormErrors] = useState({
+    number: '',
+    rent: '',
+    rooms: '',
+    status: ''
+  });
 
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const [bedNumber, setBedNumber] = useState('');
+  const [totalFee, setTotalFee] = useState('');
+  const [paidAmount, setPaidAmount] = useState('');
+  const [due, setDue] = useState('');
+  // const [tenantsWithRents, setTenantsWithRents] = useState([]);
+  const [paidDate, setPaidDate] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [editingRentId, setEditingRentId] = useState(null);
+  const [availableTenants, setAvailableTenants] = useState([]);
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [expensePopupOpen, setExpensePopupOpen] = useState(false);
+  const [bedsData, setBedsData] = useState([]);
+  let activeToastId=null;
 
-    const reader = new FileReader();
 
-    reader.onload = () => {
-      // Once the file is loaded, set the image in state
-      setBikeImage(reader.result);
-
-    };
-    // console.log(file,"file created");
+  const [rentBtnStatus,setRentBtnStatus] = useState(false);
 
 
-    reader.readAsDataURL(file);
-    console.log(file, "file2 created");
+  const getCurrentMonth = () => {
+    const monthNames = [
+      t('months.jan'),
+      t('months.feb'),
+      t('months.mar'),
+      t('months.apr'),
+      t('months.may'),
+      t('months.jun'),
+      t('months.jul'),
+      t('months.aug'),
+      t('months.sep'),
+      t('months.oct'),
+      t('months.nov'),
+      t('months.dec')
+    ];
+    const currentMonth = new Date().getMonth();
+    return monthNames[currentMonth];
   };
 
+  const getCurrentYear = () => {
+    return new Date().getFullYear().toString();
+  };
 
-  const handleRcChange = (e) => {
-    const file1 = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      setBikeRcImage(reader.result);
-    }
-    reader.readAsDataURL(file1);
-    console.log(file1, "file1 created");
+  const [year, setYear] = useState(getCurrentYear());
+  const [month, setMonth] = useState(getCurrentMonth());
 
-  }
+  const minDate = `${getCurrentYear()}-01-01`;
+  const maxDate = `${getCurrentYear()}-12-31`;
 
 
+  // use effects
   useEffect(() => {
     const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
     onValue(tenantsRef, (snapshot) => {
@@ -137,6 +180,321 @@ const DashboardBoys = () => {
     })
 
   }, [selectedTenant])
+
+
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (showModal && (event.target.id === "exampleModalRoomsBoys" || event.key === "Escape")) {
+        setShowModal(false);
+        setHasBike(false);
+        setBikeNumber('NA');
+        setModelText('');
+        setFormLayout('');
+        setShowForm(true);
+        resetForm();
+        setNotify(false)
+        navigate(-1);
+        console.log("Exceuting Every time","know")
+      }
+
+    };
+    window.addEventListener('click', handleOutsideClick);
+    window.addEventListener("keydown", handleOutsideClick)
+
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
+  
+
+  }, [showModal]);
+
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setRooms(loadedRooms);
+  //   });
+  // }, [activeBoysHostel]);
+
+  // useEffect(() => {
+  //   const formattedMonth = month.slice(0, 3).toLowerCase();
+  //   const expensesRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${formattedMonth}`);
+  //   onValue(expensesRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     let total = 0;
+  //     const expensesArray = [];
+  //     for (const key in data) {
+  //       const expense = {
+  //         id: key,
+  //         ...data[key],
+  //         expenseDate: formatDate(data[key].expenseDate)
+  //       };
+  //       total += expense.expenseAmount;
+  //       expensesArray.push(expense);
+  //     }
+  //     setCurrentMonthExpenses(expensesArray);
+  //     setTotalExpenses(total);
+  //   });
+  // }, [activeBoysHostel]);
+  useEffect(() => {
+    if (!entireHMAdata || !activeBoysHostel) return;
+
+    const formattedMonth = month.slice(0, 3).toLowerCase(); // Make sure the month is formatted correctly
+    const expensesData = entireHMAdata?.boys?.[activeBoysHostel]?.expenses?.[`${year}-${formattedMonth}`];
+
+    if (!expensesData) {
+      setCurrentMonthExpenses([]); // Set to empty array if no expenses data is available
+      setTotalExpenses(0); // Reset total expenses
+      return;
+    }
+
+    const loadedExpenses = [];
+    let totalExpenses = 0;
+
+    for (const key in expensesData) {
+      const expense = {
+        id: key,
+        ...expensesData[key],
+        expenseDate: formatDate(expensesData[key]?.expenseDate || ""), // Handle missing expenseDate
+      };
+      totalExpenses += expense.expenseAmount || 0; // Ensure expenseAmount exists
+      loadedExpenses.push(expense);
+    }
+
+    setCurrentMonthExpenses(loadedExpenses); // Update the current month's expenses
+    setTotalExpenses(totalExpenses); // Update the total expenses for the current month
+  }, [entireHMAdata, activeBoysHostel, month, year]);
+
+
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+  //   onValue(tenantsRef, snapshot => {
+  //     const data = snapshot.val() || {};
+  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
+  //       id: key,
+  //       ...value,
+  //     }));
+  //     setTenants(loadedTenants);
+  //   });
+  // }, [activeBoysHostel]);
+
+  // const [boysRooms, setBoysRooms] = useState([]);
+
+  // useEffect(() => {
+  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
+  //   onValue(roomsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedRooms = [];
+  //     for (const key in data) {
+  //       loadedRooms.push({
+  //         id: key,
+  //         ...data[key]
+  //       });
+  //     }
+  //     setBoysRooms(loadedRooms);
+  //   });
+  // }, [activeBoysHostel]);
+
+  const [showBoysRoom, setShowBoysRooms] = useState([]);
+  useEffect(() => {
+    if (!boysRooms || boysRooms.length === 0) {
+      // If rooms are not defined or the array is empty, clear bedsData and exit early
+      setBedsData([]);
+      return;
+    }
+
+    const allBeds = boysRooms.flatMap(room => {
+      return Array.from({ length: room.numberOfBeds }, (_, i) => {
+        const bedNumber = i + 1;
+        const tenant = boysTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        const tenantName = tenant ? tenant.name : "-";
+        return {
+          name: tenantName,
+          floorNumber: room.floorNumber,
+          roomNumber: room.roomNumber,
+          bedNumber: bedNumber,
+          rent: room.bedRent || "N/A",
+          status: tenant ? "Occupied" : "Unoccupied"
+        };
+      });
+    });
+    setBedsData(allBeds);
+  }, [boysRooms, boysTenants, selectedRoom]);
+
+
+  useEffect(() => {
+
+    const roomToShow = boysRooms.filter((each) => {
+      const room = bedsData.some((eachBed) => eachBed.roomNumber === each.roomNumber && eachBed.status === "Unoccupied");
+      return room;
+    })
+
+    const roomNumbersToShow = roomToShow.map((eachRoom) => eachRoom.roomNumber);
+
+    if (selectedRoom && !roomNumbersToShow.includes(selectedRoom)) {
+      roomNumbersToShow.push(selectedRoom); // Add the current room if not already present
+    }
+    setShowBoysRooms(roomNumbersToShow)
+
+
+  }, [boysRooms, boysTenants, showModal])
+
+
+  const [editRoomNumber,setEditRoomNumber] = useState();
+  useEffect(() => {
+    if (selectedRoom) {
+      const room = boysRooms.find(room => room.roomNumber === selectedRoom);
+      if (room) {
+        const options = Array.from({ length: room.numberOfBeds }, (_, i) => i + 1);
+        const requiredRoom = bedsData?.filter((each) => each.roomNumber === room.roomNumber);
+        const unoccupiedBedNumbers = requiredRoom
+          .filter((each) => each.status === "Unoccupied")
+          .map((each) => each.bedNumber);
+        if(isEditing && requiredRoom[0].roomNumber === editRoomNumber){
+          const unoccupiedBedNumbers = requiredRoom.filter((each) => each.bedNumber === parseInt(selectedBed)).map((each) => each.bedNumber)
+          setBedOptions(unoccupiedBedNumbers)
+        }else{
+          setBedOptions(unoccupiedBedNumbers);
+        } 
+      }
+    } else {
+      setBedOptions([]);
+    }
+  }, [selectedRoom, boysRooms, activeBoysHostel]);
+
+
+  useEffect(() => {
+    const updateTotalFeeFromRoom = () => {
+      const roomsArray = Object.values(boysRooms);
+      const matchingRoom = roomsArray.find(room => room.roomNumber === roomNumber);
+
+      if (matchingRoom && matchingRoom.bedRent) {
+        setTotalFee(matchingRoom.bedRent.toString());
+      } else {
+        setTotalFee('');
+      }
+    };
+    if (roomNumber) {
+      updateTotalFeeFromRoom();
+    }
+  }, [roomNumber, boysRooms]);
+
+
+  useEffect(() => {
+    if (selectedTenant) {
+      const tenant = boysTenants.find(t => t.id === selectedTenant);
+      if (tenant) {
+        setRoomNumber(tenant.roomNo || '');
+        setBedNumber(tenant.bedNo || '');
+        setDateOfJoin(tenant.dateOfJoin || '');
+      }
+    } else {
+      setRoomNumber('');
+      setBedNumber('');
+      setPaidAmount('');
+      setDue('');
+      setDateOfJoin('');
+      setDueDate('');
+    }
+  }, [selectedTenant, boysTenants, activeBoysHostel]);
+
+  useEffect(() => {
+    const tenantIdsWithRents = boysTenantsWithRents.flatMap(tenant =>
+      tenant.rents?.length > 0 ? [tenant.id] : []
+    );
+
+    const availableTenants = boysTenants.filter(
+      tenant => !tenantIdsWithRents.includes(tenant.id)
+    );
+    setAvailableTenants(availableTenants);
+  }, [boysTenants, boysTenantsWithRents, activeBoysHostel]);
+
+
+  useEffect(() => {
+    const calculatedDue = Math.max(parseFloat(totalFee) - parseFloat(paidAmount), 0).toString();
+    setDue(calculatedDue);
+  }, [paidAmount, totalFee]);
+
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+  //   onValue(tenantsRef, (snapshot) => {
+  //     const tenantsData = snapshot.val();
+  //     const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
+
+  //     const rentsPromises = tenantIds.map(tenantId => {
+  //       return new Promise((resolve) => {
+  //         const rentsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantId}/rents`);
+  //         onValue(rentsRef, (rentSnapshot) => {
+  //           const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
+  //             id: key,
+  //             ...rentSnapshot.val()[key],
+  //           })) : [];
+  //           resolve({ id: tenantId, ...tenantsData[tenantId], rents });
+  //         }, {
+  //           onlyOnce: true
+  //         });
+  //       });
+  //     });
+
+  //     Promise.all(rentsPromises).then(tenantsWithTheirRents => {
+  //       setTenantsWithRents(tenantsWithTheirRents);
+  //     });
+  //   });
+  // }, []);
+
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (popupOpen && (event.target.id === "example" || event.key === "Escape")) {
+        setPopupOpen(false)
+        setHasBike(false);
+        setBikeNumber('NA');
+        navigate(-1);
+      }
+    };
+    window.addEventListener('click', handleOutsideClick)
+    window.addEventListener('keydown', handleOutsideClick)
+
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("keydown", handleOutsideClick);
+    };
+  
+  }, [popupOpen])
+
+
+
+  useEffect(() => {
+    if (!boysRooms || boysRooms.length === 0) {
+      setBedsData([]);
+      return;
+    }
+
+    const allBeds = boysRooms.flatMap(room => {
+      return Array.from({ length: room.numberOfBeds }, (_, i) => {
+        const bedNumber = i + 1;
+
+        const tenant = boysTenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
+        return {
+          floorNumber: room.floorNumber,
+          roomNumber: room.roomNumber,
+          bedNumber: bedNumber,
+          rent: room.bedRent || "N/A",
+          status: tenant ? "Occupied" : "Unoccupied"
+        };
+      });
+    });
+    setBedsData(allBeds);
+  }, [boysRooms, boysTenants]);
 
 
   const sendMessage = (tenant, rentRecord) => {
@@ -156,128 +514,219 @@ const DashboardBoys = () => {
   You joined on ${dateOfJoin}, and your due date is ${dueDate}.\n
   Please note that you made your last payment on ${paidDate}.\n`
 
-    const phoneNumber = tenant.mobileNo; // Replace with the recipient's phone number
-
-    // Check if the phone number starts with '+91' (India's country code)
+    const phoneNumber = tenant.mobileNo;
     const formattedPhoneNumber = phoneNumber.startsWith('+91') ? phoneNumber : `+91${phoneNumber}`;
 
     const encodedMessage = encodeURIComponent(message);
-
-
-    // Use web link for non-mobile devices
     let whatsappLink = `https://wa.me/${formattedPhoneNumber}?text=${encodedMessage}`;
 
-
-    // Open the WhatsApp link
     window.open(whatsappLink, '_blank');
   };
 
-  // Event handler for the notify checkbox
   const handleNotifyCheckbox = (rentData) => {
-    // Toggle the state of the notify checkbox
 
-    console.log(notify, notifyUserInfo, "addedToNotify")
     if (notify && notifyUserInfo) {
-      // const { tenant, rentRecord } = notifyUserInfo;
-      // console.log(tenant, "InNotify")
-      sendMessage(notifyUserInfo, rentData); // If checkbox is checked and tenant info is available, send WhatsApp message
+      sendMessage(notifyUserInfo, rentData);
     }
     setNotify(!notify);
   };
-  const [hasBike, setHasBike] = useState(false);
-  const [bikeNumber, setBikeNumber] = useState('NA');
+  //  const [hasBike, setHasBike] = useState(false);
+  //  const [bikeNumber, setBikeNumber] = useState('NA');
+  //  for camera icon in mobile device
+  const [isMobile, setIsMobile] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState(null);
+  const [idUrl,setIdUrl]=useState(null);
+  const [isFileUploaded, setIsFileUploaded] = useState(false); // For disabling camera when file is uploaded
+  const [isCameraUsed, setIsCameraUsed] = useState(false); // For disabling file input when camera is used
+  const [isTenantIdFileUploaded, setIsTenantIdFileUploaded] = useState(false); // Disable camera if file uploaded
+  const [isTenantIdCameraUsed, setIsTenantIdCameraUsed] = useState(false); 
+  const [photoSource, setPhotoSource] = useState(null); // Track if photo is from file or camera
+
+  
+  useEffect(() => {
+    // Check if the user agent is a mobile device
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    setIsMobile(/iPhone|iPod|iPad|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent));
+}, []);
+
+  // const takePicture = async () => {
+
+  //   if (!isMobile) {
+  //     console.error("Camera access is not supported on your device.");
+  //     return;
+  // }
+  //   try {
+  //     const photo = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri
+  //     });
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setPhotoUrl(reader.result);
+  //       setTenantImage(reader.result);
+  //     };
+  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
+
+  //     // const response = await fetch(photo.webPath);
+  //     // const blob = await response.blob();
+  //     // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
+  //     // const snapshot = await uploadBytes(imageRef, blob);
+  //     // const url = await getDownloadURL(snapshot.ref);
+      
+  //     // setPhotoUrl(url); // Display in UI
+  //     // setTenantImageUrl(url); // Use in form submission
+  //     // setPhotoUrl(photo.webPath);
+  //   } catch (error) {
+  //     console.error("Error accessing the camera", error);
+  //     toast.error("Image not Uploaded");
+  //   }
+  // };
+
+
+  const takePicture = async () => {
+    if (!isMobile) {
+        console.error("Camera access is not supported on your device.");
+        return;
+    }
+    if (isFileUploaded) {
+      setErrorMessage((prevErrors) => ({
+        ...prevErrors,
+        tenantImage: "You've already uploaded a photo from the file manager.",
+      }));
+      return;
+    }
+    try {
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
+
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+
+        setTenantImage(blob); // Set the blob to tenantImage
+        const uploadFile = async (file, path) => {
+          try {
+              const imageRef = storageRef(storage, path);
+              const snapshot = await uploadBytes(imageRef, file);
+              return await getDownloadURL(snapshot.ref);
+          } catch (error) {
+              console.error(`Error uploading file ${file.name}:`, error);
+              throw error;
+          }
+      };
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${blob.name}`);
+        setPhotoUrl(uploadedUrl); // Set the uploaded URL to display the image
+        setIsCameraUsed(true); // Disable file input
+        setIsFileUploaded(false); // Reset file upload state
+        
+
+    } catch (error) {
+        console.error("Error accessing the camera", error);
+        // toast.error(t('toastMessages.imageNotUploaded'));    
+        }
+}
+  // const takeIdPicture = async () => {
+
+  //   if (!isMobile) {
+  //     console.error("Camera access is not supported on your device.");
+  //     return;
+  // }
+  //   try {
+  //     const photo = await Camera.getPhoto({
+  //       quality: 90,
+  //       allowEditing: false,
+  //       resultType: CameraResultType.Uri
+  //     });
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setIdUrl(reader.result);
+  //       setTenantId(reader.result);
+  //     };
+  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
+  //     // const response = await fetch(photo.webPath);
+  //     // const blob = await response.blob();
+  //     // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
+  //     // const snapshot = await uploadBytes(imageRef, blob);
+  //     // const url = await getDownloadURL(snapshot.ref);
+      
+  //     // setPhotoUrl(url); // Display in UI
+  //     // setTenantImageUrl(url); // Use in form submission
+  //     // // setPhotoUrl(photo.webPath);
+  //   } catch (error) {
+  //     console.error("Error accessing the camera", error);
+  //     toast.error("Id not Uploaded");
+  //   }
+  // };
+
+  const takeIdPicture = async () => {
+    if (!isMobile) {
+        console.error("Camera access is not supported on your device.");
+        return;
+    }
+    if (isTenantIdFileUploaded) {
+      setErrorMessage((prevErrors) => ({
+        ...prevErrors,
+        tenantId: "You've already uploaded an ID photo from the file manager.",
+      }));
+      return;
+    }
+
+    try {
+        const photo = await Camera.getPhoto({
+            quality: 90,
+            allowEditing: false,
+            resultType: CameraResultType.Uri
+        });
+
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+
+        setTenantId(blob); // Set the blob to tenantImage
+        const uploadFile = async (file, path) => {
+          try {
+              const imageRef = storageRef(storage, path);
+              const snapshot = await uploadBytes(imageRef, file);
+              return await getDownloadURL(snapshot.ref);
+          } catch (error) {
+              console.error(`Error uploading file ${file.name}:`, error);
+              throw error;
+          }
+      };
+        const uploadedUrl = await uploadFile(blob, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${blob.name}`);
+        setIdUrl(uploadedUrl); // Set the uploaded URL to display the image
+        setIsTenantIdCameraUsed(true); // Disable file input
+        setIsTenantIdFileUploaded(false); // Reset file upload state
+
+    } catch (error) {
+        console.error("Error accessing the camera", error);
+        // toast.error(t('toastMessages.imageNotUploaded'));     
+        }
+}
+
   const handleCheckboxChange = (e) => {
-    setHasBike(e.target.value == 'yes');
-    if (e.target.value == 'no') {
+    setHasBike(e.target.value === 'yes');
+    if (e.target.value === 'no') {
       setHasBike(false);
       setBikeNumber('NA');
-
     } else {
       setBikeNumber('');
     }
   };
 
 
-
-
-  const getCurrentMonth = () => {
-    const monthNames = [
-      t('months.jan'),
-      t('months.feb'),
-      t('months.mar'),
-      t('months.apr'),
-      t('months.may'),
-      t('months.jun'),
-      t('months.jul'),
-      t('months.aug'),
-      t('months.sep'),
-      t('months.oct'),
-      t('months.nov'),
-      t('months.dec')
-    ];
-    const currentMonth = new Date().getMonth(); // getMonth returns month index (0 = January, 11 = December)
-    return monthNames[currentMonth];
-  };
-
-  const getCurrentYear = () => {
-    return new Date().getFullYear().toString(); // getFullYear returns the full year (e.g., 2024)
-  };
-
-  const [year, setYear] = useState(getCurrentYear());
-  const [month, setMonth] = useState(getCurrentMonth());
-
-  // useEffect(() => {
-  //   const handleOutsideClick = (event) => {
-  //     if (showModal && event.target.id === "exampleModalRoomsBoys") {
-  //       setShowModal(false);
-  //       setHasBike(false);
-  //       setBikeNumber('NA');
-  //       // setErrors({});
-  //       // resetForm();
-  //       // setTenantErrors({})
-  //       handleCloseModal()
-  //     }
-
-  //   };
-  //   window.addEventListener('click', handleOutsideClick);
-
-  // }, [showModal]);
-
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (showModal && (event.target.id === "exampleModalRoomsBoys" || event.key === "Escape")) {
-        setShowModal(false);
-        setHasBike(false);
-        setBikeNumber('NA');
-        // setErrors({});
-        // resetForm();
-        // setTenantErrors({})
-        handleCloseModal()
-      }
-
-    };
-    window.addEventListener('click', handleOutsideClick);
-    window.addEventListener("keydown", handleOutsideClick)
-
-  }, [showModal]);
-
-
-
   const handleRoomsIntegerChange = (event) => {
     const { name, value } = event.target;
-    // const re = /^[0-9\b]+$/; // Regular expression to allow only numbers
-
     let sanitizedValue = value;
 
     if (name === 'floorNumber' || name === 'roomNumber') {
-      // Allow alphanumeric characters and hyphens only
-      sanitizedValue = value.replace(/[^a-zA-Z0-9-]/g, '');
+      sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
     } else if (name === 'numberOfBeds' || name === 'bedRent') {
-      // Allow numbers only
       sanitizedValue = value.replace(/[^0-9]/g, '');
     }
 
-    // if (value === '' || re.test(sanitizedValue)) {
     switch (name) {
       case 'floorNumber':
         setFloorNumber(sanitizedValue);
@@ -294,23 +743,9 @@ const DashboardBoys = () => {
       default:
         break;
     }
-    // }
   };
 
-  // expenses related
-  const [formData, setFormData] = useState({
-    expenseName: '',
-    expenseAmount: '',
-    expenseDate: '',
-    createdBy: 'admin'
-  });
 
-  const [formErrors, setFormErrors] = useState({
-    number: '',
-    rent: '',
-    rooms: '',
-    status: ''
-  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -322,22 +757,20 @@ const DashboardBoys = () => {
 
   const handleBoysRoomsSubmit = (e) => {
     e.preventDefault();
-    const now = new Date().toISOString();  // Get current date-time in ISO format
-    // Initialize an object to collect errors
+    const now = new Date().toISOString();
     const newErrors = {};
-    // Validation checks
     if (!floorNumber.trim()) newErrors.floorNumber = t('errors.floorNumberRequired');
     if (!roomNumber.trim()) newErrors.roomNumber = t('errors.roomNumberRequired');
-    else if (rooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
+    else if (boysRooms.some(room => room.roomNumber === roomNumber && room.id !== currentId)) {
       newErrors.roomNumber = t('errors.roomNumberExists');
     }
     if (!numberOfBeds) newErrors.numberOfBeds = t('errors.numberOfBedsRequired');
+    else if (numberOfBeds > 20) newErrors.numberOfBeds = t('errors.bedsLimit');
     if (!bedRent) newErrors.bedRent = t('errors.bedRentRequired');
 
-    // Check if there are any errors
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      return; // Prevent form submission if there are errors
+      return;
     }
 
     const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
@@ -349,7 +782,8 @@ const DashboardBoys = () => {
       createdBy,
       updateDate: now
     }).then(() => {
-      toast.success(t('toastMessages.roomAddedSuccessfully'), {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.success(t('toastMessages.roomAddedSuccessfully'), {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -357,9 +791,13 @@ const DashboardBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
+    }
+      fetchData()
     }).catch(error => {
-      toast.error(t('toastMessages.errorAddingRoom') + error.message, {
+      if (!toast.isActive(activeToastId)) {
+        activeToastId=toast.error(t('toastMessages.errorAddingRoom') + error.message, {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -367,40 +805,31 @@ const DashboardBoys = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
+    }
     });
-
-    // }(
-
-    // Reset form
     setFloorNumber('');
     setRoomNumber('');
     setNumberOfBeds('');
     setBedRent('');
     setCurrentId('');
-    setUpdateDate(now); // Update state with current date-time
-    setErrors({}); // Clear errors
+    setUpdateDate(now);
+    setErrors({});
     setShowModal(false);
+    navigate(-1)
+
   };
-
+  const [totalBeds, setTotalBeds] = useState(0);
   useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setRooms(loadedRooms);
-    });
-  }, [activeBoysHostel]);
-  // Calculate the total number of beds
-  const totalBeds = rooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
+    if (boysRooms) {
+      const totalBeds = boysRooms.reduce((acc, room) => acc + Number(room.numberOfBeds), 0);
+      setTotalBeds(totalBeds)
+    }
+  }, [ entireHMAdata, activeBoysHostel, boysRooms, boysTenants])
 
-  //==============================================================
+
+
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -417,7 +846,7 @@ const DashboardBoys = () => {
       const data = snapshot.val();
       let total = 0; // Variable to hold the total expenses
       const expensesArray = [];
-      for (const key in data) {
+      for (const key in data) { 
         const expense = {
           id: key,
           ...data[key],
@@ -451,46 +880,7 @@ const DashboardBoys = () => {
   // })
 
 
-  useEffect(() => {
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, snapshot => {
-      const data = snapshot.val() || {};
-      const loadedTenants = Object.entries(data).map(([key, value]) => ({
-        id: key,
-        ...value,
-      }));
-      setTenants(loadedTenants);
-    });
-  }, [activeBoysHostel]);
 
-  const [boysRooms, setBoysRooms] = useState([]);
-  useEffect(() => {
-    const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-    onValue(roomsRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedRooms = [];
-      for (const key in data) {
-        loadedRooms.push({
-          id: key,
-          ...data[key]
-        });
-      }
-      setBoysRooms(loadedRooms);
-    });
-    // Fetch tenants
-  }, [activeBoysHostel]);
-
-  useEffect(() => {
-    if (selectedRoom) {
-      const room = boysRooms.find(room => room.roomNumber === selectedRoom);
-      if (room) {
-        const options = Array.from({ length: room.numberOfBeds }, (_, i) => i + 1);
-        setBedOptions(options);
-      }
-    } else {
-      setBedOptions([]);
-    }
-  }, [selectedRoom, boysRooms, activeBoysHostel]);
 
   const validate = () => {
 
@@ -498,124 +888,369 @@ const DashboardBoys = () => {
     tempErrors.selectedRoom = selectedRoom ? "" : t('errors.roomNumberRequired');
     tempErrors.selectedBed = selectedBed ? "" : t('errors.bedNumberRequired');
     tempErrors.dateOfJoin = dateOfJoin ? "" : t('errors.dateOfJoinRequired');
+    tempErrors.permnentAddress = permnentAddress ? "" : t('errors.permanentAddress')
+
+    const phoneRegexWithCountryCode = /^\+\d{12}$/;
+    const phoneRegexWithoutCountryCode = /^\d{10}$/;
+
+
     if (!name) {
       tempErrors.name = t('errors.nameRequired');
     } else if (!/^[a-zA-Z\s]+$/.test(name)) {
       tempErrors.name = t('errors.nameInvalid');
     }
-    // Validate mobile number
+
     if (!mobileNo) {
       tempErrors.mobileNo = t('errors.mobileNumberRequired');
-    } else if (!/^\d{10,13}$/.test(mobileNo)) {
+    } else if (!phoneRegexWithCountryCode.test(mobileNo) && !phoneRegexWithoutCountryCode.test(mobileNo)) {
       tempErrors.mobileNo = t('errors.mobileNumberInvalid');
     }
-    tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
-    // Validate emergency contact
+    if (!idNumber) {
+      tempErrors.idNumber = idNumber ? "" : t('errors.idNumberRequired');
+    } else if (idNumber.length < 6) {
+      tempErrors.idNumber = 'Id should be min 6 characters';
+    } else if (!/^[a-zA-Z0-9]+$/.test(idNumber)) {
+      tempErrors.idNumber = 'It does not allow special charecters';
+    }
+
     if (!emergencyContact) {
       tempErrors.emergencyContact = t('errors.emergencyContactRequired');
-    } else if (!/^\d{10,13}$/.test(emergencyContact)) {
+    } else if (!phoneRegexWithCountryCode.test(emergencyContact) && !phoneRegexWithoutCountryCode.test(emergencyContact)) {
       tempErrors.emergencyContact = t('errors.emergencyContactInvalid');
     }
-    // Check if the selected bed is already occupied
-    const isBedOccupied = tenants.some(tenant => {
+
+    const isBedOccupied = boysTenants.some(tenant => {
       return tenant.roomNo === selectedRoom && tenant.bedNo === selectedBed && tenant.status === "occupied" && tenant.id !== currentTenantId;
     });
 
     if (isBedOccupied) {
       tempErrors.selectedBed = t('errors.bedAlreadyOccupied');
     }
-    if (!tenantImage && !tenantImageUrl) {
+    if (!tenantImage) {
       tempErrors.tenantImage = t('errors.tenantImageRequired');
+    }
+    if (hasBike) {
+      if (!bikeNumber) {
+        tempErrors.bikeNumber = 'Bike number required';
+      } else {
+        // Remove spaces for validation
+        const bikeNumberWithoutSpaces = bikeNumber.replace(/\s+/g, '');
+
+        if (!/^[A-Za-z0-9]{6,10}$/.test(bikeNumberWithoutSpaces)) {
+          tempErrors.bikeNumber = 'Enter a valid bike number (letters and numbers only)';
+        }
+      }
     }
     setTenantErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
 
+
   const handleTenantImageChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      const validFormats = ['image/jpeg', 'image/png'];
+      if (validFormats.includes(file.type)) {
+        setTenantImage(file);
+        setErrorMessage((prevErrors) => ({ ...prevErrors, tenantImage: '' })); 
+        setIsFileUploaded(true);  // Disable camera
+        setIsCameraUsed(false);   // Reset camera state
+        setPhotoSource("file");
+
+      } else {
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          tenantImage: 'Please upload a valid image file (JPG, JPEG, PNG).',
+        }));
+        e.target.value = null;
+      }
     }
   };
+
   const handleTenantIdChange = (e) => {
-    if (e.target.files[0]) {
-      setTenantId(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting PDFs and images
+      const maxSize = 1 * 1024 * 1024; // 1 MB
+      if (validFormats.includes(file.type)) {
+        if (file.size <= maxSize) {
+          setTenantId(file);
+          setErrorMessage((prevErrors) => ({ ...prevErrors, tenantId: '' }));
+          setIsTenantIdFileUploaded(true);  // Disable camera
+          setIsTenantIdCameraUsed(false); 
+        } else {
+          setErrorMessage((prevErrors) => ({
+            ...prevErrors,
+            tenantId: 'The file size exceeds the 1 MB limit. Please upload a smaller file.',
+          }));
+          e.target.value = null;
+        }
+      } else {
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          tenantId: 'Please upload a valid PDF or image file.',
+        }));
+        e.target.value = null;
+      }
     }
   };
+
+
+  const handleTenantBikeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validFormats = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting all image types
+      if (validFormats.includes(file.type)) {
+        setBikeImage(file);
+        setErrorMessage((prevErrors) => ({ ...prevErrors, bikeImage: '' }));
+      } else {
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          bikeImage: 'Please upload a valid image file.',
+        }));
+        e.target.value = null;
+      }
+    }
+  };
+
+  const handleTenantBikeRcChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validFormats = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']; // Accepting PDFs and images
+      const maxSize = 1 * 1024 * 1024; // 1 MB
+      if (validFormats.includes(file.type)) {
+        if (file.size <= maxSize) {
+          setBikeRcImage(file);
+          setErrorMessage((prevErrors) => ({ ...prevErrors, bikeRcImage: '' }));
+        } else {
+          setErrorMessage((prevErrors) => ({
+            ...prevErrors,
+            bikeRcImage: 'The file size exceeds the 1 MB limit. Please upload a smaller file.',
+          }));
+          e.target.value = null;
+        }
+      } else {
+        setErrorMessage((prevErrors) => ({
+          ...prevErrors,
+          bikeRcImage: 'Please upload a valid PDF or image file.',
+        }));
+        e.target.value = null;
+      }
+    }
+  };
+  // const handleTenantIdChange = (e) => {
+  //   const file = e.target.files[0];
+
+  //   if (file) {
+
+  //     const validFormat = 'application/pdf';
+  //     const maxSize = 1 * 1024 * 1024;
+
+
+  //     if (file.type === validFormat) {
+
+  //       if (file.size <= maxSize) {
+
+  //         setFileName(file.name);
+  //         setTenantId(file);
+  //         setErrorMessage('');
+  //       } else {
+
+  //         setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+  //       e.target.value = null;
+  //       }
+  //     } else {
+
+  //       setErrorMessage('Please upload a valid  file.');
+
+
+  //       e.target.value = null;
+  //     }
+  //   }
+  // };
+  // const handleTenantBikeChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+
+  //     const validFormats = ['image/jpeg', 'image/png'];
+
+
+  //     if (validFormats.includes(file.type)) {
+
+  //       setBikeImage(file);
+  //       setErrorMessage('');
+
+  //     } else {
+  //       setErrorMessage('Please upload a valid  file.');
+
+
+
+  //       e.target.value = null;
+  //     }
+  //   }
+  // };
+
+  // const handleTenantBikeRcChange = (e) => {
+  //   const file = e.target.files[0];
+
+  //   if (file) {
+
+  //     const validFormat = 'application/pdf';
+  //     const maxSize = 1 * 1024 * 1024; 
+
+
+  //     if (file.type === validFormat) {
+
+  //       if (file.size <= maxSize) {
+
+  //         setBikeRcImage(file);
+  //         setErrorMessage('');
+  //       } else {
+
+  //         setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
+  //         e.target.value = null; 
+  //       }
+  //     } else {
+
+  //       setErrorMessage('Please upload a valid  file.');
+  //       e.target.value = null; 
+  //     }
+  //   }
+  // };
+
+  const compressImage = async (file) => {
+    const options = {
+      maxSizeMB: 0.6, // Compress to a maximum of 1 MB (adjust as needed)
+      maxWidthOrHeight: 1920,
+      useWebWorker: true, // Use a web worker for better performance
+      fileType: 'image/jpeg',
+    };
+
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error('Error compressing the image:', error);
+    }
+  };
+
+  const checkImage = (type) => {
+    return type === "image/jpeg"
+  }
+
+
 
   const handleTenantSubmit = async (e) => {
     e.preventDefault();
-    // if (!validate()) return;
-    e.target.querySelector('button[type="submit"]').disabled = true;
-    if (!validate()) {
-      e.target.querySelector('button[type="submit"]').disabled = false;
-      return
-    };
 
-    let imageUrlToUpdate = tenantImageUrl;
-    if (tenantImage) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantImage.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, tenantImage);
-        imageUrlToUpdate = await getDownloadURL(snapshot.ref);
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
+    if (!isEditing) {
+      e.target.querySelector('button[type="submit"]').disabled = true;
+      if (!validate()) {
+        e.target.querySelector('button[type="submit"]').disabled = false;
+        return;
       }
-    }
-
-    let idUrlToUpdate = tenantIdUrl;
-    if (tenantId) {
-      const imageRef = storageRef(storage, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantId.name}`);
-      try {
-        const snapshot = await uploadBytes(imageRef, tenantId);
-        idUrlToUpdate = await getDownloadURL(snapshot.ref);
-      } catch (error) {
-        console.error("Error uploading tenant image:", error);
-      }
-    }
-
-    const tenantData = {
-      roomNo: selectedRoom,
-      bedNo: selectedBed,
-      dateOfJoin,
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      mobileNo,
-      idNumber,
-      emergencyContact,
-      status,
-      tenantImageUrl: imageUrlToUpdate,
-      tenantIdUrl: idUrlToUpdate,
-      bikeNumber,
-      permnentAddress,
-      bikeImage,
-      bikeRcImage
-
-      // tenantIdUrl,
-    };
-
-    if (isEditing) {
-      await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentTenantId}`), tenantData).then(() => {
-        toast.success("Tenant updated successfully.", {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }).catch(error => {
-        toast.error(t('toastMessages.errorUpdatingTenant') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
     } else {
-      await push(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`), tenantData).then(() => {
+      if (!validate()) return;
+    }
+    
+
+    setShowModal(false);
+    navigate(-1)
+    setLoading(true);
+
+    const tenantUniqueId = isEditing ? currentId : uuidv4();
+
+    // Helper function to upload a file and return its URL
+    const uploadFile = async (file, path) => {
+      try {
+        const imageRef = storageRef(storage, path);
+        const snapshot = await uploadBytes(imageRef, file);
+        return await getDownloadURL(snapshot.ref);
+      } catch (error) {
+        console.error(`Error uploading file ${file.name}:`, error);
+        throw error;
+      }
+    };
+
+    const tasks = [];
+    const uploadResults = {};
+
+    const addUploadTask = (file, type, path) => {
+      tasks.push(
+        (async () => {
+          let fileToUpload = file;
+          if (checkImage(file.type)) {
+            console.log(`Executing compression for ${type}`);
+            try {
+              fileToUpload = await compressImage(file);
+            } catch (error) {
+              console.error(`Error compressing ${type}:`, error);
+            }
+          }
+          const url = await uploadFile(fileToUpload, path);
+          return { type, url };
+        })()
+      );
+    };
+
+    if (tenantImage) {
+      addUploadTask(tenantImage, 'tenantImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantImage/${tenantUniqueId}`);
+    }
+    if (tenantId) {
+      addUploadTask(tenantId, 'tenantId', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/tenantId/${tenantUniqueId}`);
+    }
+    if (bikeImage) {
+      addUploadTask(bikeImage, 'bikeImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeImage/${tenantUniqueId}`);
+    }
+    if (bikeRcImage) {
+      addUploadTask(bikeRcImage, 'bikeRcImage', `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/images/bikeRcImage/${tenantUniqueId}`);
+    }
+
+
+    try {
+      const results = await Promise.all(tasks);
+         // Process results
+         results.forEach(({ type, url }) => {
+          uploadResults[type] = url;
+      });
+
+      const tenantData = {
+        roomNo: selectedRoom,
+        bedNo: selectedBed,
+        dateOfJoin,
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        mobileNo,
+        idNumber,
+        emergencyContact,
+        status,
+        tenantImageUrl: uploadResults['tenantImage'] || tenantImageUrl,
+        tenantIdUrl: uploadResults['tenantId'] || tenantIdUrl,
+        bikeNumber,
+        permnentAddress,
+        bikeImageUrl: uploadResults['bikeImage'] || bikeImageUrl,
+        bikeRcImageUrl: uploadResults['bikeRcImage'] || bikeRcImageUrl,
+       
+    };
+
+        // if (isEditing) {
+        //     await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
+        //     if (!toast.isActive(activeToastId)) {
+
+      if (isEditing) {
+        await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
+        toast.success(t('toastMessages.tenantUpdated'), {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          toastId: "empty-fields-error",
+        });
+        fetchData()
+      } else {
+        await set(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantUniqueId}`), tenantData);
         toast.success(t('toastMessages.tenantAddedSuccess'), {
           position: "top-center",
           autoClose: 2000,
@@ -624,133 +1259,43 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
-      }).catch(error => {
-        toast.error(t('toastMessages.errorAddingTenant') + error.message, {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      });
-    }
-    // setShowModal(false);
-    setShowModal(false);
-    resetForm();
-    if (imageInputRef.current) {
-      imageInputRef.current.value = '';
-    }
-    if (idInputRef.current) {
-      idInputRef.current.value = "";
-    }
-
-
-  };
-
-
-
-  const [bedNumber, setBedNumber] = useState('');
-  const [totalFee, setTotalFee] = useState('');
-  const [paidAmount, setPaidAmount] = useState('');
-  const [due, setDue] = useState('');
-  const [tenantsWithRents, setTenantsWithRents] = useState([]);
-  const [paidDate, setPaidDate] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [editingRentId, setEditingRentId] = useState(null);
-  const [availableTenants, setAvailableTenants] = useState([]);
-
-  useEffect(() => {
-    const updateTotalFeeFromRoom = () => {
-      // Convert the rooms object into an array of its values
-      const roomsArray = Object.values(rooms);
-      // Find the room that matches the roomNumber
-      const matchingRoom = roomsArray.find(room => room.roomNumber === roomNumber);
-
-      if (matchingRoom && matchingRoom.bedRent) {
-        setTotalFee(matchingRoom.bedRent.toString());
-      } else {
-        // Reset totalFee if no matching room is found
-        setTotalFee('');
+        fetchData();
+        e.target.querySelector('button[type="submit"]').disabled = false;
       }
-    };
-    if (roomNumber) {
-      updateTotalFeeFromRoom();
-    }
-  }, [roomNumber, rooms]);
-
-
-  useEffect(() => {
-    if (selectedTenant) {
-      const tenant = tenants.find(t => t.id === selectedTenant);
-      if (tenant) {
-        setRoomNumber(tenant.roomNo || '');
-        setBedNumber(tenant.bedNo || '');
-        setDateOfJoin(tenant.dateOfJoin || '');
-      }
-    } else {
-      // Reset these fields if no tenant is selected
-      setRoomNumber('');
-      setBedNumber('');
-      setPaidAmount('');
-      setDue('');
-      setDateOfJoin('');
-      setDueDate('');
-    }
-  }, [selectedTenant, tenants, activeBoysHostel]);
-
-  useEffect(() => {
-    // Assuming tenantsWithRents already populated
-    const tenantIdsWithRents = tenantsWithRents.flatMap(tenant =>
-      tenant.rents.length > 0 ? [tenant.id] : []
-    );
-
-    const availableTenants = tenants.filter(
-      tenant => !tenantIdsWithRents.includes(tenant.id)
-    );
-
-    // Optionally, you can store availableTenants in a state if you need to use it elsewhere
-    setAvailableTenants(availableTenants);
-  }, [tenants, tenantsWithRents, activeBoysHostel]);
-
-
-  useEffect(() => {
-    // Recalculate due when paid amount changes
-    const calculatedDue = Math.max(parseFloat(totalFee) - parseFloat(paidAmount), 0).toString();
-    setDue(calculatedDue);
-  }, [paidAmount, totalFee]);
-
-  useEffect(() => {
-    // Fetch tenants data once when component mounts
-    const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-    onValue(tenantsRef, (snapshot) => {
-      const tenantsData = snapshot.val();
-      const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
-
-      // Initialize an array to hold promises for fetching each tenant's rents
-      const rentsPromises = tenantIds.map(tenantId => {
-        return new Promise((resolve) => {
-          const rentsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantId}/rents`);
-          onValue(rentsRef, (rentSnapshot) => {
-            const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
-              id: key,
-              ...rentSnapshot.val()[key],
-            })) : [];
-            resolve({ id: tenantId, ...tenantsData[tenantId], rents });
-          }, {
-            onlyOnce: true // This ensures the callback is only executed once.
-          });
-        });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error(t('toastMessages.errorSubmitting') + error.message, {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        toastId: "empty-fields-error",
       });
+    } finally {
+        setLoading(false);
+        resetForm();
+        setErrors({});
+        // Reset file and camera options after submission
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+    setTenantId(null);
+    setIsFileUploaded(false);
+    setIsCameraUsed(false);
+    setIsTenantIdFileUploaded(false);
+    setIsTenantIdCameraUsed(false);
 
-      // Wait for all promises to resolve and then set the state
-      Promise.all(rentsPromises).then(tenantsWithTheirRents => {
-        setTenantsWithRents(tenantsWithTheirRents);
-      });
-    });
-  }, []);
+        imageInputRef.current.value = "";
+    idInputRef.current.value = "";
+    }
+};
+   
+
 
   const validateRentForm = () => {
     let formIsValid = true;
@@ -784,14 +1329,12 @@ const DashboardBoys = () => {
 
 
   const handleRentSubmit = async (e) => {
+    
     e.preventDefault();
-
-    // Validate form before proceeding
     if (!validateRentForm()) {
-      // If validation fails, stop form submission
       return;
     }
-
+    setRentBtnStatus(true)
     const rentData = {
       roomNumber,
       bedNumber,
@@ -801,14 +1344,16 @@ const DashboardBoys = () => {
       dateOfJoin,
       paidDate,
       dueDate,
-      status: parseFloat(due) <= 0 ? t('rentPage.paid') : t('rentPage.unpaid'),
+      status: parseFloat(due) <= 0 ? 'Paid' : 'Unpaid',
+      monthly:showForm
     };
 
     if (isEditing) {
-      // Update the existing rent record
       const rentRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${selectedTenant}/rents/${editingRentId}`);
       await update(rentRef, rentData).then(() => {
-        toast.success(t('toastMessages.rentUpdatedSuccess'), {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId= toast.success(t('toastMessages.rentUpdatedSuccess'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -816,14 +1361,20 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
-        setIsEditing(false); // Reset editing state
+      }
+        fetchData();
+        setIsEditing(false);
         if (notify) {
           handleNotifyCheckbox(rentData);
         }
         setNotify(false)
+        setRentBtnStatus(false)
       }).catch(error => {
-        toast.error(t('toastMessages.errorUpdatingRent') + error.message, {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error(t('toastMessages.errorUpdatingRent') + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -831,13 +1382,17 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
+      }
+      setRentBtnStatus(false)
       });
     } else {
-      // Create a new rent record
       const rentRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${selectedTenant}/rents`);
       await push(rentRef, rentData).then(() => {
-        toast.success(t('toastMessages.rentAddedSuccess'), {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.success(t('toastMessages.rentAddedSuccess'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -845,14 +1400,19 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
-        setIsEditing(false); // Reset editing state
+      }
+        fetchData();
+        setIsEditing(false);
         if (notify) {
           handleNotifyCheckbox(rentData);
         }
         setNotify(false)
+        setRentBtnStatus(false)
       }).catch(error => {
-        toast.error(t('toastMessages.errorAddingRent') + error.message, {
+        if (!toast.isActive(activeToastId)) {
+          activeToastId=toast.error(t('toastMessages.errorAddingRent') + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -860,16 +1420,19 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
+      }
+      setRentBtnStatus(false)
       });
     }
     setShowModal(false);
-
+    navigate(-1)
     resetForm();
 
   };
 
-  //-------------------------------------------------------------------------------------------------
+
   const resetForm = () => {
     setSelectedRoom('');
     setSelectedBed('');
@@ -882,10 +1445,14 @@ const DashboardBoys = () => {
     setIsEditing(false);
     setCurrentId('');
     setErrors({});
+    setErrorMessage({
+      tenantImage: '',
+      tenantId: '',
+      bikeImage: '',
+      bikeRcImage: '',
+    })
     setTenantImage(null);
     setTenantId(null);
-    setTenantImageUrl('');
-    setTenantIdUrl('');
     setFloorNumber('');
     setRoomNumber('');
     setNumberOfBeds('');
@@ -913,29 +1480,35 @@ const DashboardBoys = () => {
       expenseDate: '',
       createdBy: 'admin'
     })
+    setPermnentAddress('')
+    setHasBike(false)
+    setBikeNumber('NA')
+    setBikeImage(null);
+    setBikeRcImage(null);
+    setPhotoUrl(null);
+    setIdUrl(null);
+    setTenantImage(null);
+
+    setTenantErrors({});
   };
-
-
-
-
   const menu = [
     {
       image: Rooms,
       heading: t('dashboard.totalRooms'),
-      number: `${rooms.length}`,
+      number: `${boysRooms?.length}`,
       btntext: t('dashboard.addRooms'),
     },
 
     {
       image: Tenants,
       heading: t('dashboard.totalTenants'),
-      number: `${tenants.length}`,
+      number: `${boysTenants?.length}`,
       btntext: t('dashboard.addTenants'),
     },
     {
       image: Beds,
       heading: t('dashboard.totalBeds'),
-      number: `${totalBeds}/${totalBeds - tenants.length}`,
+      number: `${totalBeds}/${totalBeds - boysTenants?.length}`,
       btntext: t('dashboard.addRent'),
     },
     {
@@ -949,26 +1522,186 @@ const DashboardBoys = () => {
   const Buttons = ['Add Rooms', 'Add Tenants', 'Add Rent', 'Add Expenses'];
 
   const handleClick = (text) => {
-    setModelText(text);
-    setFormLayout(text);
-    setShowModal(true);
+    if (activeBoysHostelButtons?.length === 0) {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        toastId: "empty-fields-error",
+      })
+}setShowModal(false);
+    } else {
+      setModelText(text);
+      setFormLayout(text);
+      setShowModal(true);
+      window.history.pushState(null, null, location.pathname);
+      console.log(location.pathname, "pathHistory")
+      // setHistory([...history, location.pathname])
+    }
   };
 
+  
+
+    
+  useEffect(() => {
+    const handlePopState = () => {
+
+    
+      if (showModal) {
+        setShowModal(false); // Close the popup
+        console.log("working while popup open")
+      }
+        
+  //     // else if(!showModal){
+  //     //   console.log("working while popup close")
+  //     //   if ( location.pathname === '/') {
+  //     //     if (Capacitor.getPlatform() === 'android') {
+  //     //       CapacitorApp.exitApp(); 
+  //     //     }
+  //     //     console.log(Capacitor.getPlatform(),"firstTime")
+  //     //    }
+         
+  //     // }
+      
+   
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return ()=>{
+      window.removeEventListener('popstate',handlePopState)
+    }
+
+
+  }, [showModal, location.pathname]);
+
+
+ 
+  // useEffect(() => {
+  //   const handleBackButton = () => {
+  //     console.log('Back button pressed');
+  //     console.log('Modal open state:', showModal);
+
+  //     // if (showModal) {
+  //     //   setShowModal(false); // Close the popup
+  //     //   console.log("working while popup open")
+  //     // }
+      
+  //    if(!showModal) {
+  //       // Confirm exit if no popups are open
+  //       console.log('No modal is open, asking for exit confirmation...');
+
+  //       const shouldExit = window.confirm('Are you sure you want to exit the app?');
+  //       if (shouldExit) {
+  //         console.log('Exiting the app...');
+
+  //         CapacitorApp.exitApp(); // Exit the app if confirmed
+  //       }
+  //     }
+  //   };
+ 
+  //   const addBackButtonListener = async () => {
+  //     console.log('Adding back button listener');
+
+  //     const listener = await CapacitorApp.addListener('backButton', handleBackButton);
+  //     return listener;
+  //   };
+ 
+  //   let listener;
+  //   addBackButtonListener().then((l) => {
+  //     listener = l;
+  //     console.log('Back button listener added');
+
+  //   });
+ 
+  //   // Clean up listener on unmount
+  //   return () => {
+  //     // if (listener && listener.remove) {
+  //       console.log('Removing back button listener');
+
+  //       listener.remove();
+  //     // }
+  //   };
+  // }, [showModal,location.pathname]);
+ 
+   const isExiting = useRef(false); // Tracks if exit prompt has been shown
+   const backButtonListenerRef = useRef(null); // Tracks if listener is already set
+
+ useEffect(() => {
+  
+  const handleBackButton = () => {
+    console.log('Back button pressed');
+    console.log('showModal state:', showModal);
+
+    // if (showModal) {
+    //   // Close the modal if it's open
+    //   console.log('Closing modal...');
+    //   showModal(false);
+    // } else {
+      // Show exit confirmation if no modal is open and exit prompt hasn't been shown
+      if (!isExiting.current) {
+        console.log('No modal is open, showing exit confirmation...');
+        isExiting.current = true;
+        
+        const shouldExit = window.confirm('Are you sure you want to exit the app?');
+        if (shouldExit) {
+          console.log('Exiting the app...');
+          CapacitorApp.exitApp();
+        } else {
+          console.log('Exit canceled');
+           isExiting.current = false; // Reset flag if user cancels
+          // isExiting.current = true;
+        }
+      }
+    }
+  // };
+
+  const addBackButtonListener = async () => {
+    console.log('Adding back button listener');
+    const listener = await CapacitorApp.addListener('backButton', handleBackButton);
+    backButtonListenerRef.current = listener;
+  };
+
+  // Add back button listener once if not already set
+  if (!backButtonListenerRef.current) {
+    addBackButtonListener();
+    setShowModal(false)
+  }
+
+  // Clean up listener on unmount
+  return () => {
+    //  if(Capacitor.isNative && backButtonListenerRef.current){
+      console.log('Removing back button listener');
+      backButtonListenerRef?.current?.remove();
+      }
+  // };
+}, [showModal]);
+
+
+    
   const handleCloseModal = () => {
     setModelText('');
     setFormLayout('');
     resetForm();
     setShowModal(false);
+    setShowForm(true)
     setHasBike(false);
-    setBikeNumber("");
+    setBikeNumber("NA");
     setNotify(false)
-
-
+    navigate(-1);
+    // setHistory(prevHistory => [...prevHistory]);
   };
 
   const getMonthYearKey = (dateString) => {
     const date = new Date(dateString);
-    const month = date.toLocaleString('default', { month: 'short' }).toLowerCase(); // get short month name
+    const monthFull = date.toLocaleString('default', { month: 'short' });
+    const month = monthFull.slice(0, 3).toLowerCase();
     const year = date.getFullYear();
     return `${year}-${month}`;
   };
@@ -979,13 +1712,11 @@ const DashboardBoys = () => {
       tenant.id === selectedTenant
     );
     const singleTenantData = singleTenant[0];
-    console.log(singleTenantData, "addedToNotify")
     setNotifyUserInfo(singleTenantData)
   }
 
   const expensesHandleSubmit = (e) => {
     e.preventDefault();
-    // Validate the necessary fields
     let errors = {};
     let formIsValid = true;
 
@@ -1021,9 +1752,11 @@ const DashboardBoys = () => {
       push(expensesRef, {
         ...formData,
         expenseAmount: parseFloat(formData.expenseAmount),
-        expenseDate: new Date(formData.expenseDate).toISOString() // Proper ISO formatting
+        expenseDate: new Date(formData.expenseDate).toISOString()
       }).then(() => {
-        toast.success(t('toastMessages.expenseAddedSuccessfully'), {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.success(t('toastMessages.expenseAddedSuccessfully'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -1031,10 +1764,14 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
-        // setIsEditing(false); // Reset editing state
-      }).catch(error => {
-        toast.error(t('toastMessages.errorAddingExpense') + error.message, {
+      }
+        fetchData();
+      }).catch(error => {        
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error(t('toastMessages.errorAddingExpense') + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -1042,9 +1779,12 @@ const DashboardBoys = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
+      }
       });
       setShowModal(false);
+      navigate(-1);
       setFormErrors({
         number: '',
         rent: '',
@@ -1058,26 +1798,10 @@ const DashboardBoys = () => {
         createdBy: 'admin'
       });
     } else {
-      // Set errors in state if form is not valid
       setFormErrors(errors);
     }
   };
 
-  useEffect(() => {
-    if (selectedTenant) {
-      const tenant = tenants.find(t => t.id === selectedTenant);
-      if (tenant) {
-        // Set the date of join
-        setDateOfJoin(tenant.dateOfJoin || '');
-
-        // Calculate the due date (one day less than adding one month)
-        const currentDate = new Date(tenant.dateOfJoin); // Get the join date
-        const dueDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate(-1)); // Add one month and subtract one day
-        const formattedDueDate = dueDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
-        setDueDate(formattedDueDate);
-      }
-    }
-  }, [selectedTenant, tenants]);
 
   const handleFocus = (e) => {
     const { name } = e.target;
@@ -1091,7 +1815,7 @@ const DashboardBoys = () => {
     const { name } = e.target;
     setTenantErrors((prevErrors) => ({
       ...prevErrors,
-      [name]: '',  // Clear the error message for the focused field
+      [name]: '',
     }));
   };
 
@@ -1103,6 +1827,60 @@ const DashboardBoys = () => {
     }));
   };
 
+  const handleResetMonthly = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee("");
+    setPaidAmount("");
+    setDue("");
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+    setErrors({}); 
+  };
+
+  const handleResetDaily = () => {
+    setSelectedTenant("");
+    setRoomNumber("");
+    setBedNumber("");
+    setTotalFee("");
+    setPaidAmount("");
+    setDue("");
+    setDateOfJoin("");
+    setPaidDate("");
+    setDueDate("");
+    setNotify(false);
+    setErrors({}); 
+  };
+  // const handleResetMonthly = () => {
+  //   setSelectedTenant("");
+  //   setRoomNumber("");
+  //   setBedNumber("");
+  //   setTotalFee("");
+  //   setPaidAmount("");
+  //   setDue(0);
+  //   setDateOfJoin("");
+  //   setPaidDate("");
+  //   setDueDate("");
+  //   setNotify(false);
+  //   setErrors({}); 
+  // };
+
+  // const handleResetDaily = () => {
+  //   setSelectedTenant("");
+  //   setRoomNumber("");
+  //   setBedNumber("");
+  //   setTotalFee("");
+  //   setPaidAmount("");
+  //   setDue(0);
+  //   setDateOfJoin("");
+  //   setPaidDate("");
+  //   setDueDate("");
+  //   setNotify(false);
+  //   setErrors({}); 
+  // };
 
   const renderFormLayout = () => {
     switch (formLayout) {
@@ -1116,7 +1894,7 @@ const DashboardBoys = () => {
             </div>
             <div className="col-md-6">
               <label htmlFor="inputRent" className="form-label">{t('dashboard.roomNumber')}</label>
-              <input type="text" className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
+              <input type="text" placeholder='like F1, 102, ..etc' className="form-control" id="inputRent" name="roomNumber" value={roomNumber} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
               {errors.roomNumber && <div style={{ color: 'red' }}>{errors.roomNumber}</div>}
             </div>
             <div className="col-md-6">
@@ -1129,46 +1907,46 @@ const DashboardBoys = () => {
               <input type="text" className="form-control" id="inputStatus" name="bedRent" value={bedRent} onChange={handleRoomsIntegerChange} onFocus={handleFocus} />
               {errors.bedRent && <div style={{ color: 'red' }}>{errors.bedRent}</div>}
             </div>
-            <div className="col-md-6">
-              <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label>
-              {/* <select className="form-select" id="inputRole" name="role" value={createdBy} onChange={(e) => setCreatedBy(e.target.value)}>
-                <option value="admin">{t('dashboard.admin')}</option>
-                <option value="sub-admin">{t('dashboard.subAdmin')}</option>
-              </select> */}
-              <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} />
-            </div>
+
             <div className="col-12 text-center">
               <button type="submit" className="btn btn-warning" onClick={handleBoysRoomsSubmit}>{t('dashboard.createRoom')}</button>
             </div>
           </form>
         )
       case t('dashboard.addRent'):
+        // {setShowForm(true)}
         return (
           <div>
             <div className='monthlyDailyButtons'>
-              <div className={showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(true)}>
+              <div
+                className={showForm ? 'manageRentButton active' : 'manageRentButton'}
+                onClick={() => {
+                  setShowForm(true);
+                  handleResetMonthly();
+                }}
+              >
                 <text>{t('dashboard.monthly')}</text>
               </div>
-              <div className={!showForm ? 'manageRentButton active' : 'manageRentButton'} onClick={() => setShowForm(false)}>
-                <text>{t('dashboard.daily')}</text>
+
+              <div
+                className={!showForm ? 'manageRentButton active' : 'manageRentButton'}
+                onClick={() => {
+                  setShowForm(false);
+                  handleResetDaily();
+                }}
+              >
+                <text>{t('dashboard.daily')}</text> {/* Changed <text> to <span> as <text> is not a valid HTML element */}
               </div>
             </div>
             {showForm ?
               <div className='monthlyAddForm'>
                 <form class="row lg-10" onSubmit={handleRentSubmit}>
                   <div class='col-12 mb-3'>
-                    <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
+                    <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} name="selectedTenant" onFocus={handleFocus}>
                       <option value="">{t('dashboard.selectTenant')} *</option>
-                      {/* {availableTenants.map(tenant => (
-                          <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
-                        ))} */}
-                      {isEditing ? (
-                        <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
-                      ) : (
-                        availableTenants.map(tenant => (
-                          <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
-                        ))
-                      )}
+                      {availableTenants.map(tenant => (
+                        <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
+                      ))}
                     </select>
                     {errors.selectedTenant && <div style={{ color: 'red' }}>{errors.selectedTenant}</div>}
                   </div>
@@ -1184,18 +1962,61 @@ const DashboardBoys = () => {
                     <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}:</label>
                     <input id="TotalFee" class="form-control" type="number" value={totalFee} readOnly />
                   </div>
-                  <div class="col-md-6 mb-3">
+                  {/* <div class="col-md-6 mb-3">
                     <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                    <input id="PaidAmount" class="form-control" type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} name="paidAmount" onFocus={handleFocus} />
+                    <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} name="paidAmount" onFocus={handleFocus} />
                     {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                  </div>
+                  </div> */}
+                   <div class="col-md-6 mb-3">
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                            }
+                            name="paidAmount"
+                            onFocus={handleFocus}
+                          />
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
+
                   <div class="col-md-6 mb-3">
                     <label htmlFor="Due" class="form-label">{t('dashboard.due')}:</label>
                     <input id="Due" class="form-control" type="number" value={due} readOnly />
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor='DateOfJoin' class="form-label">{t('dashboard.dateOfJoin')}:</label>
-                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly // Make this field read-only since it's auto-populated
+                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly
                     />
                   </div>
                   <div class="col-md-6 mb-3">
@@ -1219,6 +2040,7 @@ const DashboardBoys = () => {
                       type="date"
                       value={dueDate}
                       onChange={e => setDueDate(e.target.value)}
+                      min={dateOfJoin}
                       name="dueDate"
                       onFocus={handleFocus}
                     />
@@ -1231,7 +2053,7 @@ const DashboardBoys = () => {
                         className="form-check-input"
                         type="checkbox"
                         checked={notify}
-                        onChange={onClickCheckbox} // Toggle the state on change
+                        onChange={onClickCheckbox}
                       />
                       <label className="form-check-label" htmlFor="notifyCheckbox">
                         {t('dashboard.notify')}
@@ -1241,7 +2063,7 @@ const DashboardBoys = () => {
                   </div>
 
                   <div class="col-12 text-center mt-2">
-                    <button type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
+                    <button disabled={rentBtnStatus} type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
                   </div>
                 </form>
               </div> :
@@ -1250,11 +2072,8 @@ const DashboardBoys = () => {
                   <div class='col-12 mb-3'>
                     <select id="bedNo" class="form-select" value={selectedTenant} onChange={e => setSelectedTenant(e.target.value)} disabled={isEditing} name="selectedTenant" onFocus={handleFocus}>
                       <option value="">{t('dashboard.selectTenant')} *</option>
-                      {/* {availableTenants.map(tenant => (
-                          <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
-                        ))} */}
                       {isEditing ? (
-                        <option key={selectedTenant} value={selectedTenant}>{tenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
+                        <option key={selectedTenant} value={selectedTenant}>{boysTenantsWithRents.find(tenant => tenant.id === selectedTenant)?.name}</option>
                       ) : (
                         availableTenants.map(tenant => (
                           <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
@@ -1273,20 +2092,57 @@ const DashboardBoys = () => {
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}</label>
-                    <input id="TotalFee" class="form-control" type="number" value={totalFee} onChange={e => setTotalFee(e.target.value)} />
+                    <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} />
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}</label>
-                    <input id="PaidAmount" class="form-control" type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} name="paidAmount" onFocus={handleFocus} />
-                    {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                  </div>
+                          <label htmlFor="PaidAmount" class="form-label">
+                            {t("dashboard.paidAmount")}:
+                          </label>
+                          <input
+                            id="PaidAmount"
+                            class="form-control"
+                            type="text"
+                            value={paidAmount}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              );
+                              if (parseFloat(value) > totalFee) {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: t("exceedTotalFee"),
+                                }));
+                              } else {
+                                setErrors((prevErrors) => ({
+                                  ...prevErrors,
+                                  paidAmount: "",
+                                }));
+                                setPaidAmount(value);
+                              }
+                            }}
+                            onInput={(e) =>
+                              (e.target.value = e.target.value.replace(
+                                /[^0-9 ]/g,
+                                ""
+                              ))
+                            }
+                            name="paidAmount"
+                            onFocus={handleFocus}
+                          />
+                          {errors.paidAmount && (
+                            <div style={{ color: "red" }}>
+                              {errors.paidAmount}
+                            </div>
+                          )}
+                        </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor="Due" class="form-label">{t('dashboard.due')}</label>
                     <input id="Due" class="form-control" type="number" value={due} readOnly />
                   </div>
                   <div class="col-md-6 mb-3">
                     <label htmlFor='DateOfJoin' class="form-label">{t('dashboard.dateOfJoin')}</label>
-                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly // Make this field read-only since it's auto-populated
+                    <input id="DateOfJoin" class="form-control" type="date" value={dateOfJoin} readOnly
                     />
                   </div>
                   <div class="col-md-6 mb-3">
@@ -1310,6 +2166,7 @@ const DashboardBoys = () => {
                       type="date"
                       value={dueDate}
                       onChange={e => setDueDate(e.target.value)}
+                      min={dateOfJoin}
                       name="dueDate"
                       onFocus={handleFocus}
                     />
@@ -1323,7 +2180,7 @@ const DashboardBoys = () => {
                         className="form-check-input"
                         type="checkbox"
                         checked={notify}
-                        onChange={onClickCheckbox} // Toggle the state on change
+                        onChange={onClickCheckbox}
                       />
                       <label className="form-check-label" htmlFor="notifyCheckbox">
                         {t('dashboard.notify')}
@@ -1334,7 +2191,7 @@ const DashboardBoys = () => {
 
 
                   <div class="col-12 text-center mt-2">
-                    <button type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
+                    <button  disabled={rentBtnStatus}  type="submit" className="btn btn-warning">{isEditing ? t('dashboard.updateRent') : t('dashboard.submitRentDetails')}</button>
                   </div>
                 </form>
               </div>}
@@ -1347,11 +2204,23 @@ const DashboardBoys = () => {
               <label htmlFor='roomNo' class="form-label">{t('dashboard.roomNo')}</label>
               <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedRoom" onFocus={handleTenantFocus}>
                 <option value="">{t('dashboard.selectRoom')}</option>
-                {boysRooms.map((room) => (
+                {/* {boysRooms.map((room) => (
                   <option key={room.roomNumber} value={room.roomNumber}>
                     {room.roomNumber}
                   </option>
-                ))}
+                ))} */}
+                {selectedRoom && !showBoysRoom.includes(selectedRoom) && (
+                        <option key={selectedRoom} value={selectedRoom}>
+                          {selectedRoom} (Current)
+                        </option>
+                      )}
+
+                      {/* Show unoccupied rooms */}
+                      {showBoysRoom.map((room) => (
+                        <option key={room} value={room}>
+                          {room}
+                        </option>
+                      ))}
               </select>
               {tenatErrors.selectedRoom && <p style={{ color: 'red' }}>{tenatErrors.selectedRoom}</p>}
             </div>
@@ -1391,15 +2260,14 @@ const DashboardBoys = () => {
               <label htmlFor='tenantMobileNo' class="form-label">
                 {t('dashboard.mobileNo')}
               </label>
-              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} name="mobileNo" onFocus={handleTenantFocus} />
-
+              <input id="tenantMobileNo" class="form-control" type="text" value={mobileNo} onChange={(e) => setMobileNo(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="mobileNo" onFocus={handleTenantFocus} />
               {tenatErrors.mobileNo && <p style={{ color: 'red' }}>{tenatErrors.mobileNo}</p>}
             </div>
             <div class="col-md-6">
               <label htmlFor='tenantIdNum' class="form-label">
                 {t('dashboard.idNumber')}
               </label>
-              <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} name="idNumber" onFocus={handleTenantFocus} />
+              <input id="tenantIdNum" class="form-control" type="text" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')} name="idNumber" onFocus={handleTenantFocus} />
 
               {tenatErrors.idNumber && <p style={{ color: 'red' }}>{tenatErrors.idNumber}</p>}
             </div>
@@ -1407,7 +2275,7 @@ const DashboardBoys = () => {
               <label htmlFor='tenantEmergency' class="form-label">
                 {t('dashboard.emergencyContact')}
               </label>
-              <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} name="emergencyContact" onFocus={handleTenantFocus} />
+              <input id="tenantEmergency" class="form-control" type="text" value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} name="emergencyContact" onFocus={handleTenantFocus} />
 
               {tenatErrors.emergencyContact && <p style={{ color: 'red' }}>{tenatErrors.emergencyContact}</p>}
             </div>
@@ -1425,35 +2293,65 @@ const DashboardBoys = () => {
               <label htmlFor='tenantUpload' class="form-label">
                 {t('dashboard.uploadImage')}
               </label>
-              {isEditing && tenantImageUrl && (
+              {isEditing && tenantImage && (
                 <div>
-                  <img src={tenantImageUrl} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
+                  <img src={tenantImage} alt="Current Tenant" style={{ width: "100px", height: "100px" }} />
                   <p>{t('dashboard.currentImage')}</p>
                 </div>
               )}
-              <input id="tenantUpload" class="form-control" type="file" onChange={handleTenantImageChange} ref={imageInputRef} required />
+              <input id="tenantUpload" class="form-control" type="file" accept=".jpg, .jpeg, .png"   onChange={handleTenantImageChange} ref={imageInputRef} 
+              disabled={isCameraUsed} 
+              />
+              {isMobile && !isFileUploaded &&   (
+                  <div>
+                  <p>{t('tenantsPage.or')}</p>
+                  <div style={{display:'flex',flexDirection:'row'}}>
+                  <p>{t('tenantsPage.takePhoto')}</p>
+                  <FontAwesomeIcon icon={faCamera} size="2x" onClick={takePicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                  disabled={isFileUploaded}
+                  />
+                  {photoUrl && <img src={photoUrl} alt="Captured" style={{  marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
+                  </div>
+                  </div>
+                    )}
+
               {errors.tenantImage && <p style={{ color: 'red' }}>{errors.tenantImage}</p>}
+              {errorMessage.tenantImage && <p style={{ color: 'red' }}>{errorMessage.tenantImage}</p>}
             </div>
             <div class="col-md-6">
               <label htmlFor='tenantUploadId' class="form-label">
                 {t('dashboard.uploadId')}:
               </label>
-              {isEditing && tenantIdUrl && (
+              {isEditing && tenantId && (
                 <object
-                  data={tenantIdUrl}
+                  data={tenantId}
                   type="application/pdf"
                   width="50%"
                   height="200px"
                 >
-                  <a href={tenantIdUrl}>{t('dashboard.downloadPdf')}</a>
+                  <a href={tenantId}>{t('dashboard.downloadPdf')}</a>
                 </object>
               )}
-              <input id="tenantUploadId" class="form-control" type="file" onChange={handleTenantIdChange} ref={idInputRef} multiple />
-
+              <input id="tenantUploadId" class="form-control" type="file" accept=".jpg, .jpeg, .png , .pdf"  onChange={handleTenantIdChange} ref={idInputRef} 
+              disabled={isTenantIdCameraUsed} />
+              {isMobile && !isTenantIdFileUploaded &&(
+                    <div>
+                    <p>{t('tenantsPage.or')}</p>
+                    <div style={{display:'flex',flexDirection:'row'}}>
+                    <p>{t('tenantsPage.takePhoto')}</p>
+                    <FontAwesomeIcon icon={faCamera} size="2x" onClick={takeIdPicture} style={{marginTop:'-7px',paddingLeft:'30px'}}
+                    disabled={isTenantIdFileUploaded}/>
+                    {idUrl && <img src={idUrl} alt="Captured" style={{ marginTop: 50,marginRight:40, Width: '100px', height: '100px' }} />}
+                    </div>
+                    </div>
+                    )}
+                     {errors.tenantId && <p style={{ color: 'red' }}>{errors.tenantId}</p>}
+                     {errorMessage.tenantId && <p style={{ color: 'red' }}>{errorMessage.tenantId}</p>}
             </div>
             <div className='col-md-12'>
               <label htmlFor="permnentAddress" className='form-label'>{t('tenantsPage.PermanentAddress')}</label>
-              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' />
+              <textarea name='permnentAddress' value={permnentAddress} onChange={(e) => setPermnentAddress(e.target.value)} placeholder='Enter Address' className='form-control' onFocus={handleTenantFocus} />
+              {tenatErrors.permnentAddress && <p style={{ color: 'red' }}>{tenatErrors.permnentAddress}</p>}
             </div>
 
             <div className="col-12 col-sm-12 col-md-12" style={{ marginTop: '20px' }}>
@@ -1481,38 +2379,40 @@ const DashboardBoys = () => {
             </div>
 
             {hasBike && (
-              <div className='bikeField' style={{ display: 'flex', flexDirection: 'row', marginTop: '10px' }}>
+              <div className=' bikeField'>
                 <label class="bikenumber" htmlFor="bikeNumber" >{t('dashboard.bikeNumber')}</label>
                 <input
                   type="text"
                   id="bikeNumber"
-
+                  onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '')}
                   className='form-control'
                   placeholder="Enter number plate ID"
                   value={bikeNumber}
                   onChange={(event) => setBikeNumber(event.target.value)}
-                  style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px', marginLeft: '8px' }}
+                  style={{ flex: '2', borderRadius: '5px', borderColor: 'beize', outline: 'none', marginTop: '0', borderStyle: 'solid', borderWidth: '1px', borderHeight: '40px' }}
                 />
               </div>
             )
             }
 
-            {/* ===== */}
+            {tenatErrors.bikeNumber && <p style={{ color: 'red', marginLeft: "4px" }}>{tenatErrors.bikeNumber}</p>}
+
             {hasBike && (
               <>
                 <div className="col-md-6">
                   <label htmlFor="bikeimage" className="form-label">{t('tenantsPage.BikePic')}</label>
-                  <input type="file" className="form-control" onChange={handleImageChange} />
+                  <input type="file" className="form-control" accept=".jpg, .jpeg, .png" onChange={handleTenantBikeChange} />
+                  {errorMessage.bikeImage && <p style={{ color: 'red' }}>{errorMessage.bikeImage}</p>}
                 </div>
                 <div className="col-md-6">
                   <label htmlFor="bikeRc" className="form-label">{t('tenantsPage.BikeRc')}</label>
-                  <input type="file" className="form-control" onChange={handleRcChange} />
+                  <input type="file" className="form-control" accept=".jpg, .jpeg, .png, .pdf" onChange={handleTenantBikeRcChange} />
+                  {errorMessage.bikeRcImage && <p style={{ color: 'red' }}>{errorMessage.bikeRcImage}</p>}
                 </div>
               </>
             )}
 
 
-            {/* =============== */}
             <div className='col-12 text-center mt-3'>
               {isEditing ? (
                 <button type="button" className="btn btn-warning" onClick={handleTenantSubmit}>{t('dashboard.updateTenant')}</button>
@@ -1528,30 +2428,22 @@ const DashboardBoys = () => {
           <form className="row 1g-10" onSubmit={expensesHandleSubmit}>
             <div className="col-md-6">
               <label htmlFor="inputExpenseName" className="form-label">{t('dashboard.expenseName')}</label>
-              <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+              <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onChange={handleInputChange} onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} onFocus={handleExpensesFocus} />
               {formErrors.expenseName && <div className="text-danger">{formErrors.expenseName}</div>}
             </div>
             <div className="col-md-6">
               <label htmlFor="inputRent" className="form-label">{t('dashboard.expenseAmount')}</label>
-              <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+              <input type="text" className="form-control" name="expenseAmount" value={formData.expenseAmount} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} onChange={handleInputChange} onFocus={handleExpensesFocus} />
               {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
             </div>
             <div className="col-md-6">
-              <label htmlFor="inputRole" className="form-label">{t('dashboard.createdBy')}</label>
-              {/* <select className="form-select" id="inputRole" name="createdBy" value={formData.createdBy} onChange={handleInputChange}>
-                <option value="admin">{t('dashboard.admin')}</option>
-                <option value="sub-admin">{t('dashboard.subAdmin')}</option>
-              </select> */}
-              <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={createdBy} />
-            </div>
-            <div className="col-md-6">
               <label htmlFor="inputDate" className="form-label">{t('dashboard.expenseDate')}</label>
-              <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+              <input type="date" min={minDate} max={maxDate} className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
               {formErrors.expenseDate && <div className="text-danger">{formErrors.expenseDate}</div>}
             </div>
 
             <div className="col-12 text-center mt-3">
-              <button type="submit" className="btn btn-warning">{t('dashboard.create')}</button>
+              <button type="submit" className="btn btn-warning">{t('dashboard.createExpense')}</button>
             </div>
           </form>
 
@@ -1562,12 +2454,8 @@ const DashboardBoys = () => {
     }
   }
 
-  const [popupOpen, setPopupOpen] = useState(false);
-  const [expensePopupOpen, setExpensePopupOpen] = useState(false);
-  const [bedsData, setBedsData] = useState([]);
   const handleCardClick = (item) => {
     if (item.heading === t('dashboard.totalBeds')) {
-      // Logic to open the popup for "Total Beds" card
       setPopupOpen(true);
     }
     if (item.heading === 'Total Expenses') {
@@ -1583,59 +2471,16 @@ const DashboardBoys = () => {
     setExpensePopupOpen(false);
   }
 
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      console.log("closed")
-      if (popupOpen && (event.target.id === "example" || event.key === "Escape")) {
-        setPopupOpen(false)
-        setHasBike(false);
-        setBikeNumber('NA');
-      }
-    };
-    window.addEventListener('click', handleOutsideClick)
-    window.addEventListener('keydown', handleOutsideClick)
-  }, [popupOpen])
-
-
-
-  useEffect(() => {
-    if (!boysRooms || boysRooms.length === 0) {
-      // If rooms are not defined or the array is empty, clear bedsData and exit early
-      setBedsData([]);
-      return;
-    }
-
-    const allBeds = boysRooms.flatMap(room => {
-      return Array.from({ length: room.numberOfBeds }, (_, i) => {
-        const bedNumber = i + 1;
-        // Find if there's a tenant for the current bed
-        const tenant = tenants.find(tenant => tenant.roomNo === room.roomNumber && tenant.bedNo === String(bedNumber));
-        return {
-          floorNumber: room.floorNumber,
-          roomNumber: room.roomNumber,
-          bedNumber: bedNumber,
-          rent: room.bedRent || "N/A", // Assuming rent is provided by the tenant data
-          status: tenant ? "Occupied" : "Unoccupied"
-        };
-      });
-    });
-    setBedsData(allBeds);
-  }, [boysRooms, tenants]); // Depend on rooms and tenants data
-
   const rows = bedsData.filter((bed) => bed.status === 'Unoccupied').map((bed, index) => ({
-    //s_no: index + 1,
     bed_number: bed.bedNumber,
     room_no: bed.roomNumber,
     floor: bed.floorNumber,
-    //status: bed.status
   }));
 
   const columns = [
-    // 'S. No',
     t('table.bedNumber'),
     t('table.roomNo'),
     t('table.floor'),
-    // 'Status'
   ];
 
   const expenseColumns = [
@@ -1649,37 +2494,44 @@ const DashboardBoys = () => {
     amount: expense.expenseAmount,
   }));
 
-
   return (
     <div className="dashboardboys">
-      <h1 className="heading">{t('dashboard.mens')}</h1>
-      {activeBoysHostelButtons.length > 0 ? (
-        <div className={"flex"}>
-          {activeBoysHostelButtons.map((button, index) => (
-            <button className={`btn m-1 ${activeBoysHostel === `${button}` ? 'active-button' : 'inactive-button'}`} onClick={() => setActiveBoysHostel(button)} key={index} style={{
-              backgroundColor: activeBoysHostel === button ? '#FF8A00' : '#fac38c', // Example colors
-              color: activeBoysHostel === button ? 'white' : '#333333' // Set text color (optional)
-            }}
-            >{button}</button>
-          ))}
+
+      {activeBoysHostelButtons?.length > 0 ? (
+        <div>
+          <h1 className="heading">{t('dashboard.mens')}</h1>
+
+          <div className={"flex"}>
+            {activeBoysHostelButtons.map((button, index) => (
+              <button
+                className={`btn m-1 ${activeBoysHostel === button.id ? 'active-button' : 'inactive-button'}`}
+                onClick={() => { setActiveBoysHostel(button.id); setActiveBoysHostelName(button.name); changeActiveFlag('boys') }}
+                key={button.id}
+                style={{
+                  backgroundColor: activeBoysHostel === button.id ? '#FF8A00' : '#fac38c',
+                  color: activeBoysHostel === button.id ? 'white' : '#333333'
+                }}
+              >
+                {button.name}
+              </button>
+            ))}
+          </div>
+          <br />
+          <div className="menu">
+            {menu.map((item, index) => (
+              <div key={index} className='cardWithBtnsContainer'>
+                <SmallCard key={index} index={index} item={item} handleClick={handleCardClick} />
+                <button id="mbladdButton" type="button" onClick={() => { handleClick(item.btntext) }}><img src={PlusIcon} alt="plusIcon" className='plusIconProperties' /> {item.btntext}</button>
+              </div>
+            ))}
+
+          </div>
         </div>
       ) : (
-        <p>No active hostels found.</p>
+        ''
       )}
-      <div className="menu">
-        {menu.map((item, index) => (
-          <div className='cardWithBtnsContainer'>
-            <SmallCard key={index} index={index} item={item} handleClick={handleCardClick} />
-            <button id="mbladdButton" type="button" onClick={() => { handleClick(item.btntext) }}><img src={PlusIcon} alt="plusIcon" className='plusIconProperties' /> {item.btntext}</button>
-          </div>
-        ))}
-        {/* <div className='button-container'>
-          {Buttons?.map((item, index) => (
-            <button id="deskaddButton" type="button" onClick={() => { handleClick(item); setShowForm(true) }}>
-              <img src={PlusIcon} alt="plusIcon" className='plusIconProperties' /> {item} </button>
-          ))}
-        </div> */}
-      </div>
+
+
       <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalRoomsBoys" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden={!showModal} >
         <div className="modal-dialog ">
           <div className="modal-content">
@@ -1691,10 +2543,13 @@ const DashboardBoys = () => {
               <div className="container-fluid">
                 {renderFormLayout()}
               </div>
+
             </div>
           </div>
         </div>
       </div>
+
+      {loading && <Spinner />}
 
       {popupOpen &&
         <div className="popupBeds" id="example">
@@ -1766,9 +2621,16 @@ const DashboardBoys = () => {
         </div>
       }
 
+
     </div>
 
   );
 };
 
+
 export default DashboardBoys;
+
+
+
+
+

@@ -2,20 +2,21 @@ import React, { useState, useEffect } from 'react'
 import ExpenseIcon from '../../images/Icons (5).png'
 import SearchIcon from '../../images/Icons (9).png'
 import Table from '../../Elements/Table'
-// import { database, push, ref } from "../../firebase";
-import { database, push, ref } from "../../firebase/firebase";
+import { push, ref } from "../../firebase/firebase";
 import "../RoomsBoys/RoomsBoys.css"
-import { onValue } from 'firebase/database';
-import { remove, update, set } from 'firebase/database';
+import { remove, set } from 'firebase/database';
 import { toast } from "react-toastify";
 import './ExpensesGirls.css';
 import { useTranslation } from 'react-i18next';
-
 import { useData } from '../../ApiData/ContextProvider';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-const ExpensesGirls = () => {
+const ExpensesGirls = ({searchQuery,setSearchQuery,month,setMonth}) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
-  const { activeGirlsHostel , userUid} = useData();
+  const { activeGirlsHostel , userUid, activeGirlsHostelButtons,firebase,setExpensesInteracted,expensesInteracted, entireHMAdata, fetchData} = useData();
+  const {database} = firebase;
 
   const  role = localStorage.getItem('role');
   let adminRole = "";
@@ -28,28 +29,31 @@ const ExpensesGirls = () => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
 
   
-  const [searchTerm, setSearchTerm] = useState('');
+  // const [searchTerm, setSearchTerm] = useState('');
   const [initialRows, setInitialRows] = useState([]);
-
-
-
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  let activeToastId = null;
+
 
   const getCurrentMonth = () => {
     const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-    const currentMonth = new Date().getMonth(); // getMonth returns month index (0 = January, 11 = December)
+    const currentMonth = new Date().getMonth(); 
     return monthNames[currentMonth];
   };
   
   const getCurrentYear = () => {
-    return new Date().getFullYear().toString(); // getFullYear returns the full year (e.g., 2024)
+    return new Date().getFullYear().toString();
   };
 
   const [year, setYear] = useState(getCurrentYear());
-  const [month, setMonth] = useState(getCurrentMonth());
+  // const [month, setMonth] = useState(getCurrentMonth());
   const [total, setTotal] = useState(0);
+  const [yearsList, setYearsList] = useState([]);
+
+  const minDate = `${getCurrentYear()}-01-01`;
+  const maxDate = `${getCurrentYear()}-12-31`;
 
   const [formData, setFormData] = useState({
     expenseName: '',
@@ -80,26 +84,35 @@ const ExpensesGirls = () => {
       console.log("Triggering")
         if (showModal && (event.target.id === "exampleModalExpensesGirls" || event.key === "Escape")) {
   setShowModal(false);
+  navigate(-1)
       }
 
       };
 window.addEventListener('click', handleOutsideClick);
 window.addEventListener('keydown',handleOutsideClick);
 
+return () => {
+  window.removeEventListener('click', handleOutsideClick);
+  window.removeEventListener("keydown", handleOutsideClick);
+};
+
   }, [showModal]);
 
   const getMonthYearKey = (dateString) => {
     const date = new Date(dateString);
-    const month = date.toLocaleString('default', { month: 'short' }).toLowerCase(); // get short month name
+    const monthFull = date.toLocaleString('default', { month: 'short' });
+    const month = monthFull.slice(0, 3).toLowerCase();
     const year = date.getFullYear();
     return `${year}-${month}`;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Validate the necessary fields
+
     let errors = {};
     let formIsValid = true;
+
+    setExpensesInteracted(!expensesInteracted)
 
     if (!formData.expenseName.match(/^[a-zA-Z\s]+$/)) {
       errors.expenseName = t('errors.expenseNameAlphabetsAndSpaces');
@@ -127,16 +140,17 @@ window.addEventListener('keydown',handleOutsideClick);
       formIsValid = false;
     }
 
-    // Only proceed if form is valid
     if (formIsValid) {
       const monthYear = getMonthYearKey(formData.expenseDate);
       const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}`);
       push(expensesRef, {
         ...formData,
         expenseAmount: parseFloat(formData.expenseAmount),
-        expenseDate: new Date(formData.expenseDate).toISOString() // Proper ISO formatting
+        expenseDate: new Date(formData.expenseDate).toISOString() 
       }).then(() => {
-        toast.success(t('toastMessages.expenseAddedSuccessfully'), {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.success(t('toastMessages.expenseAddedSuccessfully'), {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -144,10 +158,14 @@ window.addEventListener('keydown',handleOutsideClick);
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
-        // setIsEditing(false); // Reset editing state
+      }
+        fetchData();
       }).catch(error => {
-        toast.error(t('toastMessages.errorAddingExpense') + error.message, {
+        if (!toast.isActive(activeToastId)) {
+
+          activeToastId=toast.error(t('toastMessages.errorAddingExpense') + error.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: false,
@@ -155,9 +173,12 @@ window.addEventListener('keydown',handleOutsideClick);
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+          toastId: "empty-fields-error",
         });
+      }
       });
       setShowModal(false);
+      navigate(-1)
       setFormErrors({
         number: '',
         rent: '',
@@ -168,43 +189,79 @@ window.addEventListener('keydown',handleOutsideClick);
 
 
     } else {
-      // Set errors in state if form is not valid
       setFormErrors(errors);
     }
   };
 
   function formatDate(dateString) {
     const date = new Date(dateString);
-    const day = ('0' + date.getDate()).slice(-2); // Add leading zero if needed
-    const month = ('0' + (date.getMonth() + 1)).slice(-2); // Add leading zero if needed
+    const day = ('0' + date.getDate()).slice(-2); 
+    const month = ('0' + (date.getMonth() + 1)).slice(-2); 
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   }
 
+  // useEffect(() => {
+  //   const formattedMonth = month.slice(0, 3);
+  //   const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
+  //   onValue(expensesRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedExpenses = [];
+  //     for (const key in data) {
+  //       loadedExpenses.push({
+  //         id: key,
+  //         ...data[key],
+  //         expenseDate: formatDate(data[key].expenseDate) 
+  //       });
+  //     }
+  //     setExpenses(loadedExpenses);
+  //     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
+  //     setTotal(totalExpenses);
+  //   });
+  // }, [month, year, activeGirlsHostel]);
+
   useEffect(() => {
+    if (!entireHMAdata || !activeGirlsHostel) return;
+
     const formattedMonth = month.slice(0, 3);
-    const expensesRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${formattedMonth}`);
-    onValue(expensesRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedExpenses = [];
-      for (const key in data) {
-        loadedExpenses.push({
-          id: key,
-          ...data[key],
-          expenseDate: formatDate(data[key].expenseDate) // Format date as you retrieve it
-        });
+    const expensesData = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${formattedMonth}`] ; 
+    const loadedExpenses = [];
+    for (const key in expensesData) {
+      loadedExpenses.push({
+        id: key,
+        ...expensesData[key],
+        expenseDate: formatDate(expensesData[key].expenseDate),
+      });
+    }
+    setExpenses(loadedExpenses);
+
+    const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
+    setTotal(totalExpenses);
+    const totalExpensesOfhostel = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses
+    if(totalExpensesOfhostel){
+      const yearsMonth =  Object.keys(totalExpensesOfhostel)
+
+      const expenseYears = yearsMonth.map(item => parseInt(item.split('-')[0], 10));  
+      const currentYear = new Date().getFullYear();
+      const earliestYear = Math.min(currentYear, ...expenseYears);
+      const latestYear = Math.max(currentYear, ...expenseYears);
+      const years = [];
+      for (let yr = earliestYear; yr <= latestYear; yr++) {
+          years.push(yr);
       }
-      setExpenses(loadedExpenses);
-      const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
-      setTotal(totalExpenses);
-    });
-  }, [month, year, activeGirlsHostel]);
+           setYearsList(years);
+      
+    } 
+    
+
+
+  }, [entireHMAdata, activeGirlsHostel, month, year]);
+
 
   const columns = [
     t('expensesPage.sNo'),
     t('expensesPage.expenseName'),
     t('expensesPage.expenseAmount'),
-    t('expensesPage.createdBy'),
     t('expensesPage.date'),
     t('expensesPage.actions')
   ];
@@ -224,8 +281,6 @@ window.addEventListener('keydown',handleOutsideClick);
       edit_room: <button
         style={{ backgroundColor: '#ff8a00', padding: '4px', borderRadius: '5px', color: 'white', border: 'none', }}
         onClick={() => handleEdit(expense)}
-      // data-bs-toggle="modal"
-      // data-bs-target="#exampleModalExpensesGirls"
       >
         Edit
       </button>
@@ -236,7 +291,6 @@ window.addEventListener('keydown',handleOutsideClick);
 
   const handleEdit = (expense) => {
     setEditingExpense(expense);
-    // console.log(expense.expenseDate,"data was formated")
     const [day, month, year] = expense.expenseDate.split('-');
     const formattedDate = `${year}-${month}-${day}`;
     setFormData({
@@ -246,6 +300,7 @@ window.addEventListener('keydown',handleOutsideClick);
       createdBy: adminRole,
     });
     setShowModal(true);
+    window.history.pushState(null, null, location.pathname);
     setFormErrors({
       number: '',
       rent: '',
@@ -253,8 +308,6 @@ window.addEventListener('keydown',handleOutsideClick);
       status: ''
     })
   };
-
-
 
   const handleUpdate = () => {
     if (!editingExpense) return;
@@ -267,13 +320,11 @@ window.addEventListener('keydown',handleOutsideClick);
       formIsValid = false;
     }
 
-
-    const expenseAmountString = String(formData.expenseAmount); // Convert to string
+    const expenseAmountString = String(formData.expenseAmount);
     if (!expenseAmountString.match(/^\d+(\.\d{1,2})?$/)) {
       errors.expenseAmount = t('errors.expenseAmountValidNumber');
       formIsValid = false;
     }
-
 
     if (!formData.expenseDate) {
       errors.expenseDate = t('errors.expenseDateRequired');
@@ -286,8 +337,6 @@ window.addEventListener('keydown',handleOutsideClick);
       formIsValid = false;
     }
 
-    // Log the value of formData.expenseDate before conversion
-    console.log('Expense Date:', formData.expenseDate);
 
     if (formIsValid) {
       let updatedFormData = {
@@ -299,7 +348,9 @@ window.addEventListener('keydown',handleOutsideClick);
       const expenseRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}/${editingExpense.id}`);
       set(expenseRef, updatedFormData)
         .then(() => {
-          toast.success(t('toastMessages.expensesUpdatedSuccessfully'), {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.success(t('toastMessages.expensesUpdatedSuccessfully'), {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -307,10 +358,15 @@ window.addEventListener('keydown',handleOutsideClick);
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
+        }
           setEditingExpense(null);
+          fetchData();
         }).catch(error => {
-          toast.error(t('toastMessages.errorUpdatinExpense')+ error.message, {
+          if (!toast.isActive(activeToastId)) {
+
+            activeToastId=toast.error(t('toastMessages.errorUpdatinExpense')+ error.message, {
             position: "top-center",
             autoClose: 2000,
             hideProgressBar: false,
@@ -318,10 +374,13 @@ window.addEventListener('keydown',handleOutsideClick);
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: "empty-fields-error",
           });
+        }
         });
 
       setShowModal(false);
+      navigate(-1)
       setFormData({
         expenseName: '',
         expenseAmount: '',
@@ -329,17 +388,19 @@ window.addEventListener('keydown',handleOutsideClick);
         createdBy: adminRole
       });
     } else {
-      // Set errors in state if form is not valid
       setFormErrors(errors);
     }
   };
 
   const handleDelete = () => {
     if (!editingExpense) return;
+    setExpensesInteracted(!expensesInteracted)
     const monthYear = getMonthYearKey(formData.expenseDate);
     const expenseRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${monthYear}/${editingExpense.id}`);
     remove(expenseRef).then(() => {
-      toast.success(t('toastMessages.expenseDeteledSuccessfully'), {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.success(t('toastMessages.expenseDeteledSuccessfully'), {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -347,11 +408,15 @@ window.addEventListener('keydown',handleOutsideClick);
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
+    }
+      fetchData();
       setEditingExpense(null);
-      // alert('Expense deleted!');
     }).catch(error => {
-      toast.error(t('toastMessages.errorDeletingExpense') + error.message, {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.error(t('toastMessages.errorDeletingExpense') + error.message, {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -359,11 +424,13 @@ window.addEventListener('keydown',handleOutsideClick);
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: "empty-fields-error",
       });
+    }
       console.error("Error deleting document: ", error);
-      // alert('Error deleting expense!');
     });
     setShowModal(false);
+    navigate(-1)
     setFormData({
       expenseName: '',
       expenseAmount: '',
@@ -375,17 +442,33 @@ window.addEventListener('keydown',handleOutsideClick);
 
 
   const handleChange = (event) => {
-    setSearchTerm(event.target.value)
+    setSearchQuery(event.target.value)
   }
 
   const filteredRows = initialRows.filter(row => {
     return Object.values(row).some(value =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value.toString().toLowerCase().includes(searchQuery?.toLowerCase())
     );
   });
 
   const handleAddNew = () => {
+    if (activeGirlsHostelButtons.length == 0) {
+      if (!toast.isActive(activeToastId)) {
+
+        activeToastId=toast.warn("You have not added any girls hostel, please add your first Hostel in Settings", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        toastId: "empty-fields-error",
+      })
+    }
+    } else {
     setShowModal(true);
+    window.history.pushState(null, null, location.pathname);
     setFormData({
       expenseName: '',
       expenseAmount: '',
@@ -398,11 +481,13 @@ window.addEventListener('keydown',handleOutsideClick);
       expenseDate: ''
     });
     setEditingExpense(null);
+  }
   };
 
 
   const onClickClose = () => {
     setShowModal(false);
+    navigate(-1);
     setFormData({
       expenseName: '',
       expenseAmount: '',
@@ -411,38 +496,73 @@ window.addEventListener('keydown',handleOutsideClick);
     });
   }
 
+  useEffect(() => {
+    const handlePopState = () => {
+      if (showModal) {
+        setShowModal(false); // Close the popup
+        
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+
+    return () => {
+      window.removeEventListener('popstate',handlePopState)
+    }
+  }, [showModal, location.pathname]);
+
   
-// =======  calculate year expenses
 const [totalAnnualExpenses, setTotalAnnualExpenses] = useState(0);
+
+// useEffect(() => {
+//   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+//   let total = 0;
+
+//   const fetchExpenses = async () => {
+//     const promises = monthNames.map(month => {
+//       const monthRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${month}`);
+//       return new Promise((resolve) => {
+//         onValue(monthRef, (snapshot) => {
+//           const expenses = snapshot.val();
+//           if (expenses) {
+//             const monthlyTotal = Object.values(expenses).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);
+//             resolve(monthlyTotal);
+//           } else {
+//             resolve(0);
+//           }
+//         }, {
+//           onlyOnce: true
+//         });
+//       });
+//     });
+
+//     const monthlyTotals = await Promise.all(promises);
+//     total = monthlyTotals.reduce((acc, curr) => acc + curr, 0);
+//     setTotalAnnualExpenses(total);
+//   };
+
+//   fetchExpenses();
+// }, [year, expenses, activeGirlsHostel]);
+
 useEffect(() => {
+  if (!entireHMAdata || !activeGirlsHostel) return;
+
   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-  let total = 0;
+  let totalAnnualExpenses = 0;
 
-  const fetchExpenses = async () => {
-    const promises = monthNames.map(month => {
-      const monthRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/expenses/${year}-${month}`);
-      return new Promise((resolve) => {
-        onValue(monthRef, (snapshot) => {
-          const expenses = snapshot.val();
-          if (expenses) {
-            const monthlyTotal = Object.values(expenses).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);
-            resolve(monthlyTotal);
-          } else {
-            resolve(0);
-          }
-        }, {
-          onlyOnce: true
-        });
-      });
-    });
+  monthNames.forEach(month => {
+      const expensesData = entireHMAdata?.girls?.[activeGirlsHostel]?.expenses?.[`${year}-${month}`];
+      
+      if (expensesData) {
+          const monthlyTotal = Object.values(expensesData).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);
+          totalAnnualExpenses += monthlyTotal;
+      }
+  });
 
-    const monthlyTotals = await Promise.all(promises);
-    total = monthlyTotals.reduce((acc, curr) => acc + curr, 0);
-    setTotalAnnualExpenses(total);
-  };
+  setTotalAnnualExpenses(totalAnnualExpenses);
+}, [entireHMAdata, activeGirlsHostel, year]);
 
-  fetchExpenses();
-}, [year, expenses, activeGirlsHostel]);
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -456,6 +576,7 @@ const handleExpensesFocus = (e) => {
   }));
 };
 
+
   return (
     <div className='h-100'>
       <>
@@ -467,7 +588,7 @@ const handleExpensesFocus = (e) => {
             <h1 className='management-heading'>{t('expensesPage.expensesManagement')}</h1>
           </div>
           <div className="col-6 col-md-4 search-wrapper">
-            <input type="text" placeholder={t('common.search')} className='search-input' onChange={handleChange} value={searchTerm} />
+            <input type="text" placeholder={t('common.search')} className='search-input' onChange={handleChange} value={searchQuery} />
             <img src={SearchIcon} alt="search-icon" className='search-icon' />
           </div>
           <div className="col-6 col-md-4 d-flex justify-content-end">
@@ -486,15 +607,17 @@ const handleExpensesFocus = (e) => {
           <div style={{display:'flex',marginTop:'10px'}} >
           <div>
             <select className='filterExpenseField' value={year} onChange={e => setYear(e.target.value)}>
-              <option value="2022">2022</option>
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
+            {yearsList.map((yearOption) => (
+          <option key={yearOption} value={yearOption}>
+            {yearOption}
+          </option>
+        ))}
+             
             </select>
           </div>
           <div>
             <select style={{width:'70px'}}className='filterExpenseField' value={month} onChange={e => { setMonth(e.target.value) }}>
-            <option value="jan">{t('months.jan')}</option>
+              <option value="jan">{t('months.jan')}</option>
               <option value="feb">{t('months.feb')}</option>
               <option value="mar">{t('months.mar')}</option>
               <option value="apr">{t('months.apr')}</option>
@@ -509,21 +632,18 @@ const handleExpensesFocus = (e) => {
             </select>
           </div>
       </div>       
-          {/* Additional UI and functionality here */}
+        
    </div>
 
         <div>
           <Table columns={columns} rows={filteredRows} />
         </div>
-        {/* <div>
-          <text><strong>{month} month expenses : {total} </strong>
-          <strong>{year},total expenses :{totalAnnualExpenses} </strong> </text>
-        </div> */}
+    
         <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} id="exampleModalExpensesGirls" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">{t('expensesPage.addExpenses')}</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">{editingExpense? t('expensesPage.updateExpense') : t('expensesPage.addExpenses')}</h1>
                 <button type="button" onClick={onClickClose} class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
@@ -531,25 +651,17 @@ const handleExpensesFocus = (e) => {
                   <form className="row g-3" onSubmit={handleSubmit}>
                     <div className="col-md-6">
                       <label htmlFor="inputExpenseName" className="form-label">{t('expensesPage.expenseName')} :</label>
-                      <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+                      <input type="text" className="form-control" name="expenseName" value={formData.expenseName} onChange={handleInputChange}  onInput={e => e.target.value = e.target.value.replace(/[^a-zA-Z ]/g, '')} onFocus={handleExpensesFocus} />
                       {formErrors.expenseName && <div className="text-danger">{formErrors.expenseName}</div>}
                     </div>
                     <div className="col-md-6">
                       <label htmlFor="inputRent" className="form-label">{t('expensesPage.expenseAmount')} :</label>
-                      <input type="number" className="form-control" name="expenseAmount" value={formData.expenseAmount} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+                      <input type="text" className="form-control" name="expenseAmount" value={formData.expenseAmount} onInput={e => e.target.value = e.target.value.replace(/[^0-9 ]/g, '')} onChange={handleInputChange}  onFocus={handleExpensesFocus} />
                       {formErrors.expenseAmount && <div className="text-danger">{formErrors.expenseAmount}</div>}
                     </div>
                     <div className="col-md-6">
-                      <label htmlFor="inputRole" className="form-label">{t('expensesPage.createdBy')} :</label>
-                      {/* <select className="form-select" id="inputRole" name="createdBy" value={formData.createdBy} onChange={handleInputChange}>
-                        <option value="admin">{t('expensesPage.admin')}</option>
-                        <option value="sub-admin">{t('expensesPage.subAdmin')} </option>
-                      </select> */}
-                      <input disabled={isUneditable} type="text" className='form-control' id="inputRole" value={formData.createdBy} />
-                    </div>
-                    <div className="col-md-6">
                       <label htmlFor="inputDate" className="form-label">{t('expensesPage.expenseDate')} : </label>
-                      <input type="date" className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
+                      <input type="date" min={minDate} max={maxDate} className="form-control" name="expenseDate" value={formData.expenseDate} onChange={handleInputChange} onFocus={handleExpensesFocus} />
                       {formErrors.expenseDate && <div className="text-danger">{formErrors.expenseDate}</div>}
                     </div>
 
@@ -560,7 +672,7 @@ const handleExpensesFocus = (e) => {
                       {editingExpense && (
                         <>
                           <button type="button" className="btn btn-success" style={{ marginRight: '10px' }} onClick={handleUpdate}>{t('expensesPage.updateExpense')}</button>
-                          {role === "admin" ? <button type="button" className="btn btn-danger" onClick={handleDelete}>{t('expensesPage.deleteExpense')}</button> : null }
+                           <button type="button" className="btn btn-danger" onClick={handleDelete}>{t('expensesPage.deleteExpense')}</button> 
                         </>
                       )}
                     </div>

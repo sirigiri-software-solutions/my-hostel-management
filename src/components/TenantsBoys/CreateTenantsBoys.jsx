@@ -7,7 +7,7 @@ const CreateTenantsBoys = () => {
 
   const toggleCreateTenantsBoys = () => {
     setShowCreateTenantsBoys(!showCreateTenantsBoys);
-    setErrors({}); // Clear errors when toggling
+    setErrors({}); 
   };
 
   const handleSubmit = (e) => {
@@ -16,18 +16,16 @@ const CreateTenantsBoys = () => {
     const formData = new FormData(form);
     const newErrors = {};
 
-    // Required field validation
     ['inputImg', 'inputName', 'inputEmergencycon', 'inputRent', 'inputMobile', 'inputUpdatedt', 'inputId', 'inputBed'].forEach((field) => {
       if (!formData.get(field)) {
         newErrors[field] = 'This field is required';
       }
     });
 
-    // Image file validation
     const imageFile = formData.get('inputImg');
     if (imageFile) {
       const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      const maxSize = 5 * 1024 * 1024; // 5 MB
+      const maxSize = 5 * 1024 * 1024; 
 
       if (!allowedTypes.includes(imageFile.type)) {
         newErrors['inputImg'] = 'Invalid file type. Only JPG, JPEG, PNG, or GIF files are allowed.';
@@ -38,14 +36,10 @@ const CreateTenantsBoys = () => {
       }
     }
 
-
-    // Set errors state
     setErrors(newErrors);
 
-    // If there are no errors, you can proceed with form submission
-    if (Object.keys(newErrors).length === 0) {
-      // You can submit the form data or perform other actions here
-    }
+
+  
   };
 
   return (

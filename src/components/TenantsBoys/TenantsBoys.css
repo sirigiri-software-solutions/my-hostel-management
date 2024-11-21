@@ -119,8 +119,10 @@
     flex-direction:column;
     justify-content:center;
   }
+  .close-icon{
+    display:none;
+  }
   .tenants-popup-heading{
-    font-family:'Roboto';
     font-size:28px;
     font-weight:bold;
     text-align:center;
@@ -136,9 +138,18 @@
       align-items:center;
     }
     .tenants-dialog-container{
-      width:400px;
-      height:700px;
-      top:58%;
+      width:290px;
+      height:770px;
+      top:105%;
+      z-index:999;
+    }
+    .close-icon {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size:30px;
+      cursor: pointer;
+      display:inline-block;
     }
   }
   .tenants-profile-container{
@@ -166,12 +177,15 @@
   .popup-tenants-closeBtn{
     text-align:center;
     margin-top:15px;
+    gap:100px;
   }
   .NotUploadedText{
     color:red;
   }
   .downloadPdfText{
     text-decoration:none;
+    color:#007bff;
+    cursor:pointer;
   }
 
 .Radio {
@@ -380,6 +394,7 @@
 }
 #presentTenantBtn{
   width:180px;
+  margin-right:60px;
 }
 @media screen and (max-width:1650px){
   #tenantAddButton{
@@ -442,7 +457,9 @@
   #tenantVacateButton{
     width:60px;
     font-size:10px;
-      font-weight:600;
+    font-weight:600;
+    padding:0px;
+    line-height: 11px;
   }
   #presentTenantBtn{
     width:120px;
@@ -459,3 +476,25 @@
    margin-left: 20px;
   }
  }
+
+ #downloadPdfBtn{
+  margin-left:10px;
+ }
+ .photo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  padding: 20px;
+}
+
+.photo-wrapper {
+  text-align: center;
+}
+.responsive-image {
+  max-width: 100%;
+  height: auto;
+  margin-top: 20px;
+  border: 1px solid #ddd; /* Optional border for visibility */
+  border-radius: 8px; /* Optional rounded corners */
+}

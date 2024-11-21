@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">My-Hostel</string>
+    <string name="title_activity_main">My-Hostel</string>
+    <string name="package_name">com.hostel.app</string>
+    <string name="custom_url_scheme">com.hostel.app</string>
+</resources>

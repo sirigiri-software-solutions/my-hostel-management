@@ -3,8 +3,7 @@
     display: flex;
     background-color: white;
     border-radius: 15px;
-    box-shadow: rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px;
-    /* min-width: 220px; */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 -4px 8px rgba(0, 0, 0, 0.15), 4px 0 8px rgba(0, 0, 0, 0.15), -4px 0 8px rgba(0, 0, 0, 0.15);
     margin-bottom: 10px;
     width:100%;
 }
@@ -36,7 +35,6 @@
     font-size: 24px;
     background-color: rgba(255,141,7, 0.41);
     width: fit-content;
-    /* display:inline-block; */
     font-weight: bold;
     padding: 10px 15px;
     border-radius: 10px;
@@ -61,13 +59,10 @@
  
 .button-container{
     display: flex ;
-    /* justify-content: space-between ; */
     flex-direction: row;
     justify-content:space-between;
     margin-top: 20px;
     width:97%;
- 
-    /* margin-bottom: 20px; */
 }
 @media screen and (max-width:768px){
     .button-container{
@@ -80,20 +75,16 @@
         width:92%;
     }
 }
-/* #boysButtonContainer{
-    display: flex ;
-    justify-content: space-between ;
-} */
  
 @media screen and (max-width: 768px) {
     .modal-dialog {
-      width: 90vw; /* 90% of the viewport width */
-      max-width: none; /* Remove the maximum width */
-      margin: auto; /* Center the modal horizontally */
+      width: 90vw;
+      max-width: none;
+      margin: auto; 
     }
   }
 .modal-footer {
-  border: none !important; /* Remove border */
+  border: none !important;
 }
 #saveChangeButton{
     background-color:#ff8a00 ;
@@ -154,12 +145,7 @@
     border-radius:24px;
     color:#fff;
 }
-/* @media screen and (min-width:646px){
-    #mbladdButton{
-        display:none;
-     
-    }
-} */
+
 @media screen and (max-width:645px){
     #deskaddButton{
         display:none;
@@ -171,35 +157,18 @@
 }
  
 .modal {
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    background-color: rgba(0, 0, 0, 0.5); 
   }
   
   .modal-dialog {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Box shadow for depth effect */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
   }
   
   .modal-content {
-    background-color: white; /* White background for content */
-    border-radius: 10px; /* Rounded corners */
+    background-color: white; 
+    border-radius: 10px; 
   }
-  /* @media screen and (max-width:1440px)
-  {
-    .menu-item{
-        width:20%;
-    }
-  }
-  @media screen and (max-width:768px)
-   {
-     .menu-item{
-        width:70%;
-     }
-    
-     
-    
-  } */
   
-  
-/* styles.css */
 
 .popupBeds {
     display: none;
@@ -221,9 +190,9 @@
     padding: 0px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    max-width: auto; /* Adjust this value according to your design */
+    max-width: auto; 
     width: auto;
-    max-height: 80%; /* Adjust this value according to your design */
+    max-height: 80%;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -276,10 +245,8 @@
     height: 30px;
     width: 50%;
     border-radius: 5px;
-    /* border-color: lightcyan; */
     outline: none;
     margin-left: 10px;
-    /* border-top-color: lightcyan; */
   }
   .bikenumber{
     margin-left:5px;
@@ -287,17 +254,24 @@
   
 
 .custom-modal-body::-webkit-scrollbar {
-    width: 5px; /* Width of the scrollbar */
+    width: 5px; 
 }
   
 .custom-modal-body::-webkit-scrollbar-thumb {
-    background-color: black; /* Color of the thumb (the draggable part of the scrollbar) */
-    border-radius: 5px; /* Border radius of the thumb */
+    background-color: black; 
+    border-radius: 5px; 
 }
   
 .custom-modal-body::-webkit-scrollbar-track {
-    background-color: #f0f0f0; /* Color of the track (the area behind the thumb) */
+    background-color: #f0f0f0;
 }
 .flex{
     margin-bottom: -8px;
 }
+.menu > .cardWithBtnsContainer:nth-child(3),
+.menu > .cardWithBtnsContainer:nth-child(4) {
+  cursor: pointer;
+}
+
+
+

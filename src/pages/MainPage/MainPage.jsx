@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, useRef } from 'react'
+import { useLocation } from 'react-router-dom';
 import DashboardImage from '../../images/Icons (11).png'
 import RoomsImage from '../../images/Icons (2).png'
 import BedsImage from '../../images/Icons (3).png'
@@ -7,8 +8,9 @@ import Admin from '../../images/Icons.png';
 import ExpensesImage from '../../images/Icons (5).png'
 import RentImage from '../../images/Icons (6).png'
 import SettingsImage from '../../images/Icons (7).png'
-import logo from "../../images/image.png"
+import logo from "../../images/HMLogo3.png"
 import './MainPage.css'
+import moment from "moment"
 import '../../Sections/Dashboard/Dashboard.css'
 import Dashboard from '../../Sections/Dashboard/Dashboard'
 import Beds from '../../Sections/Beds/Beds'
@@ -21,23 +23,100 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import Popup from 'reactjs-popup'
 import { AiOutlineClose } from 'react-icons/ai'
 import { DataContext } from '../../ApiData/ContextProvider'
-import { useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { useTranslation } from 'react-i18next'
 import { useData } from '../../ApiData/ContextProvider';
 import Hostels from '../../Sections/Hostels/Hostels'
+import LanguageSwitch from '../../LanguageSwitch'
+import { toast } from 'react-toastify'
+import { Database, onValue, push, ref, set } from 'firebase/database'
+import { Modal, Button, Tab, Tabs, Form } from 'react-bootstrap';
+import DefaultModal from './DefaultModal'
+// import Spinner from '../../Elements/Spinner'
+import Spinner from 'react-bootstrap/Spinner';
+import { App as CapacitorApp } from '@capacitor/app';
+
 const MainPage = () => {
   const { t } = useTranslation()
-  const { activeBoysHostel, activeGirlsHostel } = useData();
+  const [isHostels, setIsHostels] = useState(false)
+  const { activeBoysHostelName, activeGirlsHostelName, entireHMAdata, activeBoysHostelButtons, activeGirlsHostelButtons, userUid, firebase, activeFlag, changeActiveFlag,setUserUid, setEntireHMAdata } = useData();
+  const navigate = useNavigate();
   const name = localStorage.getItem("username");
-  // Refer here for fetched Api Data use like this in all pages don't fetch api url
-  const { data } = useContext(DataContext);
-  console.log("start")
-  if (data != null) {
-    console.log(data && data);
-  }
-  console.log("end");
+  const [isModalOpen1, setIsModalOpen1] = useState(true);
+  const { database } = firebase;
+  const [welcomeText, setWelcomeText] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  const location = useLocation(); 
+
+
+  useEffect(()=>{
+    const isAuthenticated = localStorage.getItem('userUid');
+    if(!isAuthenticated){
+      navigate("/login")
+    }else{
+      navigate("/")
+      
+    }
+    console.log("every Route change working")
+  },[])
+  
+
+
+  // useEffect(() => {
+  //   setActiveTab("boys")
+  // }, [])
+ 
+  // useEffect(() => {
+  //   setIsHostels(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
+  //   setIsModalOpen1(activeBoysHostelButtons.length == 0 && activeGirlsHostelButtons.length == 0  )
+ 
+  // }, [activeBoysHostelButtons, activeGirlsHostelButtons, isModalOpen1])
+ 
+  useEffect(() => {
+    const userId = localStorage.getItem('userUid');
+    const dataref = ref(database, `Hostel/${userId}`);
+ 
+    onValue(dataref, (snapshot) => {
+      const data = snapshot.val();
+ 
+      if (data) {
+        const boys = data.boys || [];
+        const girls = data.girls || [];
+ 
+        // Check if boys and girls are arrays before accessing length
+        if (Array.isArray(boys) || Array.isArray(girls)) {
+          setIsHostels(boys.length === 0 && girls.length === 0);
+          setIsModalOpen1(boys.length === 0 && girls.length === 0);
+        }
+ 
+        setWelcomeText(true);
+        setLoading(false);
+      } else {
+        setIsHostels(true);
+        setIsModalOpen1(true)
+        setWelcomeText(false);
+        setLoading(false);
+ 
+      }
+    });
+  }, [isModalOpen1]);
+ 
+  // console.log(activeBoysHostelButtons.length,"area", "length")
+  // useEffect(() => {
+  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
+  //   onValue(tenantsRef, (snapshot) => {
+  //     const data = snapshot.val();
+  //     const loadedTenants = data ? Object.keys(data).map(key => ({
+  //       id: key,
+  //       ...data[key],
+  //     })) : [];
+  //     setTotalTenantData(loadedTenants)
+  //   })
+ 
+  // }, [selectedTenant])
+ 
   const menuItems = [
     {
       id: 1,
@@ -59,15 +138,15 @@ const MainPage = () => {
     },
     {
       id: 4,
-      path: "/rent",
-      name: t("menuItems.rent"),
-      icon: RentImage,
-    },
-    {
-      id: 5,
       path: "/tenants",
       name: t("menuItems.tenants"),
       icon: TenantsImage,
+    },
+    {
+      id: 5,
+      path: "/rents",
+      name: t("menuItems.rent"),
+      icon: RentImage,
     },
     {
       id: 6,
@@ -87,24 +166,28 @@ const MainPage = () => {
       name: t("menuItems.settings"),
       icon: SettingsImage,
     },
+ 
   ];
-
+ 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showSuggestionModal, setShowSuggestionModal] = useState(true); // State for suggestion modal
 
+
+ 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
-
-  const Components = [<Dashboard />, <Rooms />, <Beds />, <Rents />, <Tenants />, <Expenses />, <Hostels/>, <Settings />]
-
+ 
+  // const Components = [<Dashboard />, <Rooms />, <Beds />, <Tenants />, <Rents />, <Expenses />, <Hostels />, <Settings />]
+ 
   const [flag, setFlag] = useState(1);
-
+ 
   const handlesideBar = (value) => {
     setFlag(value);
+    // setActiveTab("boys")
   }
-
+ 
   useEffect(() => {
-    // Add event listener to handle clicks outside the popup
     const handleClickOutsideModal = (event) => {
       const popup = document.getElementById('poplogoutbtn');
       if (popup && !popup.contains(event.target)) {
@@ -112,17 +195,15 @@ const MainPage = () => {
         setIsModalOpen(false);
       }
     };
-
-    // Attach the event listener
+ 
     document.addEventListener('mousedown', handleClickOutsideModal);
-
-    // Cleanup: remove event listener on component unmount
+ 
     return () => {
       document.removeEventListener('mousedown', handleClickOutsideModal);
     };
   }, []);
-
-
+ 
+ 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -142,123 +223,243 @@ const MainPage = () => {
         setHamburgerMenuItems(false);
       }
     };
-
+ 
     // Call handleResize initially
     handleResize();
-
+ 
     // Add event listener for window resize
     window.addEventListener('resize', handleResize);
-
+ 
     // Cleanup the event listener
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-
-
+ 
+ 
+ 
   const [mainBackgroundContainerStyle, setMainBackgroundContainerStyle] = useState({})
   const [sidebarStyle, setSidebarStyle] = useState({})
   const [sidebarItems, setSidebarItems] = useState({})
   const [rightSectionMainContainer, setrightSectionMainContainer] = useState({})
   const [hamburgerMenu, setHamburgerMenu] = useState(false)
   const [hamburgerMenuItems, setHamburgerMenuItems] = useState(false)
-
+ 
   const handleHamburgerMenu = () => {
     setHamburgerMenuItems(!hamburgerMenuItems)
   }
 
+  const closePopupRef = useRef(null); // Create a ref to store the close function
+  useEffect(() => {
+    const handlePopState = () => {
+      if (closePopupRef.current) {
+        closePopupRef.current(); // Call the close function to close the popup
+      }
+    };
 
-  const handleSidebarItemClick = (itemId, close) => {
+    // Add the event listener for popstate
+    window.addEventListener("popstate", handlePopState);
+
+    // Cleanup function to remove the listener when component unmounts
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+
+  useEffect(()=>{
+    console.log(location.pathname,"path2")
+  },[location.pathname,navigate])
+ 
+ 
+  const handleSidebarItemClick = (itemId, path) => {
+    console.log(path, "pathhh")
+    navigate(path);
     handlesideBar(itemId);
-    close(); // Close the popup modal
+   
+    // close();
+    // setActiveTab('boys');
   }
+  // useEffect(() => {
+  //   const handleAppStateChange = (state) => {
+  //     if (state.isActive) {
+  //       // Navigate to the dashboard when app comes to foreground
+  //       navigate('/dashboard');
+  //     }
+  //   };
 
-  // const [isModalOpen, setIsModalOpen] = useState(false);
+  //   CapacitorApp.addListener('appStateChange', handleAppStateChange);
 
-  // const toggleModal = () => {
-  //   setIsModalOpen(!isModalOpen);
-  // };
-
-  const navigate = useNavigate();
-
+  //   return () => {
+  //     CapacitorApp.removeAllListeners('appStateChange');
+  //   };
+  // }, [navigate]);
+ 
+ 
+ 
+ 
+ 
+ 
+  useEffect(() => {
+    const checkSession = async () => {
+      const uid = localStorage.getItem('userUid');
+      const accessEnd = localStorage.getItem('accessEnd');
+ 
+      if (uid && accessEnd) {
+        const now = moment();
+        const endTime = moment(accessEnd);
+ 
+        // if (now.isAfter(endTime)) {
+        //   navigate('/subscribe');
+        // }
+      } 
+      // else {
+ 
+      //   navigate('/subscribe');
+      // }
+    };
+ 
+    checkSession();
+ 
+ 
+  }, [navigate, flag]);
+ 
   const logout = () => {
-    // Clear any stored data related to user session
-    localStorage.removeItem('username');
+    setEntireHMAdata([])
+    localStorage.removeItem('username'); //
     localStorage.removeItem('userarea');
     localStorage.removeItem('role');
     localStorage.removeItem('userUid');
     localStorage.removeItem('rememberedUsername');
     localStorage.removeItem('rememberedUserarea');
     localStorage.removeItem('rememberedPassword');
-    // Redirect to login page
-    navigate('/');
+    localStorage.removeItem("accessEnd");
+    localStorage.clear();
+    setUserUid(null)
+    navigate('/login');
+    // setLogoutFlag(true);
+  };
+  console.log(userUid, 'k_001011x')
+  console.log(entireHMAdata, 'k_00101')
+ 
+ 
+  const renderWelcomeext = index => {
+    // console.log(Components.length, "index")
+    // if (index === Components.length) {
+    //   return null;
+    // }
+    return (
+      <>
+        {activeFlag === 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeBoysHostelName}&nbsp;{t('dashboard.boysHostel')}</p>}
+        {activeFlag !== 'boys' && <p>{t('dashboard.welcomeTo')}&nbsp;{activeGirlsHostelName}&nbsp;{t('dashboard.girlsHostel')}</p>}
+      </>
+    )
+  }
+ const handleOpenModal = () => {
+    setIsModalOpen1(true);
+  };
+ 
+  const handleCloseModal = () => {
+    setIsModalOpen1(false);
   };
 
+  // useEffect(() =>{
+  //   console.log(location.pathname,"getPthname")
+  // })
+ 
   return (
     <div className='bg-container' style={mainBackgroundContainerStyle}>
       <div className='sidebar' style={sidebarStyle}>
         <div className='top-section' >
           <img src={logo} alt="logo" className='logo' />
         </div>
+ 
         <div className='nav-div' >
-        <div className='menufontchange'>
-          <img src={Admin} alt="admin" className='mbl-dashboard-icon' />
-          <h1 className='mb-dashboard-name'>{name}</h1>
+          <div className='menufontchange'>
+            <img src={Admin} alt="admin" className='mbl-dashboard-icon' />
+            <h1 className='mb-dashboard-name'>{name}</h1>
           </div>
           <div className='logoutButton' onClick={toggleModal}>
             <RiLogoutCircleRLine />
           </div>
         </div>
+ 
         <div style={sidebarItems}>
           {
             menuItems.map((item, index) => (
-              <div key={index} className="link" style={flag === item.id ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() => handlesideBar(item.id)}>
+              <div key={index} className="link" style={item.path === location.pathname ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() =>  handleSidebarItemClick(item.id, item.path)}>
                 <img src={item.icon} alt={item.name} className='icon' />
                 <label className='link-text'>{item.name}</label>
               </div>
             ))
           }
         </div>
-        <Popup modal
-          trigger={<GiHamburgerMenu style={hamburgerMenu} onClick={handleHamburgerMenu} />}>
-          {close => (
-            <div style={{
+        <Popup
+      modal
+      trigger={<GiHamburgerMenu style={hamburgerMenu} onClick={handleHamburgerMenu} />}
+      onOpen={() => {
+        // Push state to history when popup opens
+        window.history.pushState({ popup: true }, "");
+      }}
+    >
+      {close => {
+        closePopupRef.current = close; // Assign the close function to the ref
+
+        return (
+          <div
+            style={{
               backgroundColor: "#fff",
               minHeight: "100vh",
               minWidth: "100vw",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              position: "relative"
-            }}>
-              <div style={{ display: "flex", flexDirection: "Column" }}>
-                {
-
-                  menuItems.map((item, index) => (
-                    <div key={index} className="link" style={flag === item.id ? { backgroundColor: 'hsla(30, 100%, 50%, 0.41)', borderRadius: '10px' } : { borderRadius: '10px' }} onClick={() => handleSidebarItemClick(item.id, close)}>
-                      <img src={item.icon} alt={item.name} className='icon' />
-                      <label className='link-text'>{item.name}</label>
-                    </div>
-                  ))
-
-                }
-              </div>
-              <AiOutlineClose
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                }}
-                onClick={() => close()} />
+              position: "relative",
+            }}
+          >
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {menuItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="link"
+                  style={
+                    item.path === location.pathname
+                      ? {
+                          backgroundColor: "hsla(30, 100%, 50%, 0.41)",
+                          borderRadius: "10px",
+                        }
+                      : { borderRadius: "10px" }
+                  }
+                  onClick={() => {
+                    handleSidebarItemClick(item.id, item.path);
+                    close();
+                  }}
+                >
+                  <img src={item.icon} alt={item.name} className="icon" />
+                  <label className="link-text">{item.name}</label>
+                </div>
+              ))}
             </div>
-          )}
-        </Popup>
-      </div>
-
+            <AiOutlineClose
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+              }}
+              onClick={() => close()}
+            />
+          </div>
+        );
+      }}
+    </Popup>      
+    </div>
+ 
+ 
+ 
       <div style={rightSectionMainContainer} >
+ 
         <div >
           <div className='dashboardHead'>
             <div className='dashBoarWelcome'>
-              <text>{t('dashboard.welcomeTo')} {activeBoysHostel} {t('dashboard.boysHostel')}  , {activeGirlsHostel} {t('dashboard.girlsHostel')} </text>
+              {welcomeText ? renderWelcomeext(flag) : null}
             </div>
             <div className='top-div'>
               <img src={Admin} alt="admin" className='dashboard-icon' />
@@ -268,27 +469,45 @@ const MainPage = () => {
               </div>
             </div>
           </div>
-
+ 
           {isModalOpen && (
-            <div id="poplogoutbtn" className="popup">
+            <div id="poplogoutbtn" className="mainPagepPopup">
               <div>
                 <p>Manage your account</p>
               </div>
               <p>Are you sure you want to logout?</p>
               <button onClick={logout} className="logout-button">Logout</button>
-
               <button className='logout-closeBtn' onClick={toggleModal}>Close</button>
             </div>
           )}
         </div>
-        {Components && Components.map((item, index) =>
-          <div key={index} style={flag === index + 1 ? { display: 'block' } : { display: 'none' }}>
-            {item}
-          </div>)}
-
+ 
+        {loading && <div className="spinnerContainer"> <Spinner animation="border" variant="info" role="status" size="lg">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        </div>}
+        {loading ? '':
+          isHostels ? (
+            <div>
+              <DefaultModal show={isModalOpen1} handleClose={handleCloseModal} />
+            </div>
+          ) : (
+            // Components && Components.map((item, index) => (
+            //   <div key={index} style={flag === index + 1 ? { display: 'block' } : { display: 'none' }}>
+            //     {item}
+            //   </div>
+            // ))
+            <>
+            <Outlet/>
+            </>
+          )
+        }
+ 
       </div>
+      {/* <Onboarding show={showSuggestionModal} handleClose={() => setShowSuggestionModal(false)} /> */}
+
     </div>
   )
 }
-
+ 
 export default MainPage;
