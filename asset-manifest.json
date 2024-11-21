@@ -1,24 +1,38 @@
 {
   "files": {
-    "main.css": "/my-hostel-management/static/css/main.9156a159.css",
-    "main.js": "/my-hostel-management/static/js/main.df123574.js",
+    "main.css": "/my-hostel-management/static/css/main.b56a0171.css",
+    "main.js": "/my-hostel-management/static/js/main.36dd7346.js",
+    "static/js/551.effe0350.chunk.js": "/my-hostel-management/static/js/551.effe0350.chunk.js",
+    "static/js/738.bf7f547b.chunk.js": "/my-hostel-management/static/js/738.bf7f547b.chunk.js",
+    "static/js/653.c7647a5d.chunk.js": "/my-hostel-management/static/js/653.c7647a5d.chunk.js",
+    "static/js/923.2bce429e.chunk.js": "/my-hostel-management/static/js/923.2bce429e.chunk.js",
+    "static/js/627.cff343c9.chunk.js": "/my-hostel-management/static/js/627.cff343c9.chunk.js",
     "static/js/581.b80fa3e4.chunk.js": "/my-hostel-management/static/js/581.b80fa3e4.chunk.js",
+    "static/js/457.c27e5ec6.chunk.js": "/my-hostel-management/static/js/457.c27e5ec6.chunk.js",
     "static/js/239.b6e47f06.chunk.js": "/my-hostel-management/static/js/239.b6e47f06.chunk.js",
     "static/js/213.5a95ca2c.chunk.js": "/my-hostel-management/static/js/213.5a95ca2c.chunk.js",
     "static/js/732.9bf05e02.chunk.js": "/my-hostel-management/static/js/732.9bf05e02.chunk.js",
+    "static/js/842.fb278aad.chunk.js": "/my-hostel-management/static/js/842.fb278aad.chunk.js",
     "static/js/453.8e2187e8.chunk.js": "/my-hostel-management/static/js/453.8e2187e8.chunk.js",
     "static/media/HMLogo3.png": "/my-hostel-management/static/media/HMLogo3.ccbeb8eed19273e61eee.png",
     "index.html": "/my-hostel-management/index.html",
-    "main.9156a159.css.map": "/my-hostel-management/static/css/main.9156a159.css.map",
-    "main.df123574.js.map": "/my-hostel-management/static/js/main.df123574.js.map",
+    "main.b56a0171.css.map": "/my-hostel-management/static/css/main.b56a0171.css.map",
+    "main.36dd7346.js.map": "/my-hostel-management/static/js/main.36dd7346.js.map",
+    "551.effe0350.chunk.js.map": "/my-hostel-management/static/js/551.effe0350.chunk.js.map",
+    "738.bf7f547b.chunk.js.map": "/my-hostel-management/static/js/738.bf7f547b.chunk.js.map",
+    "653.c7647a5d.chunk.js.map": "/my-hostel-management/static/js/653.c7647a5d.chunk.js.map",
+    "923.2bce429e.chunk.js.map": "/my-hostel-management/static/js/923.2bce429e.chunk.js.map",
+    "627.cff343c9.chunk.js.map": "/my-hostel-management/static/js/627.cff343c9.chunk.js.map",
     "581.b80fa3e4.chunk.js.map": "/my-hostel-management/static/js/581.b80fa3e4.chunk.js.map",
+    "457.c27e5ec6.chunk.js.map": "/my-hostel-management/static/js/457.c27e5ec6.chunk.js.map",
     "239.b6e47f06.chunk.js.map": "/my-hostel-management/static/js/239.b6e47f06.chunk.js.map",
     "213.5a95ca2c.chunk.js.map": "/my-hostel-management/static/js/213.5a95ca2c.chunk.js.map",
     "732.9bf05e02.chunk.js.map": "/my-hostel-management/static/js/732.9bf05e02.chunk.js.map",
+    "842.fb278aad.chunk.js.map": "/my-hostel-management/static/js/842.fb278aad.chunk.js.map",
     "453.8e2187e8.chunk.js.map": "/my-hostel-management/static/js/453.8e2187e8.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.9156a159.css",
-    "static/js/main.df123574.js"
+    "static/css/main.b56a0171.css",
+    "static/js/main.36dd7346.js"
   ]
 }
