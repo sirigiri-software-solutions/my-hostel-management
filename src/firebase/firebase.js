@@ -151,13 +151,13 @@ const appNanakramguda = initializeApp(nanakramgudaConfig, "appNanakramguda")
 
 // Firebase instances
 const firebaseInstances = {
-  ameerpet: {
+  Ameerpet: {
     app: appAmeerpet,
     database: getDatabase(appAmeerpet),
     storage: getStorage(appAmeerpet),
     auth: getAuth(appAmeerpet),
   },
-  srnagar: {
+  SRNagar: {
     app: appSrnagar,
     database: getDatabase(appSrnagar),
     storage: getStorage(appSrnagar),
@@ -175,55 +175,55 @@ const firebaseInstances = {
     storage: getStorage(appSecunderabad),
     auth: getAuth(appSecunderabad),
   },
-  kukatpally: {
+  Kukatpally: {
     app: appKukatpally,
     database: getDatabase(appKukatpally),
     storage: getStorage(appKukatpally),
     auth: getAuth(appKukatpally),
   },
-  gachibouli: {
+  Gachibowli: {
     app: appGachibouli,
     database: getDatabase(appGachibouli),
     storage: getStorage(appGachibouli),
     auth: getAuth(appGachibouli),
   },
-  ashoknagar: {
+  AshokNagar: {
     app: appAshoknagar,
     database: getDatabase(appAshoknagar),
     storage: getStorage(appAshoknagar),
     auth: getAuth(appAshoknagar),
   },
-  dhilshuknagar: {
+  Dilsukhnagar: {
     app: appDhilshuknagar,
     database: getDatabase(appDhilshuknagar),
     storage: getStorage(appDhilshuknagar),
     auth: getAuth(appDhilshuknagar),
   },
-  himayathnagar: {
+  Himayatnagar: {
     app: appHimayathnagar,
     database: getDatabase(appHimayathnagar),
     storage: getStorage(appHimayathnagar),
     auth: getAuth(appHimayathnagar),
   },
-  madhuranagar: {
+  MadhuraNagar: {
     app: appMadhuranagar,
     database: getDatabase(appMadhuranagar),
     storage: getStorage(appMadhuranagar),
     auth: getAuth(appMadhuranagar),
   },
-  madhapur: {
+  Madhapur: {
     app: appMadhapur,
     database: getDatabase(appMadhapur),
     storage: getStorage(appMadhapur),
     auth: getAuth(appMadhapur),
   },
-  lbnagar: {
+  LBNagar: {
     app: appLbnagar,
     database: getDatabase(appLbnagar),
     storage: getStorage(appLbnagar),
     auth: getAuth(appLbnagar),
   },
-  nanakramguda: {
+  Nanakramguda: {
     app: appNanakramguda,
     database: getDatabase(appNanakramguda),
     storage: getStorage(appNanakramguda),

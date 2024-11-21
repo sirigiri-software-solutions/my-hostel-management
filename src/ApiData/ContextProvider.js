@@ -41,19 +41,19 @@ const DataProvider = ({ children }) => {
   const [firebase, setFirebase] = useState(firebaseInstances[defaultArea]);
   
   const areaToApiEndPointEntireData = {
-    ameerpet:`https://ameerpet-c73e9-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
-    srnagar:`https://sr-nagar-4426a-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    Ameerpet:`https://ameerpet-c73e9-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    SRNagar:`https://sr-nagar-4426a-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
     secunderabad: `https://sr-nagar-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
     default:`https://defaulthostel-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
-    kukatpally:`https://kukatpally-76219-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
-    gachibouli:`https://gachibouli-fc19f-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
-    ashoknagar:`https://ashoknagar-385c1-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
-    dhilshuknagar:`https://dhilshuknagar-85672-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
-    himayathnagar:`https://himayathnagar-43760-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
-    madhuranagar:`https://madhuranagar-4da77-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
-    madhapur:`https://madharpur-221df-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
-    lbnagar:`https://lbnagar-86ba7-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
-    nanakramguda:`https://nanakramguda-ebe50-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    Kukatpally:`https://kukatpally-76219-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    Gachibowli:`https://gachibouli-fc19f-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    AshokNagar:`https://ashoknagar-385c1-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    Dilsukhnagar:`https://dhilshuknagar-85672-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    Himayatnagar:`https://himayathnagar-43760-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    MadhuraNagar:`https://madhuranagar-4da77-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    Madhapur:`https://madharpur-221df-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    LBNagar:`https://lbnagar-86ba7-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
+    Nanakramguda:`https://nanakramguda-ebe50-default-rtdb.firebaseio.com/Hostel/${userUid}.json`,
   }
  
   const fetchData = async () => {
@@ -233,19 +233,19 @@ const DataProvider = ({ children }) => {
  
   const areaToApiEndpoint = {
     // hyderabad: "https://ameerpet-588ee-default-rtdb.firebaseio.com/register.json",
-    ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
-    srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
+    Ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
+    SRNagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
     // secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
     default:"https://defaulthostel-default-rtdb.firebaseio.com/register.json",
-    kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
-    gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
-    ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
-    dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
-    himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
-    madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
-    madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
-    lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
-    nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/register.json"
+    Kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
+    Gachibowli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
+    AshokNagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
+    Dilsukhnagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
+    Himayatnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
+    MadhuraNagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
+    Madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
+    LBNagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
+    Nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/register.json"
   };
  
  

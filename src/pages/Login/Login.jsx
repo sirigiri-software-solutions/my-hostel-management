@@ -26,19 +26,19 @@ const Login = () => {
 
   const areaToApiEndpoint = {
     // hyderabad: "https://ameerpet-588ee-default-rtdb.firebaseio.com/register.json",
-    ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
-    srnagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
+    Ameerpet:"https://ameerpet-c73e9-default-rtdb.firebaseio.com/register.json",
+    SRNagar:"https://sr-nagar-4426a-default-rtdb.firebaseio.com/register.json",
     // secunderabad: "https://sr-nagar-default-rtdb.firebaseio.com/register.json",
     default:"https://defaulthostel-default-rtdb.firebaseio.com/register.json",
-    kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
-    gachibouli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
-    ashoknagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
-    dhilshuknagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
-    himayathnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
-    madhuranagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
-    madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
-    lbnagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
-    nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/register.json"
+    Kukatpally:"https://kukatpally-76219-default-rtdb.firebaseio.com/register.json",
+    Gachibowli:"https://gachibouli-fc19f-default-rtdb.firebaseio.com/register.json",
+    AshokNagar:"https://ashoknagar-385c1-default-rtdb.firebaseio.com/register.json",
+    Dilsukhnagar:"https://dhilshuknagar-85672-default-rtdb.firebaseio.com/register.json",
+    Himayatnagar:"https://himayathnagar-43760-default-rtdb.firebaseio.com/register.json",
+    MadhuraNagar:"https://madhuranagar-4da77-default-rtdb.firebaseio.com/register.json",
+    Madhapur:"https://madharpur-221df-default-rtdb.firebaseio.com/register.json",
+    LBNagar:"https://lbnagar-86ba7-default-rtdb.firebaseio.com/register.json",
+    Nanakramguda:"https://nanakramguda-ebe50-default-rtdb.firebaseio.com/register.json"
   };
 
   const initialState = { Id: "", email: "", area: "", password: "" };
@@ -75,7 +75,7 @@ const Login = () => {
 
 
 
-  const areaOptions = [ "default", "ameerpet", "srnagar", "kukatpally", "gachibouli", "ashoknagar", "dhilshuknagar", "himayathnagar", "madhuranagar", "madhapur", "lbnagar", "nanakramguda"];
+  const areaOptions = [ "default", "Ameerpet", "SRNagar", "Kukatpally", "Gachibowli", "AshokNagar", "Dilsukhnagar", "Himayatnagar", "MadhuraNagar", "Madhapur", "LBNagar", "Nanakramguda"];
 
 
   const [signUpEmail, setSignUpEmail] = useState("");
@@ -578,7 +578,7 @@ const [formSubmiting, setFormSubmiting] = useState(false)
     const firebase = firebaseInstances[area]
     const { auth, database  } = firebase;
 
-    const apiEndpoint = areaToApiEndpoint[area.toLowerCase()] || "https://default-api.com/register.json";
+    const apiEndpoint = areaToApiEndpoint[area] || "https://default-api.com/register.json";
 
 
     try {
@@ -662,7 +662,7 @@ const [formSubmiting, setFormSubmiting] = useState(false)
   }
 
   const capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    return string.replace(/([A-Z])/g, (match, p1, offset) => offset === 0 ? p1 : ' ' + p1);
   };
 
 
