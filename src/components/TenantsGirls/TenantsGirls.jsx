@@ -32,6 +32,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const TenantsGirls = ({searchQuery,setSearchQuery,showBikeFilter,setShowBikeFilter,selectedStatus,setSelectedStatus}) => {
+  console.log(selectedStatus,'selectedStatus')
   const navigate= useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -121,66 +122,12 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
     // Check if the user agent is a mobile device
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     setIsMobile(/iPhone|iPod|iPad|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent));
+    return () =>{
+      setSelectedStatus('')
+      }
 }, []);
 
-  // const takePicture = async () => {
-
-  //   if (!isMobile) {
-  //     console.error("Camera access is not supported on your device.");
-  //     return;
-  // }
-  //   try {
-  //     const photo = await Camera.getPhoto({
-  //       quality: 90,
-  //       allowEditing: false,
-  //       resultType: CameraResultType.Uri
-  //     });
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setPhotoUrl(reader.result);
-  //       setTenantImage(reader.result);
-  //     };
-  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
-      
-      // const response = await fetch(photo.webPath);
-      // const blob = await response.blob();
-      // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-      // const snapshot = await uploadBytes(imageRef, blob);
-      // const url = await getDownloadURL(snapshot.ref);
-      
-      // setPhotoUrl(url); // Display in UI
-      // setTenantImageUrl(url); // Use in form submission
-      // setPhotoUrl(photo.webPath);
-  //   } catch (error) {
-  //     console.error("Error accessing the camera", error);
-  //     toast.error(t('toastMessages.Image not Uploaded'));
-  //   }
-  // };
-
-  // const takePicture = async () => {
-  //   if (!isMobile) {
-  //     console.error("Camera access is not supported on your device.");
-  //     return;
-  //   }
-  //   try {
-  //     const photo = await Camera.getPhoto({
-  //       quality: 90,
-  //       allowEditing: false,
-  //       resultType: CameraResultType.Uri
-  //     });
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setPhotoUrl(reader.result);
-  //       setTenantImage(reader.result);
-  //     };
-  //     fetch(photo.webPath)
-  //       .then(response => response.blob())
-  //       .then(blob => reader.readAsDataURL(blob));
-  //   } catch (error) {
-  //     console.error("Error accessing the camera", error);
-  //     toast.error(t('toastMessages.imageNotUploaded'));
-  //   }
-  // }
+  
   const takePicture = async () => {
     if (!isMobile) {
         console.error("Camera access is not supported on your device.");
@@ -226,65 +173,7 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
         // toast.error(t('toastMessages.imageNotUploaded'));    
       }
 }
-  // const takeidPicture = async () => {
-
-  //   if (!isMobile) {
-  //     console.error("Camera access is not supported on your device.");
-  //     return;
-  // }
-  //   try {
-  //     const photo = await Camera.getPhoto({
-  //       quality: 90,
-  //       allowEditing: false,
-  //       resultType: CameraResultType.Uri
-  //     });
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setIdUrl(reader.result);
-  //       setTenantId(reader.result);
-  //     };
-  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
-
-  //     // const response = await fetch(photo.webPath);
-  //     // const blob = await response.blob();
-  //     // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-  //     // const snapshot = await uploadBytes(imageRef, blob);
-  //     // const url = await getDownloadURL(snapshot.ref);
-      
-  //     // setIdUrl(url); // Display in UI
-  //     // setTenantIdUrl(url); // Use in form submission
-  //     // setPhotoUrl(photo.webPath);
-  //   } catch (error) {
-  //     console.error("Error accessing the camera", error);
-  //     toast.error(t('toastMessages.idNotUploaded'));
-  //   }
-  // };
-
-
-
-
-
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-
-  //   const reader = new FileReader();
-
-  //   reader.onload = () => {
-  //     setBikeImage(reader.result);
-  //   };
-  //   reader.readAsDataURL(file);
-  // };
-
-
-  // const handleRcChange = (e) => {
-  //   const file1 = e.target.files[0];
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     setBikeRcImage(reader.result);
-  //   }
-  //   reader.readAsDataURL(file1);
-
-  // }
+  
   const takeidPicture = async () => {
     if (!isMobile) {
         console.error("Camera access is not supported on your device.");
@@ -370,77 +259,7 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
   
   }, []);
 
-  // useEffect(() => {
-  //   if (entireHMAdata && typeof entireHMAdata === 'object') {
-  //     // Extract the values from the data object
-  //     const boysAndGirlsData = Object.values(entireHMAdata);
   
-  //     // Ensure we have data and that it contains 'boys'
-  //     if (boysAndGirlsData.length > 0 && boysAndGirlsData[0].boys) {
-  //       const boysData = Object.values(boysAndGirlsData[0].girls);
-  
-  //       // Check if there's data in boysData
-  //       if (boysData.length > 0) {
-  //         // const tenantsData = boysData[0].tenants || {};
-  //         // const roomsData = boysData[0].rooms || {};
-  //         const extenantsData = boysData[0].extenants || {};
-  
-  //         // Map the data to the required format
-  //         // const loadedTenants = Object.entries(tenantsData).map(([key, value]) => ({
-  //         //   id: key,
-  //         //   ...value,
-  //         // }));
-  
-  //         // const loadedRooms = Object.entries(roomsData).map(([key, value]) => ({
-  //         //   id: key,
-  //         //   ...value,
-  //         // }));
-  
-  //         // const loadedExTenants = Object.entries(extenantsData).map(([key, value]) => ({
-  //         //   id: key,
-  //         //   ...value,
-  //         // }));
-  
-  //         // Update the state with the processed data
-  //         // setTenants(loadedTenants); 
-  //         // setGirlsRooms(loadedRooms);
-  //         setExTenants(loadedExTenants);
-  //       }
-  //     }
-  //   }
-  // }, [entireHMAdata]);
-  
-
-
-  // useEffect(() => {
-  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-  //   onValue(tenantsRef, snapshot => {
-  //     const data = snapshot.val() || {};
-  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
-  //       id: key,
-  //       ...value,
-  //     }));
-  //     setTenants(loadedTenants);
-  //   });
-  // }, [activeGirlsHostel]);
-
-
-  // const [girlsRooms, setGirlsRooms] = useState([]);
-  // useEffect(() => {
-  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-  //   onValue(roomsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedRooms = [];
-  //     for (const key in data) {
-  //       loadedRooms.push({
-  //         id: key,
-  //         ...data[key]
-  //       });
-  //     }
-  //     setGirlsRooms(loadedRooms);
-  //   });
-  // }, [activeGirlsHostel]);
-
   const [bedsData, setBedsData] = useState([]);
   const [showBoysRoom, setShowBoysRooms] = useState([]);
 
@@ -573,49 +392,6 @@ const [photoSource, setPhotoSource] = useState(null); // Track if photo is from 
     setErrors(tempErrors);
     return Object.keys(tempErrors).every((key) => tempErrors[key] === "");
   };
-
-  
-
- 
-
-  // const handleTenantImageChange = (e) => {
-  //   if (e.target.files[0]) {
-  //     setTenantImage(e.target.files[0]);
-  //   }
-  // };
-  // const handleTenantIdChange = (e) => {
-  //   if (e.target.files[0]) {
-  //     const file = e.target.files[0]
-  //     setFileName(file.name)
-  //     setTenantId(e.target.files[0]);
-  //   }
-  // };
-
-  // const handleTenantBikeChange = (e) => {
-  //   if (e.target.files[0]) {
-  //     setBikeImage(e.target.files[0]);
-  //   }
-  // };
-  // const handleTenantBikeRcChange = (e) => {
-  //   if (e.target.files[0]) {
-  //     setBikeRcImage(e.target.files[0]);
-  //   }
-  // };
-
-
-
-  // const handleTenantIdChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       setTenantId(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-
-
 
 
   const handleTenantImageChange = (e) => {
@@ -1236,16 +1012,7 @@ if (bikeRcImage) {
     setErrors({});
 
   };
-  // const fetchExTenants = () => {
-  //   const exTenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/extenants`);
-  //   onValue(exTenantsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedExTenants = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...value })) : [];
-  //     setExTenants(loadedExTenants);
-  //   });
-  // };
-  // useEffect(() => { fetchExTenants() }, []);
-
+  
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [tenantIdToDelete, setTenantIdToDelete] = useState(null);
@@ -1349,9 +1116,6 @@ if (bikeRcImage) {
     }));
   };
 
-  //handleGirlTenantDownload
-  // const isPDF = (fileData) => fileData.startsWith('data:application/pdf');
-  // const isImage = (fileData) => fileData.startsWith('data:image/');
   const isPDF = (contentType) => contentType === 'application/pdf';
 const isImage = (contentType) => contentType.startsWith('image/');
   
@@ -1800,6 +1564,7 @@ const handleDownload = async (url, type, tenantName) => {
                 id="status-toggleGirl1"
                 className="toggle-checkbox"
                 onChange={handleChange}
+                checked={selectedStatus === 'YES'}
               />
               <label className="toggle-switch" htmlFor="status-toggleGirl1">
                 <span className="toggle-text">No</span>

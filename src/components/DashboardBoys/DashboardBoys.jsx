@@ -135,18 +135,18 @@ const DashboardBoys = ({show}) => {
 
   const getCurrentMonth = () => {
     const monthNames = [
-      t('months.jan'),
-      t('months.feb'),
-      t('months.mar'),
-      t('months.apr'),
-      t('months.may'),
-      t('months.jun'),
-      t('months.jul'),
-      t('months.aug'),
-      t('months.sep'),
-      t('months.oct'),
-      t('months.nov'),
-      t('months.dec')
+      "jan",
+      "feb",
+      "mar",
+      "apr",
+      "may",
+      "jun",
+      "jul",
+      "aug",
+      "sep",
+      "oct",
+      "nov",
+      "dec"
     ];
     const currentMonth = new Date().getMonth();
     return monthNames[currentMonth];
@@ -220,21 +220,22 @@ const DashboardBoys = ({show}) => {
     }
 
     const loadedExpenses = [];
-    let totalExpenses = 0;
-
+    let totalExpensesU = 0;
+    console.log(expensesData,"expensesData")
     for (const key in expensesData) {
       const expense = {
         id: key,
         ...expensesData[key],
         expenseDate: formatDate(expensesData[key]?.expenseDate || ""), // Handle missing expenseDate
       };
-      totalExpenses += expense.expenseAmount || 0; // Ensure expenseAmount exists
+      totalExpensesU += expense.expenseAmount || 0; // Ensure expenseAmount exists
       loadedExpenses.push(expense);
     }
+    console.log(totalExpenses,'expense')
 
     setCurrentMonthExpenses(loadedExpenses); // Update the current month's expenses
-    setTotalExpenses(totalExpenses); // Update the total expenses for the current month
-  }, [entireHMAdata, activeBoysHostel, month, year]);
+    // setTotalExpenses(totalExpensesU); // Update the total expenses for the current month
+  }, [entireHMAdata, activeBoysHostel, boysRooms, boysTenants, month, year]);
 
 
   const [showBoysRoom, setShowBoysRooms] = useState([]);
@@ -681,11 +682,13 @@ const DashboardBoys = ({show}) => {
 
   useEffect(() => {
     const formattedMonth = month.slice(0, 3).toLowerCase();
+    console.log(formattedMonth, year)
     const expensesRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${formattedMonth}`);
     onValue(expensesRef, (snapshot) => {
       const data = snapshot.val();
       let total = 0; // Variable to hold the total expenses
       const expensesArray = [];
+      console.log(data)
       for (const key in data) { 
         const expense = {
           id: key,
@@ -696,11 +699,11 @@ const DashboardBoys = ({show}) => {
         total += expense.expenseAmount; // Add expense amount to total
         expensesArray.push(expense);
       }
-      console.log(expensesArray, year, formattedMonth, "expenses")
+      console.log(total)
       setCurrentMonthExpenses(expensesArray);
       setTotalExpenses(total); // Set total expenses state
     });
-  }, [activeBoysHostel]);
+  }, []);
 
 
   const validate = () => {

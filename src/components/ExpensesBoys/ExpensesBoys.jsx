@@ -27,7 +27,7 @@ const ExpensesBoys = ({searchQuery,setSearchQuery,month,setMonth}) => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
   const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, setExpensesInteracted, expensesInteracted, entireHMAdata, fetchData} = useData();
   const { database } = firebase;
-  // const [searchTerm, setSearchTerm] = useState('');
+  
   const [initialRows, setInitialRows] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
@@ -282,9 +282,6 @@ const ExpensesBoys = ({searchQuery,setSearchQuery,month,setMonth}) => {
     })
   };
 
-
-
-
   const handleUpdate = () => {
     if (!editingExpense) return;
 
@@ -314,8 +311,6 @@ const ExpensesBoys = ({searchQuery,setSearchQuery,month,setMonth}) => {
       errors.expenseAmount = t('errors.expenseAmountRequired');
       formIsValid = false;
     }
-
-
 
     if (formIsValid) {
       let updatedFormData = {
