@@ -83,7 +83,9 @@
     "notify": "తెలియజేయండి",
     "welcomeTo": "స్వాగతం",
     "boysHostel": "బాలురు హాస్టల్‌కీ",
-    "girlsHostel": "మహిళా హాస్టల్‌కీ"
+    "girlsHostel": "మహిళా హాస్టల్‌కీ",
+    "boysHostelNotAdded": "మీరు ఏ పురుషుల హాస్టల్‌ను జోడించలేదు, దయచేసి సెట్టింగ్స్‌లో మీ మొదటి హాస్టల్‌ను జోడించండి.",
+    "girlsHostelNotAdded":"మీరు ఏ మహిళల హాస్టల్‌ను జోడించలేదు, దయచేసి సెట్టింగ్స్‌లో మీ మొదటి హాస్టల్‌ను జోడించండి."
   },
   "roomsPage": {
     "S.No": "క్రమ సంఖ్య",
@@ -368,7 +370,12 @@
     "hostelNameMustContainAlphabets":"హాస్టల్ పేరు కేవలం అక్షరాలను మాత్రమే కలిగి ఉండాలి",
     "pleaseSelectAFile":"దయచేసి ఒక ఫైల్‌ను ఎంచుకోండి",
     "pleaseUploadValidImage":"దయచేసి సరైన ఇమేజ్ ఫైల్‌ను అప్‌లోడ్ చేయండి (JPEG, PNG, GIF)",
-    "failedToAddNewHostel": "కొత్త హాస్టల్‌ను జోడించడంలో విఫలమైంది."
+    "failedToAddNewHostel": "కొత్త హాస్టల్‌ను జోడించడంలో విఫలమైంది.",
+    "new": "కొత్త",
+    "mens": "పురుషుల",
+    "womens": "మహిళల",
+    "hostel": "హాస్టల్",
+    "addedsuccessfully": "విజయవంతంగా జోడించబడింది"
 },
 "settings": {
   "languages": "భాషలు",

@@ -50,14 +50,12 @@ const DashboardBoys = ({show}) => {
   const [floorNumber, setFloorNumber] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [numberOfBeds, setNumberOfBeds] = useState('');
-  // const [rooms, setRooms] = useState([]);
   const [bedRent, setBedRent] = useState('');
   const [currentId, setCurrentId] = useState('');
   const [createdBy, setCreatedBy] = useState(adminRole);
   const [updateDate, setUpdateDate] = useState('');
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(show);
-  // const backButtonPressed = useRef(false); // Track if the back button was already pressed
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [currentMonthExpenses, setCurrentMonthExpenses] = useState([])
   const [selectedRoom, setSelectedRoom] = useState('');
@@ -69,7 +67,6 @@ const DashboardBoys = ({show}) => {
   const [idNumber, setIdNumber] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [status, setStatus] = useState('occupied');
-  // const [tenants, setTenants] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentTenantId, setCurrentTenantId] = useState('');
   const [tenatErrors, setTenantErrors] = useState({});
@@ -123,7 +120,6 @@ const DashboardBoys = ({show}) => {
   const [totalFee, setTotalFee] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
   const [due, setDue] = useState('');
-  // const [tenantsWithRents, setTenantsWithRents] = useState([]);
   const [paidDate, setPaidDate] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [editingRentId, setEditingRentId] = useState(null);
@@ -139,18 +135,18 @@ const DashboardBoys = ({show}) => {
 
   const getCurrentMonth = () => {
     const monthNames = [
-      t('months.jan'),
-      t('months.feb'),
-      t('months.mar'),
-      t('months.apr'),
-      t('months.may'),
-      t('months.jun'),
-      t('months.jul'),
-      t('months.aug'),
-      t('months.sep'),
-      t('months.oct'),
-      t('months.nov'),
-      t('months.dec')
+      "jan",
+      "feb",
+      "mar",
+      "apr",
+      "may",
+      "jun",
+      "jul",
+      "aug",
+      "sep",
+      "oct",
+      "nov",
+      "dec"
     ];
     const currentMonth = new Date().getMonth();
     return monthNames[currentMonth];
@@ -210,41 +206,7 @@ const DashboardBoys = ({show}) => {
 
   }, [showModal]);
 
-  // useEffect(() => {
-  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-  //   onValue(roomsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedRooms = [];
-  //     for (const key in data) {
-  //       loadedRooms.push({
-  //         id: key,
-  //         ...data[key]
-  //       });
-  //     }
-  //     setRooms(loadedRooms);
-  //   });
-  // }, [activeBoysHostel]);
-
-  // useEffect(() => {
-  //   const formattedMonth = month.slice(0, 3).toLowerCase();
-  //   const expensesRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${formattedMonth}`);
-  //   onValue(expensesRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     let total = 0;
-  //     const expensesArray = [];
-  //     for (const key in data) {
-  //       const expense = {
-  //         id: key,
-  //         ...data[key],
-  //         expenseDate: formatDate(data[key].expenseDate)
-  //       };
-  //       total += expense.expenseAmount;
-  //       expensesArray.push(expense);
-  //     }
-  //     setCurrentMonthExpenses(expensesArray);
-  //     setTotalExpenses(total);
-  //   });
-  // }, [activeBoysHostel]);
+  
   useEffect(() => {
     if (!entireHMAdata || !activeBoysHostel) return;
 
@@ -258,51 +220,23 @@ const DashboardBoys = ({show}) => {
     }
 
     const loadedExpenses = [];
-    let totalExpenses = 0;
-
+    let totalExpensesU = 0;
+    console.log(expensesData,"expensesData")
     for (const key in expensesData) {
       const expense = {
         id: key,
         ...expensesData[key],
         expenseDate: formatDate(expensesData[key]?.expenseDate || ""), // Handle missing expenseDate
       };
-      totalExpenses += expense.expenseAmount || 0; // Ensure expenseAmount exists
+      totalExpensesU += expense.expenseAmount || 0; // Ensure expenseAmount exists
       loadedExpenses.push(expense);
     }
+    console.log(totalExpenses,'expense')
 
     setCurrentMonthExpenses(loadedExpenses); // Update the current month's expenses
-    setTotalExpenses(totalExpenses); // Update the total expenses for the current month
-  }, [entireHMAdata, activeBoysHostel, month, year]);
+    // setTotalExpenses(totalExpensesU); // Update the total expenses for the current month
+  }, [entireHMAdata, activeBoysHostel, boysRooms, boysTenants, month, year]);
 
-
-  // useEffect(() => {
-  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-  //   onValue(tenantsRef, snapshot => {
-  //     const data = snapshot.val() || {};
-  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
-  //       id: key,
-  //       ...value,
-  //     }));
-  //     setTenants(loadedTenants);
-  //   });
-  // }, [activeBoysHostel]);
-
-  // const [boysRooms, setBoysRooms] = useState([]);
-
-  // useEffect(() => {
-  //   const roomsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/rooms`);
-  //   onValue(roomsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedRooms = [];
-  //     for (const key in data) {
-  //       loadedRooms.push({
-  //         id: key,
-  //         ...data[key]
-  //       });
-  //     }
-  //     setBoysRooms(loadedRooms);
-  //   });
-  // }, [activeBoysHostel]);
 
   const [showBoysRoom, setShowBoysRooms] = useState([]);
   useEffect(() => {
@@ -424,32 +358,6 @@ const DashboardBoys = ({show}) => {
     setDue(calculatedDue);
   }, [paidAmount, totalFee]);
 
-  // useEffect(() => {
-  //   const tenantsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants`);
-  //   onValue(tenantsRef, (snapshot) => {
-  //     const tenantsData = snapshot.val();
-  //     const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
-
-  //     const rentsPromises = tenantIds.map(tenantId => {
-  //       return new Promise((resolve) => {
-  //         const rentsRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${tenantId}/rents`);
-  //         onValue(rentsRef, (rentSnapshot) => {
-  //           const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
-  //             id: key,
-  //             ...rentSnapshot.val()[key],
-  //           })) : [];
-  //           resolve({ id: tenantId, ...tenantsData[tenantId], rents });
-  //         }, {
-  //           onlyOnce: true
-  //         });
-  //       });
-  //     });
-
-  //     Promise.all(rentsPromises).then(tenantsWithTheirRents => {
-  //       setTenantsWithRents(tenantsWithTheirRents);
-  //     });
-  //   });
-  // }, []);
 
 
   useEffect(() => {
@@ -530,9 +438,7 @@ const DashboardBoys = ({show}) => {
     }
     setNotify(!notify);
   };
-  //  const [hasBike, setHasBike] = useState(false);
-  //  const [bikeNumber, setBikeNumber] = useState('NA');
-  //  for camera icon in mobile device
+    //  for camera icon in mobile device
   const [isMobile, setIsMobile] = useState(false);
   const [photoUrl, setPhotoUrl] = useState(null);
   const [idUrl,setIdUrl]=useState(null);
@@ -549,40 +455,7 @@ const DashboardBoys = ({show}) => {
     setIsMobile(/iPhone|iPod|iPad|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent));
 }, []);
 
-  // const takePicture = async () => {
-
-  //   if (!isMobile) {
-  //     console.error("Camera access is not supported on your device.");
-  //     return;
-  // }
-  //   try {
-  //     const photo = await Camera.getPhoto({
-  //       quality: 90,
-  //       allowEditing: false,
-  //       resultType: CameraResultType.Uri
-  //     });
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setPhotoUrl(reader.result);
-  //       setTenantImage(reader.result);
-  //     };
-  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
-
-  //     // const response = await fetch(photo.webPath);
-  //     // const blob = await response.blob();
-  //     // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-  //     // const snapshot = await uploadBytes(imageRef, blob);
-  //     // const url = await getDownloadURL(snapshot.ref);
-      
-  //     // setPhotoUrl(url); // Display in UI
-  //     // setTenantImageUrl(url); // Use in form submission
-  //     // setPhotoUrl(photo.webPath);
-  //   } catch (error) {
-  //     console.error("Error accessing the camera", error);
-  //     toast.error("Image not Uploaded");
-  //   }
-  // };
-
+  
 
   const takePicture = async () => {
     if (!isMobile) {
@@ -628,39 +501,7 @@ const DashboardBoys = ({show}) => {
         // toast.error(t('toastMessages.imageNotUploaded'));    
         }
 }
-  // const takeIdPicture = async () => {
-
-  //   if (!isMobile) {
-  //     console.error("Camera access is not supported on your device.");
-  //     return;
-  // }
-  //   try {
-  //     const photo = await Camera.getPhoto({
-  //       quality: 90,
-  //       allowEditing: false,
-  //       resultType: CameraResultType.Uri
-  //     });
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setIdUrl(reader.result);
-  //       setTenantId(reader.result);
-  //     };
-  //     fetch(photo.webPath).then(response => response.blob()).then(blob => reader.readAsDataURL(blob));
-  //     // const response = await fetch(photo.webPath);
-  //     // const blob = await response.blob();
-  //     // const imageRef = storageRef(storage, `Hostel/boys/tenants/images/${new Date().getTime()}`);
-  //     // const snapshot = await uploadBytes(imageRef, blob);
-  //     // const url = await getDownloadURL(snapshot.ref);
-      
-  //     // setPhotoUrl(url); // Display in UI
-  //     // setTenantImageUrl(url); // Use in form submission
-  //     // // setPhotoUrl(photo.webPath);
-  //   } catch (error) {
-  //     console.error("Error accessing the camera", error);
-  //     toast.error("Id not Uploaded");
-  //   }
-  // };
-
+  
   const takeIdPicture = async () => {
     if (!isMobile) {
         console.error("Camera access is not supported on your device.");
@@ -841,11 +682,13 @@ const DashboardBoys = ({show}) => {
 
   useEffect(() => {
     const formattedMonth = month.slice(0, 3).toLowerCase();
+    console.log(formattedMonth, year)
     const expensesRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${formattedMonth}`);
     onValue(expensesRef, (snapshot) => {
       const data = snapshot.val();
       let total = 0; // Variable to hold the total expenses
       const expensesArray = [];
+      console.log(data)
       for (const key in data) { 
         const expense = {
           id: key,
@@ -856,30 +699,11 @@ const DashboardBoys = ({show}) => {
         total += expense.expenseAmount; // Add expense amount to total
         expensesArray.push(expense);
       }
-      console.log(expensesArray, year, formattedMonth, "expenses")
+      console.log(total)
       setCurrentMonthExpenses(expensesArray);
       setTotalExpenses(total); // Set total expenses state
     });
-  }, [activeBoysHostel]);
-
-  // useEffect(() => {
-  //   const totalData  = ref(database,'Hostel/boys/expenses/2023-jul');
-  //   onValue(totalData,snapshot => {
-  //     const data = snapshot.val() || {};
-  //     const loadedTenants = Object.entries(data).map(([key, value]) => ({
-  //       id: key,
-  //       ...value,
-  //     }));
-  //     let total = 0;
-  //     for (const tenant of loadedTenants) {
-  //       total += tenant.expenseAmount;
-  //     }
-  //     console.log(total,month,"totalData")
-
-  //   })
-  // })
-
-
+  }, []);
 
 
   const validate = () => {
@@ -1038,86 +862,7 @@ const DashboardBoys = ({show}) => {
       }
     }
   };
-  // const handleTenantIdChange = (e) => {
-  //   const file = e.target.files[0];
-
-  //   if (file) {
-
-  //     const validFormat = 'application/pdf';
-  //     const maxSize = 1 * 1024 * 1024;
-
-
-  //     if (file.type === validFormat) {
-
-  //       if (file.size <= maxSize) {
-
-  //         setFileName(file.name);
-  //         setTenantId(file);
-  //         setErrorMessage('');
-  //       } else {
-
-  //         setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
-  //       e.target.value = null;
-  //       }
-  //     } else {
-
-  //       setErrorMessage('Please upload a valid  file.');
-
-
-  //       e.target.value = null;
-  //     }
-  //   }
-  // };
-  // const handleTenantBikeChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-
-  //     const validFormats = ['image/jpeg', 'image/png'];
-
-
-  //     if (validFormats.includes(file.type)) {
-
-  //       setBikeImage(file);
-  //       setErrorMessage('');
-
-  //     } else {
-  //       setErrorMessage('Please upload a valid  file.');
-
-
-
-  //       e.target.value = null;
-  //     }
-  //   }
-  // };
-
-  // const handleTenantBikeRcChange = (e) => {
-  //   const file = e.target.files[0];
-
-  //   if (file) {
-
-  //     const validFormat = 'application/pdf';
-  //     const maxSize = 1 * 1024 * 1024; 
-
-
-  //     if (file.type === validFormat) {
-
-  //       if (file.size <= maxSize) {
-
-  //         setBikeRcImage(file);
-  //         setErrorMessage('');
-  //       } else {
-
-  //         setErrorMessage('The file size exceeds the 1 MB limit. Please upload a smaller file.');
-  //         e.target.value = null; 
-  //       }
-  //     } else {
-
-  //       setErrorMessage('Please upload a valid  file.');
-  //       e.target.value = null; 
-  //     }
-  //   }
-  // };
-
+  
   const compressImage = async (file) => {
     const options = {
       maxSizeMB: 0.6, // Compress to a maximum of 1 MB (adjust as needed)
@@ -1232,10 +977,7 @@ const DashboardBoys = ({show}) => {
        
     };
 
-        // if (isEditing) {
-        //     await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
-        //     if (!toast.isActive(activeToastId)) {
-
+        
       if (isEditing) {
         await update(ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/tenants/${currentId}`), tenantData);
         toast.success(t('toastMessages.tenantUpdated'), {
@@ -1525,7 +1267,7 @@ const DashboardBoys = ({show}) => {
     if (activeBoysHostelButtons?.length === 0) {
       if (!toast.isActive(activeToastId)) {
 
-        activeToastId=toast.warn("You have not added any boys hostel, please add your first Hostel in Settings", {
+        activeToastId=toast.warn(t('dashboard.boysHostelNotAdded'), {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -1542,7 +1284,7 @@ const DashboardBoys = ({show}) => {
       setShowModal(true);
       window.history.pushState(null, null, location.pathname);
       console.log(location.pathname, "pathHistory")
-      // setHistory([...history, location.pathname])
+      
     }
   };
 
@@ -1558,16 +1300,7 @@ const DashboardBoys = ({show}) => {
         console.log("working while popup open")
       }
         
-  //     // else if(!showModal){
-  //     //   console.log("working while popup close")
-  //     //   if ( location.pathname === '/') {
-  //     //     if (Capacitor.getPlatform() === 'android') {
-  //     //       CapacitorApp.exitApp(); 
-  //     //     }
-  //     //     console.log(Capacitor.getPlatform(),"firstTime")
-  //     //    }
-         
-  //     // }
+  
       
    
     };
@@ -1582,53 +1315,6 @@ const DashboardBoys = ({show}) => {
   }, [showModal, location.pathname]);
 
 
- 
-  // useEffect(() => {
-  //   const handleBackButton = () => {
-  //     console.log('Back button pressed');
-  //     console.log('Modal open state:', showModal);
-
-  //     // if (showModal) {
-  //     //   setShowModal(false); // Close the popup
-  //     //   console.log("working while popup open")
-  //     // }
-      
-  //    if(!showModal) {
-  //       // Confirm exit if no popups are open
-  //       console.log('No modal is open, asking for exit confirmation...');
-
-  //       const shouldExit = window.confirm('Are you sure you want to exit the app?');
-  //       if (shouldExit) {
-  //         console.log('Exiting the app...');
-
-  //         CapacitorApp.exitApp(); // Exit the app if confirmed
-  //       }
-  //     }
-  //   };
- 
-  //   const addBackButtonListener = async () => {
-  //     console.log('Adding back button listener');
-
-  //     const listener = await CapacitorApp.addListener('backButton', handleBackButton);
-  //     return listener;
-  //   };
- 
-  //   let listener;
-  //   addBackButtonListener().then((l) => {
-  //     listener = l;
-  //     console.log('Back button listener added');
-
-  //   });
- 
-  //   // Clean up listener on unmount
-  //   return () => {
-  //     // if (listener && listener.remove) {
-  //       console.log('Removing back button listener');
-
-  //       listener.remove();
-  //     // }
-  //   };
-  // }, [showModal,location.pathname]);
  
    const isExiting = useRef(false); // Tracks if exit prompt has been shown
    const backButtonListenerRef = useRef(null); // Tracks if listener is already set
@@ -1695,7 +1381,7 @@ const DashboardBoys = ({show}) => {
     setBikeNumber("NA");
     setNotify(false)
     navigate(-1);
-    // setHistory(prevHistory => [...prevHistory]);
+    
   };
 
   const getMonthYearKey = (dateString) => {
@@ -1854,33 +1540,7 @@ const DashboardBoys = ({show}) => {
     setNotify(false);
     setErrors({}); 
   };
-  // const handleResetMonthly = () => {
-  //   setSelectedTenant("");
-  //   setRoomNumber("");
-  //   setBedNumber("");
-  //   setTotalFee("");
-  //   setPaidAmount("");
-  //   setDue(0);
-  //   setDateOfJoin("");
-  //   setPaidDate("");
-  //   setDueDate("");
-  //   setNotify(false);
-  //   setErrors({}); 
-  // };
-
-  // const handleResetDaily = () => {
-  //   setSelectedTenant("");
-  //   setRoomNumber("");
-  //   setBedNumber("");
-  //   setTotalFee("");
-  //   setPaidAmount("");
-  //   setDue(0);
-  //   setDateOfJoin("");
-  //   setPaidDate("");
-  //   setDueDate("");
-  //   setNotify(false);
-  //   setErrors({}); 
-  // };
+  
 
   const renderFormLayout = () => {
     switch (formLayout) {
@@ -1962,11 +1622,7 @@ const DashboardBoys = ({show}) => {
                     <label htmlFor='TotalFee' class="form-label">{t('dashboard.totalFee')}:</label>
                     <input id="TotalFee" class="form-control" type="number" value={totalFee} readOnly />
                   </div>
-                  {/* <div class="col-md-6 mb-3">
-                    <label htmlFor="PaidAmount" class="form-label">{t('dashboard.paidAmount')}:</label>
-                    <input id="PaidAmount" class="form-control" type="text" value={paidAmount} onChange={e => setPaidAmount(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} name="paidAmount" onFocus={handleFocus} />
-                    {errors.paidAmount && <div style={{ color: 'red' }}>{errors.paidAmount}</div>}
-                  </div> */}
+                  
                    <div class="col-md-6 mb-3">
                           <label htmlFor="PaidAmount" class="form-label">
                             {t("dashboard.paidAmount")}:
@@ -2204,11 +1860,7 @@ const DashboardBoys = ({show}) => {
               <label htmlFor='roomNo' class="form-label">{t('dashboard.roomNo')}</label>
               <select id="roomNo" class="form-select" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} name="selectedRoom" onFocus={handleTenantFocus}>
                 <option value="">{t('dashboard.selectRoom')}</option>
-                {/* {boysRooms.map((room) => (
-                  <option key={room.roomNumber} value={room.roomNumber}>
-                    {room.roomNumber}
-                  </option>
-                ))} */}
+                
                 {selectedRoom && !showBoysRoom.includes(selectedRoom) && (
                         <option key={selectedRoom} value={selectedRoom}>
                           {selectedRoom} (Current)

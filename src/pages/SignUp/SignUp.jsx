@@ -51,38 +51,7 @@ const SignUp = () => {
     setErrors({ ...errors, [fieldName]: "" });
   };
 
-  // useEffect(() => {
-  //   const handleBackButton = () => {
-  //     // Check if any popup is open
-  //     // if (showForm) {
-  //     //   closeForm(); // Close the modal if it's open
-  //     // } else {
-  //       // Confirm exit if no popups are open
-  //       const shouldExit = window.confirm('Are you sure you want to exit the app?');
-  //       if (shouldExit) {
-  //         CapacitorApp.exitApp(); // Exit the app if confirmed
-  //       }
-  //     }
  
-  //   const addBackButtonListener = async () => {
-  //     const listener = await CapacitorApp.addListener('backButton', handleBackButton);
-  //     return listener;
-  //   };
- 
-  //   let listener;
-  //   addBackButtonListener().then((l) => {
-  //     listener = l;
-  //   });
- 
-  //   // Clean up listener on unmount
-  //   return () => {
-  //     if (listener && listener.remove) {
-  //       listener.remove();
-  //     }
-  //   };
-  // }, []);
-  //  navigate(-1);
-
   const submitHandler = (e) => {
     e.preventDefault();
     let formValid = true;

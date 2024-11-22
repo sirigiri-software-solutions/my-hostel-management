@@ -777,7 +777,7 @@ const handleHostelChange = (e, isBoys) => {
     try {
         await set(newHostelRef, hostelDetails);
         // const gender = isBoys ? "men's" : "women's";
-        toast.success(t(`New ${isBoys ? "men's" : "women's"} hostel '${name}' added successfully.`), {
+        toast.success( `${t('hostels.new')} ${isBoys ? t('hostels.mens') : t('hostels.womens')} ${t('hostels.hostel')} '${name}' ${t('hostels.addedsuccessfully')}`, {
             position: "top-center",
             autoClose: 3000,
             toastId: "success-toast",

@@ -27,7 +27,7 @@ const ExpensesBoys = ({searchQuery,setSearchQuery,month,setMonth}) => {
   const isUneditable = role === 'admin' || role === 'subAdmin';
   const { activeBoysHostel, userUid, activeBoysHostelButtons, firebase, setExpensesInteracted, expensesInteracted, entireHMAdata, fetchData} = useData();
   const { database } = firebase;
-  // const [searchTerm, setSearchTerm] = useState('');
+  
   const [initialRows, setInitialRows] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
@@ -47,20 +47,13 @@ const ExpensesBoys = ({searchQuery,setSearchQuery,month,setMonth}) => {
 
 
   const [year, setYear] = useState(getCurrentYear());
-  // const [month, setMonth] = useState(getCurrentMonth());
   const [total, setTotal] = useState(0);
   const [yearsList, setYearsList] = useState([]);
 
   const minDate = `${getCurrentYear()}-01-01`;
   const maxDate = `${getCurrentYear()}-12-31`;
 
-  // const years = useMemo(() => {
-  //   const yearArray = [];
-  //   for (let y = 2024; y <= year; y++) {
-  //     yearArray.push(y);
-  //   }
-  //   return yearArray;
-  // }, [year]);
+  
 
 
   const [formData, setFormData] = useState({
@@ -102,7 +95,6 @@ const ExpensesBoys = ({searchQuery,setSearchQuery,month,setMonth}) => {
 
   const getMonthYearKey = (dateString) => {
     const date = new Date(dateString);
-    // const month = date.toLocaleString('default', { month: 'short' }).toLowerCase();
     const monthFull = date.toLocaleString('default', { month: 'short' });
     const month = monthFull.slice(0, 3).toLowerCase();
     const year = date.getFullYear();
@@ -201,25 +193,6 @@ const ExpensesBoys = ({searchQuery,setSearchQuery,month,setMonth}) => {
     return `${day}-${month}-${year}`;
   }
 
-  // useEffect(() => {
-  //   const formattedMonth = month.slice(0, 3);
-  //   const expensesRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${formattedMonth}`);
-  //   onValue(expensesRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedExpenses = [];
-  //     for (const key in data) {
-  //       loadedExpenses.push({
-  //         id: key,
-  //         ...data[key],
-  //         expenseDate: formatDate(data[key].expenseDate)
-  //       });
-  //     }
-  //     setExpenses(loadedExpenses);
-  //     const totalExpenses = loadedExpenses.reduce((acc, current) => acc + current.expenseAmount, 0);
-  //     setTotal(totalExpenses);
-  //   });
-  // }, [month, year, activeBoysHostel]);
-
   useEffect(() => {
     if (!entireHMAdata || !activeBoysHostel) return;
  
@@ -309,9 +282,6 @@ const ExpensesBoys = ({searchQuery,setSearchQuery,month,setMonth}) => {
     })
   };
 
-
-
-
   const handleUpdate = () => {
     if (!editingExpense) return;
 
@@ -341,8 +311,6 @@ const ExpensesBoys = ({searchQuery,setSearchQuery,month,setMonth}) => {
       errors.expenseAmount = t('errors.expenseAmountRequired');
       formIsValid = false;
     }
-
-
 
     if (formIsValid) {
       let updatedFormData = {
@@ -518,36 +486,7 @@ const ExpensesBoys = ({searchQuery,setSearchQuery,month,setMonth}) => {
   }, [showModal, location.pathname]);
 
   const [totalAnnualExpenses, setTotalAnnualExpenses] = useState(0);
-  // useEffect(() => {
-  //   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-  //   let total = 0;
-
-  //   const fetchExpenses = async () => {
-  //     const promises = monthNames.map(month => {
-  //       const monthRef = ref(database, `Hostel/${userUid}/boys/${activeBoysHostel}/expenses/${year}-${month}`);
-  //       return new Promise((resolve) => {
-  //         onValue(monthRef, (snapshot) => {
-  //           const expenses = snapshot.val();
-  //           if (expenses) {
-  //             const monthlyTotal = Object.values(expenses).reduce((acc, { expenseAmount }) => acc + parseFloat(expenseAmount), 0);
-  //             resolve(monthlyTotal);
-  //           } else {
-  //             resolve(0);
-  //           }
-  //         }, {
-  //           onlyOnce: true
-  //         });
-  //       });
-  //     });
-
-  //     const monthlyTotals = await Promise.all(promises);
-  //     total = monthlyTotals.reduce((acc, curr) => acc + curr, 0);
-  //     setTotalAnnualExpenses(total);
-  //   };
-
-  //   fetchExpenses();
-  // }, [year, expenses, activeBoysHostel]);
-
+  
   useEffect(() => {
     if (!entireHMAdata || !activeBoysHostel) return;
   

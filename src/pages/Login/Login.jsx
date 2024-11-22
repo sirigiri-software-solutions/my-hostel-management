@@ -143,6 +143,7 @@ const Login = () => {
     if (validateForm()) {
       const firebase = firebaseInstances[loginData.area]
     const { auth, database  } = firebase;
+    console.log(auth);
       try {
         const userCredential = await signInWithEmailAndPassword(
           auth,
@@ -270,10 +271,7 @@ const Login = () => {
    
   useEffect(() => {
     const handleBackButton = () => {
-      // Check if any popup is open
-      // if (showForm) {
-      //   closeForm(); // Close the modal if it's open
-      // } else {
+      
         // Confirm exit if no popups are open
         const shouldExit = window.confirm('Are you sure you want to exit the app?');
         if (shouldExit) {
@@ -301,9 +299,6 @@ const Login = () => {
   }, []);
  
  
-  
-
-
   const validateForm = () => {
     let errors = {};
 
@@ -435,6 +430,7 @@ const Login = () => {
       confirmPassword: "",
       securityQuestion: "",
       securityAnswer: "",
+      
 
     });
     setLoginData({
@@ -487,6 +483,7 @@ const Login = () => {
 
     setIsForget(false);
     setSignUp(true);
+    setSignUpError("");
 
   }
 
@@ -612,6 +609,7 @@ const [formSubmiting, setFormSubmiting] = useState(false)
       });
       setSignUpPassword("");
       setSignUpEmail("");
+      setSignUpError("");
 
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -642,7 +640,8 @@ const [formSubmiting, setFormSubmiting] = useState(false)
           name: "",
         });
       } else {
-        setSignUpError(error.message);
+        // setSignUpError(error.message);
+        setSignUpError("");
       }
     }
     setFormSubmiting(false)

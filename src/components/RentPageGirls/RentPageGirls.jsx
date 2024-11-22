@@ -29,16 +29,12 @@ const RentPageGirls = ({searchQuery,setSearchQuery,filterOption,setFilterOption}
     fetchData,
   } = useData();
   const { database } = firebase;
-  // const [searchQuery, setSearchQuery] = useState("");
-  // const [tenants, setTenants] = useState([]);
-  // const [rooms, setRooms] = useState({});
   const [selectedTenant, setSelectedTenant] = useState("");
   const [roomNumber, setRoomNumber] = useState("");
   const [bedNumber, setBedNumber] = useState("");
   const [totalFee, setTotalFee] = useState("");
   const [paidAmount, setPaidAmount] = useState("");
   const [due, setDue] = useState("");
-  // const [tenantsWithRents, setTenantsWithRents] = useState([]);
   const [paidDate, setPaidDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -52,7 +48,6 @@ const RentPageGirls = ({searchQuery,setSearchQuery,filterOption,setFilterOption}
   const [notify, setNotify] = useState(false);
   const [notifyUserInfo, setNotifyUserInfo] = useState(null);
   const [showForm, setShowForm] = useState(true);
-  // const [filterOption, setFilterOption] = useState("all");
   const [tenantMonthly, setTenantMonthly] = useState(showForm)
   let activeToastId = null;
 
@@ -115,23 +110,6 @@ Please note that you made your last payment on ${paidDate}.\n`;
     };
   }, [showModal]);
 
-  // useEffect(() => {
-  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-  //   onValue(tenantsRef, (snapshot) => {
-  //     const data = snapshot.val();
-  //     const loadedTenants = data ? Object.keys(data).map(key => ({
-  //       id: key,
-  //       ...data[key],
-  //     })) : [];
-  //     setTenants(loadedTenants);
-  //   });
-
-  //   const roomsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/rooms`);
-  //   onValue(roomsRef, (snapshot) => {
-  //     const data = snapshot.val() || {};
-  //     setRooms(data);
-  //   });
-  // }, [activeGirlsHostel]);
 
   useEffect(() => {
     setTenantMonthly(true)
@@ -190,33 +168,6 @@ Please note that you made your last payment on ${paidDate}.\n`;
     setDue(calculatedDue);
   }, [paidAmount, totalFee]);
 
-  // useEffect(() => {
-  //   const tenantsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants`);
-  //   onValue(tenantsRef, (snapshot) => {
-  //     const tenantsData = snapshot.val();
-  //     const tenantIds = tenantsData ? Object.keys(tenantsData) : [];
-
-  //     const rentsPromises = tenantIds.map(tenantId => {
-  //       return new Promise((resolve) => {
-  //         const rentsRef = ref(database, `Hostel/${userUid}/girls/${activeGirlsHostel}/tenants/${tenantId}/rents`);
-  //         onValue(rentsRef, (rentSnapshot) => {
-  //           const rents = rentSnapshot.val() ? Object.keys(rentSnapshot.val()).map(key => ({
-  //             id: key,
-  //             ...rentSnapshot.val()[key],
-  //           })) : [];
-  //           resolve({ id: tenantId, ...tenantsData[tenantId], rents });
-  //         }, {
-  //           onlyOnce: true
-  //         });
-  //       });
-  //     });
-
-  //     Promise.all(rentsPromises).then(tenantsWithTheirRents => {
-  //       setTenantsWithRents(tenantsWithTheirRents);
-  //     });
-  //   });
-  // }, [activeGirlsHostel]);
-
   const loadRentForEditing = (tenantId, rentId) => {
     const tenant = girlsTenantsWithRents.find((t) => t.id === tenantId);
     const rentRecord = tenant.rents.find((r) => r.id === rentId);
@@ -231,7 +182,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
       setBedNumber(rentRecord.bedNumber || "");
        setTotalFee(rentRecord.totalFee || "");
        setTenantMonthly(rentRecord.daily)
-      // setTotalFee(rentRecord.monthly ? matchingRoom.bedRent :  rentRecord.totalFee);
+      
       setTotalFee(rentRecord.daily? matchingRoom.bedRent:rentRecord.totalFee);
       setPaidAmount(rentRecord.paidAmount || "");
       setDue(rentRecord.due || "");
@@ -780,14 +731,7 @@ Please note that you made your last payment on ${paidDate}.\n`;
                           <label htmlFor="TotalFee" class="form-label">
                             {t("dashboard.totalFee")}:
                           </label>
-                          {/* <input
-                            id="TotalFee"
-                            class="form-control"
-                            type="number"
-                            value={totalFee}
-                            readOnly
-                          /> */}
-                            <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} readOnly = {tenantMonthly}/>
+                           <input id="TotalFee" class="form-control" type="text" value={totalFee} onChange={e => setTotalFee(e.target.value)} onInput={e => e.target.value = e.target.value.replace(/[^0-9]/g, '')} readOnly = {tenantMonthly}/>
                         </div>
                         <div class="col-md-6 mb-3">
                           <label htmlFor="PaidAmount" class="form-label">

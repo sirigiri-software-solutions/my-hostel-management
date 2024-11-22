@@ -83,7 +83,9 @@
       "create": "Create",
       "welcomeTo":"Welcome to",
       "boysHostel":"Men's Hostel",
-      "girlsHostel":"Women's Hostel"
+      "girlsHostel":"Women's Hostel",
+      "boysHostelNotAdded": "You have not added any boys hostel, please add your first Hostel in Settings.",
+      "girlsHostelNotAdded":"You have not added any girls hostel, please add your first Hostel in Settings."
     },
     "roomsPage": {
 
@@ -376,7 +378,11 @@
        "pleaseSelectAFile": "Please select a file.",
        "pleaseUploadValidImage": "Please upload a valid image file (JPEG, PNG, GIF).",
        "failedToAddNewHostel": "Failed to add new hostel.",
-       "newhostelAddedsuccessfully":  "New ${gender} hostel '${name}' added successfully."
+       "new":"New",
+       "mens":"men's",
+       "womens":"women's",
+       "hostel":"hostel",
+       "addedsuccessfully":"added successfully"
 
     },
     "settings":{
